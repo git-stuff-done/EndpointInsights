@@ -6,3 +6,4 @@ Our client, VSP, is having us reimplement (from scratch) a previous dashboard th
 ## Contributors
 
 - Brynn Crowley
+- Nicholas Cooper
