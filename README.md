@@ -10,3 +10,4 @@ Our client, VSP, is having us reimplement (from scratch) a previous dashboard th
 - Tyler Mains
 - Caleb Brock
 - Marcos Pantoja
+- Daniel Carello
