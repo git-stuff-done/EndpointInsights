@@ -1,0 +1,16 @@
+# Ignore IDE folders
+.idea/
+.vscode/
+node_modules/
+
+# Misc
+
+.editorconfig
+
+# Node / Angular
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+**/dist/
+**/out-tsc/
+.angular/
