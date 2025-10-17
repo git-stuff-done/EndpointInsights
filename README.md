@@ -11,3 +11,4 @@ Our client, VSP, is having us reimplement (from scratch) a previous dashboard th
 - Caleb Brock
 - Marcos Pantoja
 - Daniel Carello
+- Cardell Rankin
