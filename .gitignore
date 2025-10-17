@@ -14,3 +14,7 @@ yarn-error.log*
 **/dist/
 **/out-tsc/
 .angular/
+
+# Maven / Java
+target/
+.mvn/
