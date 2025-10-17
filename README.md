@@ -8,3 +8,6 @@ Our client, VSP, is having us reimplement (from scratch) a previous dashboard th
 - Brynn Crowley
 - Nicholas Cooper
 - Tyler Mains
+- Caleb Brock
+- Marcos Pantoja
+- Daniel Carello
