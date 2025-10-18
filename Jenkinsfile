@@ -42,7 +42,7 @@ pipeline {
         stage('Frontend Unit Tests') {
             steps {
                 echo 'Running frontend unit tests...'
-                sh 'cd endpoint-insights-ui && npm test:ci'
+                sh 'cd endpoint-insights-ui && npm run test:ci'
             }
         }
     }
