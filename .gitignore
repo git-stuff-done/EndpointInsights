@@ -18,3 +18,5 @@ yarn-error.log*
 # Maven / Java
 target/
 .mvn/
+endpoint-insights-ui/lcov-report
+endpoint-insights-ui/coverage
