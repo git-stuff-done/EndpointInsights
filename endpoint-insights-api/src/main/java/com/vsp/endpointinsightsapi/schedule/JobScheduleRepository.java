@@ -1,6 +1,6 @@
-package com.example.endpointinsights.repository;
+package com.vsp.endpointinsightsapi.schedule;
 
-import com.example.endpointinsights.model.JobSchedule;
+import com.vsp.endpointinsightsapi.schedule.JobSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
