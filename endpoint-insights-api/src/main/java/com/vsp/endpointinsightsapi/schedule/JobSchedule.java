@@ -1,4 +1,4 @@
-package com.vsp.endpointinsightsapi.schedule;
+package com.endpointinsightsapi.schedule;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
