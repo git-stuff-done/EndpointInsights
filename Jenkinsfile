@@ -21,7 +21,7 @@ pipeline {
         stage('Backend Unit Tests') {
             steps {
                 echo 'Running backend unit tests...'
-                sh 'cd endpoint-insights-api && mvn test -Punit-tests'
+                sh 'cd endpoint-insights-api && mvn test'
             }
         }
         
