@@ -12,17 +12,27 @@ import java.time.LocalDateTime;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "test_batch")
 public class TestBatch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //TODO: Create OneToMany with jobs entity once made
+    //TODO: Create ManyToMany with jobs entity once made
 
+    @Column(name = "batch_name", nullable = false)
     String batchName;
+
+    @Column(name = "schedule_id")
     Long scheduleId;
+
+    @Column(name = "start_time")
     LocalDateTime startTime;
+
+    @Column(name = "last_time_run")
     LocalDateTime lastTimeRun;
 
+    @Column(name = "active")
+    Boolean active;
 }
