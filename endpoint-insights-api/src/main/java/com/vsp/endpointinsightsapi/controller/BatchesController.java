@@ -1,5 +1,8 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RestController;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import org.springframework.web.bind.annotation.*;
