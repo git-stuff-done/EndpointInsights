@@ -1,2 +1,7 @@
 <h1>Endpoint Insights Dashboard</h1>
-<p>Hi :)</p>
+<main class="container-fluid py-3" style="display: grid; gap: .75rem;">
+    <app-test-card
+            *ngFor="let t of tests; trackBy: trackById"
+            [test]="t">
+    </app-test-card>
+</main>

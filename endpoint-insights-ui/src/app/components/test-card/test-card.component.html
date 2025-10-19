@@ -1,0 +1,132 @@
+<mat-card
+  class="test-card"
+  [ngClass]="statusClass(test.status)"
+  [class.is-expanded]="expanded()"
+>
+  <mat-accordion class="full">
+    <mat-expansion-panel
+      #panel="matExpansionPanel"
+      [expanded]="expanded()"
+      (opened)="onOpened()"
+      (closed)="onClosed()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title class="title">
+          <mat-icon aria-hidden="true">analytics</mat-icon>
+          <span class="name">{{ test.name }}</span>
+        </mat-panel-title>
+
+        <mat-panel-description class="summary">
+          <mat-chip-set>
+            <mat-chip [ngClass]="chipClass(test.status)">
+              {{ test.status }}
+            </mat-chip>
+          </mat-chip-set>
+
+          <span class="kv">p95: <strong>{{ num(test.latencyMsP95, ' ms') }}</strong></span>
+          <span class="kv">Vol(1m): <strong>{{ num(test.volume1m) }}</strong></span>
+          <span class="kv">Err: <strong>{{ pct(test.errorRatePct) }}</strong></span>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <!-- Description shows only when expanded -->
+      <p class="description" *ngIf="test.description && panel.expanded">
+        {{ test.description }}
+      </p>
+
+      <div class="body">
+        <div class="grid">
+          <!-- Latency -->
+          <mat-card class="panel">
+            <mat-card-title>Latency</mat-card-title>
+            <mat-card-content>
+              <table class="subtable">
+                <tbody>
+                <tr><th scope="row">P50</th><td class="num">{{ num(test.latencyMsP50, ' ms') }}</td></tr>
+                <tr><th scope="row">P95</th><td class="num">{{ num(test.latencyMsP95, ' ms') }}</td></tr>
+                <tr><th scope="row">P99</th><td class="num">{{ num(test.latencyMsP99, ' ms') }}</td></tr>
+                </tbody>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+
+          <!-- Volume -->
+          <mat-card class="panel">
+            <mat-card-title>Volume</mat-card-title>
+            <mat-card-content>
+              <table class="subtable">
+                <tbody>
+                <tr><th scope="row">Last 1 min</th><td class="num">{{ num(test.volume1m) }}</td></tr>
+                <tr><th scope="row">Last 5 min</th><td class="num">{{ num(test.volume5m) }}</td></tr>
+                </tbody>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+
+          <!-- HTTP responses / Errors -->
+          <mat-card class="panel">
+            <mat-card-title>HTTP Responses / Errors</mat-card-title>
+            <mat-card-content>
+              <table
+                mat-table
+                [dataSource]="test.httpBreakdown || []"
+                class="mat-elevation-z0 http-table"
+              >
+                <ng-container matColumnDef="code">
+                  <th mat-header-cell *matHeaderCellDef>Code</th>
+                  <td mat-cell *matCellDef="let row">{{ row.code }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="count">
+                  <th mat-header-cell *matHeaderCellDef>Count</th>
+                  <td mat-cell *matCellDef="let row">{{ row.count }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="httpColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: httpColumns;"></tr>
+              </table>
+
+              <mat-divider class="sp"></mat-divider>
+              <div class="kv-line">
+                <span>Aggregate Error Rate</span>
+                <strong>{{ pct(test.errorRatePct) }}</strong>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Thresholds -->
+          <mat-card class="panel">
+            <mat-card-title>Thresholds</mat-card-title>
+            <mat-card-content>
+              <table class="subtable">
+                <tbody>
+                <tr><th scope="row">Latency Warn/Fail</th><td class="num">{{ formatLatencyWF() }}</td></tr>
+                <tr><th scope="row">Error % Warn/Fail</th><td class="num">{{ formatErrorPctWF() }}</td></tr>
+                <tr><th scope="row">Volume/min Warn/Fail</th><td class="num">{{ formatVolumeWF() }}</td></tr>
+                </tbody>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+
+          <!-- Status / Meta -->
+          <mat-card class="panel">
+            <mat-card-title>Status</mat-card-title>
+            <mat-card-content>
+              <table class="subtable">
+                <tbody>
+                <tr><th scope="row">State</th><td class="num">{{ test.status }}</td></tr>
+                <tr><th scope="row">Last Run</th><td class="num">{{ lastRun() }}</td></tr>
+                <tr><th scope="row">ID</th><td class="num">{{ test.id }}</td></tr>
+                </tbody>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</mat-card>

@@ -1,0 +1,266 @@
+/* ================================
+   Vars
+   ================================ */
+$banner-pass:   #d6f2d6;
+$banner-pass-b: #a8dea8;
+
+$banner-warn:   #fff1b8;
+$banner-warn-b: #ffd666;
+
+$banner-fail:   #fad2d2;
+$banner-fail-b: #f1a8a8;
+
+$banner-unknown:   #e9ecf1;
+$banner-unknown-b: #cfd6df;
+
+$neutral-bg:    #ffffff;
+$neutral-border:#e5e7eb;
+
+$panel-title-bg:#0b2335; /* dark blue from VSP Site */
+$panel-title-fg:#ffffff;
+
+/* Chip backgrounds (text forced below with ::ng-deep) */
+$chip-pass:   #2e7d32;
+$chip-warn:   #b26a00;
+$chip-fail:   #c62828;
+$chip-unk:    #455a64;
+
+/* ================================
+   Test card base
+   ================================ */
+.test-card {
+  transition: background-color .2s ease, box-shadow .2s ease;
+  padding: 8px 8px 12px;
+  border-radius: 12px;
+  overflow: hidden; /* clip inner corners to outer radius */
+}
+
+/* Collapsed: pastel banner on whole card */
+//.test-card.pass:not(.is-expanded)    { background-color: $banner-pass;   border: 1px solid $banner-pass-b; }
+//.test-card.warn:not(.is-expanded)    { background-color: $banner-warn;   border: 1px solid $banner-warn-b; }
+.test-card.fail:not(.is-expanded)    { background-color: $banner-fail;   border: 1px solid $banner-fail-b; }
+//.test-card.unknown:not(.is-expanded) { background-color: $banner-unknown;border: 1px solid $banner-unknown-b; }
+
+.test-card.is-expanded {
+  background: $neutral-bg;
+  border: 1px solid $neutral-border;
+}
+
+/* Expanded: make the expansion HEADER the pastel banner (same spot/size) */
+.test-card.is-expanded .mat-expansion-panel-header {
+  margin: 0 !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  min-height: 56px;
+  box-shadow: none !important;
+}
+//.test-card.pass.is-expanded    .mat-expansion-panel-header { background-color: $banner-pass   !important; } THESE LINES ARE COMMENTED TO REMOVE THE BANNER COLOR WHEN EXPANDED
+//.test-card.warn.is-expanded    .mat-expansion-panel-header { background-color: $banner-warn   !important; }
+.test-card.fail.is-expanded    .mat-expansion-panel-header { background-color: $banner-fail   !important; }
+//.test-card.unknown.is-expanded .mat-expansion-panel-header { background-color: $banner-unknown!important; }
+
+:host ::ng-deep .test-card .mat-accordion,
+:host ::ng-deep .test-card .mat-expansion-panel,
+:host ::ng-deep .test-card .mat-expansion-panel-header,
+:host ::ng-deep .test-card .mat-expansion-panel-content,
+:host ::ng-deep .test-card .mat-expansion-panel-body {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+:host ::ng-deep .test-card .mat-expansion-panel {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ================================
+   Header content
+   ================================ */
+.title { display: flex; align-items: center; gap: .5rem; }
+.name  { font-weight: 600; letter-spacing: .2px; }
+.summary {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  .kv { color: rgba(0,0,0,.75); }
+  .kv strong { font-variant-numeric: tabular-nums; }
+}
+
+/* ================================
+   Chip styles
+   ================================ */
+.chip-pass    { background-color: $chip-pass   !important; }
+.chip-warn    { background-color: $chip-warn   !important; }
+.chip-fail    { background-color: $chip-fail   !important; }
+.chip-unknown { background-color: $chip-unk    !important; }
+
+:host ::ng-deep .mat-mdc-chip.chip-pass    .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-warn    .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-fail    .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-unknown .mdc-evolution-chip__text-label { color: #fff !important; }
+
+/* Chip geometry */
+:host ::ng-deep .mdc-evolution-chip {
+  border-radius: 10px;
+  padding: 0 10px;
+  min-height: 28px;
+  font-weight: 600;
+}
+
+/* ================================
+   Body layout
+   ================================ */
+.body { padding: 14px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+
+/* Panels */
+.panel { grid-column: span 6; border-radius: 10px; }
+@media (max-width: 900px) { .panel { grid-column: span 12; } }
+
+/* Panel title bar: uses dark blue when expanded */
+.test-card.is-expanded .panel .mat-mdc-card-title {
+  background: $panel-title-bg;
+  color: $panel-title-fg;
+  margin: 0;
+  padding: 8px 16px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Panel content padding */
+.panel .mat-mdc-card-content { padding: 10px 16px 12px 16px; }
+
+/* ================================
+   Stacked label/value blocks
+   ================================ */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+@media (max-width: 900px) { .kv-grid { grid-template-columns: 1fr; } }
+
+.kv-grid .item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.kv-grid .item .label {
+  color: rgba(0, 0, 0, .62);
+  font-size: .9rem;
+  line-height: 1.1;
+  letter-spacing: .2px;
+}
+.kv-grid .item .value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .2px;
+}
+
+/* One-line kv row */
+.kv-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* ================================
+   Tables (compact)
+   ================================ */
+.http-table { width: 100%; }
+.test-card .mat-card-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.test-card .mat-card-content th,
+.test-card .mat-card-content td {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  line-height: 1.1rem;
+}
+.test-card .mat-card-content th {
+  font-weight: 600;
+  color: #374151;
+}
+.test-card .mat-card-content td {
+  color: #111827;
+  vertical-align: top;
+}
+/* MDC table cell padding/line */
+:host ::ng-deep .mat-mdc-table th.mdc-data-table__header-cell,
+:host ::ng-deep .mat-mdc-table td.mdc-data-table__cell {
+  padding: 10px 12px;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+/* Misc */
+.sp { margin: 8px 0; }
+.description { margin: 8px 12px 0 12px; color: rgba(0,0,0,.72); }
+/* ===== Subpanel compaction (tables) ===== */
+.panel .mat-mdc-card-content {
+  padding: 8px 12px;
+}
+
+.subtable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.9rem;
+}
+
+.subtable th,
+.subtable td {
+  padding: 4px 8px;
+  line-height: 1.15rem;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  vertical-align: top;
+}
+
+.subtable th {
+  width: 55%;
+  text-align: left;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.subtable td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #111827;
+}
+
+.subtable tr:last-child th,
+.subtable tr:last-child td {
+  border-bottom: 0;
+}
+
+:host ::ng-deep .mat-mdc-table th.mdc-data-table__header-cell,
+:host ::ng-deep .mat-mdc-table td.mdc-data-table__cell {
+  padding: 6px 8px;
+  line-height: 1.15rem;
+}
+.grid {
+  align-items: start;
+}
+
+.panel {
+  align-self: start;
+  height: auto;
+}
+
+:host ::ng-deep .panel .mdc-card {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+}
+
+.panel .mat-mdc-card-title   { padding: 6px 12px; margin: 0; line-height: 1.15; }
+.panel .mat-mdc-card-content { padding: 6px 12px 8px 12px; margin: 0; }
+
+.subtable { margin-bottom: 0; }
+.subtable tr:last-child th,
+.subtable tr:last-child td {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}

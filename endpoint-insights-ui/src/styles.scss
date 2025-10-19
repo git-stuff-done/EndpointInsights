@@ -1,4 +1,32 @@
+
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+          color: (
+                  primary: mat.$azure-palette,
+                  tertiary: mat.$blue-palette,
+          ),
+          typography: Roboto,
+          density: 0,
+  ));
+}
+
+body {
+
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
 /* You can add global styles to this file, and also import other style files */
 
-/* Importing Bootstrap SCSS file. */
-@import 'bootstrap/scss/bootstrap';
+html, body { height: 100%; }
+.mat-mdc-standard-chip {
+  --mdc-chip-label-text-color: #fff;
+}
+
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
