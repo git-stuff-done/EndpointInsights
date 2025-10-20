@@ -3,6 +3,8 @@ package com.vsp.endpointinsightsapi.model;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class JobEntityTest {
@@ -13,6 +15,19 @@ public class JobEntityTest {
 
         assertThat(job.getCreatedAt()).isNotNull();
         assertThat(job.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void shouldUpdateTimestampOnUpdate() {
+        Job job = new Job();
+        job.onCreate();
+
+        Date initialTime = new Date(System.currentTimeMillis() - 1000);
+        job.setUpdatedAt(initialTime);
+
+        job.onUpdate();
+
+        assertThat(job.getUpdatedAt()).isAfter(initialTime);
     }
 
     @Test
