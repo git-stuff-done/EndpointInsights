@@ -28,8 +28,10 @@ public class TestBatch {
     Long scheduleId;
 
     @Column(name = "start_time")
+    @Temporal(TemporalType.DATE)
     LocalDateTime startTime;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "last_time_run")
     LocalDateTime lastTimeRun;
 
