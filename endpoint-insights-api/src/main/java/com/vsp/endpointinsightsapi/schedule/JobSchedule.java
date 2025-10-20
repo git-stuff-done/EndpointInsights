@@ -11,9 +11,9 @@ public class JobSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id", nullable = false)
-    private Job job;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "job_id", nullable = false)
+//    private Job job;
 
     @Column(name = "cron_expr", nullable = false, length = 50)
     private String cronExpr;
@@ -45,28 +45,67 @@ public class JobSchedule {
     }
 
     // Getters and setters
-    public Long getScheduleId() { return scheduleId; }
-    public void setScheduleId(Long scheduleId) { this.scheduleId = scheduleId; }
+    public Long getScheduleId() {
+        return scheduleId;
+    }
 
-    public Job getJob() { return job; }
-    public void setJob(Job job) { this.job = job; }
+    public void setScheduleId(Long scheduleId) {
+        this.scheduleId = scheduleId;
+    }
 
-    public String getCronExpr() { return cronExpr; }
-    public void setCronExpr(String cronExpr) { this.cronExpr = cronExpr; }
+//    public Job getJob() {
+//        return job;
+//    }
+//    public void setJob(Job job) {
+//        this.job = job;
+//    }
 
-    public String getTimezone() { return timezone; }
-    public void setTimezone(String timezone) { this.timezone = timezone; }
+    public String getCronExpr() {
+        return cronExpr;
+    }
 
-    public LocalDateTime getNextRunAt() { return nextRunAt; }
-    public void setNextRunAt(LocalDateTime nextRunAt) { this.nextRunAt = nextRunAt; }
+    public void setCronExpr(String cronExpr) {
+        this.cronExpr = cronExpr;
+    }
 
-    public Boolean getIsEnabled() { return isEnabled; }
-    public void setIsEnabled(Boolean isEnabled) { this.isEnabled = isEnabled; }
+    public String getTimezone() {
+        return timezone;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getNextRunAt() {
+        return nextRunAt;
+    }
+
+    public void setNextRunAt(LocalDateTime nextRunAt) {
+        this.nextRunAt = nextRunAt;
+    }
+
+    public Boolean getIsEnabled() {
+        return isEnabled;
+    }
+
+    public void setIsEnabled(Boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
 }
