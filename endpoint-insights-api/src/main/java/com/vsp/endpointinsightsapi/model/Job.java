@@ -1,8 +1,15 @@
 package com.vsp.endpointinsightsapi.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.Date;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 //import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
 //import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
@@ -14,6 +21,8 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "job")
 public class Job {
@@ -21,7 +30,7 @@ public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_id")
-    private Long jobId;
+    private String jobId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -67,6 +76,7 @@ public class Job {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "config", columnDefinition = "jsonb")
     private Map<String, Object> config;
+
 
     @PrePersist
     void onCreate() {

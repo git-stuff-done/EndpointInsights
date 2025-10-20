@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.model.*;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import com.vsp.endpointinsightsapi.validation.Patterns;
 import jakarta.validation.Valid;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -30,7 +33,7 @@ public class JobsController {
 	@PostMapping
 	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
 		LOG.info("Creating job");
-		return ResponseEntity.ok(new Job("1"));
+		return ResponseEntity.ok(new Job());
 	}
 
 	/**
@@ -50,7 +53,13 @@ public class JobsController {
 			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
 			String jobId) {
 		LOG.info("Updating job");
-		return ResponseEntity.ok(new Job(jobId));
+
+		Job updatedJob = new Job();
+		updatedJob.setJobId(jobId);
+		updatedJob.setName("Updated Job #" + jobId);
+		updatedJob.setDescription("This is a stub for job #" + jobId);
+
+		return ResponseEntity.ok(updatedJob);
 	}
 
 	/**
@@ -74,7 +83,13 @@ public class JobsController {
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
 			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
 			String jobId) {
-		return ResponseEntity.ok(new Job(jobId));
+
+		Job job = new Job();
+		job.setJobId(jobId);
+		job.setName("Job #" + jobId);
+		job.setDescription("This is a stub for job #" + jobId);
+
+		return ResponseEntity.ok(job);
 	}
 
 	/**
