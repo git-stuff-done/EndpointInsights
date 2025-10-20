@@ -10,7 +10,7 @@ import { TestRecord } from '../models/test-record.model';
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
-export class DashboardComponent {
+export class DashboardComponent { //Currently just a mock data for now; I will need to fetch this from the server later
     tests: TestRecord[] = [
         {
             id: 'login-api',

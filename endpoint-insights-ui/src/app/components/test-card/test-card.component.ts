@@ -10,9 +10,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-test-card',
+  selector: 'app-test-results-card',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,6 +23,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatTableModule,
     MatButtonModule,
     MatDividerModule,
+    MatIconModule,
+    MatTooltipModule,
     MatIconModule,
   ],
   templateUrl: './test-card.component.html',

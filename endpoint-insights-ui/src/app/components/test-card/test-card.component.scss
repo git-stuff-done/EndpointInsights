@@ -1,5 +1,5 @@
 /* ================================
-   Vars
+   Variables
    ================================ */
 $banner-pass:   #d6f2d6;
 $banner-pass-b: #a8dea8;
@@ -13,92 +13,132 @@ $banner-fail-b: #f1a8a8;
 $banner-unknown:   #e9ecf1;
 $banner-unknown-b: #cfd6df;
 
-$neutral-bg:    #ffffff;
-$neutral-border:#e5e7eb;
+$neutral-bg:     #ffffff;
+$neutral-border: #e5e7eb;
 
-$panel-title-bg:#0b2335; /* dark blue from VSP Site */
-$panel-title-fg:#ffffff;
+$panel-title-bg: #0b2335;
+$panel-title-fg: #ffffff;
 
-/* Chip backgrounds (text forced below with ::ng-deep) */
-$chip-pass:   #2e7d32;
-$chip-warn:   #b26a00;
-$chip-fail:   #c62828;
-$chip-unk:    #455a64;
+$chip-pass: #2e7d32;
+$chip-warn: #b26a00;
+$chip-fail: #c62828;
+$chip-unk:  #455a64;
 
 /* ================================
-   Test card base
+   Test Card Shell
    ================================ */
 .test-card {
-  transition: background-color .2s ease, box-shadow .2s ease;
   padding: 8px 8px 12px;
   border-radius: 12px;
-  overflow: hidden; /* clip inner corners to outer radius */
+  overflow: hidden; /* clip internal corners */
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+
+  /* Remove inner “bubble” from Material expansion internals */
+  .mat-accordion,
+  .mat-expansion-panel,
+  .mat-expansion-panel-header,
+  .mat-expansion-panel-content,
+  .mat-expansion-panel-body {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .mat-expansion-panel { margin: 0; border-radius: 0; }
 }
 
-/* Collapsed: pastel banner on whole card */
-//.test-card.pass:not(.is-expanded)    { background-color: $banner-pass;   border: 1px solid $banner-pass-b; }
-//.test-card.warn:not(.is-expanded)    { background-color: $banner-warn;   border: 1px solid $banner-warn-b; }
-.test-card.fail:not(.is-expanded)    { background-color: $banner-fail;   border: 1px solid $banner-fail-b; }
-//.test-card.unknown:not(.is-expanded) { background-color: $banner-unknown;border: 1px solid $banner-unknown-b; }
+/* ================================
+   Collapsed Banner (card background)
+   - PASS/WARN/UNKNOWN: white with colored outline
+   - FAIL: pastel fill
+   ================================ */
+.test-card.pass:not(.is-expanded)    { background-color: #fff;        border: 2px solid #7fcf8b; }
+.test-card.warn:not(.is-expanded)    { background-color: #fff;        border: 2px solid #ffb74d; }
+.test-card.unknown:not(.is-expanded) { background-color: #fff;        border: 2px solid #9eabb4; }
+.test-card.fail:not(.is-expanded)    { background-color: $banner-fail; border: 1px solid $banner-fail-b; }
 
+/* ================================
+   Expanded State
+   - Neutral body
+   - Header remains the “banner slot” (white with outline, or pastel for FAIL)
+   ================================ */
 .test-card.is-expanded {
   background: $neutral-bg;
   border: 1px solid $neutral-border;
-}
 
-/* Expanded: make the expansion HEADER the pastel banner (same spot/size) */
-.test-card.is-expanded .mat-expansion-panel-header {
-  margin: 0 !important;
-  border-radius: 12px 12px 0 0 !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-  min-height: 56px;
-  box-shadow: none !important;
-}
-//.test-card.pass.is-expanded    .mat-expansion-panel-header { background-color: $banner-pass   !important; } THESE LINES ARE COMMENTED TO REMOVE THE BANNER COLOR WHEN EXPANDED
-//.test-card.warn.is-expanded    .mat-expansion-panel-header { background-color: $banner-warn   !important; }
-.test-card.fail.is-expanded    .mat-expansion-panel-header { background-color: $banner-fail   !important; }
-//.test-card.unknown.is-expanded .mat-expansion-panel-header { background-color: $banner-unknown!important; }
+  .mat-expansion-panel-header {
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    padding: 8px 16px;
+    min-height: 56px;
+    box-shadow: none;
+    background: #fff;
+    align-items: center; /* keep the banner centered vertically */
+    overflow: visible;
+  }
 
-:host ::ng-deep .test-card .mat-accordion,
-:host ::ng-deep .test-card .mat-expansion-panel,
-:host ::ng-deep .test-card .mat-expansion-panel-header,
-:host ::ng-deep .test-card .mat-expansion-panel-content,
-:host ::ng-deep .test-card .mat-expansion-panel-body {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-:host ::ng-deep .test-card .mat-expansion-panel {
-  margin: 0 !important;
-  border-radius: 0 !important;
+  /* Header outline when expanded (non-FAIL) */
+  &.pass    .mat-expansion-panel-header { border: 2px solid #7fcf8b; }
+  &.warn    .mat-expansion-panel-header { border: 2px solid #ffb74d; }
+  &.unknown .mat-expansion-panel-header { border: 2px solid #9eabb4; }
+
+  /* FAIL gets pastel header fill */
+  &.fail    .mat-expansion-panel-header { background-color: $banner-fail; border: 1px solid $banner-fail-b; }
 }
 
 /* ================================
-   Header content
+   Banner Layout (title + summary on one visual line)
+   ================================ */
+.test-card .mat-expansion-panel-header .mat-content {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  min-width: 0; /* allow children to shrink */
+}
+
+.test-card .mat-expansion-panel-header .mat-expansion-panel-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  white-space: nowrap; /* keep icon+name together */
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.summary {
+  margin-left: auto;                 /* push to the right */
+  display: inline-flex;
+  align-items: center;
+  gap: 12px 16px;
+  white-space: nowrap;               /* one visual line */
+  overflow-x: auto;                  /* horizontal scroll on narrow screens */
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;               /* room for thin scrollbar */
+}
+.summary mat-chip-set,
+.summary .kv { flex: 0 0 auto; }
+.summary .kv strong { white-space: nowrap; }
+
+/* ================================
+   Header Content (typography)
    ================================ */
 .title { display: flex; align-items: center; gap: .5rem; }
 .name  { font-weight: 600; letter-spacing: .2px; }
-.summary {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  .kv { color: rgba(0,0,0,.75); }
-  .kv strong { font-variant-numeric: tabular-nums; }
-}
+.summary .kv { color: rgba(0,0,0,.75); }
+.summary .kv strong { font-variant-numeric: tabular-nums; }
 
 /* ================================
-   Chip styles
+   Chips
    ================================ */
-.chip-pass    { background-color: $chip-pass   !important; }
-.chip-warn    { background-color: $chip-warn   !important; }
-.chip-fail    { background-color: $chip-fail   !important; }
-.chip-unknown { background-color: $chip-unk    !important; }
+.chip-pass    { background-color: $chip-pass; }
+.chip-warn    { background-color: $chip-warn; }
+.chip-fail    { background-color: $chip-fail; }
+.chip-unknown { background-color: $chip-unk;  }
 
-:host ::ng-deep .mat-mdc-chip.chip-pass    .mdc-evolution-chip__text-label,
-:host ::ng-deep .mat-mdc-chip.chip-warn    .mdc-evolution-chip__text-label,
-:host ::ng-deep .mat-mdc-chip.chip-fail    .mdc-evolution-chip__text-label,
-:host ::ng-deep .mat-mdc-chip.chip-unknown .mdc-evolution-chip__text-label { color: #fff !important; }
-
-/* Chip geometry */
-:host ::ng-deep .mdc-evolution-chip {
+/* Chip text color + geometry */
+.test-card .mat-chip .mdc-evolution-chip__text-label { color: #fff; }
+.test-card .mdc-evolution-chip {
   border-radius: 10px;
   padding: 0 10px;
   min-height: 28px;
@@ -106,20 +146,28 @@ $chip-unk:    #455a64;
 }
 
 /* ================================
-   Body layout
+   Body & Subpanels
    ================================ */
 .body { padding: 14px; }
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
   gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start; /* subpanels don’t stretch taller than content */
 }
 
-/* Panels */
-.panel { grid-column: span 6; border-radius: 10px; }
-@media (max-width: 900px) { .panel { grid-column: span 12; } }
+.panel {
+  grid-column: span 1;
+  border-radius: 10px;
+  align-self: start;
+  height: auto;
 
-/* Panel title bar: uses dark blue when expanded */
+  /* Material card internals */
+  .mdc-card { min-height: 0; height: auto; padding: 0; }
+}
+
+/* Subpanel title bar: dark only when expanded (keeps collapsed clean) */
 .test-card.is-expanded .panel .mat-mdc-card-title {
   background: $panel-title-bg;
   color: $panel-title-fg;
@@ -129,173 +177,98 @@ $chip-unk:    #455a64;
   border-top-right-radius: 10px;
 }
 
-/* Panel content padding */
-.panel .mat-mdc-card-content { padding: 10px 16px 12px 16px; }
+/* Subpanel content padding */
+.panel .mat-mdc-card-content { padding: 6px 12px 8px 12px; margin: 0; }
 
 /* ================================
-   Stacked label/value blocks
+   Stacked label/value blocks (if used)
    ================================ */
 .kv-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 16px;
+
+  .item { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .label { color: rgba(0, 0, 0, .62); font-size: .9rem; line-height: 1.1; letter-spacing: .2px; }
+  .value { font-variant-numeric: tabular-nums; font-weight: 600; line-height: 1.2; letter-spacing: .2px; }
 }
 @media (max-width: 900px) { .kv-grid { grid-template-columns: 1fr; } }
-
-.kv-grid .item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.kv-grid .item .label {
-  color: rgba(0, 0, 0, .62);
-  font-size: .9rem;
-  line-height: 1.1;
-  letter-spacing: .2px;
-}
-.kv-grid .item .value {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: .2px;
-}
-
-/* One-line kv row */
-.kv-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
 /* ================================
    Tables (compact)
    ================================ */
 .http-table { width: 100%; }
+
 .test-card .mat-card-content table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .test-card .mat-card-content th,
 .test-card .mat-card-content td {
   padding: 4px 6px;
   font-size: 0.85rem;
   line-height: 1.1rem;
 }
+
 .test-card .mat-card-content th {
   font-weight: 600;
   color: #374151;
 }
+
 .test-card .mat-card-content td {
   color: #111827;
   vertical-align: top;
 }
-/* MDC table cell padding/line */
-:host ::ng-deep .mat-mdc-table th.mdc-data-table__header-cell,
-:host ::ng-deep .mat-mdc-table td.mdc-data-table__cell {
-  padding: 10px 12px;
+
+/* MDC data table cells rhythm */
+.test-card .mat-mdc-table th.mdc-data-table__header-cell,
+.test-card .mat-mdc-table td.mdc-data-table__cell {
+  padding: 6px 8px;
   font-variant-numeric: tabular-nums;
   border-bottom: 1px solid rgba(0,0,0,.06);
 }
 
-/* Misc */
-.sp { margin: 8px 0; }
-.description { margin: 8px 12px 0 12px; color: rgba(0,0,0,.72); }
-/* ===== Subpanel compaction (tables) ===== */
-.panel .mat-mdc-card-content {
-  padding: 8px 12px;
-}
-
+/* Subtable helpers */
 .subtable {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.9rem;
+  margin-bottom: 0;
+
+  th, td {
+    padding: 4px 8px;
+    line-height: 1.15rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    vertical-align: top;
+  }
+
+  th {
+    width: 55%;
+    text-align: left;
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  td.num { text-align: right; font-variant-numeric: tabular-nums; color: #111827; }
+
+  tr:last-child th,
+  tr:last-child td { border-bottom: 0; padding-bottom: 2px; }
 }
 
-.subtable th,
-.subtable td {
-  padding: 4px 8px;
-  line-height: 1.15rem;
-  border-bottom: 1px solid rgba(0,0,0,.06);
-  vertical-align: top;
-}
+/* ================================
+   Misc
+   ================================ */
+.sp { margin: 8px 0; }
+.description { margin: 8px 12px 0 12px; color: rgba(0,0,0,.72); }
 
-.subtable th {
-  width: 55%;
-  text-align: left;
-  color: #6b7280;
-  font-weight: 600;
-}
-
-.subtable td.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  color: #111827;
-}
-
-.subtable tr:last-child th,
-.subtable tr:last-child td {
-  border-bottom: 0;
-}
-
-:host ::ng-deep .mat-mdc-table th.mdc-data-table__header-cell,
-:host ::ng-deep .mat-mdc-table td.mdc-data-table__cell {
-  padding: 6px 8px;
-  line-height: 1.15rem;
-}
-.grid {
-  align-items: start;
-}
-
-.panel {
-  align-self: start;
-  height: auto;
-}
-
-:host ::ng-deep .panel .mdc-card {
-  min-height: 0 !important;
-  height: auto !important;
-  padding: 0 !important;
-}
-
-.panel .mat-mdc-card-title   { padding: 6px 12px; margin: 0; line-height: 1.15; }
-.panel .mat-mdc-card-content { padding: 6px 12px 8px 12px; margin: 0; }
-
-.subtable { margin-bottom: 0; }
-.subtable tr:last-child th,
-.subtable tr:last-child td {
-  border-bottom: 0;
-  padding-bottom: 2px;
-}
-.test-card.pass:not(.is-expanded) {
-  background-color: #fff;
-  border: 2px solid #7fcf8b;
-}
-
-.test-card.warn:not(.is-expanded) {
-  background-color: #fff;
-  border: 2px solid #ffb74d;
-}
-
-.test-card.unknown:not(.is-expanded) {
-  background-color: #fff;
-  border: 2px solid #9eabb4;
-}
-
-.test-card.fail:not(.is-expanded) {
-}
-
+/* Hover affordance on outlined banners (collapsed only) */
 .test-card.pass:not(.is-expanded),
 .test-card.warn:not(.is-expanded),
 .test-card.unknown:not(.is-expanded) {
   transition: box-shadow .15s ease, border-color .15s ease;
 }
-.test-card.pass:not(.is-expanded):hover   { box-shadow: 0 4px 14px rgba(46,125,50,.12); }
-.test-card.warn:not(.is-expanded):hover   { box-shadow: 0 4px 14px rgba(178,106,0,.12); }
-.test-card.unknown:not(.is-expanded):hover{ box-shadow: 0 4px 14px rgba(69,90,100,.12); }
-
-.test-card.pass.is-expanded    .mat-expansion-panel-header { border: 2px solid #7fcf8b; }
-.test-card.warn.is-expanded    .mat-expansion-panel-header { border: 2px solid #ffb74d; }
-.test-card.unknown.is-expanded .mat-expansion-panel-header { border: 2px solid #9eabb4; }
-
-.test-card .mat-expansion-panel-header {
-  border-radius: 12px 12px 0 0;
-  background: #fff;
-}
+.test-card.pass:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(46,125,50,.12); }
+.test-card.warn:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(178,106,0,.12); }
+.test-card.unknown:not(.is-expanded):hover { box-shadow: 0 4px 14px rgba(69,90,100,.12); }
