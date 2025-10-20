@@ -10,5 +10,5 @@ CREATE TABLE job (
     started_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
     completed_at TIMESTAMP WITH TIME ZONE,
-    config JSONB,
+    config JSONB
 );
