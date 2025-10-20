@@ -1,13 +1,19 @@
 package com.vsp.endpointinsightsapi.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
 //import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
 //import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "job")
 public class Job {
@@ -15,10 +21,13 @@ public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_id")
-    private Long id;
+    private Long jobId;
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description")
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
@@ -34,14 +43,25 @@ public class Job {
     @JoinColumn(name = "created_by")
     private User createdBy;
 */
-    @Column(name = "is_active", nullable = false)
-    private boolean active = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private JobStatus status = JobStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+    @Column(name = "started_at", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startedAt;
+
+    @Column(name = "completed_at", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job
     @JdbcTypeCode(SqlTypes.JSON)
@@ -50,43 +70,12 @@ public class Job {
 
     @PrePersist
     void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
     }
 
     @PreUpdate
     void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = new Date();
     }
-
-    // --- getters/setters ---
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public TestType getTestType() { return testType; }
-    public void setTestType(TestType testType) { this.testType = testType; }
-
-    // Uncomment when the TestTarget and User Entities are created
-    /*
-    public TestTarget getTestTarget() { return testTarget; }
-    public void setTestTarget(TestTarget testTarget) { this.testTarget = testTarget; }
-
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
-*/
-
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-
-    public Map<String, Object> getConfig() { return config; }
-    public void setConfig(Map<String, Object> config) { this.config = config; }
-
-    public enum TestType { PERF, INTEGRATION, E2E }
 }
