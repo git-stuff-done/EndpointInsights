@@ -6,7 +6,7 @@ import { TestRecord } from '../models/test-record.model';
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, TestCardComponent],
+    imports: [ CommonModule, TestCardComponent,],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
@@ -31,7 +31,7 @@ export class DashboardComponent {
             status: 'FAIL',
             lastRunIso: new Date().toISOString(),
             latencyMsP50: 320, latencyMsP95: 900, latencyMsP99: 1900,
-            volume1m: 75, volume5m: 420,
+            volume1m: 75, volume5m: 450,
             httpBreakdown: [{ code: 200, count: 240 }, { code: 429, count: 22 }, { code: 500, count: 31 }],
             errorRatePct: 9.8,
             thresholds: { latencyMs: { warn: 250, fail: 600 }, errorRatePct: { warn: 2.0, fail: 5.0 }, volumePerMin: { warn: 60, fail: 30 } }
@@ -39,4 +39,6 @@ export class DashboardComponent {
     ];
 
     trackById = (_: number, t: TestRecord) => t.id;
+
 }
+

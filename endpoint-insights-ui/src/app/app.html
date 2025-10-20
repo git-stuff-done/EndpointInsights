@@ -1,3 +1,14 @@
-<div class="container">
-    <router-outlet/>
-</div>
+<header class="topbar">
+    <nav class="topbar-nav">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+            Dashboard
+        </a>
+        <a routerLink="/batches" routerLinkActive="active" class="nav-link">
+            Batches
+        </a>
+    </nav>
+</header>
+
+<main class="page">
+    <router-outlet></router-outlet>
+</main>
