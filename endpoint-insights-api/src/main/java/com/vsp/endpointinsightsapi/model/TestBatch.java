@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,11 +30,11 @@ public class TestBatch {
 
     @Column(name = "start_time")
     @Temporal(TemporalType.DATE)
-    LocalDateTime startTime;
+    LocalDate startTime;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "last_time_run")
-    LocalDateTime lastTimeRun;
+    LocalDate lastTimeRun;
 
     @Column(name = "active")
     Boolean active;
