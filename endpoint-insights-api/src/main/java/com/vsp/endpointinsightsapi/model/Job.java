@@ -1,6 +1,5 @@
 package com.vsp.endpointinsightsapi.model;
 
-<<<<<<< HEAD
 import jakarta.persistence.*;
 import java.util.Date;
 import lombok.Getter;
@@ -79,18 +78,4 @@ public class Job {
     void onUpdate() {
         this.updatedAt = new Date();
     }
-=======
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@AllArgsConstructor
-@Getter
-@Setter
-public class Job {
-
-	private final String jobId;
-
-	//todo: implement
->>>>>>> develop
 }
