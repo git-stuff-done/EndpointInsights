@@ -2,9 +2,13 @@ package com.vsp.endpointinsightsapi.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api/batches")
+@RestController
+@RequestMapping("/api/batches")
+@Validated
 public class BatchesController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(BatchesController.class);
