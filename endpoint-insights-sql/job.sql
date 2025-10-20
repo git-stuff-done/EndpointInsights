@@ -5,7 +5,6 @@ CREATE TABLE job (
     test_type VARCHAR(10) NOT NULL CHECK (test_type IN ('PERF', 'INTERATION', 'E2E')),
     target_id VARCHAR(1024) NOT NULL,
     created_by VARCHAR(255) NOT NULL,
-    is_active BOOLEAN,
     status VARCHAR(50) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     started_at TIMESTAMP WITH TIME ZONE,
