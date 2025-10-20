@@ -264,3 +264,38 @@ $chip-unk:    #455a64;
   border-bottom: 0;
   padding-bottom: 2px;
 }
+.test-card.pass:not(.is-expanded) {
+  background-color: #fff;
+  border: 2px solid #7fcf8b;
+}
+
+.test-card.warn:not(.is-expanded) {
+  background-color: #fff;
+  border: 2px solid #ffb74d;
+}
+
+.test-card.unknown:not(.is-expanded) {
+  background-color: #fff;
+  border: 2px solid #9eabb4;
+}
+
+.test-card.fail:not(.is-expanded) {
+}
+
+.test-card.pass:not(.is-expanded),
+.test-card.warn:not(.is-expanded),
+.test-card.unknown:not(.is-expanded) {
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.test-card.pass:not(.is-expanded):hover   { box-shadow: 0 4px 14px rgba(46,125,50,.12); }
+.test-card.warn:not(.is-expanded):hover   { box-shadow: 0 4px 14px rgba(178,106,0,.12); }
+.test-card.unknown:not(.is-expanded):hover{ box-shadow: 0 4px 14px rgba(69,90,100,.12); }
+
+.test-card.pass.is-expanded    .mat-expansion-panel-header { border: 2px solid #7fcf8b; }
+.test-card.warn.is-expanded    .mat-expansion-panel-header { border: 2px solid #ffb74d; }
+.test-card.unknown.is-expanded .mat-expansion-panel-header { border: 2px solid #9eabb4; }
+
+.test-card .mat-expansion-panel-header {
+  border-radius: 12px 12px 0 0;
+  background: #fff;
+}
