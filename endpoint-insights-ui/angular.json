@@ -74,8 +74,15 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
+	    "karmaConfig": "karma.config.js",
+	    "codeCoverage": true,
+	    "codeCoverageExclude": [
+	      "src/**/*.spec.ts",
+	      "src/test.ts",
+	      "src/polyfills.ts"
+	    ],
             "polyfills": [
               "zone.js",
               "zone.js/testing",
@@ -96,5 +103,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
