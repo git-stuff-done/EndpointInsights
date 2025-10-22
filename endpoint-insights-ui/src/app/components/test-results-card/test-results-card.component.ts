@@ -27,11 +27,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTooltipModule,
     MatIconModule,
   ],
-  templateUrl: './test-card.component.html',
-  styleUrls: ['./test-card.component.scss'],
+  templateUrl: './test-results-card.component.html',
+  styleUrls: ['./test-results-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestCardComponent {
+export class TestResultsCardComponent {
   @Input({ required: true }) test!: TestRecord;
   @Input() defaultExpanded = false;
 
@@ -46,9 +46,15 @@ export class TestCardComponent {
     return ({ PASS: 'pass', WARN: 'warn', FAIL: 'fail', UNKNOWN: 'unknown' } as const)[s] ?? 'unknown';
   }
 
-  chipClass(s: TestStatus): string {
-    return ({ PASS: 'chip-pass', WARN: 'chip-warn', FAIL: 'chip-fail', UNKNOWN: 'chip-unknown' } as const)[s] ?? 'chip-unknown';
-  }
+    chipClass(status: string): string {
+        switch ((status || '').toLowerCase()) {
+            case 'pass': return 'chip-pass';
+            case 'warn': return 'chip-warn';
+            case 'fail': return 'chip-fail';
+            default:     return 'chip-unknown';
+        }
+    }
+
 
   num(n?: number, suffix = '') { return (n ?? n === 0) ? `${n}${suffix}` : '—'; }
   pct(n?: number) { return (typeof n === 'number') ? `${n.toFixed(1)}%` : '—'; }

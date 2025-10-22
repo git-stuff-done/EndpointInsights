@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TestCardComponent } from '../components/test-card/test-card.component';
+import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../models/test-record.model';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [ CommonModule, TestCardComponent,],
+    imports: [ CommonModule, TestResultsCardComponent,],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
