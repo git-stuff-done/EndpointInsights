@@ -1,0 +1,54 @@
+.batch-card {
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.meta {
+  display: grid;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  align-items: baseline;
+
+  .label { color: #6b7280; }
+  .value { font-weight: 600; }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 160px;
+
+  button[mat-stroked-button] {
+    display: inline-flex;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 0 14px;
+  }
+}
+.batch-card {
+  transition: transform .06s ease, box-shadow .12s ease;
+}
+.batch-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2, 12, 27, .08);
+}

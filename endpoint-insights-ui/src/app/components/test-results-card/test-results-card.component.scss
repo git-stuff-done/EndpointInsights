@@ -1,0 +1,325 @@
+/* ================================
+   Variables
+   ================================ */
+$banner-pass:   #d6f2d6;
+$banner-pass-b: #a8dea8;
+
+$banner-warn:   #fff1b8;
+$banner-warn-b: #ffd666;
+
+$banner-fail:   #fad2d2;
+$banner-fail-b: #f1a8a8;
+
+$banner-unknown:   #e9ecf1;
+$banner-unknown-b: #cfd6df;
+
+$neutral-bg:     #ffffff;
+$neutral-border: #e5e7eb;
+
+$panel-title-bg: #0b2335;
+$panel-title-fg: #ffffff;
+
+/* brand colors for chips */
+$chip-pass: #2e7d32;
+$chip-warn: #b26a00;
+$chip-fail: #c62828;
+$chip-unk:  #455a64;
+
+/* ================================
+   Card shell
+   ================================ */
+.test-results-card {
+  padding: 8px 8px 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+
+  .mat-accordion,
+  .mat-expansion-panel,
+  .mat-expansion-panel-header,
+  .mat-expansion-panel-content,
+  .mat-expansion-panel-body {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .mat-expansion-panel {
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+/* ================================
+   Collapsed banner
+   ================================ */
+.test-results-card.pass:not(.is-expanded)    { background: #fff;         border: 2px solid #7fcf8b; }
+.test-results-card.warn:not(.is-expanded)    { background: #fff;         border: 2px solid #ffb74d; }
+.test-results-card.unknown:not(.is-expanded) { background: #fff;         border: 2px solid #9eabb4; }
+.test-results-card.fail:not(.is-expanded)    { background: $banner-fail; border: 1px solid $banner-fail-b; }
+
+:host ::ng-deep .mat-mdc-chip.chip-pass .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-warn .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-fail .mdc-evolution-chip__text-label,
+:host ::ng-deep .mat-mdc-chip.chip-unknown .mdc-evolution-chip__text-label {
+  color: #fff !important;
+}
+/* ================================
+   Expanded state
+   ================================ */
+.test-results-card.is-expanded {
+  background: $neutral-bg;
+  border: 1px solid $neutral-border;
+
+  .mat-expansion-panel-header {
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    padding: 8px 16px;
+    min-height: 56px;
+    box-shadow: none;
+    background: #fff;
+    align-items: center;
+    overflow: visible;
+  }
+
+  &.pass    .mat-expansion-panel-header { border: 2px solid #7fcf8b; }
+  &.warn    .mat-expansion-panel-header { border: 2px solid #ffb74d; }
+  &.unknown .mat-expansion-panel-header { border: 2px solid #9eabb4; }
+  &.fail    .mat-expansion-panel-header { background: $banner-fail; border: 1px solid $banner-fail-b; }
+}
+
+/* ================================
+   Banner layout
+   ================================ */
+.test-results-card .mat-expansion-panel-header .mat-content {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  min-width: 0;
+}
+
+.test-results-card .mat-expansion-panel-header .mat-expansion-panel-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.summary {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px 16px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+
+.summary mat-chip-set,
+.summary .kv { flex: 0 0 auto; }
+
+.summary .kv { color: rgba(0,0,0,.75); }
+.summary .kv strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.title { display: flex; align-items: center; gap: .5rem; }
+.name  { font-weight: 600; letter-spacing: .2px; }
+
+/* ================================
+   Chips
+   Support both "chip-pass" and "pass"
+   class names returned by chipClass()
+   ================================ */
+
+/* PASS */
+.mat-mdc-chip.chip-pass,
+.mat-mdc-chip.pass {
+  --mdc-chip-elevated-container-color: #2e7d32;
+  --mdc-chip-flat-container-color:     #2e7d32;
+  --mdc-chip-label-text-color:         #ffffff;
+  background-color: $chip-pass;
+}
+
+/* WARN */
+.mat-mdc-chip.chip-warn,
+.mat-mdc-chip.warn {
+  --mdc-chip-elevated-container-color: #b26a00;
+  --mdc-chip-flat-container-color:     #b26a00;
+  --mdc-chip-label-text-color:         #fff8e1;
+  background-color: $chip-warn;
+}
+
+/* FAIL */
+.mat-mdc-chip.chip-fail,
+.mat-mdc-chip.fail {
+  --mdc-chip-elevated-container-color: #c62828;
+  --mdc-chip-flat-container-color:     #c62828;
+  --mdc-chip-label-text-color:         #fff5f5;
+  background-color: $chip-fail;
+}
+
+/* UNKNOWN */
+.mat-mdc-chip.chip-unknown,
+.mat-mdc-chip.unknown {
+  --mdc-chip-elevated-container-color: #455a64;
+  --mdc-chip-flat-container-color:     #455a64;
+  --mdc-chip-label-text-color:         #f0f0f0;
+  background-color: $chip-unk;
+}
+
+/* Force readable label text regardless of theme quirks */
+.mat-mdc-chip.chip-pass .mdc-evolution-chip__text-label,
+.mat-mdc-chip.chip-warn .mdc-evolution-chip__text-label,
+.mat-mdc-chip.chip-fail .mdc-evolution-chip__text-label,
+.mat-mdc-chip.chip-unknown .mdc-evolution-chip__text-label,
+.mat-mdc-chip.pass .mdc-evolution-chip__text-label,
+.mat-mdc-chip.warn .mdc-evolution-chip__text-label,
+.mat-mdc-chip.fail .mdc-evolution-chip__text-label,
+.mat-mdc-chip.unknown .mdc-evolution-chip__text-label {
+  color: #fff !important;
+}
+
+/* chip geometry */
+.test-results-card .mdc-evolution-chip {
+  border-radius: 10px;
+  padding: 0 10px;
+  min-height: 28px;
+  font-weight: 600;
+}
+
+/* ================================
+   Body and subpanels
+   ================================ */
+.body { padding: 14px; }
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+}
+
+.panel {
+  grid-column: span 1;
+  border-radius: 10px;
+  align-self: start;
+  height: auto;
+
+  .mdc-card { min-height: 0; height: auto; padding: 0; }
+}
+
+/* Subpanel title: dark when expanded */
+.test-results-card.is-expanded .panel .mat-mdc-card-title {
+  background: $panel-title-bg;
+  color: $panel-title-fg;
+  margin: 0;
+  padding: 8px 16px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Subpanel content */
+.panel .mat-mdc-card-content {
+  padding: 6px 12px 8px 12px;
+  margin: 0;
+}
+
+/* Inline tooltip icon wrapper */
+.title-with-hint { display: inline-flex; align-items: center; gap: 6px; }
+.title-with-hint .q { font-size: 18px; opacity: .85; transform: translateY(1px); }
+.title-with-hint .q:hover { opacity: 1; }
+
+/* ================================
+   Tables
+   ================================ */
+.http-table { width: 100%; }
+
+.test-results-card .mat-card-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.test-results-card .mat-card-content th,
+.test-results-card .mat-card-content td {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  line-height: 1.1rem;
+}
+
+.test-results-card .mat-card-content th {
+  font-weight: 600;
+  color: #374151;
+}
+
+.test-results-card .mat-card-content td {
+  color: #111827;
+  vertical-align: top;
+}
+
+/* MDC data table rhythm */
+.test-results-card .mat-mdc-table th.mdc-data-table__header-cell,
+.test-results-card .mat-mdc-table td.mdc-data-table__cell {
+  padding: 6px 8px;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+/* Subtable helpers */
+.subtable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.9rem;
+  margin-bottom: 0;
+
+  th, td {
+    padding: 4px 8px;
+    line-height: 1.15rem;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    vertical-align: top;
+  }
+
+  th {
+    width: 55%;
+    text-align: left;
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: #111827;
+  }
+
+  tr:last-child th,
+  tr:last-child td {
+    border-bottom: 0;
+    padding-bottom: 2px;
+  }
+}
+
+/* ================================
+   Misc
+   ================================ */
+.sp { margin: 8px 0; }
+.description { margin: 8px 12px 0 12px; color: rgba(0,0,0,.72); }
+
+/* Hover affordance on outlined banners */
+.test-results-card.pass:not(.is-expanded),
+.test-results-card.warn:not(.is-expanded),
+.test-results-card.unknown:not(.is-expanded) {
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.test-results-card.pass:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(46,125,50,.12); }
+.test-results-card.warn:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(178,106,0,.12); }
+.test-results-card.unknown:not(.is-expanded):hover { box-shadow: 0 4px 14px rgba(69,90,100,.12); }
+
+
