@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, signal} from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -7,4 +7,6 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     imports: [RouterOutlet, RouterLink, RouterLinkActive],
     templateUrl: './app.html',
 })
-export class AppComponent {}
+export class AppComponent {
+    readonly title = signal('endpoint-insights-ui');
+}

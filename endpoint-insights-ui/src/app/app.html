@@ -1,14 +1,8 @@
-<header class="topbar">
-    <nav class="topbar-nav">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
-            Dashboard
-        </a>
-        <a routerLink="/batches" routerLinkActive="active" class="nav-link">
-            Batches
-        </a>
+<header class="app-header">
+    <h1>{{ title() }}</h1>
+    <nav>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
+        <a routerLink="/batches" routerLinkActive="active">Batches</a>
     </nav>
 </header>
-
-<main class="page">
-    <router-outlet></router-outlet>
-</main>
+<router-outlet></router-outlet>
