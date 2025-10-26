@@ -28,4 +28,3 @@ spring:
       - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
       - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
       - org.springframework.boot.data.jpa.autoconfigure.JpaRepositoriesAutoConfiguration
-

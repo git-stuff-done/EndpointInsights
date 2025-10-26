@@ -1,0 +1,182 @@
+<mat-card
+        class="test-results-card"
+        [ngClass]="statusClass(test.status)"
+        [class.is-expanded]="expanded()"
+>
+    <mat-accordion class="full">
+        <mat-expansion-panel
+            #panel="matExpansionPanel"
+            [expanded]="expanded()"
+            (opened)="onOpened()"
+            (closed)="onClosed()"
+        >
+            <mat-expansion-panel-header>
+                <mat-panel-title class="title">
+                    <mat-icon aria-hidden="true">analytics</mat-icon>
+                    <span class="name">{{ test.name }}</span>
+                </mat-panel-title>
+
+                <mat-panel-description class="summary">
+                    <mat-chip-set>
+                        <mat-chip [ngClass]="chipClass(test.status)">
+                            {{ test.status }}
+                        </mat-chip>
+                    </mat-chip-set>
+
+                    <!-- Clearer labels in the banner -->
+                    <span class="kv">P95 Latency: <strong>{{ num(test.latencyMsP95, ' ms') }}</strong></span>
+                    <span class="kv">Volume (last minute): <strong>{{ num(test.volume1m) }}</strong></span>
+                    <span class="kv">Error Rate: <strong>{{ pct(test.errorRatePct) }}</strong></span>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Description shows only when expanded -->
+            <p class="description" *ngIf="test.description && panel.expanded">
+                {{ test.description }}
+            </p>
+
+            <div class="body">
+                <div class="grid">
+                    <!-- Latency -->
+                    <mat-card class="panel">
+                        <mat-card-title>
+    <span class="title-with-hint"
+          matTooltip="Latency percentiles:
+P50: 50% of requests completed faster than this time.
+P95: 95% of requests completed faster than this time.
+P99: 99% of requests completed faster than this time."
+          matTooltipPosition="above">
+        Latency
+    </span>
+                        </mat-card-title>
+
+                        <mat-card-content>
+                            <table class="subtable">
+                                <tbody>
+                                <tr><th scope="row">P50</th><td class="num">{{ num(test.latencyMsP50, ' ms') }}</td></tr>
+                                <tr><th scope="row">P95</th><td class="num">{{ num(test.latencyMsP95, ' ms') }}</td></tr>
+                                <tr><th scope="row">P99</th><td class="num">{{ num(test.latencyMsP99, ' ms') }}</td></tr>
+                                </tbody>
+                            </table>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <!-- Volume -->
+                    <mat-card class="panel">
+                        <mat-card-title>
+  <span class="title-with-hint"
+        matTooltip="Count of requests observed within rolling windows.
+'Last 1 minute' is a snapshot of recent traffic; 'Last 5 minutes' helps spot spikes/drops."
+        matTooltipPosition="above">
+    Volume
+  </span>
+                        </mat-card-title>
+
+                        <mat-card-content>
+                            <table class="subtable">
+                                <tbody>
+                                <tr><th scope="row">Last 1 minute</th><td class="num">{{ num(test.volume1m) }}</td></tr>
+                                <tr><th scope="row">Last 5 minutes</th><td class="num">{{ num(test.volume5m) }}</td></tr>
+                                </tbody>
+                            </table>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <!-- HTTP responses / Errors -->
+                    <mat-card class="panel">
+                        <mat-card-title>
+  <span class="title-with-hint"
+        matTooltip="Which status codes count as errors?
+Typically non-2xx responses are considered errors for error rate calculation (e.g., 4xx and 5xx)."
+        matTooltipPosition="above">
+    HTTP Responses / Errors
+  </span>
+                        </mat-card-title>
+
+                        <mat-card-content>
+                            <table
+                                    mat-table
+                                    [dataSource]="test.httpBreakdown || []"
+                                    class="mat-elevation-z0 http-table"
+                            >
+                                <ng-container matColumnDef="code">
+                                    <th mat-header-cell *matHeaderCellDef>Code</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.code }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="count">
+                                    <th mat-header-cell *matHeaderCellDef>Count</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.count }}</td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="httpColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: httpColumns;"></tr>
+                            </table>
+
+                            <mat-divider class="sp"></mat-divider>
+                            <div class="kv-line">
+                                <span>Aggregate Error Rate</span>
+                                <strong>{{ pct(test.errorRatePct) }}</strong>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <!-- Thresholds: Name | Warn | Fail -->
+                    <mat-card class="panel">
+                        <mat-card-title>
+  <span class="title-with-hint"
+        matTooltip="Warn/Fail boundaries used to compute overall status. Values that meet/exceed 'Fail' trigger FAIL; near 'Warn' trigger WARN."
+        matTooltipPosition="above">
+    Thresholds
+  </span>
+                        </mat-card-title>
+
+
+                        <mat-card-content>
+                            <table class="subtable">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col" class="num">Warn Threshold</th>
+                                    <th scope="col" class="num">Fail Threshold</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">Latency (ms)</th>
+                                    <td class="num">{{ num(test.thresholds?.latencyMs?.warn, ' ms') }}</td>
+                                    <td class="num">{{ num(test.thresholds?.latencyMs?.fail, ' ms') }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Error Rate (%)</th>
+                                    <td class="num">{{ pct(test.thresholds?.errorRatePct?.warn) }}</td>
+                                    <td class="num">{{ pct(test.thresholds?.errorRatePct?.fail) }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Volume / min</th>
+                                    <td class="num">{{ num(test.thresholds?.volumePerMin?.warn) }}</td>
+                                    <td class="num">{{ num(test.thresholds?.volumePerMin?.fail) }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <!-- Status / Meta -->
+                    <mat-card class="panel">
+                        <mat-card-title>Status</mat-card-title>
+                        <mat-card-content>
+                            <table class="subtable">
+                                <tbody>
+                                <tr><th scope="row">State</th><td class="num">{{ test.status }}</td></tr>
+                                <tr><th scope="row">Last Run</th><td class="num">{{ lastRun() }}</td></tr>
+                                <tr><th scope="row">ID</th><td class="num">{{ test.id }}</td></tr>
+                                </tbody>
+                            </table>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+</mat-card>
