@@ -29,10 +29,8 @@ public class TestBatch {
     Long scheduleId;
 
     @Column(name = "start_time")
-    @Temporal(TemporalType.TIMESTAMP)
     LocalDate startTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_time_run")
     LocalDate lastTimeRun;
 
