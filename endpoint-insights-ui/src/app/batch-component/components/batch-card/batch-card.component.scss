@@ -52,3 +52,27 @@
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(2, 12, 27, .08);
 }
+
+button[mat-stroked-button] {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 8px;
+  font-weight: 500;
+
+  /* Hover: subtle lift */
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Active: pressed down */
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
+  }
+
+  /* Optional focus ring for accessibility */
+  &:focus-visible {
+    outline: 2px solid #0b2335; /* your VSP blue */
+    outline-offset: 2px;
+  }
+}

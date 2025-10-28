@@ -1,0 +1,41 @@
+/* Header container */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 1px, 1px);
+  white-space: nowrap; border: 0;
+}
+.app-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #0b2335; /* VSP dark blue bar */
+}
+
+/* Pill buttons */
+.app-header a[mat-button] {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 9999px;       /* pill shape - can edit it later if Jim wants Square */
+  font-weight: 600;
+  letter-spacing: .2px;
+  text-decoration: none;
+
+  background: #1976d2;
+  color: #fff;
+
+  transition: background .18s ease, box-shadow .18s ease;
+}
+
+.app-header a[mat-button].active {
+  background: #2196f3;         /* active/selected tab */
+}
+
+.app-header a[mat-button]:hover {
+  background: #42a5f5;
+  box-shadow: 0 4px 14px rgba(25,118,210,.22);
+}
