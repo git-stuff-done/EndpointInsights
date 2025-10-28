@@ -2,7 +2,6 @@ package com.vsp.endpointinsightsapi.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 import jakarta.validation.constraints.NotNull;
