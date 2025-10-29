@@ -1,0 +1,44 @@
+.header{
+  background: lightgray;
+  text-align: center;
+  padding: 10px;
+}
+
+.card{
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  max-width: 400px;
+  margin: 2rem auto;
+  transition: box-shadow 0.2s ease;
+}
+
+.logo{
+  width: 225px;
+  height: auto;
+  border: 1px solid #000000;
+  display: block;
+  padding: 20px;
+  margin: 0 auto 20px;
+}
+.welcome{
+  text-align: center;
+  padding-bottom: 40px;
+}
+.welcome-text{
+  font-weight: bold;
+}
+.button-container{
+  text-align: center;
+}
+
+.login-button{
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 400px;
+}
