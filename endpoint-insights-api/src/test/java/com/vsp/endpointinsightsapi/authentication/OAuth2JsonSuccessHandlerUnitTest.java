@@ -300,7 +300,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
     @Test
     void shouldHandleSpecialCharactersInAttributes() throws IOException {
         String username = "user@domain.com";
-        String email = "test+tag@example.co.uk";
+        String email = "test+tag@example.com";
         Instant expiresAt = Instant.now().plusSeconds(3600);
         String tokenValue = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.special.chars";
 

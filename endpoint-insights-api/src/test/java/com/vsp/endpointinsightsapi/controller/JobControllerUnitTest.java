@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = "app.authentication.enabled=false")
 @WebMvcTest(JobsController.class)
 @AutoConfigureWebMvc
-public class JobControllerTest {
+public class JobControllerUnitTest {
 
 	@Autowired
 	private MockMvc mockMvc;
