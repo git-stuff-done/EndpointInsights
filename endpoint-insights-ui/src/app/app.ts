@@ -1,4 +1,4 @@
-// app.ts
+
 import { Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule, MatButton } from '@angular/material/button';
@@ -6,7 +6,7 @@ import { MatButtonModule, MatButton } from '@angular/material/button';
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterLink, RouterLinkActive, MatButtonModule],
+    imports: [RouterLink, RouterLinkActive, MatButtonModule, RouterOutlet],
     templateUrl: './app.html',
     styleUrls: ['./app.scss'],
 })
