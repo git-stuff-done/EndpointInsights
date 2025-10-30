@@ -13,6 +13,7 @@ import lombok.Setter;
 //import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
 //import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
@@ -27,7 +28,8 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "job_id")
     private String jobId;
 
@@ -56,19 +58,15 @@ public class Job {
     private JobStatus status = JobStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
     @Column(name = "started_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date startedAt;
 
     @Column(name = "completed_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job

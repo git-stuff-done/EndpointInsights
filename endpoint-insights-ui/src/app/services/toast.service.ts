@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {TOAST_TIMEOUT} from "../common/constants";
-import {ToastComponent} from "../batch-component/components/toast-notification/toast.component";
+import {TOAST_TIMEOUT} from "../common/notification.constants";
+import {ToastComponent} from "../components/toast-notification/toast.component";
 
 @Injectable({providedIn: 'root'})
 

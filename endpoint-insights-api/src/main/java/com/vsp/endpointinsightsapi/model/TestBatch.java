@@ -5,9 +5,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.UUID;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -17,10 +19,13 @@ import java.time.LocalDateTime;
 public class TestBatch {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UUID
+    private String id;
 
-    //TODO: Create ManyToMany with jobs entity once made
+//   @ManyToMany
+//   @JoinTable(name = )
+//   private List<Job> jobs;
 
     @Column(name = "batch_name", nullable = false)
     String batchName;
