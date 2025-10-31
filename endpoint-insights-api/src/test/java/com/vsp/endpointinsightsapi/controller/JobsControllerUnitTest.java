@@ -10,11 +10,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @WebMvcTest(JobsController.class)
 class JobsControllerUnitTest {
-    @Autowired
-    private MockMvc mockMvc;
+
+    @MockitoBean
+    private JobService jobService;
 
     @Test
-    void contextLoad() {
-
+    void contextLoads() {
     }
 }
