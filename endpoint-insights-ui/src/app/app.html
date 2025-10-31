@@ -1,9 +1,11 @@
 <span class="sr-only" data-test="app-title">{{ title() }}</span>
 
 <header class="app-header">
-    <nav class="nav">
-        <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-        <a mat-button routerLink="/batches" routerLinkActive="active">Batches</a>
+    <h1>{{ title() }}</h1>
+    <nav>
+        <a routerLink="/login" routerLinkActive="active">Login</a>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"> Dashboard</a>
+        <a routerLink="/batches" routerLinkActive="active"> Batches</a>
     </nav>
 </header>
 
