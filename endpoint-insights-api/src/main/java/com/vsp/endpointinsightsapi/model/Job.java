@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +27,7 @@ public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_id")
-    private String jobId;
+    private Integer jobId;
 
     @Column(name = "name", nullable = false)
     private String name;

@@ -50,8 +50,7 @@ public class JobsController {
 			JobUpdateRequest request,
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			String jobId) {
+			Integer jobId) {
 		LOG.info("Updating job");
 
 		Job updatedJob = new Job();
@@ -81,8 +80,7 @@ public class JobsController {
 	public ResponseEntity<Job> getJob(
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			String jobId) {
+			Integer jobId) {
 
 		Job job = new Job();
 		job.setJobId(jobId);
