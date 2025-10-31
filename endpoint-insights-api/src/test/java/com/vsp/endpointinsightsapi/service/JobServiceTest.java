@@ -23,6 +23,7 @@ class JobServiceTest {
 
     @InjectMocks
     private JobService jobService;
+        //test if job exists it is deleted
 
     @Test
     void createJob_returnSavedJob() {
@@ -35,17 +36,6 @@ class JobServiceTest {
     
     @Test
     void getAllJobs_ReturnListOfJobs() {
-        Job job = new Job();
-        job.setJobId("1");
-        when(jobRepository.findById("1")).thenReturn(Optional.of(job));
-        Optional<Job> testResult = jobService.getJobById("1");
-        assertTrue(testResult.isPresent());
-        assertEquals("1", testResult.get().getJobId());
-        verify(jobRepository, times(1)).findById("1");
-    }
-
-    @Test
-    void getJobById_ReturnJob() {
         Job job1 = new Job();
         job1.setJobId("1");
         Job job2 = new Job();
@@ -55,5 +45,17 @@ class JobServiceTest {
         List<Job> testResult = jobService.getAllJobs();
         assertEquals(2, testResult.size());
         verify(jobRepository, times(1)).findAll();
+    }
+    //test if job does not exist throws exception
+
+    @Test
+    void getJobById_ReturnJob() {
+        Job job = new Job();
+        job.setJobId("1");
+        when(jobRepository.findById("1")).thenReturn(Optional.of(job));
+        Optional<Job> testResult = jobService.getJobById("1");
+        assertTrue(testResult.isPresent());
+        assertEquals("1", testResult.get().getJobId());
+        verify(jobRepository, times(1)).findById("1");
     }
 }
