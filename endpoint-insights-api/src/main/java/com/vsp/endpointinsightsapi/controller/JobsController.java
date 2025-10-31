@@ -1,6 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
-
 import com.vsp.endpointinsightsapi.model.*;
+import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import com.vsp.endpointinsightsapi.validation.Patterns;
@@ -23,6 +23,11 @@ import java.util.List;
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
+	private final JobService jobService;
+
+	public JobsController(JobService jobService) {
+		this.jobService = jobService;
+	}
 
 	/**
 	 * Endpoint to create a job.
@@ -31,9 +36,10 @@ public class JobsController {
 	 * @return the created Job
 	 * */
 	@PostMapping
-	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
+	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request, Job job) {
 		LOG.info("Creating job");
-		return ResponseEntity.ok(new Job());
+		Job newJob = jobService.createJob(job);
+		return ResponseEntity.ok(newJob);
 	}
 
 	/**
@@ -67,8 +73,9 @@ public class JobsController {
 	 * @return all job ids as a List of Strings
 	 * */
 	@GetMapping
-	public ResponseEntity<List<String>> getJobs() {
-		return ResponseEntity.ok(List.of("1", "2", "5"));
+	public ResponseEntity<List<Job>> getJobs() {
+		List<Job> jobs = jobService.getAllJobs();
+		return ResponseEntity.ok(jobs);
 	}
 
 	/**

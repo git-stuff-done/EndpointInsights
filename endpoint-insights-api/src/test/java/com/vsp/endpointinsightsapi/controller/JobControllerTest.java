@@ -1,4 +1,5 @@
 package com.vsp.endpointinsightsapi.controller;
+import com.vsp.endpointinsightsapi.service.JobService;
 
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
@@ -24,6 +26,9 @@ public class JobControllerTest {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@MockitoBean
+	private JobService jobService;
 
 
 	@Test
