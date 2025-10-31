@@ -19,14 +19,14 @@ public class JobService {
 
     @Transactional
     public void deleteJobById(String jobId) {
-        LOG.info("Attempting to delete job with ID {}", jobId);
+        LOG.debug("Attempting to delete job with ID {}", jobId);
 
         if (!jobRepository.existsById(jobId)) {
-            LOG.warn("Job {} not found", jobId);
-            throw new JobNotFoundException("Job not found: " + jobId);
+            LOG.debug("Job {} not found", jobId);
+            throw new JobNotFoundException(jobId);
         }
 
         jobRepository.deleteById(jobId);
-        LOG.info("Job {} deleted successfully", jobId);
+        LOG.debug("Job {} deleted successfully", jobId);
     }
 }
