@@ -6,8 +6,8 @@
 - [Security Hardening](architecture/security-hardening.md)
 
 ### Authentication
-- [OIDC Authentication](authentication/oidc-authentication.md)
-- [JWT Sessions](authentication/jwt-sessions.md)
+- [OIDC Authentication](auth/authentication-oidc.md)
+- [JWT Authorization](auth/authorization-jwt.md)
 
 ### Deployment
 - [Kubernetes Deployment](deployment/kubernetes-deployment.md)

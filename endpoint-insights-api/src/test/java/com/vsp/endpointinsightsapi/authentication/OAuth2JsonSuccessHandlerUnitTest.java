@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,12 @@ public class OAuth2JsonSuccessHandlerUnitTest {
     @Mock
     private OidcIdToken oidcIdToken;
 
+    @Mock
+    private AuthenticationProperties authProperties;
+
+    @Mock
+    private AuthenticationProperties.Claims claimsConfig;
+
     private OAuth2JsonSuccessHandler handler;
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -53,7 +60,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
 
     @BeforeEach
     void setUp() {
-        handler = new OAuth2JsonSuccessHandler();
+        handler = new OAuth2JsonSuccessHandler(authProperties);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         objectMapper = new ObjectMapper();
@@ -70,6 +77,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn(userName);
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
         when(oidcUser.getAttribute("email")).thenReturn(email);
         when(oidcIdToken.getExpiresAt()).thenReturn(expiresAt);
@@ -146,6 +156,8 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Test User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(null);
 
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -161,6 +173,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Test User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn("testuser");
         when(oidcUser.getAttribute("email")).thenReturn(null);
 
@@ -177,6 +192,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Test User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn("testuser");
         when(oidcUser.getAttribute("email")).thenReturn("test@example.com");
         when(oidcIdToken.getExpiresAt()).thenReturn(null);
@@ -194,6 +212,8 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Test User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(oidcUser.getAttribute("preferred_username")).thenReturn("");
 
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -208,6 +228,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Test User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn("testuser");
         when(oidcUser.getAttribute("email")).thenReturn("");
 
@@ -257,6 +280,10 @@ public class OAuth2JsonSuccessHandlerUnitTest {
                 "oidc-client"
         );
 
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
+
         handler.onAuthenticationSuccess(request, response, realOAuth2Token);
 
         assertEquals("application/json", response.getContentType());
@@ -279,6 +306,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("JSON User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
         when(oidcUser.getAttribute("email")).thenReturn(email);
         when(oidcIdToken.getExpiresAt()).thenReturn(expiresAt);
@@ -307,6 +337,9 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn("Special Char User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(claimsConfig.getUsername()).thenReturn("preferred_username");
+        when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
         when(oidcUser.getAttribute("email")).thenReturn(email);
         when(oidcIdToken.getExpiresAt()).thenReturn(expiresAt);

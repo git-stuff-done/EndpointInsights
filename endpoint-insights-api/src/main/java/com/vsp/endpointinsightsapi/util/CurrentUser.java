@@ -9,15 +9,46 @@ import java.util.Optional;
 
 /**
  * Utility class for accessing the current user's context from anywhere in the application.
- * Prevents unnecessary json unmarshalling.
+ *
+ * <p>This class provides static methods to access {@link UserContext} that is set by
+ * {@link com.vsp.endpointinsightsapi.authentication.AuthorizationInterceptor} during request processing.
+ * The context is stored in request-scoped attributes via Spring's {@link RequestContextHolder},
+ * ensuring thread-safety and automatic cleanup after request completion.
+ *
+ * <h2>Usage Examples:</h2>
+ * <pre>{@code
+ * // Get full user context
+ * Optional<UserContext> context = CurrentUser.get();
+ *
+ * // Get specific user properties (returns "system" if no user)
+ * String userId = CurrentUser.getUserId();
+ * String username = CurrentUser.getUsername();
+ * String logIdentifier = CurrentUser.getLogIdentifier();
+ *
+ * // Check permissions
+ * if (CurrentUser.hasWriteAccess()) {
+ *     // perform write operation
+ * }
+ * }</pre>
+ *
+ * <h2>Availability:</h2>
+ * <ul>
+ *   <li>Available for all protected API endpoints after JWT validation</li>
+ *   <li>Returns empty/default values for public endpoints</li>
+ *   <li>Returns empty if called outside of a web request context</li>
+ * </ul>
+ *
+ * @see UserContext
+ * @see com.vsp.endpointinsightsapi.authentication.AuthorizationInterceptor
  */
 public class CurrentUser {
 
     private static final String USER_CONTEXT_ATTRIBUTE = "userContext";
 
     /**
-     * Get the current user's context from the request.
-     * Returns empty if no user context is available (e.g., public endpoints).
+     * Gets the current user's context from the request.
+     *
+     * @return Optional containing UserContext if available, empty otherwise
      */
     public static Optional<UserContext> get() {
         try {
@@ -31,48 +62,58 @@ public class CurrentUser {
     }
 
     /**
-     * Get the current user's ID for logging purposes.
-     * Returns "system" if no user context is available.
+     * Gets the current user's ID for logging purposes.
+     *
+     * @return the user ID, or "system" if no user context is available
      */
     public static String getUserId() {
         return get().map(UserContext::getUserId).orElse("system");
     }
 
     /**
-     * Get the current user's username for logging purposes.
-     * Returns "system" if no user context is available.
+     * Gets the current user's username for logging purposes.
+     *
+     * @return the username, or "system" if no user context is available
      */
     public static String getUsername() {
         return get().map(UserContext::getUsername).orElse("system");
     }
 
     /**
-     * Get a user identifier suitable for logging (username + ID).
-     * Returns "system" if no user context is available.
+     * Gets a user identifier suitable for logging (username + ID).
+     *
+     * @return formatted log identifier "username (userId)", or "system" if unavailable
      */
     public static String getLogIdentifier() {
         return get().map(UserContext::getLogIdentifier).orElse("system");
     }
 
     /**
-     * Check if the current user has write access.
-     * Returns false if no user context is available.
+     * Checks if the current user has write access.
+     *
+     * @return true if user has WRITE role, false otherwise or if no user context
      */
     public static boolean hasWriteAccess() {
         return get().map(UserContext::hasWriteAccess).orElse(false);
     }
 
     /**
-     * Check if the current user has read access.
-     * Returns false if no user context is available.
+     * Checks if the current user has read access.
+     *
+     * @return true if user has READ or WRITE role, false otherwise or if no user context
      */
     public static boolean hasReadAccess() {
         return get().map(UserContext::hasReadAccess).orElse(false);
     }
 
     /**
-     * Internal method for the interceptor to set the user context.
-     * Should not be called from application code.
+     * Sets the user context for the current request.
+     *
+     * <p><strong>Internal use only.</strong> This method is called by
+     * {@link com.vsp.endpointinsightsapi.authentication.AuthorizationInterceptor}
+     * and should not be called from application code.
+     *
+     * @param userContext the user context to set
      */
     public static void setUserContext(UserContext userContext) {
         try {

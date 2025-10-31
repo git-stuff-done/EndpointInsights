@@ -2,7 +2,6 @@ package com.vsp.endpointinsightsapi.authentication;
 
 import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
 import com.vsp.endpointinsightsapi.exception.CustomException;
-import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationInterceptorUnitTest {
+public class AuthorizationInterceptorUnitTest {
 
     @Mock
     private JwtDecoder jwtDecoder;
@@ -46,7 +45,7 @@ public class AuthenticationInterceptorUnitTest {
     @Mock
     private AuthenticationProperties.Endpoints endpointsConfig;
 
-    private AuthenticationInterceptor interceptor;
+    private AuthorizationInterceptor interceptor;
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -59,7 +58,11 @@ public class AuthenticationInterceptorUnitTest {
         when(authProperties.getEndpoints()).thenReturn(endpointsConfig);
         when(endpointsConfig.getPublicEndpoints()).thenReturn(List.of("/api/health"));
 
-        interceptor = new AuthenticationInterceptor(authProperties);
+        interceptor = new AuthorizationInterceptor(authProperties);
+
+        // Initialize the publicEndpointsSet that would normally be set by @PostConstruct
+        ReflectionTestUtils.setField(interceptor, "publicEndpointsSet",
+            new java.util.HashSet<>(authProperties.getEndpoints().getPublicEndpoints()));
     }
 
     @Test
