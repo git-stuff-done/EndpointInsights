@@ -50,12 +50,14 @@ class JobServiceTest {
 
     @Test
     void getJobById_ReturnJob() {
+        String jobId = "1";
         Job job = new Job();
-        job.setJobId("1");
-        when(jobRepository.findById("1")).thenReturn(Optional.of(job));
-        Optional<Job> testResult = jobService.getJobById("1");
+        job.setJobId(jobId);
+        when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
+        Optional<Job> testResult = jobService.getJobById(jobId);
+        assertNotNull(testResult);
         assertTrue(testResult.isPresent());
-        assertEquals("1", testResult.get().getJobId());
-        verify(jobRepository, times(1)).findById("1");
+        assertEquals(jobId, testResult.get().getJobId());
+        verify(jobRepository, times(1)).findById(jobId);
     }
 }
