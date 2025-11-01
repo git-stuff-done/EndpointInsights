@@ -53,11 +53,26 @@ class JobServiceTest {
         String jobId = "1";
         Job job = new Job();
         job.setJobId(jobId);
-        job.setName("Test Job");
+
+        when(jobRepository.existsById(eq(jobId))).thenReturn(true);
         when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
+
         Optional<Job> testResult = jobService.getJobById(jobId);
         assertTrue(testResult.isPresent());
-        assertEquals("Test Job", testResult.get().getName());
+        assertEquals(jobId, testResult.get().getJobId());
+        verify(jobRepository, times(1)).existsById(jobId);
         verify(jobRepository, times(1)).findById(jobId);
+    }
+
+    @Test
+    void getJobById_JobNotFound_ThrowsException() {
+        String jobId = "nonexistent";
+        when(jobRepository.existsById(eq(jobId))).thenReturn(false);
+        Exception exception = assertThrows(JobNotFoundException.class, () -> {
+            jobService.getJobById(jobId);
+        });
+        assertEquals("Job not found: " + jobId, exception.getMessage());
+        verify(jobRepository, times(1)).existsById(jobId);
+        verify(jobRepository, times(0)).findById(anyString());
     }
 }

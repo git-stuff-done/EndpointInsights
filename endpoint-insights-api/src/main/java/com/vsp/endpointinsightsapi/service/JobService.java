@@ -1,6 +1,6 @@
 package com.vsp.endpointinsightsapi.service;
 import java.util.List;
-import java.util.Optional;
+//import java.util.Optional;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
@@ -28,12 +28,15 @@ public class JobService {
         return jobRepository.findAll();
     }
 
-    public Optional<Job> getJobById(String jobId) {
-        if (!jobRepository.existsById(jobId)) {
+    public Job getJobById(String jobId) {
+        // if (!jobRepository.existsById(jobId)) {
+        //     LOG.warn("Job {} not found", jobId);
+        //     throw new JobNotFoundException("Job not found: " + jobId);
+        // }
+        return jobRepository.findById(jobId).orElseThrow(() -> {
             LOG.warn("Job {} not found", jobId);
-            throw new JobNotFoundException("Job not found: " + jobId);
-        }
-        return jobRepository.findById(jobId);
+            return new JobNotFoundException("Job not found: " + jobId);
+        });
     }
 
 }

@@ -1,7 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.service.JobService;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+// import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import com.vsp.endpointinsightsapi.validation.Patterns;
 import jakarta.validation.Valid;
@@ -13,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+// import java.time.LocalDate;
+// import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -95,7 +95,8 @@ public class JobsController {
 		// job.setJobId(jobId);
 		// job.setName("Job #" + jobId);
 		// job.setDescription("This is a stub for job #" + jobId);
-			return jobService.getJobById(jobId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+			Job job = jobService.getJobById(jobId);
+			return job != null ? ResponseEntity.ok(job) : ResponseEntity.notFound().build();
 
 		//return ResponseEntity.ok(job);
 	}
