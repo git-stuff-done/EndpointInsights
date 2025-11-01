@@ -27,10 +27,10 @@ public class JobService {
     }
 
     public Optional<Job> getJobById(String jobId) {
-        if (!jobRepository.existsById(jobId)) {
-            LOG.warn("Job {} not found", jobId);
-            throw new JobNotFoundException("Job not found: " + jobId);
-        }
+        // if (!jobRepository.existsById(jobId)) {
+        //     LOG.warn("Job {} not found", jobId);
+        //     throw new JobNotFoundException("Job not found: " + jobId);
+        // }
         return jobRepository.findById(jobId);
     }
 
