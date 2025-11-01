@@ -56,10 +56,9 @@ class JobServiceTest {
 
         when(jobRepository.existsById(eq(jobId))).thenReturn(true);
         when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
-
-        Optional<Job> testResult = jobService.getJobById(jobId);
-        assertTrue(testResult.isPresent());
-        assertEquals(jobId, testResult.get().getJobId());
+        Job testResult = jobService.getJobById(jobId);
+        assertNotNull(testResult);
+        assertEquals(jobId, testResult.getJobId());
         verify(jobRepository, times(1)).existsById(jobId);
         verify(jobRepository, times(1)).findById(jobId);
     }
