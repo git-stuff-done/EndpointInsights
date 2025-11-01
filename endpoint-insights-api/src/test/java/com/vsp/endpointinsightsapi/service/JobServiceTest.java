@@ -53,11 +53,11 @@ class JobServiceTest {
         String jobId = "1";
         Job job = new Job();
         job.setJobId(jobId);
+        job.setName("Test Job");
         when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);
-        assertNotNull(testResult);
         assertTrue(testResult.isPresent());
-        assertEquals(jobId, testResult.get().getJobId());
+        assertEquals("Test Job", testResult.get().getName());
         verify(jobRepository, times(1)).findById(jobId);
     }
 }
