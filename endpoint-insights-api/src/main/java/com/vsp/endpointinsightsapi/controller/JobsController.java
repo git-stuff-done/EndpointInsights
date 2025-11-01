@@ -91,12 +91,13 @@ public class JobsController {
 			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
 			String jobId) {
 
-		Job job = new Job();
-		job.setJobId(jobId);
-		job.setName("Job #" + jobId);
-		job.setDescription("This is a stub for job #" + jobId);
+		// Job job = new Job();
+		// job.setJobId(jobId);
+		// job.setName("Job #" + jobId);
+		// job.setDescription("This is a stub for job #" + jobId);
+			return jobService.getJobById(jobId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 
-		return ResponseEntity.ok(job);
+		//return ResponseEntity.ok(job);
 	}
 
 	/**

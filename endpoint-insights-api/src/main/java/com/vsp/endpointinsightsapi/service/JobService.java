@@ -6,6 +6,7 @@ import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +15,7 @@ public class JobService {
     private static final Logger LOG = LoggerFactory.getLogger(JobService.class);
     private final JobRepository jobRepository;
 
+    @Autowired
     public JobService(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
     }
@@ -27,10 +29,10 @@ public class JobService {
     }
 
     public Optional<Job> getJobById(String jobId) {
-        // if (!jobRepository.existsById(jobId)) {
-        //     LOG.warn("Job {} not found", jobId);
-        //     throw new JobNotFoundException("Job not found: " + jobId);
-        // }
+        if (!jobRepository.existsById(jobId)) {
+            LOG.warn("Job {} not found", jobId);
+            throw new JobNotFoundException("Job not found: " + jobId);
+        }
         return jobRepository.findById(jobId);
     }
 
