@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.UUID;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+
+import java.util.*;
 
 @Data
 @Entity
@@ -20,12 +20,12 @@ public class TestBatch {
 
     @Id
     @GeneratedValue
-    @UUID
-    private String id;
+    @UuidGenerator
+    @Column(name = "id", nullable = false)
+    private UUID batch_id;
 
-//   @ManyToMany
-//   @JoinTable(name = )
-//   private List<Job> jobs;
+   @ManyToMany(mappedBy = "testBatches")
+   private List<Job> jobs;
 
     @Column(name = "batch_name", nullable = false)
     String batchName;

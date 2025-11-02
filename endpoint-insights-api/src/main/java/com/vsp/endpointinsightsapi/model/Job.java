@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 
@@ -31,7 +32,7 @@ public class Job {
     @GeneratedValue
     @UuidGenerator
     @Column(name = "job_id")
-    private String jobId;
+    private UUID jobId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -43,11 +44,22 @@ public class Job {
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
 
+
+    @ManyToMany
+    @JoinTable(
+        name = "test_batch_tests",
+        joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+        inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+    )
+    private Set<TestBatch> testBatches;
+
+
     // Uncomment when the TestTarget and User Entities are created
     /*
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "target_id")
     private TestTarget testTarget;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by")

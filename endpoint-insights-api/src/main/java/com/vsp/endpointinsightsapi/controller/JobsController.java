@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -55,7 +56,7 @@ public class JobsController {
 		LOG.info("Updating job");
 
 		Job updatedJob = new Job();
-		updatedJob.setJobId(jobId);
+		updatedJob.setJobId(UUID.fromString(jobId));
 		updatedJob.setName("Updated Job #" + jobId);
 		updatedJob.setDescription("This is a stub for job #" + jobId);
 
@@ -85,7 +86,7 @@ public class JobsController {
 			String jobId) {
 
 		Job job = new Job();
-		job.setJobId(jobId);
+		job.setJobId(UUID.fromString(jobId));
 		job.setName("Job #" + jobId);
 		job.setDescription("This is a stub for job #" + jobId);
 
