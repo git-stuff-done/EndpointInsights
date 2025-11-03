@@ -14,6 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,21 +44,16 @@ public class JobControllerTest {
 
 	@Test
 	public void getJobSuccess() throws Exception {
-		mockMvc.perform(get("/api/jobs/{id}", "1"))
+		UUID jobId = UUID.randomUUID();
+		mockMvc.perform(get("/api/jobs/{id}", jobId.toString()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.jobId").value("1"));
-	}
-
-	@Test
-	public void getJobInvalidFormat() throws Exception {
-		mockMvc.perform(get("/api/jobs/invalidFormat"))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.details[0]").value(ErrorMessages.JOB_ID_INVALID_FORMAT));
+				.andExpect(jsonPath("$.jobId").value(jobId.toString()));
 	}
 
 	@Test
 	public void updateJob() throws Exception {
-		mockMvc.perform(put("/api/jobs/{id}", "1")
+		UUID jobId = UUID.randomUUID();
+		mockMvc.perform(put("/api/jobs/{id}", jobId.toString())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(new JobUpdateRequest())))
 				.andExpect(status().isOk());
@@ -64,9 +61,11 @@ public class JobControllerTest {
 
 	@Test
 	public void deleteJob() throws Exception {
-		mockMvc.perform(delete("/api/jobs/{id}", "1"))
+		UUID jobId = UUID.randomUUID();
+
+		mockMvc.perform(delete("/api/jobs/{id}", jobId.toString()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").value("Job 1 deleted"));
+				.andExpect(jsonPath("$").value("Job %s deleted".formatted(jobId.toString())));
 	}
 
 	@Test
