@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+import static org.mockito.Mockito.doThrow;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -74,4 +75,13 @@ public class JobControllerTest {
 		mockMvc.perform(get("/api/jobs")).andExpect(status().isOk());
 	}
 
+	@Test
+	public void deleteJob_runtimeException_returnsNotFound() throws Exception {
+		doThrow(new RuntimeException("test error"))
+				.when(jobService)
+				.deleteJobById("123");
+
+		mockMvc.perform(delete("/api/jobs/{id}", "123"))
+				.andExpect(status().isNotFound());
+	}
 }
