@@ -18,8 +18,8 @@ export class BatchComponent {
 
   // mock data for now; I will need to fetch this from the server later
   batches: Batch[] = [
-    { id: 'B-2025-00123', title: 'Nightly ETL (US-East)', createdIso: '2025-10-17T02:13:00Z' },
-    { id: 'B-2025-00124', title: 'Customer Backfill – Oct', createdIso: '2025-10-18T15:45:00Z' },
+    { id: 'B-2025-00123', title: 'Nightly ETL (US-East)', date: '2025-10-17T02:13:00Z' },
+    { id: 'B-2025-00124', title: 'Customer Backfill – Oct', date: '2025-10-18T15:45:00Z' },
   ];
 
   onConfigure(batch: Batch) {
