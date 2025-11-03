@@ -1,23 +1,19 @@
 package com.vsp.endpointinsightsapi.model;
 
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
-
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-//import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
-//import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
-import com.vsp.endpointinsightsapi.model.enums.TestType;
 
 @Getter
 @Setter
