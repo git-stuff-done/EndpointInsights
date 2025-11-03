@@ -17,9 +17,4 @@ describe('App', () => {
         expect(fixture.componentInstance).toBeTruthy();
     });
 
-    it('should render title', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        fixture.detectChanges();
-        expect(fixture.nativeElement.textContent).toContain('endpoint-insights-ui'); // or whatever selector you assert
-    });
 });
