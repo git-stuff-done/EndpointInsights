@@ -13,11 +13,8 @@ import lombok.Setter;
 //import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
 //import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
-import java.util.UUID;
-
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 
@@ -30,9 +27,9 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 public class Job {
 
     @Id
-    @GeneratedValue
-    @UuidGenerator
-    private UUID jobId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "job_id")
+    private String jobId;
 
     @Column(name = "name", nullable = false)
     private String name;

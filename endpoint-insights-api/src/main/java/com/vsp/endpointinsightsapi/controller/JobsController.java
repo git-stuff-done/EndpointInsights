@@ -56,7 +56,7 @@ public class JobsController {
 		LOG.info("Updating job");
 
 		Job updatedJob = new Job();
-		updatedJob.setJobId(UUID.fromString(jobId));
+		updatedJob.setJobId(jobId);
 		updatedJob.setName("Updated Job #" + jobId);
 		updatedJob.setDescription("This is a stub for job #" + jobId);
 
@@ -86,7 +86,7 @@ public class JobsController {
 			String jobId) {
 
 		Job job = new Job();
-		job.setJobId(UUID.fromString(jobId));
+		job.setJobId(jobId);
 		job.setName("Job #" + jobId);
 		job.setDescription("This is a stub for job #" + jobId);
 
