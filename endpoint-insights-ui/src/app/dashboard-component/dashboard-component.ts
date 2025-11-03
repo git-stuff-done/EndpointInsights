@@ -42,4 +42,3 @@ export class DashboardComponent { //Currently just a mock data for now; I will n
 
     trackById = (_: number, t: TestRecord) => t.id;
 }
-
