@@ -44,7 +44,7 @@ public class Job {
 			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
 			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
 	)
-	//private Set<TestBatch> testBatches;
+	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
     /*
