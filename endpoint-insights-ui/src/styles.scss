@@ -81,16 +81,16 @@ body {
 
 .toast-success,
 .toast-error {
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  max-width: 500px !important;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  max-width: 500px;
 
   .mat-mdc-snack-bar-container,
   .mdc-snackbar__surface {
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
   }
 }
 

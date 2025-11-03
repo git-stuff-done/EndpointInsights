@@ -16,6 +16,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
+import java.util.UUID;
+
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 
@@ -30,8 +32,7 @@ public class Job {
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(name = "job_id")
-    private String jobId;
+    private UUID jobId;
 
     @Column(name = "name", nullable = false)
     private String name;
