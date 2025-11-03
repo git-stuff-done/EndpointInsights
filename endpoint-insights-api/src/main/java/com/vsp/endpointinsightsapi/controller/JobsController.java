@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
@@ -19,6 +20,12 @@ import java.util.UUID;
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
+    private final JobService jobService;
+
+	public JobsController(JobService jobService) {
+		this.jobService = jobService;
+	}
+
 
 	/**
 	 * Endpoint to create a job.
@@ -93,11 +100,13 @@ public class JobsController {
 	 * @return A status message indicating the job was deleted
 	 * */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteJob(
-			@PathVariable("id")
-			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			String jobId) {
-		return ResponseEntity.ok(String.format("Job %s deleted", jobId));
+	public ResponseEntity<String> deleteJob(@PathVariable("id") String jobId) {
+		try {
+			jobService.deleteJobById(jobId);
+			return ResponseEntity.ok(String.format("Job %s deleted", jobId));
+		} catch (RuntimeException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 	/**
