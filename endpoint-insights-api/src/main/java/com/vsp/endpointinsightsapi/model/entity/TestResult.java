@@ -1,8 +1,14 @@
 package com.vsp.endpointinsightsapi.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -10,9 +16,9 @@ import lombok.Setter;
 @Table(name = "test_result")
 public class TestResult {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@ColumnDefault("gen_random_uuid()")
 	@Column(name = "result_id", nullable = false)
-	private Integer id;
+	private UUID id;
 
 	@Column(name = "job_type")
 	private Integer jobType;

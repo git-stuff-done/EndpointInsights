@@ -7,17 +7,20 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Embeddable
 public class PerfTestResultCodeId implements Serializable {
-	private static final long serialVersionUID = -2989881077012165282L;
+	@Serial
+	private static final long serialVersionUID = 3984884292218826468L;
 	@NotNull
 	@Column(name = "result_id", nullable = false)
-	private Long resultId;
+	private UUID resultId;
 
 	@NotNull
 	@Column(name = "error_code", nullable = false)
