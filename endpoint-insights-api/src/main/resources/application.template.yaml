@@ -1,11 +1,4 @@
 spring:
-  application:
-    name: endpoint-insights-api
-  datasource:
-    url: jdbc:${DB_URI}
-    username: ${DB_NAME}
-    password: ${DB_PASSWORD}
-
   security:
     oauth2:
       client:
@@ -19,12 +12,11 @@ spring:
             client-name: OIDC
         provider:
           oidc:
-            issuer-uri: ${OIDC_ISSUER_URI:https://auth.example.com}
-            authorization-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/authorization
-            token-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/token
-            user-info-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/userinfo
-            jwk-set-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/jwks.json
-            user-name-attribute: preferred_username
+            issuer-uri: https://auth.example.com
+            authorization-uri: https://auth.example.com/api/oidc/authorization
+            token-uri: https://auth.example.com/api/oidc/token
+            user-info-uri: https://auth.example.com/api/oidc/userinfo
+            jwk-set-uri: https://auth.example.com/jwks.json
 
 app:
   authentication:
@@ -50,3 +42,5 @@ app:
     allowed-origins:
       - "http://localhost:8080"
 
+server:
+  port: 8080
