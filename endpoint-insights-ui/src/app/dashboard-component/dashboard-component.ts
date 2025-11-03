@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../models/test-record.model';
+import { MatButtonModule } from '@angular/material/button';
+//import { ModalService } from '../shared/modal/modal.service';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [ CommonModule, TestResultsCardComponent,],
+    imports: [CommonModule, TestResultsCardComponent, MatButtonModule],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
@@ -39,6 +41,5 @@ export class DashboardComponent { //Currently just a mock data for now; I will n
     ];
 
     trackById = (_: number, t: TestRecord) => t.id;
-
 }
 
