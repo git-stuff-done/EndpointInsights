@@ -18,11 +18,11 @@ public class JobCreateRequest {
     @Size(max = 255, message = "name must be at most 255 characters")
     private String name;
 
-    @NotBlank(message = "createdBy is required")
-    @Size(max = 100, message = "createdBy must be at most 100 characters")
-    private String createdBy;
+    // @NotBlank(message = "createdBy is required")
+    // @Size(max = 100, message = "createdBy must be at most 100 characters")
+    // private String createdBy;
 
-    @NotBlank(message = "testType is required")
-    @Size(max = 50, message = "testType must be at most 50 characters")
-    private String testType;
+    // @NotBlank(message = "testType is required")
+    // @Size(max = 50, message = "testType must be at most 50 characters")
+    // private String testType;
 }
