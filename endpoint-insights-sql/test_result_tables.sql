@@ -1,14 +1,14 @@
 create table test_result
 (
-    result_id integer generated always as identity
-        constraint result_id_pk
+    result_id uuid default gen_random_uuid()
+        constraint test_result_pk
             primary key,
     job_type  integer
 );
 
 create table perf_test_result
 (
-    result_id             integer not null
+    result_id             uuid not null
         constraint perf_test_result_pk
             primary key
         constraint perf_test_result_fk
@@ -23,7 +23,7 @@ create table perf_test_result
 
 create table perf_test_result_code
 (
-    result_id  bigint  not null
+    result_id  uuid  not null
         constraint perf_test_result_code_fk
             references perf_test_result,
     error_code integer not null,
