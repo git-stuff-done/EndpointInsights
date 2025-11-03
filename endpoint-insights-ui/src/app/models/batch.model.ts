@@ -1,6 +1,6 @@
 /** Represents a single batch entry shown on the Dashboard. */
 export interface Batch {
-    /** Unique ID for the batch */
+    /** Unique ID for the batch (UUID) */
     id: string;
 
     /** Display title (usually a short descriptive name) */
