@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
-import java.util.UUID;
+
+import java.util.*;
 
 @Data
 @Entity
@@ -20,11 +21,11 @@ public class TestBatch {
     @Id
     @GeneratedValue
     @UuidGenerator
-    private UUID id;
+    @Column(name = "id", nullable = false)
+    private UUID batch_id;
 
-//   @ManyToMany
-//   @JoinTable(name = )
-//   private List<Job> jobs;
+   @ManyToMany(mappedBy = "testBatches")
+   private List<Job> jobs;
 
     @Column(name = "batch_name", nullable = false)
     String batchName;

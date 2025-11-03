@@ -13,6 +13,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -37,6 +38,14 @@ public class Job {
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
+
+	@ManyToMany
+	@JoinTable(
+			name = "test_batch_tests",
+			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	)
+	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
     /*
