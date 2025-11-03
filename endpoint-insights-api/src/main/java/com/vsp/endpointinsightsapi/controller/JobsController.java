@@ -1,21 +1,18 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.*;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
-import com.vsp.endpointinsightsapi.validation.Patterns;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -23,6 +20,12 @@ import java.util.List;
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
+    private final JobService jobService;
+
+	public JobsController(JobService jobService) {
+		this.jobService = jobService;
+	}
+
 
 	/**
 	 * Endpoint to create a job.
@@ -50,8 +53,7 @@ public class JobsController {
 			JobUpdateRequest request,
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			String jobId) {
+			UUID jobId) {
 		LOG.info("Updating job");
 
 		Job updatedJob = new Job();
@@ -81,8 +83,7 @@ public class JobsController {
 	public ResponseEntity<Job> getJob(
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			String jobId) {
+			UUID jobId) {
 
 		Job job = new Job();
 		job.setJobId(jobId);
@@ -99,12 +100,13 @@ public class JobsController {
 	 * @return A status message indicating the job was deleted
 	 * */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteJob(
-			@PathVariable("id")
-			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			String jobId) {
-		return ResponseEntity.ok(String.format("Job %s deleted", jobId));
+	public ResponseEntity<String> deleteJob(@PathVariable("id") String jobId) {
+		try {
+			jobService.deleteJobById(jobId);
+			return ResponseEntity.ok(String.format("Job %s deleted", jobId));
+		} catch (RuntimeException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 	/**
@@ -117,10 +119,9 @@ public class JobsController {
 	public ResponseEntity<JobRunHistory> getJobHistory(
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
 			String jobId) {
 		// note to implementer: this is a great place to put some serious service level logic to aggregate data
-		return ResponseEntity.ok(new JobRunHistory(List.of(new JobRun("1", jobId))));
+		return ResponseEntity.ok(new JobRunHistory(List.of(new JobRun(UUID.fromString("1"), jobId))));
 	}
 
 

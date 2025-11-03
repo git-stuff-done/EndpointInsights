@@ -1,5 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.service.JobService;
+
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
@@ -9,8 +11,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+import static org.mockito.Mockito.doThrow;
+
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,6 +33,9 @@ public class JobControllerUnitTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@MockitoBean
+	private JobService jobService;
+
 
 	@Test
 	public void createJob() throws Exception {
@@ -38,21 +47,16 @@ public class JobControllerUnitTest {
 
 	@Test
 	public void getJobSuccess() throws Exception {
-		mockMvc.perform(get("/api/jobs/{id}", "1"))
+		UUID jobId = UUID.randomUUID();
+		mockMvc.perform(get("/api/jobs/{id}", jobId.toString()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.jobId").value("1"));
-	}
-
-	@Test
-	public void getJobInvalidFormat() throws Exception {
-		mockMvc.perform(get("/api/jobs/invalidFormat"))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.details[0]").value(ErrorMessages.JOB_ID_INVALID_FORMAT));
+				.andExpect(jsonPath("$.jobId").value(jobId.toString()));
 	}
 
 	@Test
 	public void updateJob() throws Exception {
-		mockMvc.perform(put("/api/jobs/{id}", "1")
+		UUID jobId = UUID.randomUUID();
+		mockMvc.perform(put("/api/jobs/{id}", jobId.toString())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(new JobUpdateRequest())))
 				.andExpect(status().isOk());
@@ -60,9 +64,11 @@ public class JobControllerUnitTest {
 
 	@Test
 	public void deleteJob() throws Exception {
-		mockMvc.perform(delete("/api/jobs/{id}", "1"))
+		UUID jobId = UUID.randomUUID();
+
+		mockMvc.perform(delete("/api/jobs/{id}", jobId.toString()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").value("Job 1 deleted"));
+				.andExpect(jsonPath("$").value("Job %s deleted".formatted(jobId.toString())));
 	}
 
 	@Test
@@ -70,4 +76,13 @@ public class JobControllerUnitTest {
 		mockMvc.perform(get("/api/jobs")).andExpect(status().isOk());
 	}
 
+	@Test
+	public void deleteJob_runtimeException_returnsNotFound() throws Exception {
+		doThrow(new RuntimeException("test error"))
+				.when(jobService)
+				.deleteJobById("123");
+
+		mockMvc.perform(delete("/api/jobs/{id}", "123"))
+				.andExpect(status().isNotFound());
+	}
 }

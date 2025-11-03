@@ -76,3 +76,63 @@ body {
   letter-spacing: .2px;
   box-shadow: 0 8px 24px rgba(0,0,0,.22);
 }
+// Toast Notifications
+
+.toast-success,
+.toast-error {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  max-width: 500px;
+
+  .mat-mdc-snack-bar-container,
+  .mdc-snackbar__surface {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+// Toast Styling ** Mats library requires global styling **
+.toast-success .toast {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.toast-error .toast {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.toast {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-radius: 4px;
+  padding: 16px;
+  min-width: 300px;
+}
+
+.toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.type {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.content {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.close {
+  position: absolute;
+  margin-left: 8px;
+}
