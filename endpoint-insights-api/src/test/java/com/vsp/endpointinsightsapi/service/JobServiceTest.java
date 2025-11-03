@@ -8,15 +8,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Mock
     private JobRepository jobRepository;
@@ -26,7 +34,7 @@ class JobServiceTest {
         //test if job exists it is deleted
 
     @Test
-    void createJob_returnSavedJob() {
+    void createJob_returnSavedJobStatus() throws Exception {
         Job job = new Job();
         when(jobRepository.save(job)).thenReturn(job);
         Job testResult = jobService.createJob(job);
@@ -38,8 +46,10 @@ class JobServiceTest {
     void getAllJobs_ReturnListOfJobs() {
         Job job1 = new Job();
         job1.setJobId("1");
+        jobRepository.save(job1);
         Job job2 = new Job();
         job2.setJobId("2");
+        jobRepository.save(job2);
 
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
         List<Job> testResult = jobService.getAllJobs();
@@ -50,9 +60,9 @@ class JobServiceTest {
 
     @Test
     void getJobById_ReturnJob() {
-        // String jobId = "1";
-        // Job job = new Job();
-        // job.setJobId(jobId);
+        String jobId = "6";
+        Job job = new Job();
+        job.setJobId(jobId);
 
         // when(jobRepository.existsById(eq(jobId))).thenReturn(true);
         // when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
@@ -61,10 +71,12 @@ class JobServiceTest {
         // assertEquals(jobId, testResult.getJobId());
         // verify(jobRepository, times(1)).existsById(jobId);
         // verify(jobRepository, times(1)).findById(jobId);
-        when(jobRepository.existsById("1")).thenReturn(true);
-        jobService.getJobById("1");
-        verify(jobRepository, times(1)).findById("1");
-        verify(jobRepository, times(1)).existsById("1");
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        Job testResult = jobService.getJobById(jobId);
+        assertNotNull(testResult);
+        assertEquals(jobId, testResult.getJobId());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(1)).existsById(jobId);
     }
 
     @Test

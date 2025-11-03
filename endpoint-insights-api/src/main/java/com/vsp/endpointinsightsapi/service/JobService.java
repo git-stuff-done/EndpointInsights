@@ -35,7 +35,7 @@ public class JobService {
         // }
         return jobRepository.findById(jobId).orElseThrow(() -> {
             LOG.warn("Job {} not found", jobId);
-            return new JobNotFoundException("Job not found: " + jobId);
+            return new JobNotFoundException("Job not found with ID: " + jobId);
         });
     }
 

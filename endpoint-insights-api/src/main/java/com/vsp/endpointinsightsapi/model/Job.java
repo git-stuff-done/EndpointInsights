@@ -17,6 +17,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.Map;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
+//import com.vsp.endpointinsightsapi.model.enums.TestTarget;
 
 @Getter
 @Setter
@@ -41,11 +42,12 @@ public class Job {
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
 
+
     // Uncomment when the TestTarget and User Entities are created
     /*
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "target_id")
-    private TestTarget testTarget;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "target_id")
+        private TestTarget testTarget;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by")

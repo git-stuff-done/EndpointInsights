@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
-import com.vsp.endpointinsightsapi.service.JobService;
 
+import com.vsp.endpointinsightsapi.service.JobService;
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
@@ -13,6 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,13 +33,13 @@ public class JobControllerTest {
 	@MockitoBean
 	private JobService jobService;
 
-
 	@Test
 	public void createJob() throws Exception {
+		//when(jobService.createJob(any())).thenReturn(new Job());
 		mockMvc.perform(post("/api/jobs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(new JobCreateRequest())))
-				.andExpect(status().isOk());
+						.content(objectMapper.writeValueAsString(new Job())))
+				.andExpect(status().isCreated());
 	}
 
 	@Test

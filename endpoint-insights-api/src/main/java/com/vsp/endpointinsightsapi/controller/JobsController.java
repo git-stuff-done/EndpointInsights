@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +36,23 @@ public class JobsController {
 	 * @param request the job details
 	 * @return the created Job
 	 * */
-	@PostMapping
-	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request, Job job) {
-		LOG.info("Creating job");
-		Job newJob = jobService.createJob(job);
-		return ResponseEntity.ok(newJob);
+	@PostMapping("/")
+	public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+		try {
+			jobService.createJob(jobRequest);
+			return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+		} catch (RuntimeException e) {
+			LOG.error("Error creating job: {}", e.getMessage());
+			return new ResponseEntity<>(null);
+		}
 	}
+
+
+		// LOG.info("Creating job");
+		// //jobRequest.setJobId(java.util.UUID.randomUUID().toString());
+		// Job newJob = jobService.createJob(jobRequest);
+		// return new ResponseEntity<>(newJob, HttpStatus.CREATED);
+	// }
 
 	/**
 	 * Endpoint to update a job resource.
@@ -72,10 +84,12 @@ public class JobsController {
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping
+	@GetMapping("/")
 	public ResponseEntity<List<Job>> getJobs() {
 		List<Job> jobs = jobService.getAllJobs();
-		return ResponseEntity.ok(jobs);
+		return jobs != null ? ResponseEntity.ok(jobs) : ResponseEntity.notFound().build();
+		// Job job = jobService.getJobById("1");
+		// return job != null ? ResponseEntity.ok(job) : ResponseEntity.notFound().build();
 	}
 
 	/**
@@ -95,8 +109,8 @@ public class JobsController {
 		// job.setJobId(jobId);
 		// job.setName("Job #" + jobId);
 		// job.setDescription("This is a stub for job #" + jobId);
-			Job job = jobService.getJobById(jobId);
-			return job != null ? ResponseEntity.ok(job) : ResponseEntity.notFound().build();
+		Job job = jobService.getJobById(jobId);
+		return job != null ? ResponseEntity.ok(job) : ResponseEntity.notFound().build();
 
 		//return ResponseEntity.ok(job);
 	}
