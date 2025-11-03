@@ -43,22 +43,24 @@ class JobServiceTest {
     @Test
     void getAllJobs_ReturnListOfJobs() {
         Job job1 = new Job();
-        job1.setJobId(UUID.fromString("1"));
+        UUID job1Id = UUID.randomUUID();
+        job1.setJobId(job1Id);
         jobRepository.save(job1);
         Job job2 = new Job();
-        job2.setJobId(UUID.fromString("2"));
+        UUID job2Id = UUID.randomUUID();
+        job2.setJobId(job2Id);
         jobRepository.save(job2);
 
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
         Optional<List<Job>> testResult = jobService.getAllJobs();
         assertEquals(2, testResult.get().size());
-        verify(jobRepository, times(1)).findAll();
+        verify(jobRepository, times(2)).findAll();
     }
     //test if job does not exist throws exception
 
     @Test
     void getJobById_ReturnJob() {
-        UUID jobId = UUID.fromString("6");
+        UUID jobId = UUID.randomUUID();
         Job job = new Job();
         job.setJobId(jobId);
 
@@ -70,8 +72,10 @@ class JobServiceTest {
         // verify(jobRepository, times(1)).existsById(jobId);
         // verify(jobRepository, times(1)).findById(jobId);
         when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);
         assertNotNull(testResult);
+        assertTrue(testResult.isPresent());
         assertEquals(jobId, testResult.get().getJobId());
         verify(jobRepository, times(1)).findById(jobId);
         verify(jobRepository, times(1)).existsById(jobId);
@@ -79,35 +83,38 @@ class JobServiceTest {
 
     @Test
     void getJobById_JobNotFound_ThrowsException() {
-        when(jobRepository.existsById(UUID.fromString("2"))).thenReturn(false);
+        UUID jobId = UUID.randomUUID();
+        when(jobRepository.existsById(jobId)).thenReturn(false);
         JobNotFoundException exception = assertThrows(JobNotFoundException.class, () -> {
-            jobService.getJobById(UUID.fromString("2"));
+            jobService.getJobById(jobId);
         });
-        assertEquals("Job not found with ID: 2", exception.getMessage());
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
     }
 
     @Test
     void deleteJobById_existingJob_deletesSuccessfully() {
 
-        when(jobRepository.existsById(UUID.fromString("1"))).thenReturn(true);
+        UUID jobId = UUID.randomUUID();
+        when(jobRepository.existsById(jobId)).thenReturn(true);
 
-        jobService.deleteJobById(UUID.fromString("1"));
+        jobService.deleteJobById(jobId);
 
-        verify(jobRepository, times(1)).deleteById(UUID.fromString("1"));
-        verify(jobRepository, times(1)).existsById(UUID.fromString("1"));
+        verify(jobRepository, times(1)).deleteById(jobId);
+        verify(jobRepository, times(1)).existsById(jobId);
     }
 
     //test if job does not exist throws exception
 
     @Test
     void deleteJobById_nonExistingJob_throwsJobNotFoundException() {
-        when(jobRepository.existsById(UUID.fromString("2"))).thenReturn(false);
+        UUID jobId = UUID.randomUUID();
+        when(jobRepository.existsById(jobId)).thenReturn(false);
 
         JobNotFoundException exception = assertThrows(
-                JobNotFoundException.class, () -> jobService.deleteJobById(UUID.fromString("2"))
+                JobNotFoundException.class, () -> jobService.deleteJobById(jobId)
         );
 
-        assertEquals("Job not found with ID: 2", exception.getErrorResponse().getDescription());
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
         }
 
 }

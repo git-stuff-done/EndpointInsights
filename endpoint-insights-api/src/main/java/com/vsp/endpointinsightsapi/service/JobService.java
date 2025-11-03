@@ -44,24 +44,24 @@ public class JobService {
         //     LOG.warn("Job {} not found", jobId);
         //     return new JobNotFoundException("Job not found with ID: " + jobId);
         // });
-        if(!jobRepository.existsById(jobId.toString())) {
+        if(!jobRepository.existsById(jobId)) {
             LOG.debug("Job {} not found", jobId);
             throw new JobNotFoundException(jobId.toString());
         }
-        return jobRepository.findById(jobId.toString());
-        
+        return jobRepository.findById(jobId);
+
     }
 
     @Transactional
     public void deleteJobById(UUID jobId) {
-        LOG.debug("Attempting to delete job with ID {}", jobId.toString());
+        LOG.debug("Attempting to delete job with ID {}", jobId);
 
-        if (!jobRepository.existsById(jobId.toString())) {
-            LOG.debug("Job {} not found", jobId.toString());
+        if (!jobRepository.existsById(jobId)) {
+            LOG.debug("Job {} not found", jobId);
             throw new JobNotFoundException(jobId.toString());
         }
 
-        jobRepository.deleteById(jobId.toString());
+        jobRepository.deleteById(jobId);
         LOG.debug("Job {} deleted successfully", jobId);
     }
 }

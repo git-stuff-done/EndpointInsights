@@ -40,15 +40,28 @@ public class JobsController {
 	 * @param request the job details
 	 * @return the created Job
 	 * */
-	@PostMapping("/")
-	public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+	@PostMapping //("/")
+	// public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+	// 	try {
+	// 		jobService.createJob(jobRequest);
+	// 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+	// 	} catch (RuntimeException e) {
+	// 		LOG.error("Error creating job: {}", e.getMessage());
+	// 		return new ResponseEntity<>(null);
+	// 	}
+	// }
+	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
+		LOG.info("Creating job");
 		try {
-			jobService.createJob(jobRequest);
-			return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+			Job newJob = new Job();
+			newJob.setName(request.getName());
+			jobService.createJob(newJob);
+			return new ResponseEntity<>(newJob, HttpStatus.CREATED);
 		} catch (RuntimeException e) {
 			LOG.error("Error creating job: {}", e.getMessage());
 			return new ResponseEntity<>(null);
 		}
+		
 	}
 
 
@@ -87,7 +100,7 @@ public class JobsController {
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping("/")
+	@GetMapping //("/")
 	public ResponseEntity<List<Job>> getJobs() {
 		// List<Job> jobs = jobService.getAllJobs();
 		// return jobs != null ? ResponseEntity.ok(jobs) : ResponseEntity.notFound().build();
@@ -106,16 +119,23 @@ public class JobsController {
 	public ResponseEntity<Job> getJob(
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			@Pattern(regexp = Patterns.JOB_ID_PATTERN, message = ErrorMessages.JOB_ID_INVALID_FORMAT)
-			UUID jobId) {
+			String jobId) {
+		
+		try{
+			UUID jobUuid = UUID.fromString(jobId);
+			return jobService.getJobById(jobUuid).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 
+		} catch(IllegalArgumentException e){
+			LOG.error("Invalid UUID format for jobId: {}", jobId);
+			return ResponseEntity.badRequest().build();
+		}
 		// Job job = new Job();
 		// job.setJobId(jobId);
 		// job.setName("Job #" + jobId);
 		// job.setDescription("This is a stub for job #" + jobId);
 
 		//Optional<Job> job = jobService.getJobById(jobId);
-		return jobService.getJobById(jobId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+		// return jobService.getJobById(UUID.fromString(jobId)).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 
 		//return ResponseEntity.ok(job);
 	}
