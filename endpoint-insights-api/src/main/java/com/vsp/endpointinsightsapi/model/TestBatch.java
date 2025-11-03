@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
-
-import java.util.*;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -26,6 +25,7 @@ public class TestBatch {
 
    @ManyToMany(mappedBy = "testBatches")
    private List<Job> jobs;
+
 
     @Column(name = "batch_name", nullable = false)
     String batchName;
