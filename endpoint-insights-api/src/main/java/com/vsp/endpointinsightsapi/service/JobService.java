@@ -36,14 +36,6 @@ public class JobService {
     }
 
     public Optional<Job> getJobById(UUID jobId) {
-        // if (!jobRepository.existsById(jobId)) {
-        //     LOG.warn("Job {} not found", jobId);
-        //     throw new JobNotFoundException("Job not found: " + jobId);
-        // }
-        // return jobRepository.findById(jobId).orElseThrow(() -> {
-        //     LOG.warn("Job {} not found", jobId);
-        //     return new JobNotFoundException("Job not found with ID: " + jobId);
-        // });
         if(!jobRepository.existsById(jobId)) {
             LOG.debug("Job {} not found", jobId);
             throw new JobNotFoundException(jobId.toString());

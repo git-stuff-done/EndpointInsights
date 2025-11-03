@@ -64,13 +64,6 @@ public class JobsController {
 		
 	}
 
-
-		// LOG.info("Creating job");
-		// //jobRequest.setJobId(java.util.UUID.randomUUID().toString());
-		// Job newJob = jobService.createJob(jobRequest);
-		// return new ResponseEntity<>(newJob, HttpStatus.CREATED);
-	// }
-
 	/**
 	 * Endpoint to update a job resource.
 	 *
@@ -100,13 +93,9 @@ public class JobsController {
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping //("/")
+	@GetMapping
 	public ResponseEntity<List<Job>> getJobs() {
-		// List<Job> jobs = jobService.getAllJobs();
-		// return jobs != null ? ResponseEntity.ok(jobs) : ResponseEntity.notFound().build();
 		return ((Optional<List<Job>>) jobService.getAllJobs()).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-		// Job job = jobService.getJobById("1");
-		// return job != null ? ResponseEntity.ok(job) : ResponseEntity.notFound().build();
 	}
 
 	/**
@@ -129,15 +118,6 @@ public class JobsController {
 			LOG.error("Invalid UUID format for jobId: {}", jobId);
 			return ResponseEntity.badRequest().build();
 		}
-		// Job job = new Job();
-		// job.setJobId(jobId);
-		// job.setName("Job #" + jobId);
-		// job.setDescription("This is a stub for job #" + jobId);
-
-		//Optional<Job> job = jobService.getJobById(jobId);
-		// return jobService.getJobById(UUID.fromString(jobId)).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-
-		//return ResponseEntity.ok(job);
 	}
 
 	/**

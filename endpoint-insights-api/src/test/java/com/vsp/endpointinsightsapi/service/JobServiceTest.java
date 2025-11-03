@@ -63,14 +63,6 @@ class JobServiceTest {
         UUID jobId = UUID.randomUUID();
         Job job = new Job();
         job.setJobId(jobId);
-
-        // when(jobRepository.existsById(eq(jobId))).thenReturn(true);
-        // when(jobRepository.findById(eq(jobId))).thenReturn(Optional.of(job));
-        // Job testResult = jobService.getJobById(jobId);
-        // assertNotNull(testResult);
-        // assertEquals(jobId, testResult.getJobId());
-        // verify(jobRepository, times(1)).existsById(jobId);
-        // verify(jobRepository, times(1)).findById(jobId);
         when(jobRepository.existsById(jobId)).thenReturn(true);
         when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);

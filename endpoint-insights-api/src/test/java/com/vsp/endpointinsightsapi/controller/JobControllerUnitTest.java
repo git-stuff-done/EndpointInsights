@@ -56,8 +56,8 @@ public class JobControllerUnitTest {
 		jobService.createJob(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
-				.andExpect(status().isOk());
-				//.andExpect(jsonPath("$.jobId").value(jobUuid));
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.jobId").value(jobUuid.toString()));
 	}
 
 	@Test
