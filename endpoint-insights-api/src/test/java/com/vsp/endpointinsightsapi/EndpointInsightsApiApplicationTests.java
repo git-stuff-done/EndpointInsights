@@ -11,4 +11,5 @@ class EndpointInsightsApiApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+
 }

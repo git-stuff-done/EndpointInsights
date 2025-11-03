@@ -1,24 +1,20 @@
 package com.vsp.endpointinsightsapi.model;
 
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
-
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-//import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
-//import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
+
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
-import com.vsp.endpointinsightsapi.model.enums.TestType;
 
 @Getter
 @Setter
@@ -29,8 +25,7 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 public class Job {
 
     @Id
-    @GeneratedValue
-    @UuidGenerator
+    @ColumnDefault("gen_random_uuid()")
     @Column(name = "job_id")
     private UUID jobId;
 
@@ -44,22 +39,19 @@ public class Job {
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
 
-
-    @ManyToMany
-    @JoinTable(
-        name = "test_batch_tests",
-        joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
-        inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
-    )
-    private Set<TestBatch> testBatches;
-
+	@ManyToMany
+	@JoinTable(
+			name = "test_batch_tests",
+			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	)
+	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
     /*
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "target_id")
     private TestTarget testTarget;
-
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by")
