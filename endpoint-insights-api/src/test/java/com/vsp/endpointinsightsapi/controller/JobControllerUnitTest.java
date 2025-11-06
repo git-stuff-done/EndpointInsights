@@ -1,7 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.service.JobService;
-
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
@@ -16,8 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import static org.mockito.Mockito.doThrow;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,21 +40,24 @@ public class JobControllerUnitTest {
 	@MockitoBean
 	private JobService jobService;
 
-
 	@Test
 	public void createJob() throws Exception {
 		mockMvc.perform(post("/api/jobs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(new JobCreateRequest())))
-				.andExpect(status().isOk());
+						.content(objectMapper.writeValueAsString(new JobCreateRequest("test_job"))))
+				.andExpect(status().isCreated());
 	}
 
 	@Test
 	public void getJobSuccess() throws Exception {
-		UUID jobId = UUID.randomUUID();
-		mockMvc.perform(get("/api/jobs/{id}", jobId.toString()))
+		UUID jobUuid = UUID.randomUUID();
+		Job job = new Job();
+		job.setJobId(jobUuid);
+		jobService.createJob(job);
+		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
+		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.jobId").value(jobId.toString()));
+				.andExpect(jsonPath("$.jobId").value(jobUuid.toString()));
 	}
 
 	@Test
@@ -73,16 +80,24 @@ public class JobControllerUnitTest {
 
 	@Test
 	public void getJobsSuccess() throws Exception {
+		UUID jobUuid = UUID.randomUUID();
+		Job job = new Job();
+		job.setJobId(jobUuid);
+		jobService.createJob(job);
+		Optional<List<Job>> jobs = Optional.of(List.of(job));
+		when(jobService.getAllJobs()).thenReturn(jobs);
 		mockMvc.perform(get("/api/jobs")).andExpect(status().isOk());
 	}
 
+
 	@Test
 	public void deleteJob_runtimeException_returnsNotFound() throws Exception {
+		UUID jobUuid = UUID.randomUUID();
 		doThrow(new RuntimeException("test error"))
 				.when(jobService)
-				.deleteJobById("123");
+				.deleteJobById(jobUuid);
 
-		mockMvc.perform(delete("/api/jobs/{id}", "123"))
+		mockMvc.perform(delete("/api/jobs/{id}", jobUuid.toString()))
 				.andExpect(status().isNotFound());
 	}
 }
