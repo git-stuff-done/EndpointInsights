@@ -1,5 +1,4 @@
 package com.vsp.endpointinsightsapi.model;
-
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
@@ -25,7 +24,7 @@ import java.util.UUID;
 public class Job {
 
     @Id
-    @ColumnDefault("gen_random_uuid()")
+    @ColumnDefault("get_random_uuid()")
     @Column(name = "job_id")
     private UUID jobId;
 
