@@ -1,0 +1,48 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  max-width: 600px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-error {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  line-height: 1.2;
+
+  div {
+    margin: 0;
+  }
+}
+
+mat-form-field.ng-invalid.ng-touched {
+  mat-error {
+    display: block;
+  }
+}
+
+mat-form-field:not(.mat-form-field-invalid) mat-error,
+mat-form-field.mat-form-field-invalid:not(.mat-form-field-touched) mat-error {
+  display: none;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

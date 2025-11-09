@@ -1,0 +1,12 @@
+<div class="modal-header">
+    <h2 mat-dialog-title>Create New Job</h2>
+
+    <mat-dialog-content>
+        <app-job-form (jobSubmitted)="onJobCreated($event)"></app-job-form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-raised-button (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="onSubmit()">Create Job</button>
+    </mat-dialog-actions>
+</div>
