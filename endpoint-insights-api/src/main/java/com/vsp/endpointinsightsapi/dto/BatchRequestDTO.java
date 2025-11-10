@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -12,5 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BatchRequestDTO {
     private String name;
-    private String description;
+    private Long scheduleId;
+    private LocalDate startTime;
+    private Boolean active;
 }
