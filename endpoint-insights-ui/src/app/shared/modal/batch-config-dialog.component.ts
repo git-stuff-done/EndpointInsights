@@ -82,9 +82,9 @@ export class BatchConfigDialogComponent implements OnInit {
     /** Compose an ISO string from a date control and "HH:MM" time string */
     private composeIso(date: Date | null, time: string | null): string | undefined {
         if (!date) return undefined;
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const dd = String(date.getDate()).padStart(2, '0');
+        const yyyy = date.getUTCFullYear();
+        const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(date.getUTCDate()).padStart(2, '0');
 
         let hh = '00', mi = '00';
         if (time && /^\d{1,2}:\d{2}$/.test(time.trim())) {
