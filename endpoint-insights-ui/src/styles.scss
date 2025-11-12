@@ -1,26 +1,97 @@
-/* ===== Base reset-ish touches */
+/* ----- Theme variables ----- */
 :root {
-  --topbar-bg: #0b2335;           /* deep slate */
-  --topbar-fg: #ffffff;
+  /* Colors */
+  --color-primary: #0b2335;
+  --color-accent: #1976d2;
+  --color-accent-light: #42a5f5;
+  --color-success: #4caf50;
+  --color-green: var(--color-success);
+  --color-warning: #ff9800;
+  --color-error: #f44336;
+  --color-red: var(--color-error);
+  --color-bg: #f7f9fc;
+  --color-white: #ffffff;
+  --color-text: #0d1117;
+  --color-text-light: rgba(255,255,255,0.9);
+
+  /* Typography */
+  --font-family-base: system-ui, 'Inter', 'Roboto', sans-serif;
+  --font-size-base: 16px;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Elevation / shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 10px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 20px rgba(0,0,0,0.16);
+
+  /* Existing app variables */
   --topbar-fg-dim: rgba(255,255,255,.80);
-  --topbar-active: #67e8f9;       /* cyan accent */
   --page-bg: #f7f9fc;
   --card-radius: 12px;
+
+  /* ---- Button variables ---- */
+    --btn-bg: var(--color-white);
+    --btn-fg: #111;
+    --btn-radius: 14px;
+    --btn-padding-vertical: 10px;
+    --btn-padding-horizontal: 18px;
+    --btn-gap: 12px;
+    --btn-shadow: var(--shadow-sm), var(--shadow-md);
+    --btn-font-weight: 700;
+  }
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+
+  padding: var(--btn-padding-vertical) var(--btn-padding-horizontal);
+  border: 1px solid var(--btn-fg);
+  border-radius: var(--btn-radius);
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: var(--btn-font-weight);
+  cursor: pointer;
+  box-shadow: var(--btn-shadow);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+}
+
+/* Hover & Active Effects */
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+}
+
+button:active, .btn:active {
+  transform: translateY(0);
+}
+
+/* ----- Global styles -----*/
+:where(*) {
+  font-family: var(--font-family-base), sans-serif;
+  font-size: var(--font-size-base);
 }
 
 html, body { height: 100%; }
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   background: var(--page-bg);
-  color: #111827;
 }
 
 /* ===== App chrome */
 .topbar {
   position: sticky; top: 0; z-index: 100;
-  background: var(--topbar-bg);
-  color: var(--topbar-fg);
+  background: var(--color-primary);
+  color: var(--color-white);
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
 
@@ -43,12 +114,11 @@ body {
   transition: background-color .15s ease, color .15s ease, transform .02s ease;
 }
 
-.nav-link:hover { color: var(--topbar-fg); background: rgba(255,255,255,.08); }
+.nav-link:hover { color: var(--color-white); background: rgba(255,255,255,.08); }
 .nav-link:active { transform: translateY(1px); }
 
 .nav-link.active {
-  color: #06202f;
-  background: var(--topbar-active);
+  background: var(--color-accent-light);
 }
 
 /* ===== Routed page container */
@@ -68,13 +138,13 @@ body {
 
 /* Solid tooltip surface (MDC) */
 .cdk-overlay-container .mat-mdc-tooltip .mdc-tooltip__surface {
-  background-color: #0b2335;  /* VSP dark */
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-surface);
   opacity: 1;
   border-radius: 8px;
   padding: 8px 10px;
   letter-spacing: .2px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  box-shadow: var(--shadow-lg);
 }
 // Toast Notifications
 
@@ -95,13 +165,13 @@ body {
 
 // Toast Styling ** Mats library requires global styling **
 .toast-success .toast {
-  background-color: #4caf50;
-  color: #fff;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
 }
 
 .toast-error .toast {
-  background-color: #f44336;
-  color: #fff;
+  background-color: var(--color-error);
+  color: var(--color-text-light);
 }
 
 .toast {
