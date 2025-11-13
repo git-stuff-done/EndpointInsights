@@ -13,7 +13,7 @@ export class LoginComponent {
     constructor(private notifications: NotificationService, private router: Router) {}
 
     login() {
-        const success = true;
+        const success = true; // TODO: Replace with actual auth logic
         if (success) {
             this.notifications.showBanner('You have successfully logged in', 'success');
             setTimeout(() => {
