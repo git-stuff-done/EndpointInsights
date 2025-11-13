@@ -14,12 +14,14 @@
 :host, :host * { box-sizing: border-box; }
 
 .grid > * {
-  background: #fff;
-  border: 1px solid #e9e9e9;
-  border-radius: 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-text-light);
   padding: 12px 14px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.10);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  border-radius: var(--card-radius);
+  background: var(--color-white);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: var(--card-transition);
 
   width: 100%;
 }
