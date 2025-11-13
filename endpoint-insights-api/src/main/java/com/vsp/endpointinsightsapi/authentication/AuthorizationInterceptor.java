@@ -116,7 +116,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 		String requestPath = request.getRequestURI();
 		LOG.debug("Processing request: {}", requestPath);
 
-		if (isPublicEndpoint(requestPath)) {
+		if (isPublicEndpoint(handler)) {
 			return true;
 		}
 
@@ -218,10 +218,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	 */
 	private List<UserRole> extractRolesFromJwt(Jwt jwt) {
 		List<String> groups = jwt.getClaimAsStringList(authProperties.getClaims().getGroups());
-		if (groups == null) return List.of();
+		if (groups == null || groups.isEmpty())
+			return List.of();
 
 		List<UserRole> roles = new ArrayList<>();
-
 
 		if (groups.contains(authProperties.getGroups().getWrite()))
 			roles.add(UserRole.WRITE);
@@ -246,7 +246,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 		LOG.debug("Accessing method: {} in class: {}", method.getName(), method.getDeclaringClass().getSimpleName());
 
-		return Arrays.stream(method.getAnnotations()).anyMatch(annotation -> annotation instanceof PublicAPI);
+
+		return method.isAnnotationPresent(PublicAPI.class);
 	}
 
 	/**

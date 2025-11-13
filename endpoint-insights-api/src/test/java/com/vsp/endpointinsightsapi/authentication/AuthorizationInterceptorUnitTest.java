@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.authentication;
 
 import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
+import com.vsp.endpointinsightsapi.controller.HealthController;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.method.HandlerMethod;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,9 +46,6 @@ public class AuthorizationInterceptorUnitTest {
     @Mock
     private AuthenticationProperties authProperties;
 
-    @Mock
-    private AuthenticationProperties.Endpoints endpointsConfig;
-
     private AuthorizationInterceptor interceptor;
 
     private MockHttpServletRequest request;
@@ -55,21 +56,16 @@ public class AuthorizationInterceptorUnitTest {
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
 
-        when(authProperties.getEndpoints()).thenReturn(endpointsConfig);
-        when(endpointsConfig.getPublicEndpoints()).thenReturn(List.of("/api/health"));
-
         interceptor = new AuthorizationInterceptor(authProperties);
-
-        // Initialize the publicEndpointsSet that would normally be set by @PostConstruct
-        ReflectionTestUtils.setField(interceptor, "publicEndpointsSet",
-            new java.util.HashSet<>(authProperties.getEndpoints().getPublicEndpoints()));
     }
 
     @Test
     void shouldAllowHealthEndpoint() throws Exception {
         request.setRequestURI("/api/health");
 
-        boolean result = interceptor.preHandle(request, response, new Object());
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheck"));
+
+        boolean result = interceptor.preHandle(request, response, handler);
 
         assertTrue(result, "Public endpoints should be accessible without authentication");
     }
@@ -78,8 +74,10 @@ public class AuthorizationInterceptorUnitTest {
     void shouldRejectPrivateEndpointWithoutAuthorizationHeader() throws Exception {
         request.setRequestURI("/api/private");
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Private endpoints should reject requests without authorization header");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -90,8 +88,10 @@ public class AuthorizationInterceptorUnitTest {
         request.setRequestURI("/api/private");
         request.addHeader("Authorization", "Basic auth");
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         });
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -102,8 +102,10 @@ public class AuthorizationInterceptorUnitTest {
         request.setRequestURI("/api/private");
         request.addHeader("Authorization", "Bearer  ");
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         });
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -118,8 +120,10 @@ public class AuthorizationInterceptorUnitTest {
 
         when(jwtDecoder.decode(anyString())).thenThrow(new JwtException("Invalid token"));
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         });
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -132,8 +136,10 @@ public class AuthorizationInterceptorUnitTest {
 
         ReflectionTestUtils.setField(interceptor, "jwtDecoder", jwtDecoder);
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Should reject authorization header with 'Bearer ' but no token");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -148,8 +154,10 @@ public class AuthorizationInterceptorUnitTest {
         when(jwtDecoder.decode("valid.jwt.token")).thenReturn(mockJwt);
         when(mockJwt.getSubject()).thenReturn(null);
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Should reject JWT with missing subject claim");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -168,8 +176,10 @@ public class AuthorizationInterceptorUnitTest {
         when(jwtDecoder.decode("valid.jwt.token")).thenReturn(mockJwt);
         when(mockJwt.getSubject()).thenReturn("  ");
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Should reject JWT with missing subject claim");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -192,8 +202,10 @@ public class AuthorizationInterceptorUnitTest {
         when(mockJwt.getSubject()).thenReturn("user123");
         when(mockJwt.getClaimAsString("preferred_username")).thenReturn(null);
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Should reject JWT with missing username claim");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -218,8 +230,10 @@ public class AuthorizationInterceptorUnitTest {
         when(mockJwt.getClaimAsString("preferred_username")).thenReturn("testuser");
         when(mockJwt.getClaimAsString("email")).thenReturn(null);
 
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interceptor.preHandle(request, response, new Object());
+            interceptor.preHandle(request, response, handler);
         }, "Should reject JWT with missing email claim");
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getHttpStatus());
@@ -276,15 +290,18 @@ public class AuthorizationInterceptorUnitTest {
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(claimsConfig.getGroups()).thenReturn("groups");
-        when(authProperties.getGroups()).thenReturn(mock(AuthenticationProperties.Groups.class));
-        when(authProperties.getGroups().getWrite()).thenReturn("write-group");
+        when(authProperties.getGroups()).thenReturn(groupsConfig);
+        when(groupsConfig.getWrite()).thenReturn("write-group");
+        when(groupsConfig.getRead()).thenReturn("read-group");
 
         when(mockJwt.getSubject()).thenReturn("user123");
         when(mockJwt.getClaimAsString("preferred_username")).thenReturn("testuser");
         when(mockJwt.getClaimAsString("email")).thenReturn("test@example.com");
         when(mockJwt.getClaimAsStringList("groups")).thenReturn(List.of("write-group"));
 
-        boolean result = interceptor.preHandle(request, response, new Object());
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
+        boolean result = interceptor.preHandle(request, response, handler);
 
         assertTrue(result, "Valid JWT should allow access");
         assertEquals("valid.jwt.token", request.getAttribute("bearer-token"));
@@ -359,9 +376,6 @@ public class AuthorizationInterceptorUnitTest {
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(claimsConfig.getGroups()).thenReturn("groups");
-        when(authProperties.getGroups()).thenReturn(mock(AuthenticationProperties.Groups.class));
-        when(authProperties.getGroups().getRead()).thenReturn("read-group");
-        when(authProperties.getGroups().getWrite()).thenReturn("write-group");
 
         when(mockJwt.getSubject()).thenReturn("user123");
         when(mockJwt.getClaimAsString("preferred_username")).thenReturn("testuser");
@@ -491,13 +505,16 @@ public class AuthorizationInterceptorUnitTest {
         when(claimsConfig.getGroups()).thenReturn("groups");
         when(authProperties.getGroups()).thenReturn(groupsConfig);
         when(groupsConfig.getWrite()).thenReturn("write-group");
+        when(groupsConfig.getRead()).thenReturn("read-group");
 
         when(mockJwt.getSubject()).thenReturn("user123");
         when(mockJwt.getClaimAsString("preferred_username")).thenReturn("testuser");
         when(mockJwt.getClaimAsString("email")).thenReturn("test@example.com");
         when(mockJwt.getClaimAsStringList("groups")).thenReturn(List.of("write-group"));
 
-        boolean result = interceptor.preHandle(request, response, new Object());
+        var handler = new HandlerMethod(new HealthController(), HealthController.class.getMethod("healthCheckSecure"));
+
+        boolean result = interceptor.preHandle(request, response, handler);
 
         assertTrue(result, "Valid JWT with write role should allow access");
     }

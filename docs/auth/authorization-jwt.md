@@ -60,9 +60,6 @@ app.authentication:
     username: preferred_username
     email: email
     groups: groups
-  endpoints:
-    public-endpoints:
-      - "/api/health"
 ```
 
 ## Security Features
