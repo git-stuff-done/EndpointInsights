@@ -14,6 +14,10 @@ form {
   }
 }
 
+.form-row-commands {
+  margin-top: 24px;
+}
+
 mat-form-field {
   width: 100%;
 }
@@ -29,20 +33,9 @@ mat-error {
   }
 }
 
-mat-form-field.ng-invalid.ng-touched {
-  mat-error {
-    display: block;
-  }
-}
 
-mat-form-field:not(.mat-form-field-invalid) mat-error,
-mat-form-field.mat-form-field-invalid:not(.mat-form-field-touched) mat-error {
-  display: none;
-}
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-}
+
+
+
+

@@ -6,7 +6,9 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-        <button mat-raised-button (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" (click)="onSubmit()">Create Job</button>
+        <div class="button-group">
+            <button class="create-job-modal-cancel-button" mat-raised-button (click)="onCancel()">Cancel</button>
+            <button class="create-job-modal-create-button" mat-raised-button (click)="onSubmit()">Create Job</button>
+        </div>
     </mat-dialog-actions>
 </div>

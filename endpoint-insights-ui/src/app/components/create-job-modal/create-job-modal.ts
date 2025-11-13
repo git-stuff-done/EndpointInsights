@@ -1,35 +1,32 @@
 import {Component, ViewChild} from '@angular/core';
-import {MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
-import {MatDialogClose, MatDialogTitle} from "@angular/material/dialog";
-import {MatIcon} from "@angular/material/icon";
-import {MatButton, MatIconButton} from "@angular/material/button";
-import {JobForm} from "../job-form/job-form";
+import { MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
+import { MatDialogTitle} from "@angular/material/dialog";
+import {MatButton} from "@angular/material/button";
+import {CreateJobForm} from "../create-job-form/create-job-form";
 
 @Component({
   selector: 'app-create-job-modal',
   standalone: true,
   imports: [
     MatDialogTitle,
-    MatDialogClose,
-    MatIcon,
-    MatIconButton,
     MatDialogContent,
-    JobForm,
+    CreateJobForm,
     MatDialogActions,
-    MatButton
+    MatButton,
+    CreateJobForm
   ],
   templateUrl: './create-job-modal.html',
   styleUrl: './create-job-modal.scss',
 })
 export class CreateJobModal {
-  @ViewChild(JobForm) jobForm!: JobForm;
+  @ViewChild(CreateJobForm) createJobForm!: CreateJobForm;
 
   constructor(
       private dialogRef: MatDialogRef<CreateJobModal>
   ) {}
 
   onSubmit() {
-    this.jobForm.submitForm();
+    this.createJobForm.submitForm();
   }
 
   onJobCreated(jobData: any){

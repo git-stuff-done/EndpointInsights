@@ -136,3 +136,28 @@ body {
   position: absolute;
   margin-left: 8px;
 }
+
+
+/**
+Begin Styles for Create Job Form Components
+ */
+div.mat-mdc-select-panel.create-job-form-type-select-panel {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+mat-option.mat-mdc-option.create-job-form-type-select-option {
+  background-color: white;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+}
+
+mat-option.mat-mdc-option.create-job-form-type-select-option:hover {
+  background-color: #ccc
+}
+/**
+End Styles for Create Job Form Components
+ */
+
