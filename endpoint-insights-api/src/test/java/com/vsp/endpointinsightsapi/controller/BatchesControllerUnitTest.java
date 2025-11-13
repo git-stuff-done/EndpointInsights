@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -124,7 +125,22 @@ class BatchesControllerUnitTest {
     @Test
     void shouldDeleteBatch() throws Exception {
         UUID id = UUID.randomUUID();
+
+        org.mockito.Mockito.doNothing()
+                .when(batchService).deleteBatchById(id);
+
         mockMvc.perform(delete("/api/batches/{id}", id))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonexistentBatch() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        org.mockito.Mockito.doThrow(new BatchNotFoundException(id.toString()))
+                .when(batchService).deleteBatchById(id);
+
+        mockMvc.perform(delete("/api/batches/{id}", id))
+                .andExpect(status().isNotFound());
     }
 }

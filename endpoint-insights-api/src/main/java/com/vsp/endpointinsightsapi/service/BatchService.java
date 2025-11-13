@@ -28,10 +28,19 @@ public class BatchService {
                     LOG.debug("Batch {} not found", batchId);
                     return new BatchNotFoundException(batchId.toString());
                 });
-
         return mapToDto(b);
-
     }
+
+    public void deleteBatchById(UUID batchId) {
+        if (!testBatchRepository.existsById(batchId)) {
+            LOG.debug("Batch {} not found", batchId);
+            throw new BatchNotFoundException(batchId.toString());
+        }
+
+        testBatchRepository.deleteById(batchId);
+        LOG.info("Deleted batch {}", batchId);
+    }
+
 
     private BatchResponseDTO mapToDto(TestBatch b) {
         return new BatchResponseDTO(

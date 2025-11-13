@@ -85,6 +85,7 @@ public class BatchesController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteBatch(@PathVariable UUID id) {
-		return ResponseEntity.noContent().build();
+		batchService.deleteBatchById(id);
+        return ResponseEntity.noContent().build();
 	}
 }
