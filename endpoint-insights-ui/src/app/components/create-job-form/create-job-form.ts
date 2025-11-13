@@ -136,12 +136,11 @@ export class CreateJobForm {
 
     submitForm() {
         if (this.createJobForm.valid) {
-            console.log('Form submitted:', this.createJobForm.value);
             this.jobSubmitted.emit(this.createJobForm.value);
+            //TODO: Trigger success notification and call backend.
         } else {
             this.createJobForm.markAllAsTouched();
-            console.log('Form is invalid');
-            // do the OTHER thing
+            //TODO: Trigger error notification.
         }
     }
 }
