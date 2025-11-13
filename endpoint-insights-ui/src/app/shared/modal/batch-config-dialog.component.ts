@@ -82,16 +82,27 @@ export class BatchConfigDialogComponent implements OnInit {
     /** Compose an ISO string from a date control and "HH:MM" time string */
     private composeIso(date: Date | null, time: string | null): string | undefined {
         if (!date) return undefined;
-        const yyyy = date.getUTCFullYear();
-        const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const dd = String(date.getUTCDate()).padStart(2, '0');
 
-        let hh = '00', mi = '00';
+        // Local date components selected by the user
+        const yyyy = date.getFullYear();
+        const mm = date.getMonth();      // zero based
+        const dd = date.getDate();
+
+        // Default time
+        let hh = 0;
+        let mi = 0;
+
+        // Validate and clamp the "HH:MM" string
         if (time && /^\d{1,2}:\d{2}$/.test(time.trim())) {
             const [h, m] = time.trim().split(':');
-            hh = String(Math.min(23, Math.max(0, parseInt(h, 10) || 0))).padStart(2, '0');
-            mi = String(Math.min(59, Math.max(0, parseInt(m, 10) || 0))).padStart(2, '0');
+            hh = Math.min(23, Math.max(0, parseInt(h, 10) || 0));
+            mi = Math.min(59, Math.max(0, parseInt(m, 10) || 0));
         }
-        return `${yyyy}-${mm}-${dd}T${hh}:${mi}:00Z`;
+
+        // Build a proper UTC Date
+        const utcDate = new Date(Date.UTC(yyyy, mm, dd, hh, mi, 0));
+
+        return utcDate.toISOString();
     }
+
 }
