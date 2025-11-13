@@ -18,12 +18,16 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.annotation.PostConstruct;
-import java.util.HashSet;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * Validates JWT bearer tokens on API requests and enforces role-based authorization.
@@ -68,7 +72,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 	private final AuthenticationProperties authProperties;
 	private JwtDecoder jwtDecoder;
-	private Set<String> publicEndpointsSet;
 
 	public AuthorizationInterceptor(AuthenticationProperties authProperties) {
 		this.authProperties = authProperties;
@@ -81,13 +84,11 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	@PostConstruct
 	private void initializeJwtDecoder() {
 		this.jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
-		this.publicEndpointsSet = new HashSet<>(authProperties.getEndpoints().getPublicEndpoints());
 
 		LOG.debug("Initialized JWT decoder with JWKS URI: {}", jwkSetUri);
 		LOG.debug("Authentication groups - Read: '{}', Write: '{}'",
 				authProperties.getGroups().getRead(),
 				authProperties.getGroups().getWrite());
-		LOG.info("Public endpoints: {}", publicEndpointsSet);
 	}
 
 	/**
@@ -138,20 +139,24 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 			validateRequiredClaims(jwt);
 
-			UserRole role = extractRoleFromJwt(jwt);
+			List<UserRole> roles = extractRolesFromJwt(jwt);
 
 			// Test if the AUTHENTICATED user has read/write access to private endpoint.
-			if (role == UserRole.NONE){
+			if (roles.isEmpty()){
 				throw new CustomExceptionBuilder()
 						.withStatus(HttpStatus.FORBIDDEN)  // 403 instead of 401 since they're authenticated but not authorized
 						.build();
+			}
+
+			if (!isValidRole(roles, handler)) {
+				return false;
 			}
 
 			UserContext userContext = UserContext.builder()
 					.userId(jwt.getSubject())
 					.username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
 					.email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
-					.role(role)
+					.roles(roles)
 					.build();
 
 			CurrentUser.setUserContext(userContext);
@@ -211,22 +216,70 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	 * @param jwt the decoded JWT token
 	 * @return the user's role based on group membership
 	 */
-	private UserRole extractRoleFromJwt(Jwt jwt) {
+	private List<UserRole> extractRolesFromJwt(Jwt jwt) {
 		List<String> groups = jwt.getClaimAsStringList(authProperties.getClaims().getGroups());
-		if (groups == null) return UserRole.NONE;
+		if (groups == null) return List.of();
 
-		if (groups.contains(authProperties.getGroups().getWrite())) return UserRole.WRITE;
-		if (groups.contains(authProperties.getGroups().getRead())) return UserRole.READ;
-		return UserRole.NONE;
+		List<UserRole> roles = new ArrayList<>();
+
+
+		if (groups.contains(authProperties.getGroups().getWrite()))
+			roles.add(UserRole.WRITE);
+		if (groups.contains(authProperties.getGroups().getRead()))
+			roles.add(UserRole.READ);
+
+		return roles;
 	}
 
 	/**
 	 * Checks if the request path is configured as a public endpoint.
 	 *
-	 * @param requestPath the request URI path
+	 * @param handler the request handler object (most likely the method)
 	 * @return true if endpoint is public, false otherwise
 	 */
-	private boolean isPublicEndpoint(String requestPath) {
-		return publicEndpointsSet.contains(requestPath);
+	private boolean isPublicEndpoint(Object handler) {
+		if (!(handler instanceof HandlerMethod))
+			return false;
+
+		var handlerMethod = (HandlerMethod) handler;
+		var method = handlerMethod.getMethod();
+
+		LOG.debug("Accessing method: {} in class: {}", method.getName(), method.getDeclaringClass().getSimpleName());
+
+		return Arrays.stream(method.getAnnotations()).anyMatch(annotation -> annotation instanceof PublicAPI);
+	}
+
+	/**
+	 * Checks if the user roles are valid for the current handler
+	 *
+	 * @param roles the user roles extracted from the jwt
+	 * @param handler the request handler object (most likely the method)
+	 * */
+	private boolean isValidRole(List<UserRole> roles, Object handler) {
+		if (!(handler instanceof HandlerMethod))
+			return true;
+
+		HandlerMethod handlerMethod = (HandlerMethod) handler;
+		Method method = handlerMethod.getMethod();
+
+		LOG.debug("Validating role for method: {} in class: {}", method.getName(), method.getDeclaringClass().getSimpleName());
+
+		var annotationOptional = Arrays.stream(method.getAnnotations()).filter(a -> a instanceof RequiredRoles).findFirst();
+
+		// If no required role annotation is present, simply being authorized will provide access
+		if (annotationOptional.isEmpty())
+			return true;
+
+		RequiredRoles requiredRolesAnnotation = (RequiredRoles) annotationOptional.get();
+		UserRole[] requiredRoles = requiredRolesAnnotation.roles();
+		RoleAccessConfigurationType matchStyle = requiredRolesAnnotation.roleAccessConfigurationType();
+
+		var roleStream = Arrays.stream(requiredRoles);
+
+		if (Objects.requireNonNull(matchStyle) == RoleAccessConfigurationType.ONE) {
+			return roleStream.anyMatch(roles::contains);
+		}
+
+		return roleStream.allMatch(roles::contains);
 	}
 }

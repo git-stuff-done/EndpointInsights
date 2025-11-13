@@ -118,16 +118,16 @@ public void SomeFunction() {
 
 ```
 
+Additionally, controller methods can be annotated with @RequiredRoles() to specify roles required to access an endpoint for broad control.
+This prevents us from needing to write full role validation in every method.
+
 ### Example Usage in Controllers
 ```java
+@RequiredRoles(roles = {UserRole.WRITE})
 @RestController
 public class SomeController {
     @PostMapping("/api/data")
     public ResponseEntity<String> createData(@RequestBody DataRequest request) {
-        if (!CurrentUser.hasWriteAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         log.info("User {} creating new data record", CurrentUser.getLogIdentifier());
 
         String createdBy = CurrentUser.getUsername();
