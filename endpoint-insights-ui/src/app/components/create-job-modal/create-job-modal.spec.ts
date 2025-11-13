@@ -1,8 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialogRef} from '@angular/material/dialog';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {CreateJobModal} from './create-job-modal';
-import {CreateJobForm} from '../create-job-form/create-job-form';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 
@@ -13,13 +12,13 @@ describe('CreateJobModal', () => {
     let compiled: DebugElement;
 
     beforeEach(async () => {
-        // Create a mock MatDialogRef
         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         await TestBed.configureTestingModule({
-            imports: [CreateJobModal, BrowserAnimationsModule],
+            imports: [CreateJobModal,],
             providers: [
-                {provide: MatDialogRef, useValue: mockDialogRef}
+                {provide: MatDialogRef, useValue: mockDialogRef},
+                provideNoopAnimations()
             ]
         })
             .compileComponents();

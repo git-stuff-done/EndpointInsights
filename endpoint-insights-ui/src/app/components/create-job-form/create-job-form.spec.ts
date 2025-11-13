@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CreateJobForm} from './create-job-form';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {provideNoopAnimations} from '@angular/platform-browser/animations';
 
 describe('CreateJobForm', () => {
     let component: CreateJobForm;
@@ -9,7 +9,8 @@ describe('CreateJobForm', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [CreateJobForm, ReactiveFormsModule, BrowserAnimationsModule]
+            imports: [CreateJobForm, ReactiveFormsModule],
+            providers: [provideNoopAnimations()]
         })
             .compileComponents();
 
