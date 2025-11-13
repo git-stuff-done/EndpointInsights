@@ -20,7 +20,7 @@ export class LoginComponent {
                 this.router.navigate(['/']);
             }, 2000);
         } else {
-            this.notifications.showBanner('Login failed. Try again.', 'error');
+            //this.notifications.showBanner('Login failed. Try again.', 'error'); removed for testing purpose
         }
     }
 
