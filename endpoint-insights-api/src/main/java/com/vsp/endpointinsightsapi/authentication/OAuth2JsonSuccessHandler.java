@@ -140,8 +140,10 @@ public class OAuth2JsonSuccessHandler implements AuthenticationSuccessHandler {
                 "email", email
         );
 
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+
+//        response.setContentType("application/json");
+        response.sendRedirect("http://localhost:4200/auth/callback?token=" + idToken.getTokenValue());
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
     }
 }
