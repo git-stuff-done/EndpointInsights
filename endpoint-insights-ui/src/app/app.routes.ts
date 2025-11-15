@@ -5,12 +5,13 @@ import {BatchComponent} from "./batch-component/batch-component";
 import {TestOverview} from "./pages/test-overview/test-overview";
 import {AuthCallback} from "./authentication/auth-callback/auth-callback";
 import {PageNotFoundComponent} from "./page-not-found-component/page-not-found-component";
+import {authGuard} from "./auth-guard";
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
-    { path: '', component: DashboardComponent, pathMatch: 'full' },
-    { path: 'batches', component: BatchComponent },
-    { path: 'tests', component: TestOverview },
     { path: 'auth/callback', component: AuthCallback, pathMatch: 'full'},
+    { path: '', component: DashboardComponent, pathMatch: 'full', canActivate: [authGuard] },
+    { path: 'batches', component: BatchComponent, canActivate: [authGuard] },
+    { path: 'tests', component: TestOverview, canActivate: [authGuard] },
     { path: '**', component: PageNotFoundComponent },
 ];

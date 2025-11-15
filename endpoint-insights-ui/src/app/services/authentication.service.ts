@@ -19,6 +19,8 @@ export class AuthenticationService {
   private readonly authUrl = environment.authUrl;
   private readonly apiUrl = environment.apiUrl;
   private readonly tokenKey = environment.tokenStorageKey;
+  private readonly AUTH_TOKEN_COOKIE = "authToken";
+
 
   private userInfo: UserInfo | null = null;
 
@@ -68,9 +70,6 @@ export class AuthenticationService {
    * Checks if the user's roles contains role. (CaSe SeNsItIvE)
    * */
   public hasRole(role: string): boolean {
-    if (this.token) {
-      console.log("expiration left: " + this.isTokenExpired());
-    }
     return this.isAuthenticated() && this.userInfo! && this.getUserInfo().roles.includes(role);
   }
 
@@ -80,25 +79,25 @@ export class AuthenticationService {
   public logout(): void {
     this.clearAuthData();
     this.authStateSubject.next(false);
-    
-    this.router.navigate(['/']);
+
+    this.router.navigate(['/login']);
   }
 
   /**
    * Checks if user is authenticated
    */
   public isAuthenticated(): boolean {
-    return this.token != null && !this.isTokenExpired();
+    return this.authStateSubject.value;
   }
 
   /**
    * Checks if the current token is expired
    */
-  private isTokenExpired(): boolean {
-    if (!this.token) return true;
-    
+  private isTokenExpired(token: any): boolean {
+    if (!token) return true;
+
     try {
-      const payload = JSON.parse(atob(this.token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Math.floor(Date.now() / 1000);
       return payload.exp < currentTime;
     } catch {
@@ -121,12 +120,28 @@ export class AuthenticationService {
     localStorage.setItem(this.tokenKey, token);
   }
 
+  public loadTokenFromCookie() {
+    const token = window.cookieStore.get(this.AUTH_TOKEN_COOKIE);
+    token.then(t => {
+      if (t == null) {
+          this.router.navigate(['/']);
+      } else if (t?.value) {
+        window.cookieStore.delete(this.AUTH_TOKEN_COOKIE);
+        this.setToken(t.value);
+        this.loadTokenFromStorage();
+        this.loadUserInfo();
+        this.router.navigate(['/']);
+      }
+
+    }).catch(e => console.log(e));
+  }
+
   /**
    * Loads token from local storage
    */
   private loadTokenFromStorage(): void {
     const token = localStorage.getItem(this.tokenKey);
-    if (token && !this.isTokenExpired()) {
+    if (token && !this.isTokenExpired(token)) {
       this.token = token;
       this.authStateSubject.next(true);
     } else if (token) {
@@ -140,6 +155,7 @@ export class AuthenticationService {
    */
   private clearAuthData(): void {
     this.token = null;
+    window.cookieStore.delete(this.AUTH_TOKEN_COOKIE);
     localStorage.removeItem(this.tokenKey);
   }
 
