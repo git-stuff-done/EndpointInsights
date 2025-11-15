@@ -134,16 +134,6 @@ public class OAuth2JsonSuccessHandler implements AuthenticationSuccessHandler {
                     .build();
         }
 
-        Map<String, Object> tokenResponse = Map.of(
-                "idToken", idToken.getTokenValue(),
-                "expiresAt", expiresAt.getEpochSecond(),
-                "username", username,
-                "email", email
-        );
-
-        var obj = objectMapper.writeValueAsString(tokenResponse);
-        LOG.info("Token response: {}", obj);
-
         Cookie tokenCookie = new Cookie("authToken", idToken.getTokenValue());
         //todo: set to secure only once we implement tls
 //        tokenCookie.setSecure(true);
