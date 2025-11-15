@@ -4,6 +4,8 @@ import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Immutable user session data extracted from JWT token claims.
  *
@@ -29,7 +31,7 @@ public class UserContext {
     private final String userId;
     private final String username;
     private final String email;
-    private final UserRole role;
+    private final List<UserRole> roles;
 
     /**
      * Returns a formatted identifier suitable for logging.
@@ -46,7 +48,7 @@ public class UserContext {
      * @return true if user has WRITE role, false otherwise
      */
     public boolean hasWriteAccess() {
-        return role == UserRole.WRITE;
+        return roles.contains(UserRole.WRITE);
     }
 
     /**
@@ -55,6 +57,6 @@ public class UserContext {
      * @return true if user has READ or WRITE role, false otherwise
      */
     public boolean hasReadAccess() {
-        return role == UserRole.READ || role == UserRole.WRITE;
+        return roles.contains(UserRole.READ) || roles.contains(UserRole.WRITE);
     }
 }

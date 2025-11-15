@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.config;
 
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
@@ -24,9 +25,6 @@ import java.util.List;
  *       username: "preferred_username"
  *       email: "email"
  *       groups: "groups"
- *     endpoints:
- *       public-endpoints:
- *         - "/api/health"
  * }</pre>
  *
  * @see com.vsp.endpointinsightsapi.authentication.AuthorizationInterceptor
@@ -42,8 +40,8 @@ public class AuthenticationProperties {
     @NestedConfigurationProperty
     private Claims claims = new Claims();
 
-    @NestedConfigurationProperty
-    private Endpoints endpoints = new Endpoints();
+    @Getter
+    private String callbackUri;
 
     /**
      * Group name mappings for role-based access control.
@@ -67,14 +65,5 @@ public class AuthenticationProperties {
         private String email = "email";
         /** Claim name for groups list (default: groups) */
         private String groups = "groups";
-    }
-
-    /**
-     * Public endpoint configuration.
-     */
-    @Data
-    public static class Endpoints {
-        /** List of endpoints that bypass authentication */
-        private List<String> publicEndpoints = List.of("/api/health");
     }
 }
