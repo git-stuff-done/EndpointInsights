@@ -1,22 +1,19 @@
 package com.vsp.endpointinsightsapi.model;
-
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
-
-import java.util.Date;
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-//import com.vsp.endpointinsightsapi.user.User;           // adjust imports/package names for when created
-//import com.vsp.endpointinsightsapi.target.TestTarget;  // adjust imports/package names for when created
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.Date;
 import java.util.Map;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
-import com.vsp.endpointinsightsapi.model.enums.TestType;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,9 +24,9 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ColumnDefault("get_random_uuid()")
     @Column(name = "job_id")
-    private String jobId;
+    private UUID jobId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -40,6 +37,14 @@ public class Job {
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
+
+	@ManyToMany
+	@JoinTable(
+			name = "test_batch_tests",
+			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	)
+	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
     /*
@@ -56,19 +61,15 @@ public class Job {
     private JobStatus status = JobStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
     @Column(name = "started_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date startedAt;
 
     @Column(name = "completed_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job

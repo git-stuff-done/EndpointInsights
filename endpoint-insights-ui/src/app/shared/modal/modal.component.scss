@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .mat-dialog-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.tab-pane { padding: .25rem 0; }
