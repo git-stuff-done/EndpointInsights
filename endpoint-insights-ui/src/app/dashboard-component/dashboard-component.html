@@ -1,7 +1,126 @@
-<h1>Endpoint Insights Dashboard</h1>
-<main class="container-fluid py-3" style="display: grid; gap: .75rem;">
-    <app-test-results-card
-            *ngFor="let t of tests; trackBy: trackById"
-            [test]="t">
-    </app-test-results-card>
+<h1 class="page-title"> Endpoint Insights Dashboard</h1>
+
+<main class="container-fluid py-3">
+    <section class="dashboard-grid">
+
+        <!-- KPI Row -->
+        <section class="kpi-row">
+            <article class="kpi-card">
+                <header class="kpi-title">Active Jobs</header>
+                <div class="kpi-main">{{ activeJobsTotal }}</div>
+                <div class="kpi-sub">
+                    {{ activeJobsScheduled }} scheduled,
+                    {{ activeJobsManual }} manual
+                </div>
+            </article>
+
+            <article class="kpi-card">
+                <header class="kpi-title">Failures in last 24h</header>
+                <div class="kpi-main">{{ failuresLast24h }}</div>
+                <div class="kpi-sub">
+                    Across {{ failureEndpointsCount }} endpoints
+                </div>
+            </article>
+
+            <article class="kpi-card">
+                <header class="kpi-title">% Passing Tests</header>
+                <div class="kpi-main">{{ passingPercentage }}%</div>
+                <div class="kpi-sub">
+                    {{ passingRuns }} of {{ totalRuns }} total runs
+                </div>
+            </article>
+
+            <article class="kpi-card">
+                <header class="kpi-title">Average API Latency</header>
+                <div class="kpi-main">{{ averageLatencyMs }} ms</div>
+                <div class="kpi-sub">
+                    Target threshold {{ latencyThresholdMs }} ms
+                </div>
+            </article>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-row">
+            <article class="panel panel-chart">
+                <header class="panel-header">API Performance</header>
+                <div class="panel-body">
+                    <div class="chart-placeholder">
+                        API Performance chart placeholder
+                    </div>
+                </div>
+            </article>
+
+            <article class="panel panel-chart">
+                <header class="panel-header">API Trend</header>
+                <div class="panel-body">
+                    <div class="chart-placeholder">
+                        API Trend chart placeholder
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="activity-row">
+            <article class="panel panel-table">
+                <header class="panel-header">Recent Activity Table</header>
+                <div class="panel-body">
+                    <table class="activity-table">
+                        <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Group</th>
+                            <th>Date Run</th>
+                            <th>Duration</th>
+                            <th>Started By</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @for (t of tests; track t.id) {
+                                <tr>
+                                    <td>{{ t.testName }}</td>
+                                    <td>{{ t.group }}</td>
+                                    <td>{{ t.dateRun | date: 'M/d/yy' }}</td>
+                                    <td>{{ t.durationMs }} ms</td>
+                                    <td>{{ t.startedBy }}</td>
+                                    <td>
+                    <span
+                            class="status-pill"
+                            [class.status-pass]="t.status === 'PASS'"
+                            [class.status-fail]="t.status === 'FAIL'"
+                    >
+                      {{ t.status }}
+                    </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+        <!-- Alerts -->
+        <section class="alerts-row">
+            <article class="panel panel-alerts">
+                <header class="panel-header">Alerts / Notifications</header>
+                <div class="panel-body">
+                    <ul class="alerts-list">
+                        @for (a of alerts; track a.id) {
+                            <li
+                                    class="alert-item"
+                                    [class.alert-warning]="a.severity === 'warning'"
+                                    [class.alert-error]="a.severity === 'error'"
+                            >
+                                <span class="alert-icon">⚠</span>
+                                <span class="alert-message">{{ a.message }}</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </article>
+        </section>
+
+    </section>
 </main>

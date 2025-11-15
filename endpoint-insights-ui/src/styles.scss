@@ -1,4 +1,18 @@
 /* ===== Base reset-ish touches */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+app-root {
+  display: block;
+  max-width: 100%;
+}
+
+
 :root {
   --topbar-bg: #0b2335;           /* deep slate */
   --topbar-fg: #ffffff;
