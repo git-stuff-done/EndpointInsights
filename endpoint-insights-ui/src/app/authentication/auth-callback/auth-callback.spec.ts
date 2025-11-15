@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthCallback } from './auth-callback';
+import {provideHttpClient} from "@angular/common/http";
 
 describe('AuthCallback', () => {
   let component: AuthCallback;
@@ -8,7 +9,8 @@ describe('AuthCallback', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthCallback]
+      imports: [AuthCallback],
+      providers: [provideHttpClient()]
     })
     .compileComponents();
 
