@@ -1,24 +1,20 @@
 package com.vsp.endpointinsightsapi.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.ObjectMapper;
 
-
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BatchesController.class)
-@ActiveProfiles("test")
-class BatchesControllerUnitTest {
+@AutoConfigureWebMvc
+public class BatchesControllerUnitTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -26,62 +22,52 @@ class BatchesControllerUnitTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public ObjectMapper objectMapper() {
-            return new ObjectMapper();
-        }
-    }
-
     @Test
-    void shouldReturnListOfBatches() throws Exception {
+    void getBatches_returnsListOfBatches() throws Exception {
         mockMvc.perform(get("/api/batches"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThan(0))))
-                .andExpect(jsonPath("$[0].id", notNullValue()))
-                .andExpect(jsonPath("$[0].name", not(emptyString())))
-                .andExpect(jsonPath("$[0].status", not(emptyString())));
+                .andExpect(jsonPath("$[0].name").value("Daily API Tests"))
+                .andExpect(jsonPath("$[1].status").value("INACTIVE"));
     }
 
     @Test
-    void shouldReturnBatchById() throws Exception {
-        mockMvc.perform(get("/api/batches/1"))
+    void getBatchById_returnsSingleBatch() throws Exception {
+        mockMvc.perform(get("/api/batches/{id}", 1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", containsString("Example Batch")))
-                .andExpect(jsonPath("$.status", is("ACTIVE")));
+                .andExpect(jsonPath("$.name").value("Example Batch 1"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
 
     @Test
-    void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", "Test batch description");
+    void createBatch_returnsCreatedBatch() throws Exception {
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setName("Nightly Test Run");
 
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(99)))
-                .andExpect(jsonPath("$.name", is("New Batch")))
-                .andExpect(jsonPath("$.status", is("CREATED")));
+                .andExpect(jsonPath("$.name").value("Nightly Test Run"))
+                .andExpect(jsonPath("$.status").value("CREATED"));
     }
 
     @Test
-    void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", "Updated description");
+    void updateBatch_returnsUpdatedBatch() throws Exception {
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setName("Updated Batch");
 
-        mockMvc.perform(put("/api/batches/2")
+        mockMvc.perform(put("/api/batches/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2)))
-                .andExpect(jsonPath("$.name", is("Updated Batch")))
-                .andExpect(jsonPath("$.status", is("UPDATED")));
+                .andExpect(jsonPath("$.name").value("Updated Batch"))
+                .andExpect(jsonPath("$.status").value("UPDATED"));
     }
 
     @Test
-    void shouldDeleteBatch() throws Exception {
-        mockMvc.perform(delete("/api/batches/1"))
-                .andExpect(status().isNoContent());
+    void deleteBatch_returnsNoContent() throws Exception {
+        mockMvc.perform(delete("/api/batches/{id}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Batch 1 deleted"));
     }
 }

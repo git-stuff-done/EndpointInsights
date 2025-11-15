@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/api/jobs")
 @Validated
 public class JobsController {
-
+	
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 
 	/**
