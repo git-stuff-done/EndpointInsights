@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.config;
 
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,9 @@ public class AuthenticationProperties {
 
     @NestedConfigurationProperty
     private Claims claims = new Claims();
+
+    @Getter
+    private String callbackUri;
 
     /**
      * Group name mappings for role-based access control.

@@ -29,6 +29,7 @@ spring:
 app:
   authentication:
     enabled: true
+    callback-uri: ${OID_CLIENT_CALLBACK_URI:http://localhost:4200/auth/callback}
     groups:
       write: "ei:write"
       read: "ei:read"

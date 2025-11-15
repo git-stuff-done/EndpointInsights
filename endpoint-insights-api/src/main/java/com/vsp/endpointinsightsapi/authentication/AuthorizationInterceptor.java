@@ -120,6 +120,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 			return true;
 		}
 
+		if (request.getMethod().equals("OPTIONS")) {
+			return true;
+		}
+
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			throw new CustomExceptionBuilder()

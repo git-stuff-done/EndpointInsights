@@ -1,15 +1,14 @@
-import {Component, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
+import {Router} from '@angular/router';
+import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
 import {environment} from "../../environment";
 
-interface AuthResponse {
-  idToken: string;
+interface UserInfo {
   expiresAt: number;
   username: string;
   email: string;
+  roles: string[];
 }
 
 @Injectable({
@@ -20,7 +19,8 @@ export class AuthenticationService {
   private readonly authUrl = environment.authUrl;
   private readonly apiUrl = environment.apiUrl;
   private readonly tokenKey = environment.tokenStorageKey;
-  private readonly redirectKey = 'auth_redirect_url';
+
+  private userInfo: UserInfo | null = null;
 
   // Observable to track authentication state
   private authStateSubject = new BehaviorSubject<boolean>(false);
@@ -31,103 +31,53 @@ export class AuthenticationService {
     private router: Router
   ) {
     this.loadTokenFromStorage();
-    this.checkInitialAuthState();
+    if (this.token) {
+      this.loadUserInfo();
+    }
   }
 
   /**
    * Initiates the OAuth2 authentication flow
    * Stores current route for post-auth redirect
    */
-  login(returnUrl?: string): void {
-    // Store the return URL for after authentication
-    if (returnUrl) {
-      localStorage.setItem(this.redirectKey, returnUrl);
-    } else {
-      // Store current route if no specific return URL provided
-      localStorage.setItem(this.redirectKey, this.router.url);
-    }
-
+  public login(): void {
     window.location.href = this.authUrl;
   }
 
-  /**
-   * Handles the OAuth2 callback and processes the authentication result
-   * Call this from your callback component or app initialization
-   */
-  handleAuthCallback(): Observable<boolean> {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const error = urlParams.get('error');
-
-    if (error) {
-      console.error('OAuth2 authentication error:', error);
-      this.clearAuthData();
-      return of(false);
-    }
-
-    if (code && state) {
-      // The OAuth2 flow should have already been processed by the backend
-      // and we should be redirected back with the token in the response
-      // Since your backend returns JSON after successful auth, you might need
-      // to modify this based on how the backend handles the final redirect
-      return this.verifyAuthenticationState();
-    }
-
-    return of(false);
+  public getUserInfo(): UserInfo {
+    return this.userInfo!;
   }
 
-  /**
-   * Verifies if the user is currently authenticated by checking with the backend
-   */
-  private verifyAuthenticationState(): Observable<boolean> {
-    return this.httpClient.get<AuthResponse>(`${this.authUrl}/auth/verify`, {
-      withCredentials: true // Important for session-based auth
+  public loadUserInfo() {
+    if (this.userInfo)
+      return;
+
+   this.httpClient.get<UserInfo>(`${this.apiUrl}/auth/user-info`, {
+      headers: new HttpHeaders().set('Authorization', `Bearer ${this.getToken()}`),
     }).pipe(
-      tap(response => {
-        if (response && response.idToken) {
-          this.setToken(response.idToken);
-          this.authStateSubject.next(true);
-        }
-      }),
-      map(response => {
-        return !!(response && response.idToken);
-      }),
-      catchError(() => of(false))
-    );
+        catchError(error => {
+          console.error(error);
+          throw error;
+        })
+    ).subscribe(userInfo => {
+      this.userInfo = userInfo;
+   })
   }
 
   /**
-   * Checks authentication state on app initialization
-   */
-  private checkInitialAuthState(): void {
+   * Checks if the user's roles contains role. (CaSe SeNsItIvE)
+   * */
+  public hasRole(role: string): boolean {
     if (this.token) {
-      // If we have a token, verify it's still valid
-      this.verifyAuthenticationState().subscribe();
-    } else {
-      // Check if we're in an OAuth callback situation
-      this.handleAuthCallback().subscribe();
+      console.log("expiration left: " + this.isTokenExpired());
     }
-  }
-
-  /**
-   * Processes successful authentication and redirects user
-   */
-  handleSuccessfulAuth(authResponse: AuthResponse): void {
-    this.setToken(authResponse.idToken);
-    this.authStateSubject.next(true);
-    
-    // Get stored redirect URL and navigate there
-    const redirectUrl = localStorage.getItem(this.redirectKey) || '/dashboard';
-    localStorage.removeItem(this.redirectKey);
-    
-    this.router.navigate([redirectUrl]);
+    return this.isAuthenticated() && this.userInfo! && this.getUserInfo().roles.includes(role);
   }
 
   /**
    * Logs out the user and clears authentication data
    */
-  logout(): void {
+  public logout(): void {
     this.clearAuthData();
     this.authStateSubject.next(false);
     
@@ -137,7 +87,7 @@ export class AuthenticationService {
   /**
    * Checks if user is authenticated
    */
-  isAuthenticated(): boolean {
+  public isAuthenticated(): boolean {
     return this.token != null && !this.isTokenExpired();
   }
 
@@ -166,7 +116,7 @@ export class AuthenticationService {
   /**
    * Sets the authentication token
    */
-  private setToken(token: string): void {
+  public setToken(token: string): void {
     this.token = token;
     localStorage.setItem(this.tokenKey, token);
   }
@@ -191,7 +141,6 @@ export class AuthenticationService {
   private clearAuthData(): void {
     this.token = null;
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.redirectKey);
   }
 
   // API methods using the authenticated token

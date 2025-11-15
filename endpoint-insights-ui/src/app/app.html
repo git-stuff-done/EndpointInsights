@@ -1,9 +1,15 @@
 <header class="app-header">
     <nav class="nav">
-        <a mat-button routerLink="/login" routerLinkActive="active">Login</a>
+        @if (!authService.isAuthenticated()) {
+            <a mat-button routerLink="/login" routerLinkActive="active">Login</a>
+        } @else {
+            <a mat-button (click)="authService.logout()">Logout</a>
+        }
         <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-        <a mat-button routerLink="/batches" routerLinkActive="active">Batches</a>
-        <a mat-button routerLink="/tests" routerLinkActive="active">Tests</a>
+        @if (authService.hasRole('WRITE')) {
+            <a mat-button routerLink="/tests" routerLinkActive="active">Tests</a>
+            <a mat-button routerLink="/batches" routerLinkActive="active">Batches</a>
+        }
     </nav>
 </header>
 
