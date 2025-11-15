@@ -12,3 +12,16 @@
 }
 
 :host, :host * { box-sizing: border-box; }
+
+.grid > * {
+  background: var(--color-white);
+  border: 1px solid var(--color-text-light);
+  padding: 12px 14px;
+  border-radius: var(--card-radius);
+  background: var(--color-white);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: var(--card-transition);
+
+  width: 100%;
+}

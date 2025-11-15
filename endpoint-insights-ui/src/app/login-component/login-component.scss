@@ -4,15 +4,17 @@
   padding: 10px;
 }
 
-.card{
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  padding: 1.5rem;
+.card {
+  padding: 12px 14px;
+  border-radius: var(--card-radius);
+  background: var(--color-white);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: var(--card-transition);
   max-width: 400px;
   margin: 2rem auto;
-  transition: box-shadow 0.2s ease;
 }
+
 
 .logo{
   width: 225px;
