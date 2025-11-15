@@ -1,0 +1,45 @@
+.banner {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  color: white;
+  font-weight: 500;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  box-sizing: border-box;
+}
+
+.banner.info    { background: #2196f3; }
+.banner.success { background: #4caf50; }
+.banner.warning { background: #ff9800; }
+.banner.error   { background: #f44336; }
+
+.banner span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 16px;
+}
+
+.banner button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 12px;
+  flex-shrink: 0;
+  min-width: 30px;
+  border-radius: 4px;
+}
+
+.banner button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
