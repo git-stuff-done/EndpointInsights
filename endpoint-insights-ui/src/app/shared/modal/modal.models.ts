@@ -10,6 +10,7 @@ export interface ModalConfig {
     title?: string;
     /** Tabs to render. 0, 1, or many allowed. */
     tabs: ModalTab[];
+    initialState?: Record<string, any>
     /** Optional width constraints */
     width?: string;
     maxWidth?: string;

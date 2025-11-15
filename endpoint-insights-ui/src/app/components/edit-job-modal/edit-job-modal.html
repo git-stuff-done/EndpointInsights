@@ -1,0 +1,63 @@
+<div class="modal-header">
+    <div mat-dialog-title class="header">
+        <h2 mat-dialog-title>Edit: {{data.name}}</h2>
+        <h3 mat-dialog-title>#{{ data.id }}</h3>
+    </div>
+
+    <mat-dialog-content>
+        @if (state().inEditMode){
+            <app-job-form [job]="data"></app-job-form>
+        }
+        @else {
+            <div class="form">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Job Name</label>
+                        <p>{{ data.name }}</p>
+                    </div>
+                    <div class="form-field">
+                        <label>Job Description</label>
+                        <p>{{ data.description }}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Git URL</label>
+                        <p>{{ data.gitUrl }}</p>
+                    </div>
+                    <div class="form-field">
+                        <label>Job Type</label>
+                        <p>{{ data.jobType }}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Run Command</label>
+                        <p>{{ data.runCommand }}</p>
+                    </div>
+                    <div class="form-field">
+                        <label>Compile Command</label>
+                        <p>{{ data.compileCommand }}</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <div class="button-group">
+            <button class="create-job-modal-cancel-button" mat-raised-button (click)="onCancel()">Cancel</button>
+
+            <button class="create-job-modal-create-button" (click)="toggleEditMode()" mat-raised-button>
+                @if (!state().inEditMode) {
+                    <span>Edit</span>
+                }
+                @else {
+                    <span>Save</span>
+                }
+            </button>
+        </div>
+    </mat-dialog-actions>
+</div>

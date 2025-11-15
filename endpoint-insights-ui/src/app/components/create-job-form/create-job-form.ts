@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
 import {
     AbstractControl,
     FormBuilder,
@@ -10,6 +10,7 @@ import {
 import {MatFormField} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatOption, MatSelect} from "@angular/material/select";
+import {TestItem} from "../../pages/test-overview/test-overview";
 
 @Component({
     selector: 'app-job-form',
@@ -26,7 +27,7 @@ import {MatOption, MatSelect} from "@angular/material/select";
 })
 export class CreateJobForm {
     createJobForm: FormGroup;
-
+    @Input() job!: TestItem;
     constructor(private formBuilder: FormBuilder) {
         this.createJobForm = this.formBuilder.group({
             name: ["", [
@@ -52,6 +53,21 @@ export class CreateJobForm {
             ]],
         })
     }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['job'] && this.job) {
+            this.createJobForm.patchValue({
+                name: this.job.name,
+                description: this.job.description,
+                gitUrl: this.job.gitUrl,
+                jobType: this.job.jobType,
+                runCommand: this.job.runCommand,
+                compileCommand: this.job.compileCommand,
+            });
+        }
+    }
+
+
 
     @Output() jobSubmitted = new EventEmitter<any>();
 
