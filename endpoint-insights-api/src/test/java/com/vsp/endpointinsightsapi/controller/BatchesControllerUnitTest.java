@@ -17,6 +17,8 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.UUID;
+
 @TestPropertySource(properties = "app.authentication.enabled=false")
 @WebMvcTest(BatchesController.class)
 @ActiveProfiles("test")
@@ -57,8 +59,7 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", "Test batch description");
-
+        BatchRequestDTO request = new BatchRequestDTO("New Batch", null);
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -70,7 +71,7 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", "Updated description");
+        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", null);
 
         mockMvc.perform(put("/api/batches/2")
                         .contentType(MediaType.APPLICATION_JSON)
