@@ -34,6 +34,15 @@ public class Job {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "git_url")
+    private String gitUrl;
+
+    @Column(name = "run_command")
+    private String runCommand;
+
+    @Column(name = "compile_command")
+    private String compileCommand;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType testType;
