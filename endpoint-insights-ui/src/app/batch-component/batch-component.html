@@ -1,7 +1,7 @@
 <main class="container-fluid py-3">
   <section class="grid">
     <app-batch-card
-      *ngFor="let b of batches; trackBy: trackById"
+      *ngFor="let b of batch; trackBy: trackById"
       [batch]="b"
       (configure)="onConfigure($event)">
     </app-batch-card>
