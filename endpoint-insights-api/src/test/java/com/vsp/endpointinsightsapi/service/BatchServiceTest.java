@@ -36,9 +36,9 @@ class BatchServiceTest {
 
     @Test
     void createBatch_ReturnSavedBatch() {
-        BatchRequestDTO batch = new BatchRequestDTO();
+        BatchRequestDTO request = new BatchRequestDTO("New Batch", null);
         when(batchRepository.save(any(TestBatch.class))).thenReturn(new TestBatch());
-        TestBatch testResult = batchService.createBatch(batch);
+        TestBatch testResult = batchService.createBatch(request);
         assertThat(testResult).isNotNull();
         Mockito.verify(batchRepository, Mockito.times(1)).save(any(TestBatch.class));
     }

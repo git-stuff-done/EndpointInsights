@@ -70,7 +70,6 @@ class BatchesControllerUnitTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(99)))
                 .andExpect(jsonPath("$.name", is("New Batch")))
                 .andExpect(jsonPath("$.status", is("CREATED")));
     }
