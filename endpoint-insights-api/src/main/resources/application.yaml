@@ -28,7 +28,7 @@ spring:
 
 app:
   authentication:
-    enabled: true
+    enabled: false
     groups:
       write: "ei:write"
       read: "ei:read"

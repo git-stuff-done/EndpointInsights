@@ -1,4 +1,4 @@
-import {Component, Inject, signal, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Inject, Output, signal, ViewChild} from "@angular/core";
 import {
     MAT_DIALOG_DATA,
     MatDialogActions,
@@ -9,6 +9,8 @@ import {
 import {MatButton} from "@angular/material/button";
 import {TestItem} from "../../pages/test-overview/test-overview";
 import {CreateJobForm} from "../create-job-form/create-job-form";
+import {ToastService} from "../../services/toast.service";
+import {JobService} from "../../services/job-services";
 
 @Component({
     selector:'edit-job-modal',
@@ -32,7 +34,9 @@ export class EditJobModal{
     })
     constructor(
         dialogRef: MatDialogRef<EditJobModal>,
-        @Inject(MAT_DIALOG_DATA) public data: TestItem)
+        @Inject(MAT_DIALOG_DATA) public data: TestItem,
+        private toastService :ToastService,
+        private jobService: JobService)
     {
         this.dialogRef = dialogRef;
     }
@@ -42,6 +46,27 @@ export class EditJobModal{
             ...s,
             inEditMode: !s.inEditMode
         }))
+
+        // Check for sav3e
+        if (!this.state().inEditMode) {
+            this.onSave();
+        }
+    }
+
+
+    onSave(){
+        this.jobService.createJob(this.data).subscribe({
+            next: (response) => {
+                console.log('Job created:', response);
+                this.toastService.onSuccess('Job created successfully!');
+                // // Reset form
+                // this.job = { title: '', description: '', status: 'pending' };
+            },
+            error: (error) => {
+                console.error('Error creating job:', error);
+                this.toastService.onError('Failed to create job');
+            }
+        });
     }
 
     onCancel(){

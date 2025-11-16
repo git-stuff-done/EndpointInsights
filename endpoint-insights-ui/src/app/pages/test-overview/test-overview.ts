@@ -6,6 +6,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {CreateJobModal} from "../../components/create-job-modal/create-job-modal";
 import {EditJobModal} from "../../components/edit-job-modal/edit-job-modal";
 import {ModalComponent} from "../../shared/modal/modal.component";
+import {JobStatus} from "../../common/job.constants";
 
 export interface TestItem {
       id: string;
@@ -18,7 +19,7 @@ export interface TestItem {
       jobType: string,
       createdAt: Date | string;
       createdBy: string;
-      status: 'running' | 'stopped';
+      status: JobStatus;
     }
 
 @Component({
@@ -41,11 +42,11 @@ export class TestOverview {
 
 
     tests: TestItem[] = [
-      { id:'1', name:'Auth – Login OK', batch:'Nightly-01', createdAt:new Date(), createdBy:'Alex', status:'running',
+      { id:'1', name:'Auth – Login OK', batch:'Nightly-01', createdAt:new Date(), createdBy:'Alex', status:'RUNNING',
       gitUrl:"git.com/test", description: "this is a test", jobType:"jmeter", compileCommand:"./ep-compile <testname>",
       runCommand:"./ep-run <testname> -<type>" },
 
-      { id:'2', name:'Billing – Refund', batch:'Nightly-01', createdAt:new Date(), createdBy:'Sam', status:'stopped',
+      { id:'2', name:'Billing – Refund', batch:'Nightly-01', createdAt:new Date(), createdBy:'Sam', status:'STOPPED',
       gitUrl:"git.com/test", description: "", jobType:"nightwatch", compileCommand:"", runCommand:"./ep-run <testname> -<type>"},
     ];
 

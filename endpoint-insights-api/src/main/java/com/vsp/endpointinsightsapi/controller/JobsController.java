@@ -25,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/jobs")
 @Validated
+@CrossOrigin(origins = "http://localhost:4200")  // Add this
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
@@ -40,16 +41,16 @@ public class JobsController {
 	 * @param request the job details
 	 * @return the created Job
 	 * */
-	@PostMapping //("/")
-	// public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
-	// 	try {
-	// 		jobService.createJob(jobRequest);
-	// 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
-	// 	} catch (RuntimeException e) {
-	// 		LOG.error("Error creating job: {}", e.getMessage());
-	// 		return new ResponseEntity<>(null);
-	// 	}
-	// }
+	@PostMapping
+	 public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+	 	try {
+	 		jobService.createJob(jobRequest);
+	 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+	 	} catch (RuntimeException e) {
+	 		LOG.error("Error creating job: {}", e.getMessage());
+	 		return new ResponseEntity<>(null);
+	 	}
+	 }
 	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
 		LOG.info("Creating job");
 		try {
