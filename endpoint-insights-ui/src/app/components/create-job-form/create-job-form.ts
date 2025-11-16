@@ -154,6 +154,7 @@ export class CreateJobForm {
         if (this.createJobForm.valid) {
             this.jobSubmitted.emit(this.createJobForm.value);
             //TODO: Trigger success notification and call backend.
+
         } else {
             this.createJobForm.markAllAsTouched();
             //TODO: Trigger error notification.

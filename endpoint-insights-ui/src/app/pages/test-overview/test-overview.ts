@@ -42,8 +42,8 @@ export class TestOverview {
 
 
     tests: TestItem[] = [
-      { id:'1', name:'Auth – Login OK', batch:'Nightly-01', createdAt:new Date(), createdBy:'Alex', status:'RUNNING',
-      gitUrl:"git.com/test", description: "this is a test", jobType:"jmeter", compileCommand:"./ep-compile <testname>",
+      { id:'7c601a1b-9c98-45f6-a8e6-786c0d797fe4', name:'Auth – Login OK', batch:'Nightly-01', createdAt:new Date(), createdBy:'Alex', status:'RUNNING',
+      gitUrl:"git.com/test", description: "this is a test", jobType:"E2E", compileCommand:"./ep-compile <testname>",
       runCommand:"./ep-run <testname> -<type>" },
 
       { id:'2', name:'Billing – Refund', batch:'Nightly-01', createdAt:new Date(), createdBy:'Sam', status:'STOPPED',
@@ -67,7 +67,6 @@ export class TestOverview {
         dialogRef.afterClosed().subscribe((result: any) => {
             if (result) {
                 console.log("New job created:", result);
-                //handle backend call to create new job
             }
         });
     }

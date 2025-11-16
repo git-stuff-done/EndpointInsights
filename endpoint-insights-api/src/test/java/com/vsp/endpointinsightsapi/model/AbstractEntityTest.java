@@ -35,10 +35,10 @@ public class AbstractEntityTest {
 
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(savedBatch);
 
-        when(testBatchRepository.findByTestId(batchId)).thenReturn(savedBatch);
+        when(testBatchRepository.findById(batchId)).thenReturn(savedBatch);
 
         TestBatch result = testBatchRepository.save(batch);
-        TestBatch expectedBatch = testBatchRepository.findByTestId(savedBatch.getBatch_id());
+        TestBatch expectedBatch = testBatchRepository.findById(savedBatch.getBatch_id());
 
         assertNotNull(result);
         assertNotNull(expectedBatch);
@@ -46,6 +46,6 @@ public class AbstractEntityTest {
         assertEquals(batchId, expectedBatch.getBatch_id());
 
         verify(testBatchRepository, times(1)).save(batch);
-        verify(testBatchRepository, times(1)).findByTestId(batchId);
+        verify(testBatchRepository, times(1)).findById(batchId);
     }
 }

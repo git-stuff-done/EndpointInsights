@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Inject, Output, signal, ViewChild} from "@angular/core";
+import {Component, Inject, signal, ViewChild} from "@angular/core";
 import {
     MAT_DIALOG_DATA,
     MatDialogActions,
@@ -49,18 +49,16 @@ export class EditJobModal{
 
         // Check for sav3e
         if (!this.state().inEditMode) {
-            this.onSave();
+            this.onUpdate();
         }
     }
 
 
-    onSave(){
-        this.jobService.createJob(this.data).subscribe({
+    onUpdate(){
+        this.jobService.updateJob(this.data.id,this.data).subscribe({
             next: (response) => {
                 console.log('Job created:', response);
                 this.toastService.onSuccess('Job created successfully!');
-                // // Reset form
-                // this.job = { title: '', description: '', status: 'pending' };
             },
             error: (error) => {
                 console.error('Error creating job:', error);

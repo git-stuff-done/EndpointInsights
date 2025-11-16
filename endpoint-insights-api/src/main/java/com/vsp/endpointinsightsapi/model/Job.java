@@ -22,7 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job {
+public class Job  extends AuditingEntity {
 
     @Id
     @GeneratedValue
@@ -38,7 +38,7 @@ public class Job {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
-    private TestType testType;
+    private TestType jobType;
 
 	@ManyToMany
 	@JoinTable(

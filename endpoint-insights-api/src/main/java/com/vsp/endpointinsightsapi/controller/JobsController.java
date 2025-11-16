@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/jobs")
 @Validated
-@CrossOrigin(origins = "http://localhost:4200")  // Add this
+@CrossOrigin(origins = "http://localhost:4200")
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
@@ -51,19 +51,6 @@ public class JobsController {
 	 		return new ResponseEntity<>(null);
 	 	}
 	 }
-	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
-		LOG.info("Creating job");
-		try {
-			Job newJob = new Job();
-			newJob.setName(request.getName());
-			jobService.createJob(newJob);
-			return new ResponseEntity<>(newJob, HttpStatus.CREATED);
-		} catch (RuntimeException e) {
-			LOG.error("Error creating job: {}", e.getMessage());
-			return new ResponseEntity<>(null);
-		}
-		
-	}
 
 	/**
 	 * Endpoint to update a job resource.
@@ -76,18 +63,15 @@ public class JobsController {
 	public ResponseEntity<Job> updateJob(
 			@RequestBody
 			@Valid
-			JobUpdateRequest request,
+			Job request,
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
 			UUID jobId) {
 		LOG.info("Updating job");
 
-		Job updatedJob = new Job();
-		updatedJob.setJobId(jobId);
-		updatedJob.setName("Updated Job #" + jobId);
-		updatedJob.setDescription("This is a stub for job #" + jobId);
+        Job savedJob = jobService.updateJob(jobId, request);
 
-		return ResponseEntity.ok(updatedJob);
+		return ResponseEntity.ok(savedJob);
 	}
 
 	/**

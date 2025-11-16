@@ -23,6 +23,15 @@ button.mat-mdc-raised-button.create-job-modal-cancel-button {
     outline: none;
   }
 }
+.truncate-id .id-text {
+  display: inline-block;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
 
 .form {
   display: flex;

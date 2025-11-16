@@ -44,6 +44,18 @@ public class JobService {
 
     }
 
+    public Job updateJob(UUID id, Job job) {
+        Job existingJob = jobRepository.findById(id)
+                .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
+        existingJob.setName(job.getName());
+        existingJob.setDescription(job.getDescription());
+        existingJob.setStatus(job.getStatus());
+        existingJob.setTestBatches(job.getTestBatches());
+        existingJob.setJobType(job.getJobType());
+        existingJob.setConfig(job.getConfig());
+        return jobRepository.save(existingJob);
+    }
+
     @Transactional
     public void deleteJobById(UUID jobId) {
         LOG.debug("Attempting to delete job with ID {}", jobId);

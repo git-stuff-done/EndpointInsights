@@ -1,6 +1,8 @@
 <div class="modal-header">
-    <div mat-dialog-title class="header">
-        <h2 mat-dialog-title>{{data.name}}:{{ data.id }}</h2>
+    <div class="header">
+        <h2 mat-dialog-title class="truncate-id">
+            {{data.name}}: <span class="id-text">{{data.id}}</span>
+        </h2>
     </div>
 
     <mat-dialog-content>

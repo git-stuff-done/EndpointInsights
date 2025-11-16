@@ -16,7 +16,7 @@ export class JobService {
         return this.http.post<TestItem>(this.apiUrl, test);
     }
 
-    updateJob(id: number, test: TestItem): Observable<TestItem> {
+    updateJob(id: string, test: TestItem): Observable<TestItem> {
         return this.http.put<TestItem>(`${this.apiUrl}/${id}`, test);
     }
 }
