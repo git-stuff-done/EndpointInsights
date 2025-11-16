@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
+import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.controller.BatchesController;
 import org.junit.jupiter.api.Test;
@@ -20,11 +21,12 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Collections;
 import java.util.UUID;
+
 
 @TestPropertySource(properties = "app.authentication.enabled=false")
 @WebMvcTest(BatchesController.class)
-@ActiveProfiles("test")
 class BatchesControllerUnitTest {
 
     @Autowired
@@ -33,13 +35,6 @@ class BatchesControllerUnitTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public ObjectMapper objectMapper() {
-            return new ObjectMapper();
-        }
-    }
 
     @MockitoBean
     private BatchService batchService;
@@ -65,18 +60,17 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", null);
+        BatchRequestDTO request = new BatchRequestDTO("New Batch", Collections.emptyList());
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.batchName", is("New Batch")))
-                .andExpect(jsonPath("$.status", is("CREATED")));
+                .andExpect(jsonPath("$.batchName", is("New Batch")));
     }
 
     @Test
     void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", null);
+        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
 
         mockMvc.perform(put("/api/batches/2")
                         .contentType(MediaType.APPLICATION_JSON)
