@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @EntityListeners(AuditingEntityListener.class)
@@ -18,19 +19,19 @@ import java.time.LocalDateTime;
 public abstract class AuditingEntity {
 
     @CreatedBy
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_by", nullable = false, updatable = false)
     private String createdBy;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    @Column(name = "created_date",nullable = false, updatable = false)
+    private Instant createdDate;
 
     @LastModifiedBy
-    @Column(nullable = false, updatable = false)
-    private String lastModifiedBy;
+    @Column(name = "updated_by",nullable = false)
+    private String updatedBy;
 
     @LastModifiedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime lastModifiedDate;
+    @Column(name = "updated_date",nullable = false)
+    private Instant updatedDate;
 
 }
