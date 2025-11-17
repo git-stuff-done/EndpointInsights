@@ -1,56 +1,43 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NotificationService, NotificationType } from '../../services/notification.service';
 import { Subscription, timer } from 'rxjs';
-import {NgClass} from "@angular/common";
-
+import { NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-banner-notification',
     standalone: true,
-    template: `
-        @if (message) {
-            <div class="banner" [ngClass]="type">
-                <span>{{ message }}</span>
-                <button class="close-btn" (click)="dismiss()">×</button>
-            </div>
-        }
-    `,
-    imports: [
-        NgClass,
-    ],
-    styleUrls: ['./banner.component.scss']
-
+    imports: [NgClass],
+    templateUrl: './banner.component.html',
+    styleUrls: ['./banner.component.scss'],
 })
 export class BannerNotificationComponent implements OnInit, OnDestroy {
-    message: string | null = null;
-    type: NotificationType = 'info';
+
+    messages: { text: string; type: NotificationType }[] = [];
     private sub!: Subscription;
-    private timerSub?: Subscription;
 
     constructor(private notifications: NotificationService) {}
 
     ngOnInit() {
         this.sub = this.notifications.banner$.subscribe(notif => {
-            if (notif) {
-                this.message = notif.message;
-                this.type = notif.type;
-
-                // Auto-dismiss after 5 seconds
-                this.timerSub?.unsubscribe(); // cancel previous timer if any
-                this.timerSub = timer(5000).subscribe(() => this.dismiss());
-            } else {
-                this.message = null;
+            if (!notif) {
+                this.messages = [];
+                return;
             }
+
+            const msg = { text: notif.message, type: notif.type };
+            this.messages.push(msg);
+
+            // Auto-dismiss after 5 sec
+            timer(5000).subscribe(() => this.dismiss(msg));
         });
     }
 
-    dismiss() {
-        this.message = null;
+    dismiss(msg: { text: string; type: NotificationType }) {
+        this.messages = this.messages.filter(m => m !== msg);
         this.notifications.clearBanner();
-        this.timerSub?.unsubscribe();    }
+    }
 
     ngOnDestroy() {
         this.sub.unsubscribe();
-        this.timerSub?.unsubscribe();
     }
 }

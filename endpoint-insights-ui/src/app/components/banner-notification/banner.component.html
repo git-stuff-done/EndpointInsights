@@ -1,0 +1,6 @@
+@for (msg of messages; track $index) {
+    <div class="banner" [ngClass]="msg.type">
+        <span>{{ msg.text }}</span>
+        <button class="close-btn" (click)="dismiss(msg)">×</button>
+    </div>
+}
