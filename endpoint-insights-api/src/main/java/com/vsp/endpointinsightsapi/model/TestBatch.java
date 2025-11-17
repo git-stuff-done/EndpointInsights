@@ -3,24 +3,21 @@ package com.vsp.endpointinsightsapi.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDate;
 
 import java.util.*;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "test_batch")
-public class TestBatch {
+public class TestBatch extends AuditingEntity{
 
     @Id
     @GeneratedValue

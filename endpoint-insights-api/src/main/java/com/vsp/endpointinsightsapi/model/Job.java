@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job {
+public class Job extends AuditingEntity {
 
     @Id
     @ColumnDefault("get_random_uuid()")
@@ -33,6 +33,15 @@ public class Job {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "git_url")
+    private String gitUrl;
+
+    @Column(name = "run_command")
+    private String runCommand;
+
+    @Column(name = "compile_command")
+    private String compileCommand;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
@@ -60,16 +69,11 @@ public class Job {
     @Column(name = "status", nullable = false, length = 20)
     private JobStatus status = JobStatus.PENDING;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private Date updatedAt;
-
-    @Column(name = "started_at", nullable = false)
+    @Column(name = "started_at")
     private Date startedAt;
 
-    @Column(name = "completed_at", nullable = false)
+    @Column(name = "completed_at")
     private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job
@@ -78,14 +82,4 @@ public class Job {
     private Map<String, Object> config;
 
 
-    @PrePersist
-    void onCreate() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        this.updatedAt = new Date();
-    }
 }

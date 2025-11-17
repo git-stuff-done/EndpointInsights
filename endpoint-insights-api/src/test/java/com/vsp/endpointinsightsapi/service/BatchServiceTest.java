@@ -1,13 +1,10 @@
 package com.vsp.endpointinsightsapi.service;
 
-import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Optional;
@@ -19,28 +16,44 @@ import static org.mockito.Mockito.when;
 
 class BatchServiceTest {
 
-    @Mock
-    private TestBatchRepository batchRepository;
-    @Mock
+    private TestBatchRepository testBatchRepository;
     private JobRepository jobRepository;
-    @InjectMocks
     private BatchService batchService;
-    
 
     @BeforeEach
     void setUp() {
-        batchRepository = Mockito.mock(TestBatchRepository.class);
+        testBatchRepository = Mockito.mock(TestBatchRepository.class);
         jobRepository = Mockito.mock(JobRepository.class);
-        batchService = new BatchService(batchRepository, jobRepository);
+        batchService = new BatchService(testBatchRepository, jobRepository);
     }
 
     @Test
-    void createBatch_ReturnSavedBatch() {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", null);
-        when(batchRepository.save(any(TestBatch.class))).thenReturn(new TestBatch());
-        TestBatch testResult = batchService.createBatch(request);
-        assertThat(testResult).isNotNull();
-        Mockito.verify(batchRepository, Mockito.times(1)).save(any(TestBatch.class));
+    void getBatchById_shouldReturnBatchWhenFound() {
+        UUID id = UUID.randomUUID();
+        TestBatch mockBatch = new TestBatch();
+        mockBatch.setBatch_id(id);
+        mockBatch.setBatchName("Sample Batch");
+        mockBatch.setActive(true);
+
+        when(testBatchRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(mockBatch));
+
+        Optional<TestBatch> result = batchService.getBatchById(id);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getBatch_id()).isEqualTo(id);
+        assertThat(result.get().getBatchName()).isEqualTo("Sample Batch");
     }
 
+    @Test
+    void getBatchById_shouldReturnEmptyWhenNotFound() {
+        UUID id = UUID.randomUUID();
+
+        when(testBatchRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        Optional<TestBatch> result = batchService.getBatchById(id);
+
+        assertThat(result).isEmpty();
+    }
 }
