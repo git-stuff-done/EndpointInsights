@@ -39,11 +39,11 @@ public class Job extends AuditingEntity {
     private TestType testType;
 
 	@ManyToMany
-	@JoinTable(
-			name = "test_batch_tests",
-			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
-			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
-	)
+	// @JoinTable(
+	// 		name = "test_batch_tests",
+	// 		joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+	// 		inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	// )
 	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
