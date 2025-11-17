@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>Configure Batch</h2>
+
+<mat-dialog-content class="modal-body">
+    <mat-tab-group [dynamicHeight]="false" animationDuration="200ms">
+        <!-- NAME TAB -->
+        <mat-tab label="Name">
+            <div class="tab-pane" *ngIf="!loading(); else loadingTpl">
+                <form [formGroup]="form" class="form grid">
+                    <!-- Application Name -->
+                    <mat-form-field appearance="outline" class="full tight-field">
+                        <mat-label>Application Name</mat-label>
+                        <input matInput placeholder="e.g. Payments Service" formControlName="title" />
+                        <button
+                                mat-icon-button
+                                matSuffix
+                                (click)="saveTitle()"
+                                [disabled]="form.controls.title.invalid"
+                                aria-label="Save title">
+                            <mat-icon>save</mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    <!-- Test Count -->
+                    <div class="kv">
+                        <div class="label">Number of Tests</div>
+                        <div class="value">
+                            {{ testCount() ?? '—' }}
+                            <button
+                                    mat-icon-button
+                                    (click)="refreshCount()"
+                                    aria-label="Refresh test count"
+                                    class="refresh-btn">
+                                <mat-icon>refresh</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Next Scheduled Run -->
+                    <div class="schedule-row">
+                        <mat-form-field appearance="outline" class="tight-field">
+                            <mat-label>Next Run (Date)</mat-label>
+                            <input matInput [matDatepicker]="picker" formControlName="nextRunDate" />
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="tight-field">
+                            <mat-label>Time (HH:MM)</mat-label>
+                            <input matInput placeholder="HH:MM" formControlName="nextRunTime" />
+                        </mat-form-field>
+                    </div>
+                </form>
+            </div>
+        </mat-tab>
+
+        <!-- Placeholder tabs for future content -->
+        <mat-tab label="Overview" disabled></mat-tab>
+        <mat-tab label="Settings" disabled></mat-tab>
+        <mat-tab label="Runs" disabled></mat-tab>
+    </mat-tab-group>
+
+    <ng-template #loadingTpl>
+        <div class="loading">Loading…</div>
+    </ng-template>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="close()">Done</button>
+</mat-dialog-actions>

@@ -4,7 +4,10 @@ import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.service.BatchService;
+import com.vsp.endpointinsightsapi.controller.BatchesController;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -16,8 +19,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+
+
+import java.util.UUID;
+import java.util.Collections;
+
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,6 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //Unit tests for BatchesController.
 @WebMvcTest(controllers = BatchesController.class)
 @TestPropertySource(properties = "app.authentication.enabled=false")
+@TestPropertySource(properties = "app.authentication.enabled=false")
+@WebMvcTest(BatchesController.class)
 class BatchesControllerUnitTest {
 
     @Autowired
@@ -75,21 +84,21 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", "Description");
-
+        BatchRequestDTO request = new BatchRequestDTO("New Batch", Collections.emptyList());
+        TestBatch batch = new TestBatch();
+        batch.setBatchName("New Batch");
+        Mockito.when(batchService.createBatch(Mockito.any(BatchRequestDTO.class)))
+                .thenReturn(batch);
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(99)))
-                .andExpect(jsonPath("$.name", is("New Batch")))
-                .andExpect(jsonPath("$.status", is("CREATED")));
+                .andExpect(jsonPath("$.batchName", is("New Batch")));
     }
 
     @Test
     void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", "Updated Description");
-
+        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
         mockMvc.perform(put("/api/batches/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
