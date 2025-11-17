@@ -2,6 +2,11 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +16,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/batches")
 public class BatchesController {
+	private final static Logger LOG = LoggerFactory.getLogger(BatchesController.class);
+	private final BatchService batchService;
+
+	public BatchesController(BatchService batchService) {
+		this.batchService = batchService;
+	}
 
 	@GetMapping
 	public ResponseEntity<List<BatchResponseDTO>> listBatches() {
@@ -28,9 +39,9 @@ public class BatchesController {
 	}
 
 	@PostMapping
-	public ResponseEntity<BatchResponseDTO> createBatch(@RequestBody BatchRequestDTO request) {
-		BatchResponseDTO created = new BatchResponseDTO(99L, request.getName(), "CREATED");
-		return ResponseEntity.status(HttpStatus.CREATED).body(created);
+	public ResponseEntity<TestBatch> createBatch(@RequestBody BatchRequestDTO request) {
+		TestBatch batch = batchService.createBatch(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
 	@PutMapping("/{id}")
