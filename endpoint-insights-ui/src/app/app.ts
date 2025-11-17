@@ -2,6 +2,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule, MatButton } from '@angular/material/button';
+import {AuthenticationService} from "./services/authentication.service";
 
 @Component({
     selector: 'app-root',
@@ -12,4 +13,6 @@ import { MatButtonModule, MatButton } from '@angular/material/button';
 })
 export class AppComponent {
     readonly title = signal('endpoint-insights-ui'); // needed for the test
+    constructor(public authService: AuthenticationService) {}
+
 }

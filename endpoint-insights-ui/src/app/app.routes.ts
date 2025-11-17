@@ -1,32 +1,19 @@
-import { Routes } from '@angular/router';
-import { DashboardComponent } from './dashboard-component/dashboard-component';
-import { LoginComponent } from './login-component/login-component';
+import {Routes} from '@angular/router';
+import {DashboardComponent} from './dashboard-component/dashboard-component';
+import {LoginComponent} from './login-component/login-component';
+import {BatchComponent} from "./batch-component/batch-component";
+import {TestOverview} from "./pages/test-overview/test-overview";
+import {AuthCallback} from "./authentication/auth-callback/auth-callback";
+import {PageNotFoundComponent} from "./page-not-found-component/page-not-found-component";
+import {authGuard} from "./auth-guard";
+import {TestsResultsPageComponent} from "./pages/Test-Results-Page/tests-results-page.component";
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
-    { path: '', component: DashboardComponent, pathMatch: 'full' },
-    {
-        path: 'batches',
-        loadComponent: () =>
-            import('./batch-component/batch-component').then(m => m.BatchComponent),
-    },
-    {
-        path: 'tests',
-        loadComponent: () =>
-            import('./pages/test-overview/test-overview').then(m => m.TestOverview),
-    },
-    {
-        path: 'test-results',
-        loadComponent: () =>
-            import('./pages/Test-Results-Page/tests-results-page.component').then(
-                m => m.TestsResultsPageComponent,
-            ),
-    },
-    {
-        path: '**',
-        loadComponent: () =>
-            import('./page-not-found-component/page-not-found-component').then(
-                m => m.PageNotFoundComponent,
-            ),
-    },
+    { path: 'auth/callback', component: AuthCallback, pathMatch: 'full'},
+    { path: '', component: DashboardComponent, pathMatch: 'full', canActivate: [authGuard] },
+    { path: 'batches', component: BatchComponent, canActivate: [authGuard] },
+    { path: 'tests', component: TestOverview, canActivate: [authGuard] },
+    { path: 'test-results', component: TestsResultsPageComponent, canActivate: [authGuard]},
+    { path: '**', component: PageNotFoundComponent },
 ];
