@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +17,14 @@ import static org.mockito.Mockito.when;
 class BatchServiceTest {
 
     private TestBatchRepository testBatchRepository;
+    private JobRepository jobRepository;
     private BatchService batchService;
 
     @BeforeEach
     void setUp() {
-        // Create a mock repository and inject it into the service
         testBatchRepository = Mockito.mock(TestBatchRepository.class);
-        batchService = new BatchService(testBatchRepository);
+        jobRepository = Mockito.mock(JobRepository.class);
+        batchService = new BatchService(testBatchRepository, jobRepository);
     }
 
     @Test
