@@ -5,41 +5,93 @@ import { TestRecord } from '../models/test-record.model';
 import { MatButtonModule } from '@angular/material/button';
 //import { ModalService } from '../shared/modal/modal.service';
 
+export interface DashboardTestActivity {
+    id: string;
+    testName: string;
+    group: string;
+    dateRun: Date;
+    durationMs: number;
+    startedBy: string;
+    status: 'PASS' | 'FAIL';
+}
+
+export interface DashboardAlert {
+    id: string;
+    message: string;
+    severity: 'warning' | 'error';
+}
+
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, TestResultsCardComponent, MatButtonModule],
+    imports: [CommonModule, MatButtonModule],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
 export class DashboardComponent {
-    // ----------------------
-    tests: TestRecord[] = [
+
+    // KPI metrics
+    activeJobsTotal = 12;
+    activeJobsScheduled = 9;
+    activeJobsManual = 3;
+
+    failuresLast24h = 3;
+    failureEndpointsCount = 2;
+
+    passingPercentage = 92;
+    passingRuns = 230;
+    totalRuns = 250;
+
+    averageLatencyMs = 350;
+    latencyThresholdMs = 400;
+
+    // Chart data placeholders
+    apiPerformanceData = [];   // replace with real shape later
+    apiTrendData = [];         // same here
+
+    // Recent activity mock data
+    tests: DashboardTestActivity[] = [
         {
-            id: 'login-api',
-            name: 'Login API',
-            description: 'Auth flow correctness & responsiveness.',
-            status: 'PASS',
-            lastRunIso: new Date().toISOString(),
-            latencyMsP50: 42, latencyMsP95: 120, latencyMsP99: 210,
-            volume1m: 530, volume5m: 2510,
-            httpBreakdown: [{ code: 200, count: 2478 }, { code: 401, count: 8 }, { code: 500, count: 1 }],
-            errorRatePct: 0.4,
-            thresholds: { latencyMs: { warn: 200, fail: 400 }, errorRatePct: { warn: 1.0, fail: 2.5 }, volumePerMin: { warn: 100, fail: 20 } }
+            id: 'vision-api-daily',
+            testName: 'Vision API',
+            group: 'Daily',
+            dateRun: new Date('2025-07-10'),
+            durationMs: 230,
+            startedBy: 'J. Brock',
+            status: 'PASS'
         },
         {
-            id: 'payments',
-            name: 'Payments',
-            description: 'Card authorization and capture path.',
-            status: 'FAIL',
-            lastRunIso: new Date().toISOString(),
-            latencyMsP50: 320, latencyMsP95: 900, latencyMsP99: 1900,
-            volume1m: 75, volume5m: 450,
-            httpBreakdown: [{ code: 200, count: 240 }, { code: 429, count: 22 }, { code: 500, count: 31 }],
-            errorRatePct: 9.8,
-            thresholds: { latencyMs: { warn: 250, fail: 600 }, errorRatePct: { warn: 2.0, fail: 5.0 }, volumePerMin: { warn: 60, fail: 30 } }
+            id: 'services-api-manual',
+            testName: 'Services API',
+            group: 'N/A',
+            dateRun: new Date('2025-07-10'),
+            durationMs: 20,
+            startedBy: 'F. Zappa',
+            status: 'PASS'
         }
     ];
 
-    trackById = (_: number, t: TestRecord) => t.id;
+    // Alerts mock data
+    alerts: DashboardAlert[] = [
+        {
+            id: 'checkout-latency',
+            message:
+                'Checkout API latency spike, 600 ms average (threshold 400 ms), notified DevOps team',
+            severity: 'warning'
+        },
+        {
+            id: 'auth-error-rate',
+            message:
+                'Auth API error rate above 5 percent, job failed, email sent to API owners',
+            severity: 'error'
+        },
+        {
+            id: 'profile-missed',
+            message:
+                'Profile API scheduled run missed, retrying in 15 minutes',
+            severity: 'warning'
+        }
+    ];
+
+    // keep any other existing code you already had in here
 }
