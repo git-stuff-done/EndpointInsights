@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import {MatDialog} from "@angular/material/dialog";
+import {CreateJobModal} from "../../components/create-job-modal/create-job-modal";
 
 export interface TestItem {
       id: string;
@@ -24,10 +26,6 @@ export interface TestItem {
   ],
 })
 export class TestOverview {
-    onNewTest() {
-        console.log('New Test button clicked!');
-      }
-
     onFilter() {
         console.log('Filter Button clicked');
       }
@@ -43,4 +41,21 @@ export class TestOverview {
     onRun(t: TestItem)   { console.log('Run Clicked') }
     onEdit(t: TestItem)  { console.log('Edit Clicked') }
     onDelete(t: TestItem){ console.log('Delete Clicked') }
+
+
+    constructor(private dialog: MatDialog){}
+
+    openCreateJobModal() {
+        const dialogRef = this.dialog.open(CreateJobModal, {
+            width: '600px',
+            maxWidth: '95vw'
+        });
+
+        dialogRef.afterClosed().subscribe((result: any) => {
+            if (result) {
+                console.log("New job created:", result);
+                //handle backend call to create new job
+            }
+        });
+    }
 }

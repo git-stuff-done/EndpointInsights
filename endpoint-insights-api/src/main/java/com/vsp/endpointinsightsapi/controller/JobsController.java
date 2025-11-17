@@ -3,11 +3,9 @@ import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.service.JobService;
 // import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
-import com.vsp.endpointinsightsapi.validation.Patterns;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +38,7 @@ public class JobsController {
 	 * @param request the job details
 	 * @return the created Job
 	 * */
-	@PostMapping //("/")
-	// public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
-	// 	try {
-	// 		jobService.createJob(jobRequest);
-	// 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
-	// 	} catch (RuntimeException e) {
-	// 		LOG.error("Error creating job: {}", e.getMessage());
-	// 		return new ResponseEntity<>(null);
-	// 	}
-	// }
+	@PostMapping
 	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
 		LOG.info("Creating job");
 		try {

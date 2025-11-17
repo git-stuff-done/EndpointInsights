@@ -14,8 +14,7 @@
         </div>
 
         <div class="actions">
-            <!-- Use the existing icon button to open the modal -->
-            <button mat-stroked-button color="primary" (click)="onConfigure()">
+            <button mat-stroked-button color="primary" (click)="configure.emit(batch)">
                 <mat-icon aria-hidden="true">settings</mat-icon>
                 Configure
             </button>
