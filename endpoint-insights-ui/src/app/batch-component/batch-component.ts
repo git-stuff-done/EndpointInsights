@@ -1,26 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Batch } from '../models/batch.model';
+import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+
 import { BatchCardComponent } from './components/batch-card/batch-card.component';
+import { Batch } from '../models/batch.model';
+import { BatchStore } from '../services/batch-store.service';
+import { BatchConfigDialogComponent } from '../shared/modal/batch-config-dialog.component';
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent,],
+    imports: [CommonModule, BatchCardComponent],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
-export class BatchComponent {
-  // mock data for now; I will need to fetch this from the server later
-  batches: Batch[] = [
-    { id: 'B-2025-00123', title: 'Nightly ETL (US-East)', date: '2025-10-17T02:13:00Z' },
-    { id: 'B-2025-00124', title: 'Customer Backfill – Oct', date: '2025-10-18T15:45:00Z' },
-  ];
+export class BatchComponent implements OnInit, OnDestroy {
+    private readonly store = inject(BatchStore);
+    private readonly dialog = inject(MatDialog);
+    private sub?: Subscription;
 
-  onConfigure(batch: Batch) {
-    // gotta hook this up to the server later
-    console.log('Configure clicked:', batch);
-  }
+    batch: Batch[] = [];
 
-  trackById = (_: number, b: Batch) => b.id;
+    ngOnInit() {
+        this.sub = this.store.batches$.subscribe(list => this.batch = list);
+    }
+    ngOnDestroy() { this.sub?.unsubscribe(); }
+
+    trackById = (_: number, b: Batch) => b.id;
+
+    onConfigure(batch: Batch) {
+        this.dialog.open(BatchConfigDialogComponent, {
+            width: '720px',
+            data: { batchId: batch.id, title: batch.title }
+        }).afterClosed().subscribe(result => {
+            if (!result) return;
+            const { title, nextRunIso } = result;
+            this.store.update(batch.id, {
+                title: typeof title === 'string' && title.trim() ? title.trim() : batch.title,
+                date: nextRunIso ?? batch.date
+            });
+        });
+    }
 }

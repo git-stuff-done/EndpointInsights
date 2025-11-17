@@ -25,8 +25,13 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "id", nullable = false)
     private UUID batch_id;
 
-   @ManyToMany(mappedBy = "testBatches")
-   private List<Job> jobs;
+   @ManyToMany
+   @JoinTable(
+        name = "batch_jobs",
+        joinColumns = @JoinColumn(name = "batch_id"),
+        inverseJoinColumns = @JoinColumn(name = "job_id")
+        )
+   private List<Job> jobs = new ArrayList<>();
 
     @Column(name = "batch_name", nullable = false)
     String batchName;

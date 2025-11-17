@@ -25,7 +25,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/jobs")
 @Validated
-@CrossOrigin(origins = "http://localhost:4200")
 public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);

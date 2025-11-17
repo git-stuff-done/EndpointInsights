@@ -36,16 +36,25 @@ public class Job  extends AuditingEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "git_url")
+    private String gitUrl;
+
+    @Column(name = "run_command")
+    private String runCommand;
+
+    @Column(name = "compile_command")
+    private String compileCommand;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType jobType;
 
 	@ManyToMany
-	@JoinTable(
-			name = "test_batch_tests",
-			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
-			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
-	)
+	// @JoinTable(
+	// 		name = "test_batch_tests",
+	// 		joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+	// 		inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	// )
 	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
