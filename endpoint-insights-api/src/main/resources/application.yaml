@@ -33,6 +33,7 @@ spring:
 app:
   authentication:
     enabled: true
+    callback-uri: ${OID_CLIENT_CALLBACK_URI:http://localhost:4200/auth/callback}
     groups:
       write: "ei:write"
       read: "ei:read"
@@ -40,9 +41,6 @@ app:
       username: ${AUTH_USERNAME_CLAIM:preferred_username}
       email: ${AUTH_EMAIL_CLAIM:email}
       groups: ${AUTH_GROUPS_CLAIM:groups}
-    endpoints:
-      public-endpoints:
-        - "/api/health"
   cors:
     allow-credentials: true
     allowed-methods:
@@ -53,4 +51,5 @@ app:
       - "OPTIONS"
     allowed-origins:
       - "http://localhost:8080"
+      - "http://localhost:4200"
 

@@ -1,30 +1,19 @@
-import { Component } from '@angular/core';
-import { BannerNotificationComponent } from '../components/banner-notification/banner.component';
-import { NotificationService } from '../services/notification.service';
-import {Router, RouterOutlet} from '@angular/router';
+import {Component} from '@angular/core';
+import {AuthenticationService} from "../services/authentication.service";
+import {NotificationService} from '../services/notification.service';
+
 
 @Component({
     selector: 'app-login',
-    imports: [BannerNotificationComponent, RouterOutlet],
+    imports: [],
     templateUrl: './login-component.html',
     styleUrl: './login-component.scss'
 })
 export class LoginComponent {
-    constructor(private notifications: NotificationService, private router: Router) {}
 
-    login() {
-        const success = true; // TODO: Replace with actual auth logic
-        if (success) {
-            this.notifications.showBanner('You have successfully logged in', 'success');
-            setTimeout(() => {
-                this.router.navigate(['/']);
-            }, 2000);
-        } else {
-            //this.notifications.showBanner('Login failed. Try again.', 'error'); removed for testing purpose
-        }
-    }
+  constructor(private authService: AuthenticationService, private notifications: NotificationService) {}
 
-    showBanner() {
-        this.notifications.showBanner('You have successfully logged in', 'success');
-    }
+  public login():void {
+    this.authService.login();
+  }
 }

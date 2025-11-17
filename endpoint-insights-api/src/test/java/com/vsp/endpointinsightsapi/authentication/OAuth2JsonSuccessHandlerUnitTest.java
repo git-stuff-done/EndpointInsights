@@ -77,6 +77,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn(userName);
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(authProperties.getClaims()).thenReturn(claimsConfig);
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
@@ -87,22 +88,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
 
         handler.onAuthenticationSuccess(request, response, oauth2AuthenticationToken);
 
-        assertEquals("application/json", response.getContentType());
-        assertEquals(200, response.getStatus());
-
-        String responseBody = response.getContentAsString();
-        assertNotNull(responseBody);
-        assertTrue(responseBody.contains(tokenValue));
-        assertTrue(responseBody.contains(username));
-        assertTrue(responseBody.contains(email));
-        assertTrue(responseBody.contains(String.valueOf(expiresAt.getEpochSecond())));
-
-        verify(oidcUser).getName();
-        verify(oidcUser).getIdToken();
-        verify(oidcUser).getAttribute("preferred_username");
-        verify(oidcUser).getAttribute("email");
-        verify(oidcIdToken).getExpiresAt();
-        verify(oidcIdToken).getTokenValue();
+        assertEquals(HttpStatus.FOUND.value(), response.getStatus());
     }
 
     @Test
@@ -281,19 +267,13 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         );
 
         when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
 
         handler.onAuthenticationSuccess(request, response, realOAuth2Token);
 
-        assertEquals("application/json", response.getContentType());
-        assertEquals(200, response.getStatus());
-
-        String responseBody = response.getContentAsString();
-        assertNotNull(responseBody);
-        assertTrue(responseBody.contains("realuser"));
-        assertTrue(responseBody.contains("realuser@example.com"));
-        assertTrue(responseBody.contains("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.real.token"));
+        assertEquals(HttpStatus.FOUND.value(), response.getStatus());
     }
 
     @Test
@@ -307,6 +287,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oidcUser.getName()).thenReturn("JSON User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
         when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
@@ -316,15 +297,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
 
         handler.onAuthenticationSuccess(request, response, oauth2AuthenticationToken);
 
-        String responseBody = response.getContentAsString();
-
-        Map<String, Object> parsedResponse = objectMapper.readValue(responseBody, Map.class);
-
-        assertEquals(tokenValue, parsedResponse.get("idToken"));
-        assertEquals(1234567890, parsedResponse.get("expiresAt"));
-        assertEquals(username, parsedResponse.get("username"));
-        assertEquals(email, parsedResponse.get("email"));
-        assertEquals(4, parsedResponse.size());
+        assertEquals(HttpStatus.FOUND.value(), response.getStatus());
     }
 
     @Test
@@ -338,6 +311,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oidcUser.getName()).thenReturn("Special Char User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
         when(authProperties.getClaims()).thenReturn(claimsConfig);
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
@@ -347,9 +321,6 @@ public class OAuth2JsonSuccessHandlerUnitTest {
 
         handler.onAuthenticationSuccess(request, response, oauth2AuthenticationToken);
 
-        assertEquals(200, response.getStatus());
-        String responseBody = response.getContentAsString();
-        assertTrue(responseBody.contains(username));
-        assertTrue(responseBody.contains(email));
+        assertEquals(HttpStatus.FOUND.value(), response.getStatus());
     }
 }
