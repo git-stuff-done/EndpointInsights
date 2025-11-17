@@ -17,13 +17,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BatchServiceTest {
 
-    @Mock TestBatchRepository repo;
-    @InjectMocks BatchService service;
+    @Mock TestBatchRepository testBatchRepository;
+    @InjectMocks BatchService batchService;
 
     @Test
     void getBatchById_returnsDto() {
@@ -37,9 +38,9 @@ class BatchServiceTest {
         entity.setLastTimeRun(LocalDate.parse("2025-11-09"));
         entity.setActive(true);
 
-        when(repo.findById(id)).thenReturn(Optional.of(entity));
+        when(testBatchRepository.findById(id)).thenReturn(Optional.of(entity));
 
-        BatchResponseDTO dto = service.getBatchById(id);
+        BatchResponseDTO dto = batchService.getBatchById(id);
 
         assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getBatchName()).isEqualTo("Example");
@@ -50,8 +51,26 @@ class BatchServiceTest {
     @Test
     void getBatchById_notFound_throws() {
         UUID id = UUID.randomUUID();
-        when(repo.findById(id)).thenReturn(Optional.empty());
+        when(testBatchRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(BatchNotFoundException.class, () -> service.getBatchById(id));
+        assertThrows(BatchNotFoundException.class, () -> batchService.getBatchById(id));
+    }
+
+    @Test
+    void deleteBatchById_Exists() {
+        UUID id = UUID.randomUUID();
+        when(testBatchRepository.existsById(id)).thenReturn(true);
+
+        batchService.deleteBatchById(id);
+
+        verify(testBatchRepository).deleteById(id);
+    }
+
+    @Test
+    void deleteBatchById_NotFound() {
+        UUID id = UUID.randomUUID();
+        when(testBatchRepository.existsById(id)).thenReturn(false);
+
+        assertThrows(BatchNotFoundException.class, () -> batchService.deleteBatchById(id));
     }
 }
