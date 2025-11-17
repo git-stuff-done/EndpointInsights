@@ -23,11 +23,9 @@ import java.time.LocalDateTime;
 public abstract class AuditingEntity {
 
     @CreatedBy
-    @Column(name = "created_by", nullable = false)
     private String createdBy;
 
     @CreatedDate
-    @Column(name = "created_date",nullable = false)
     private Instant createdDate;
 
     @LastModifiedBy

@@ -3,9 +3,11 @@ import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.service.JobService;
 // import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
+import com.vsp.endpointinsightsapi.validation.Patterns;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,19 +41,15 @@ public class JobsController {
 	 * @return the created Job
 	 * */
 	@PostMapping
-	public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest request) {
-		LOG.info("Creating job");
-		try {
-			Job newJob = new Job();
-			newJob.setName(request.getName());
-			jobService.createJob(newJob);
-			return new ResponseEntity<>(newJob, HttpStatus.CREATED);
-		} catch (RuntimeException e) {
-			LOG.error("Error creating job: {}", e.getMessage());
-			return new ResponseEntity<>(null);
-		}
-		
-	}
+	 public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+	 	try {
+	 		jobService.createJob(jobRequest);
+	 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+	 	} catch (RuntimeException e) {
+	 		LOG.error("Error creating job: {}", e.getMessage());
+	 		return new ResponseEntity<>(null);
+	 	}
+	 }
 
 	/**
 	 * Endpoint to update a job resource.
@@ -64,18 +62,15 @@ public class JobsController {
 	public ResponseEntity<Job> updateJob(
 			@RequestBody
 			@Valid
-			JobUpdateRequest request,
+			Job request,
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
 			UUID jobId) {
 		LOG.info("Updating job");
 
-		Job updatedJob = new Job();
-		updatedJob.setJobId(jobId);
-		updatedJob.setName("Updated Job #" + jobId);
-		updatedJob.setDescription("This is a stub for job #" + jobId);
+        Job savedJob = jobService.updateJob(jobId, request);
 
-		return ResponseEntity.ok(updatedJob);
+		return ResponseEntity.ok(savedJob);
 	}
 
 	/**

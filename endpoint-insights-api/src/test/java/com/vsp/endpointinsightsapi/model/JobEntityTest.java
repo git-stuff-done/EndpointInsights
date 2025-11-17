@@ -9,6 +9,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class JobEntityTest {
 
+
     @Test
     void shouldDefaultToPendingStatus() {
         Job job = new Job();

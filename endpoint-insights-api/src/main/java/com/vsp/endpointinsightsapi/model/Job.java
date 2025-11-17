@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
@@ -21,10 +22,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job extends AuditingEntity {
+public class Job  extends AuditingEntity {
 
     @Id
-    @ColumnDefault("get_random_uuid()")
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "job_id")
     private UUID jobId;
 
@@ -45,7 +47,7 @@ public class Job extends AuditingEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
-    private TestType testType;
+    private TestType jobType;
 
 	@ManyToMany
 	// @JoinTable(
@@ -69,12 +71,6 @@ public class Job extends AuditingEntity {
     @Column(name = "status", nullable = false, length = 20)
     private JobStatus status = JobStatus.PENDING;
 
-
-    @Column(name = "started_at")
-    private Date startedAt;
-
-    @Column(name = "completed_at")
-    private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job
     @JdbcTypeCode(SqlTypes.JSON)
