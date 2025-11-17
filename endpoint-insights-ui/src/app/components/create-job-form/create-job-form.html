@@ -1,0 +1,47 @@
+<form [formGroup]="createJobForm">
+    <div class="form-row">
+        <mat-form-field>
+            <mat-label>Job Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Job Description</mat-label>
+            <textarea matInput formControlName="description"></textarea>
+            <mat-error>{{ getErrorMessage('description') }}</mat-error>
+        </mat-form-field>
+    </div>
+
+    <div class="form-row">
+        <mat-form-field>
+            <mat-label>Git Url</mat-label>
+            <input matInput formControlName="gitUrl">
+            <mat-error>{{ getErrorMessage('gitUrl') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Job Type</mat-label>
+            <mat-select panelClass="create-job-form-type-select-panel" formControlName="jobType">
+                <mat-option class="create-job-form-type-select-option" value="jmeter">JMeter</mat-option>
+                <mat-option class="create-job-form-type-select-option" value="jbehave">JBehave</mat-option>
+                <mat-option class="create-job-form-type-select-option" value="nightwatch">Nightwatch</mat-option>
+            </mat-select>
+            <mat-error>{{ getErrorMessage('jobType') }}</mat-error>
+        </mat-form-field>
+    </div>
+
+    <div class="form-row form-row-commands">
+        <mat-form-field>
+            <mat-label>Run Command</mat-label>
+            <input matInput formControlName="runCommand">
+            <mat-error>{{ getErrorMessage('runCommand') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Compile Command</mat-label>
+            <input matInput formControlName="compileCommand">
+            <mat-error>{{ getErrorMessage('compileCommand') }}</mat-error>
+        </mat-form-field>
+    </div>
+</form>

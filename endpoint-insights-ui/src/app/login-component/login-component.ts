@@ -1,18 +1,19 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {AuthenticationService} from "../services/authentication.service";
+import {NotificationService} from '../services/notification.service';
+
 
 @Component({
-  selector: 'app-login',
-  imports: [],
-  templateUrl: './login-component.html',
-  styleUrl: './login-component.scss'
+    selector: 'app-login',
+    imports: [],
+    templateUrl: './login-component.html',
+    styleUrl: './login-component.scss'
 })
 export class LoginComponent {
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(private authService: AuthenticationService, private notifications: NotificationService) {}
 
   public login():void {
     this.authService.login();
   }
-
 }
