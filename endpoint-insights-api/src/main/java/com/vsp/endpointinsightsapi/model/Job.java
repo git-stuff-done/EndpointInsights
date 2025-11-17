@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 import java.util.Date;
@@ -21,10 +22,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job {
+public class Job  extends AuditingEntity {
 
     @Id
-    @ColumnDefault("get_random_uuid()")
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "job_id")
     private UUID jobId;
 
@@ -34,16 +36,25 @@ public class Job {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "git_url")
+    private String gitUrl;
+
+    @Column(name = "run_command")
+    private String runCommand;
+
+    @Column(name = "compile_command")
+    private String compileCommand;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
-    private TestType testType;
+    private TestType jobType;
 
 	@ManyToMany
-	@JoinTable(
-			name = "test_batch_tests",
-			joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
-			inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
-	)
+	// @JoinTable(
+	// 		name = "test_batch_tests",
+	// 		joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
+	// 		inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
+	// )
 	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
@@ -60,17 +71,6 @@ public class Job {
     @Column(name = "status", nullable = false, length = 20)
     private JobStatus status = JobStatus.PENDING;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Date updatedAt;
-
-    @Column(name = "started_at", nullable = false)
-    private Date startedAt;
-
-    @Column(name = "completed_at", nullable = false)
-    private Date completedAt;
 
     // JSONB config: arbitrary key/value settings for the job
     @JdbcTypeCode(SqlTypes.JSON)
@@ -78,14 +78,4 @@ public class Job {
     private Map<String, Object> config;
 
 
-    @PrePersist
-    void onCreate() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        this.updatedAt = new Date();
-    }
 }
