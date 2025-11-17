@@ -19,7 +19,10 @@ export class BannerNotificationComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.sub = this.notifications.banner$.subscribe(notif => {
-            if (!notif) return;
+            if (!notif) {
+                this.messages = [];
+                return;
+            }
 
             const msg = { text: notif.message, type: notif.type };
             this.messages.push(msg);
