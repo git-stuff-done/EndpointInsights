@@ -31,7 +31,6 @@ export interface TestItem {
       CommonModule,
       MatIconModule,
       MatButtonModule,
-      EditJobModal
   ],
 })
 export class TestOverview {
