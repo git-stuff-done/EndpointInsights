@@ -1,3 +1,6 @@
+<app-banner-notification></app-banner-notification>
+<router-outlet></router-outlet>
+
 <div class="login-wrapper">
     <div class = "header">
         <h2>EndPoint Insights</h2>
@@ -9,7 +12,7 @@
             <div class="welcome-text">Login to Access Dashboard</div>
         </div>
         <div class="button-container">
-            <button class="login-button">Log In With SSO</button>
+            <button class="login-button" (click)="login()">Log In With SSO</button>
         </div>
     </div>
 </div>
