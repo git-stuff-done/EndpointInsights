@@ -43,8 +43,8 @@
 .banner button:hover {
   background: rgba(255, 255, 255, 0.3);
 }
-+
-+.banner button:focus-visible {
-+  outline: 2px solid rgba(255, 255, 255, 0.6);
-+  outline-offset: 2px;
-+}
+
+.banner button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
