@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
-import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {environment} from "../../environment";
+import {jwtDecode} from "jwt-decode";
 
 interface UserInfo {
   expiresAt: number;
@@ -54,16 +55,16 @@ export class AuthenticationService {
     if (this.userInfo)
       return;
 
-   this.httpClient.get<UserInfo>(`${this.apiUrl}/auth/user-info`, {
-      headers: new HttpHeaders().set('Authorization', `Bearer ${this.getToken()}`),
-    }).pipe(
-        catchError(error => {
-          console.error(error);
-          throw error;
-        })
-    ).subscribe(userInfo => {
-      this.userInfo = userInfo;
-   })
+    const decodedToken = jwtDecode(this.token!) as any;
+
+    if (decodedToken) {
+      this.userInfo = {
+        username: decodedToken.preferred_username,
+        email: decodedToken.email,
+        roles: decodedToken.groups,
+        expiresAt: decodedToken.exp
+      } as UserInfo;
+    }
   }
 
   /**
