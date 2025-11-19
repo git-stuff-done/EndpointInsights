@@ -3,6 +3,7 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
+import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 class BatchServiceTest {
 
     @Mock TestBatchRepository testBatchRepository;
+    @Mock BatchMapper batchMapper;
     @InjectMocks BatchService batchService;
 
     @Test
@@ -40,12 +41,22 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(id)).thenReturn(Optional.of(entity));
 
-        BatchResponseDTO dto = batchService.getBatchById(id);
+        BatchResponseDTO dto = BatchResponseDTO.builder()
+                .id(id)
+                .batchName("Example")
+                .scheduleId(1001L)
+                .startTime(LocalDate.parse("2025-11-08"))
+                .lastTimeRun(LocalDate.parse("2025-11-09"))
+                .active(true)
+                .build();
+        when(batchMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(dto.getId()).isEqualTo(id);
-        assertThat(dto.getBatchName()).isEqualTo("Example");
-        assertThat(dto.getScheduleId()).isEqualTo(1001L);
-        assertThat(dto.getActive()).isTrue();
+        BatchResponseDTO out = batchService.getBatchById(id);
+
+        assertEquals(id, out.getId());
+        assertEquals("Example", out.getBatchName());
+        verify(testBatchRepository).findById(id);
+        verify(batchMapper).toDto(entity);
     }
 
     @Test
