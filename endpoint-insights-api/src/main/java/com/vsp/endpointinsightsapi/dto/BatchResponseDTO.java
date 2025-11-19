@@ -20,5 +20,4 @@ public class BatchResponseDTO {
     private LocalDate startTime;
     private LocalDate lastTimeRun;
     private Boolean active;
-//    private List<Job> jobs; Jobs Table not created yet
 }
