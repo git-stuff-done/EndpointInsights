@@ -1,11 +1,12 @@
 package com.vsp.endpointinsightsapi.dto;
 
+import java.util.List;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 
 @Getter
@@ -14,7 +15,5 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class BatchRequestDTO {
     private String name;
-    private Long scheduleId;
-    private LocalDate startTime;
-    private Boolean active;
+    private List<UUID> jobIds;
 }

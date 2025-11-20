@@ -2,41 +2,39 @@ package com.vsp.endpointinsightsapi.controller;
 
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
+import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
-import com.vsp.endpointinsightsapi.service.BatchService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @TestPropertySource(properties = "app.authentication.enabled=false")
-@WebMvcTest(BatchesController.class)
-@ActiveProfiles("test")
+@WebMvcTest(controllers = BatchesController.class)
 class BatchesControllerUnitTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean
     private BatchService batchService;
-
 
     @Test
     void shouldReturnListOfBatches() throws Exception {
@@ -60,7 +58,6 @@ class BatchesControllerUnitTest {
                 .startTime(LocalDate.parse("2025-11-08"))
                 .lastTimeRun(LocalDate.parse("2025-11-09"))
                 .active(true)
-//                .jobs(Collections.emptyList()) Jobs not implemented yet
                 .build();
 
         when(batchService.getBatchById(id)).thenReturn(dto);
@@ -84,31 +81,23 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO(
-                "New Batch",
-                5001L,
-                LocalDate.now(),
-                true
-        );
+        BatchRequestDTO request = new BatchRequestDTO("New Batch", Collections.emptyList());
+        TestBatch batch = new TestBatch();
+        batch.setBatchName("New Batch");
+
+        Mockito.when(batchService.createBatch(Mockito.any(BatchRequestDTO.class)))
+                .thenReturn(batch);
 
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.batchName", is("New Batch")))
-                .andExpect(jsonPath("$.scheduleId", is(5001)))
-                .andExpect(jsonPath("$.active", is(true)));
+                .andExpect(jsonPath("$.batchName", is("New Batch")));
     }
 
     @Test
     void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO(
-                "Updated Batch",
-                7002L,
-                LocalDate.now(),
-                false
-        );
+        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
 
         UUID id = UUID.randomUUID();
 

@@ -3,6 +3,7 @@ package com.vsp.endpointinsightsapi.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -10,12 +11,13 @@ import java.time.LocalDate;
 
 import java.util.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "test_batch")
-public class TestBatch {
+public class TestBatch extends AuditingEntity{
 
     @Id
     @GeneratedValue
@@ -23,8 +25,13 @@ public class TestBatch {
     @Column(name = "id", nullable = false)
     private UUID batch_id;
 
-   @ManyToMany(mappedBy = "testBatches")
-   private List<Job> jobs;
+   @ManyToMany
+   @JoinTable(
+        name = "batch_jobs",
+        joinColumns = @JoinColumn(name = "batch_id"),
+        inverseJoinColumns = @JoinColumn(name = "job_id")
+        )
+   private List<Job> jobs = new ArrayList<>();
 
     @Column(name = "batch_name", nullable = false)
     String batchName;
