@@ -4,6 +4,8 @@ import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.service.BatchService;
+import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,33 +42,40 @@ class BatchesControllerUnitTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(greaterThan(0))))
                 .andExpect(jsonPath("$[0].id", notNullValue()))
-                .andExpect(jsonPath("$[0].name", not(emptyString())))
-                .andExpect(jsonPath("$[0].status", not(emptyString())));
+                .andExpect(jsonPath("$[0].batchName", not(emptyString())))
+                .andExpect(jsonPath("$[0].scheduleId", notNullValue()))
+                .andExpect(jsonPath("$[0].active", anyOf(is(true), is(false))));
     }
 
     @Test
     void shouldReturnBatchById() throws Exception {
         UUID id = UUID.randomUUID();
-        TestBatch batch = new TestBatch(id, null, "Example Batch",
-                1L, LocalDate.now(), LocalDate.now(), true);
 
-        Mockito.when(batchService.getBatchById(any(UUID.class)))
-                .thenReturn(Optional.of(batch));
+        BatchResponseDTO dto = BatchResponseDTO.builder()
+                .id(id)
+                .batchName("Daily API Tests")
+                .scheduleId(1001L)
+                .startTime(LocalDate.parse("2025-11-08"))
+                .lastTimeRun(LocalDate.parse("2025-11-09"))
+                .active(true)
+                .build();
 
-        mockMvc.perform(get("/api/batches/" + id))
+        when(batchService.getBatchById(id)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/batches/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.batchName", is("Example Batch")))
-                .andExpect(jsonPath("$.active", is(true)));
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.batchName").value("Daily API Tests"))
+                .andExpect(jsonPath("$.scheduleId").value(1001))
+                .andExpect(jsonPath("$.active").value(true));
     }
 
     @Test
-    void shouldReturnNotFoundWhenBatchMissing() throws Exception {
+    void getBatchById_notFound_shouldReturn404() throws Exception {
         UUID id = UUID.randomUUID();
+        when(batchService.getBatchById(id)).thenThrow(new BatchNotFoundException(id.toString()));
 
-        Mockito.when(batchService.getBatchById(any(UUID.class)))
-                .thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/batches/" + id))
+        mockMvc.perform(get("/api/batches/{id}", id))
                 .andExpect(status().isNotFound());
     }
 
@@ -89,18 +99,35 @@ class BatchesControllerUnitTest {
     void shouldUpdateBatch() throws Exception {
         BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
 
-        mockMvc.perform(put("/api/batches/2")
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/batches/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2)))
-                .andExpect(jsonPath("$.name", is("Updated Batch")))
-                .andExpect(jsonPath("$.status", is("UPDATED")));
+                .andExpect(jsonPath("$.id", is(id.toString())))
+                .andExpect(jsonPath("$.batchName", is("Updated Batch")));
     }
 
     @Test
     void shouldDeleteBatch() throws Exception {
-        mockMvc.perform(delete("/api/batches/1"))
+        UUID id = UUID.randomUUID();
+
+        org.mockito.Mockito.doNothing()
+                .when(batchService).deleteBatchById(id);
+
+        mockMvc.perform(delete("/api/batches/{id}", id))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonexistentBatch() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        org.mockito.Mockito.doThrow(new BatchNotFoundException(id.toString()))
+                .when(batchService).deleteBatchById(id);
+
+        mockMvc.perform(delete("/api/batches/{id}", id))
+                .andExpect(status().isNotFound());
     }
 }
