@@ -5,24 +5,22 @@ import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 public class BatchService {
 
-    private final Logger LOG = LoggerFactory.getLogger(BatchService.class);
-    private TestBatchRepository testBatchRepository = null;
+    private static final Logger LOG = LoggerFactory.getLogger(BatchService.class);
+    private final TestBatchRepository testBatchRepository;
     private final BatchMapper batchMapper;
 
     public BatchService(TestBatchRepository testBatchRepository, BatchMapper batchMapper) {
-        this.testBatchRepository = testBatchRepository;
-        this.batchMapper = batchMapper;
+        this.testBatchRepository = Objects.requireNonNull(testBatchRepository, "testBatchRepository must not be null");
+        this.batchMapper = Objects.requireNonNull(batchMapper, "batchMapper must not be null");
     }
 
     public BatchResponseDTO getBatchById(UUID batchId) {
