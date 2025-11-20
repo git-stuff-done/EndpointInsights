@@ -7,13 +7,11 @@ import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -21,7 +19,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +26,7 @@ class BatchServiceTest {
 
     @Mock TestBatchRepository testBatchRepository;
     @Mock BatchMapper batchMapper;
-    @Mock BatchService batchService;
+    @InjectMocks BatchService batchService;
     @Mock JobRepository jobRepository;
 
     @Test

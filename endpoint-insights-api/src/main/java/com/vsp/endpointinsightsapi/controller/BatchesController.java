@@ -73,10 +73,7 @@ public class BatchesController {
         BatchResponseDTO updated = BatchResponseDTO.builder()
                 .id(id)
                 .batchName(request.getName())
-                .scheduleId(request.getScheduleId())
-                .startTime(request.getStartTime())
                 .lastTimeRun(LocalDate.now())
-                .active(request.getActive())
                 .build();
 
         return ResponseEntity.ok(updated);

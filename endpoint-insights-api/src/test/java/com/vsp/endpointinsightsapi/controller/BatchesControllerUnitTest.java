@@ -106,9 +106,7 @@ class BatchesControllerUnitTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(id.toString())))
-                .andExpect(jsonPath("$.batchName", is("Updated Batch")))
-                .andExpect(jsonPath("$.scheduleId", is(7002)))
-                .andExpect(jsonPath("$.active", is(false)));
+                .andExpect(jsonPath("$.batchName", is("Updated Batch")));
     }
 
     @Test
