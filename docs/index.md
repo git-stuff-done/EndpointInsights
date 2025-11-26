@@ -14,4 +14,4 @@
 
 
 ### Timeline for Completion
-[Image](document-assets/timeline.png)
+![Image](document-assets/timeline.png)
