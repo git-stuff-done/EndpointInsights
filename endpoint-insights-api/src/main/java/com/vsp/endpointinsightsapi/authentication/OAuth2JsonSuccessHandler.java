@@ -3,6 +3,7 @@ package com.vsp.endpointinsightsapi.authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -133,15 +134,14 @@ public class OAuth2JsonSuccessHandler implements AuthenticationSuccessHandler {
                     .build();
         }
 
-        Map<String, Object> tokenResponse = Map.of(
-                "idToken", idToken.getTokenValue(),
-                "expiresAt", expiresAt.getEpochSecond(),
-                "username", username,
-                "email", email
-        );
+        Cookie tokenCookie = new Cookie("authToken", idToken.getTokenValue());
+        //todo: set to secure only once we implement tls
+//        tokenCookie.setSecure(true);
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge((int) (expiresAt.getEpochSecond() - Instant.now().getEpochSecond()));
 
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+        response.addCookie(tokenCookie);
+        response.sendRedirect(authProperties.getCallbackUri());
     }
+
 }
