@@ -38,7 +38,7 @@ Our client, VSP, is having us reimplement (from scratch) a dashboard that they u
 - **Testing**: Karma 6.4.0, Jasmine 5.9.0
 
 ### DevOps & Infrastructure
-- **CI/CD**: Jenkins with Kubernetes pods
+- **CI/CD**: Jenkins
 - **Version Control**: Git + GitHub
 
 ### Security & Authentication
