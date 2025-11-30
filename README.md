@@ -117,6 +117,7 @@ TBD
 ### 1. Create a branch sourced from `develop`
   - Name your branch after your Jira story dedicated to the code implementation.
   - Example: `feature/EI-21`
+  - Clone repo to local machine and target to new branch
 ### 2. Develop & Test
   - Implement code changes.
   - Run local unit tests to verify functionality.
