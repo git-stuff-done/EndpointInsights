@@ -114,7 +114,26 @@ Code coverage reposts are automatically generated and published to CodeCov when 
 TBD
 
 ## Contributing
-TBD
+### 1. Create a branch sourced from `develop`
+  - Name your branch after your Jira story dedicated to the code implementation.
+  - Example: `feature/EI-21`
+### 2. Develop & Test
+  - Implement code changes.
+  - Run local unit tests to verify functionality.
+    - Refer to [Testing](https://github.com/git-stuff-done/EndpointInsights/tree/readme-contributing?tab=readme-ov-file#testing)
+### 3. Commit your changes
+  - Each commit should include comments describing:
+    - Related Jira story/subtask
+    - The feature implemented or task completed
+### 4. Create a Pull Request
+  - Open a PR **into the `develop` branch** and include:
+      - Related Jira story
+      - Feature or task implemented
+### 5. Address Code Review Requests
+  - Commit any updates requested by Code Reviewer(s).
+### 6. Merge & Cleanup
+  - Once approved and all tests are passing, merge branch into `develop`.
+  - Delete branch after merge.
 
 ## Documentation
 
