@@ -1,6 +1,10 @@
 # Endpoint Insights
 
-[![Build Status](https://jenkins.crowleybrynn.com/buildStatus/icon?job=EndpointInsights-UnitTesting%2Fdevelop&subject=Develop%20Branch%20Tests)](https://jenkins.crowleybrynn.com/job/EndpointInsights-UnitTesting/job/develop/) [![codecov](https://codecov.io/gh/git-stuff-done/EndpointInsights/graph/badge.svg?token=4FFNP3JSPE)](https://codecov.io/gh/git-stuff-done/EndpointInsights)
+<div style="text-align: center">
+  <img src="endpoint-insights-ui/public/VSP_Logo.png" alt="VSP Logo" width="200"/>
+
+  [![Build Status](https://jenkins.crowleybrynn.com/buildStatus/icon?job=EndpointInsights-UnitTesting%2Fdevelop&subject=Develop%20Branch%20Tests)](https://jenkins.crowleybrynn.com/job/EndpointInsights-UnitTesting/job/develop/) [![codecov](https://codecov.io/gh/git-stuff-done/EndpointInsights/graph/badge.svg?token=4FFNP3JSPE)](https://codecov.io/gh/git-stuff-done/EndpointInsights)
+</div>
 
 ## Overview
 
@@ -14,6 +18,34 @@ Our client, VSP, is having us reimplement (from scratch) a dashboard that they u
 ### Key Features
 
 **Features**
+
+## Technology Stack
+
+### Backend
+- **Framework**: Spring Boot 4.0.0-M3
+- **Language**: Java 25
+- **Build Tool**: Maven 3.9+
+- **Database**: PostgreSQL 17
+- **ORM**: Spring Data JPA with Hibernate
+- **Testing**: JUnit 5
+- **Code Coverage**: CodeCov
+
+### Frontend
+- **Framework**: Angular 20.3.0+
+- **Language**: TypeScript 5.9.2
+- **Build Tool**: Angular CLI 20.3.6
+- **UI Libraries**: Angular Material 20.2.9, Bootstrap 5.3.6, ng-bootstrap 19.0.1
+- **Testing**: Karma 6.4.0, Jasmine 5.9.0
+
+### DevOps & Infrastructure
+- **CI/CD**: Jenkins with Kubernetes pods
+- **Version Control**: Git + GitHub
+
+### Security & Authentication
+- **Protocol**: OpenID Connect (OIDC)
+- **Authorization**: JWT with Bearer tokens
+- **Session Management**: Stateless
+- **Identity Provider**: External IdP (production)
 
 ## Architecture
 
