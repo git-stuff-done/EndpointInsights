@@ -5,7 +5,7 @@
 
   [![Build Status](https://jenkins.crowleybrynn.com/buildStatus/icon?job=EndpointInsights-UnitTesting%2Fdevelop&subject=Develop%20Branch%20Tests)](https://jenkins.crowleybrynn.com/job/EndpointInsights-UnitTesting/job/develop/) [![codecov](https://codecov.io/gh/git-stuff-done/EndpointInsights/graph/badge.svg?token=4FFNP3JSPE)](https://codecov.io/gh/git-stuff-done/EndpointInsights)
 </div>
-
+  
 ## Overview
 
 Endpoint Insights is a performance and integration testing dashboard that we are building for our senior project.
@@ -133,6 +133,73 @@ Code coverage reposts are automatically generated and published to CodeCov when 
 
 ## Deployment
 TBD
+
+## Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    JOB {
+        uuid job_id PK
+        string name
+        string description
+        string git_url
+        string run_command
+        string compile_command
+        string test_type
+        string status
+        jsonb config
+        string created_by
+        timestamp created_date
+        string updated_by
+        timestamp updated_date
+    }
+
+    TEST_BATCH {
+        uuid id PK
+        string batch_name
+        bigint schedule_id
+        date start_time
+        date last_time_run
+        boolean active
+        string created_by
+        timestamp created_date
+        string updated_by
+        timestamp updated_date
+    }
+
+    BATCH_JOBS {
+        uuid batch_id PK, FK
+        uuid job_id PK, FK
+    }
+
+    TEST_RESULT {
+        uuid result_id PK
+        int job_type
+    }
+
+    PERF_TEST_RESULT {
+        uuid result_id PK, FK
+        int p50_latency_ms
+        int p95_latency_ms
+        int p99_latency_ms
+        int volume_last_minute
+        int volume_last_5_minutes
+        float error_rate_percent
+    }
+
+    PERF_TEST_RESULT_CODE {
+        uuid result_id PK, FK
+        int error_code PK
+        int count
+    }
+
+    JOB ||--o{ BATCH_JOBS : "is linked to"
+    TEST_BATCH ||--o{ BATCH_JOBS : "groups jobs"
+
+    TEST_RESULT ||--|| PERF_TEST_RESULT : "performance details"
+    PERF_TEST_RESULT ||--o{ PERF_TEST_RESULT_CODE : "per error code"
+```
+
 
 ## Contributing
 ### 1. Create a branch sourced from `develop`
