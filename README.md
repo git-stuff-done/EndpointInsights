@@ -157,6 +157,11 @@ TBD
   - Once approved and all tests are passing, merge branch into `develop`.
   - Delete branch after merge.
 
+
+## Timeline for Completion
+![Image](./docs/document-assets/timeline.png)
+
+
 ## Documentation
 
 For detailed information about the system architecture, deployment, and authentication:
