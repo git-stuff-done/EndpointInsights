@@ -94,9 +94,9 @@ The system consists of:
      - triggers alerts based on thresholds
 
  ## Application UI Visual
- ![Image](./docs/document-assets/UI1(1).jpg)
+ ![Image](./docs/document-assets/UI1.jpg)
  ![Image](./docs/document-assets/UI2.jpg)
- ![Image](./docs/document-assets/UI3(1).jpg)
+ ![Image](./docs/document-assets/UI3.jpg)
  ![Image](./docs/document-assets/UI4.jpg)
  ![Image](./docs/document-assets/UI5.jpg)
 
