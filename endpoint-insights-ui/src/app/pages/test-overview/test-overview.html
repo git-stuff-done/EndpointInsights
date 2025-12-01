@@ -1,0 +1,42 @@
+
+<div class="page-container">
+    <div class="button-container">
+        <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateJobModal()">
+            <span>New Test</span>
+            <mat-icon fontIcon="add"></mat-icon>
+    </button>
+    </div>
+    <div class="test-list-container">
+        <div class="test-header-row">
+            <div class="test-headers">
+                <h3>Test Name</h3>
+                <h3>Test Batch</h3>
+                <h3>Date Created</h3>
+                <h3>Created By</h3>
+            </div>
+            <div class="filter-btn">
+                <button mat-icon-button class="elevated-btn mat-elev-2" color="basic" (click)="onFilter()">
+                    <mat-icon>filter_list</mat-icon>
+                </button>
+            </div>
+        </div>
+        <!-- List -->
+        <div class="test-list">
+            <div class="test-row" *ngFor="let t of tests">
+                <div class="cell name">
+                    <span class="title">{{ t.name }}</span>
+                    <span class="status" [ngClass]="t.status">{{ t.status }}</span>
+                </div>
+                <div class="cell batch">{{ t.batch }}</div>
+                <div class="cell date">{{ t.createdAt | date:'MMM d, y, h:mm a' }}</div>
+                <div class="cell author">{{ t.createdBy }}</div>
+
+                <div class="cell actions" (click)="$event.stopPropagation()">
+                    <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onRun(t)"><mat-icon>play_arrow</mat-icon></button>
+                    <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Edit" (click)="onEdit(t)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Delete" (click)="onDelete(t)"><mat-icon>delete</mat-icon></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Getter
 @Setter
 public class JobRun {
 
-	private String runId;
+	private UUID runId;
 	private String jobId;
 
 

@@ -1,0 +1,7 @@
+<main class="container-fluid py-3">
+    <section class="test-results-list">
+        @for (t of tests; track t.id) {
+            <app-test-results-card [test]="t"></app-test-results-card>
+        }
+    </section>
+</main>

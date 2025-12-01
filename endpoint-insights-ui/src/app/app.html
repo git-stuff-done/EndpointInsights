@@ -1,9 +1,26 @@
-<header class="app-header">
-    <h1>{{ title() }}</h1>
-    <nav>
-        <a routerLink="/login" routerLinkActive="active">Login</a>
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"> Dashboard</a>
-        <a routerLink="/batches" routerLinkActive="active"> Batches</a>
-    </nav>
-</header>
+@if (authService.isAuthenticated()) {
+    <header class="app-header">
+        <nav class="nav">
+            <a mat-button (click)="authService.logout()">Logout</a>
+            <a
+                    mat-button
+                    routerLink="/"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+            >
+                Dashboard
+            </a>
+            <a mat-button routerLink="/batches" routerLinkActive="active">
+                Batches
+            </a>
+            <a mat-button routerLink="/tests" routerLinkActive="active">
+                Tests
+            </a>
+            <a mat-button routerLink="/test-results" routerLinkActive="active">
+                Test Results
+            </a>
+        </nav>
+    </header>
+}
+
 <router-outlet></router-outlet>

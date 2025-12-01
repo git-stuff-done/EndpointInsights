@@ -5,26 +5,51 @@ spring:
     url: jdbc:${DB_URI}
     username: ${DB_NAME}
     password: ${DB_PASSWORD}
-
   jpa:
-    database-platform:
-      org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+      ddl-auto: create
 
+  security:
+    oauth2:
+      client:
+        registration:
+          oidc:
+            client-id: ${OIDC_CLIENT_ID:endpoint-insights}
+            client-secret: ${OIDC_CLIENT_SECRET:your-secret-here}
+            redirect-uri:  ${OIDC_CLIENT_REDIRECT_URI:http://localhost:8080/login/oauth2/code/oidc}
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email,groups
+            client-name: OIDC
+        provider:
+          oidc:
+            issuer-uri: ${OIDC_ISSUER_URI:https://auth.example.com}
+            authorization-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/authorization
+            token-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/token
+            user-info-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/userinfo
+            jwk-set-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/jwks.json
+            user-name-attribute: preferred_username
 
----
-spring:
-  config:
-    activate:
-      on-profile: test
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
-      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
-      - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
-      - org.springframework.boot.data.jpa.autoconfigure.JpaRepositoriesAutoConfiguration
+app:
+  authentication:
+    enabled: true
+    callback-uri: ${OID_CLIENT_CALLBACK_URI:http://localhost:4200/auth/callback}
+    groups:
+      write: "ei:write"
+      read: "ei:read"
+    claims:
+      username: ${AUTH_USERNAME_CLAIM:preferred_username}
+      email: ${AUTH_EMAIL_CLAIM:email}
+      groups: ${AUTH_GROUPS_CLAIM:groups}
+  cors:
+    allow-credentials: true
+    allowed-methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allowed-origins:
+      - "http://localhost:8080"
+      - "http://localhost:4200"
+

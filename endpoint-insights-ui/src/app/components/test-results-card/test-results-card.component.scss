@@ -16,7 +16,7 @@ $banner-unknown-b: #cfd6df;
 $neutral-bg:     #ffffff;
 $neutral-border: #e5e7eb;
 
-$panel-title-bg: #0b2335;
+$panel-title-bg: var(--color-primary);
 $panel-title-fg: #ffffff;
 
 /* brand colors for chips */
@@ -207,11 +207,13 @@ $chip-unk:  #455a64;
 
 .panel {
   grid-column: span 1;
-  border-radius: 10px;
   align-self: start;
   height: auto;
-
-  .mdc-card { min-height: 0; height: auto; padding: 0; }
+  border-radius: var(--card-radius);
+  background: var(--color-white);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: var(--card-transition);
 }
 
 /* Subpanel title: dark when expanded */

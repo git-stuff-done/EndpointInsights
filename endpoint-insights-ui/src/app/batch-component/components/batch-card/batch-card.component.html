@@ -1,16 +1,23 @@
+<!-- batch-card.component.html -->
 <mat-card class="batch-card mat-elevation-z1">
-  <div class="row">
-    <div class="meta">
-      <h3 class="title">{{ batch.title }}</h3>
-      <div class="kv"><span class="label">Batch ID</span><span class="value">{{ batch.id }}</span></div>
-      <div class="kv"><span class="label">Date</span><span class="value">{{ formattedDate() }}</span></div>
-    </div>
+    <div class="row">
+        <div class="meta">
+            <h3 class="title">{{ batch.title }}</h3>
+            <div class="kv">
+                <span class="label">Batch ID</span>
+                <span class="value">{{ batch.id }}</span>
+            </div>
+            <div class="kv">
+                <span class="label">Date</span>
+                <span class="value">{{ formattedDate() }}</span>
+            </div>
+        </div>
 
-    <div class="actions">
-      <button mat-stroked-button color="primary" (click)="configure.emit(batch)">
-        <mat-icon aria-hidden="true">settings</mat-icon>
-        Configure
-      </button>
+        <div class="actions">
+            <button mat-stroked-button color="primary" (click)="configure.emit(batch)">
+                <mat-icon aria-hidden="true">settings</mat-icon>
+                Configure
+            </button>
+        </div>
     </div>
-  </div>
 </mat-card>

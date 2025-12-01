@@ -1,0 +1,32 @@
+<ng-container>
+    <h2 mat-dialog-title class="modal-title">
+        <span>{{ data.title || 'Details' }}</span>
+        <button mat-icon-button mat-dialog-close aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </h2>
+
+    <mat-dialog-content class="modal-content">
+        <!-- 0 tabs -->
+        <div *ngIf="tabs.length === 0" class="empty">
+            No content yet.
+        </div>
+
+        <!-- 1 tab (no header) -->
+        <div *ngIf="tabs.length === 1" class="single-tab">
+            <h3 class="sr-only">{{ tabs[0].label }}</h3>
+            <div class="tab-body" [innerHTML]="tabs[0].content"></div>
+        </div>
+
+        <!-- 2+ tabs (show tab buttons) -->
+        <mat-tab-group *ngIf="tabs.length > 1" [fitInkBarToContent]="true" [disableRipple]="true" [dynamicHeight]="true" [animationDuration]="'150ms'">
+            <mat-tab *ngFor="let t of tabs" [label]="t.label">
+                <div class="tab-body" [innerHTML]="t.content"></div>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+</ng-container>

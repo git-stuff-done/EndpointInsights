@@ -1,0 +1,222 @@
+:host {
+  display: block;
+}
+
+/* Page title */
+.page-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Main container should never exceed viewport width */
+main.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Top-level layout inside the dashboard */
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Shared panel/card look */
+.kpi-card,
+.panel {
+  border-radius: 6px;
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* KPI row */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.kpi-card {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kpi-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.kpi-main {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.kpi-sub {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Charts row */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.panel-header {
+  background-color: #004a6f;
+  color: #fff;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px 6px 0 0;
+}
+
+.panel-body {
+  background-color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0 0 6px 6px;
+}
+
+/* Placeholder styling until real charts exist */
+.chart-placeholder {
+  height: 220px;
+  border: 1px dashed #c0c4cc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* Recent activity table */
+.activity-row {
+  width: 100%;
+  max-width: 100%;
+}
+
+.panel-table .panel-body {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.activity-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
+}
+
+.activity-table th,
+.activity-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-table thead {
+  background-color: #e1e4ea;
+}
+
+.activity-table tbody tr:nth-child(even) {
+  background-color: #f7f7f7;
+}
+
+/* Status pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.status-pass {
+  background-color: #2e9d4b;
+}
+
+.status-fail {
+  background-color: #c53c3c;
+}
+
+/* Alerts */
+.alerts-row {
+  width: 100%;
+  max-width: 100%;
+}
+
+.alerts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background-color: #f2f2f2;
+  font-size: 0.85rem;
+}
+
+.alert-warning {
+  border-left: 4px solid #f0c14b;
+}
+
+.alert-error {
+  border-left: 4px solid #c53c3c;
+}
+
+.alert-icon {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.alert-message {
+  flex: 1;
+}
+
+/* Responsive tweaks */
+@media (max-width: 960px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-table th,
+  .activity-table td {
+    white-space: normal;
+  }
+}
