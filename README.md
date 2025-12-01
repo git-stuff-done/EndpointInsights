@@ -93,6 +93,13 @@ The system consists of:
      - interprets results
      - triggers alerts based on thresholds
 
+ ## Application UI Visual
+ ![Image](./docs/document-assets/UI1(1).jpg)
+ ![Image](./docs/document-assets/UI2.jpg)
+ ![Image](./docs/document-assets/UI3(1).jpg)
+ ![Image](./docs/document-assets/UI4.jpg)
+ ![Image](./docs/document-assets/UI5.jpg)
+
 ## Getting Started
 
 Tests are run automatically on all first-party branches and pull requests. 
