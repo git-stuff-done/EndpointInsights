@@ -121,7 +121,7 @@ TBD
 ### 2. Develop & Test
   - Implement code changes.
   - Run local unit tests to verify functionality.
-    - Refer to [Testing](https://github.com/git-stuff-done/EndpointInsights/tree/readme-contributing?tab=readme-ov-file#testing)
+    - Refer to [Testing](#testing)
 ### 3. Commit your changes
   - Each commit should include comments describing:
     - Related Jira story/subtask
