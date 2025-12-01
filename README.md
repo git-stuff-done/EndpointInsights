@@ -15,9 +15,26 @@ Our client, VSP, is having us reimplement (from scratch) a dashboard that they u
 
 **Project Duration**: Fall 2025 - Spring 2026 (CSC 190/191)
 
-### Key Features
+## Key Features
+### 1. Test Configurations:
+   - Support a single test or you can batch tests together
+   - Tests are configurable for their testing thresholds for performance testing
+   - Tests can be for APIs, Integration testing, and UI testing
+   - Schedule automated tests to run at certain times
 
-**Features**
+### 2. Authentication and Authorization:
+   - Single sign on via OpenID Connect
+   - Support for role based access control which enables control over what users are allowed access to in the application
+
+### 3. Email Notifications:
+   - Emails the specified user a summary of tests performed and their configurations
+   - Provides the user with a synopsis of important information from the tests completed
+   - The emails will have color coordination for the test results so the user can quickly recognize the test performances
+
+### 4. Comprehensive Results Summary:
+   - Show the performance test result information
+   - Highlight important parts of the results such as the maximum, minimum, and average response times
+   - Shows what tests were performed, the duration of the tests, and who initiated the test
 
 ## Technology Stack
 
@@ -223,6 +240,11 @@ erDiagram
 ### 6. Merge & Cleanup
   - Once approved and all tests are passing, merge branch into `develop`.
   - Delete branch after merge.
+
+
+## Timeline for Completion
+![Image](./docs/document-assets/timeline.png)
+
 
 ## Documentation
 
