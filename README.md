@@ -92,7 +92,28 @@ Tests are run automatically on all first-party branches and pull requests.
 
 ## Running Locally
 
-**stuff**
+### Backend
+1. Configure the following environment variables: 
+
+    | Environment Variable     | Description                                                      | Required |
+    |--------------------------|------------------------------------------------------------------|----------|
+    | DB_NAME                  | Username used for the db connection                              | **X**    |
+    | DB_PASSWORD              | Password used for the db connection                              | **X**    |
+    | DB_URI                   | URI in jdbc format to the db (including database name)           | **X**    |
+    | OIDC_CLIENT_ID           | Client ID for OIDC authentication flow                           | **X**    |
+    | OIDC_CLIENT_SECRET       | Client secret for authentication                                 | **X**    |
+    | OIDC_ISSUER_URI          | Token issuer URI                                                 | **X**    |
+    | OIDC_CLIENT_REDIRECT_URI | Redirect URI for the api call back when a user is authenticated. |          |
+
+2. `cd endpoint-insights-api`
+3. Run directly with a maven goal `mvn spring-boot:run` ***or*** build and run `mvn clean package` & `java -jar target/endpoint-insights-api-*.jar`
+4. Run a quick health check: `curl localhost:8080/api/health`
+
+### Frontend
+1. Ensure [`endpoint-insights-api`](#running-locally) is running
+2. `cd endpoint-insights-ui`
+3. Install dependencies with `npm install`
+4. Run with `ng serve`
 
 ## Testing
 
