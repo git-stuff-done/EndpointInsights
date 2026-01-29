@@ -6,8 +6,7 @@ pipeline {
     environment {
         REGISTRY = 'ghcr.io'
         IMAGE_NAME = 'git-stuff-done/endpoint-insights-api'
-        GIT_COMMIT_SHA = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-        GIT_BRANCH = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+
     }
     
     stages {
@@ -20,9 +19,9 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    def tags = "-t ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT_SHA} -t ${REGISTRY}/${IMAGE_NAME}:${GIT_BRANCH}"
+                    def tags = "-t ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT} -t ${REGISTRY}/${IMAGE_NAME}:${BRANCH_NAME}"
 
-                    if (GIT_BRANCH == 'main') {
+                    if (BRANCH_NAME == 'main') {
                         tags += " -t ${REGISTRY}/${IMAGE_NAME}:latest"
                     }
 
@@ -43,11 +42,11 @@ pipeline {
                     )]) {
                         sh """
                             echo \$DOCKER_PASS | docker login ${REGISTRY} -u \$DOCKER_USER --password-stdin
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT_SHA}
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_BRANCH}
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT}
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${BRANCH_NAME}
                         """
 
-                        if (GIT_BRANCH == 'main') {
+                        if (BRANCH_NAME == 'main') {
                             sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
                         }
                     }
