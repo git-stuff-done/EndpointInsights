@@ -12,6 +12,5 @@
 ### Deployment
 - [Kubernetes Deployment](deployment/kubernetes-deployment.md)
 
-
 ### Timeline for Completion
-![Image](document-assets/timeline.png)
+![Image](./assets/timeline.png)
