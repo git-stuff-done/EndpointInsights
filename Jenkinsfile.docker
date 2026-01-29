@@ -27,7 +27,7 @@ pipeline {
                     }
 
                     sh """
-                        docker build ${tags} .
+                        docker build -f ./endpoint-insights-api/Dockerfile ${tags} ./endpoint-insights-api
                     """
                 }
             }
