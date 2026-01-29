@@ -1,0 +1,65 @@
+pipeline {
+    agent {
+        label 'vm-docker'
+    }
+
+    environment {
+        REGISTRY = 'ghcr.io'
+        IMAGE_NAME = 'git-stuff-done/endpoint-insights-api'
+        GIT_COMMIT_SHA = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+        GIT_BRANCH = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    def tags = "-t ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT_SHA} -t ${REGISTRY}/${IMAGE_NAME}:${GIT_BRANCH}"
+
+                    if (GIT_BRANCH == 'main') {
+                        tags += " -t ${REGISTRY}/${IMAGE_NAME}:latest"
+                    }
+
+                    sh """
+                        docker build ${tags} .
+                    """
+                }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-registry-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                            echo \$DOCKER_PASS | docker login ${REGISTRY} -u \$DOCKER_USER --password-stdin
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT_SHA}
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_BRANCH}
+                        """
+
+                        if (GIT_BRANCH == 'main') {
+                            sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            sh "docker logout ${REGISTRY} || true"
+            sh "docker image prune -f || true"
+        }
+    }
+}
