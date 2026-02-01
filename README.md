@@ -5,7 +5,7 @@
 
   [![Build Status](https://jenkins.crowleybrynn.com/buildStatus/icon?job=EndpointInsights-UnitTesting%2Fdevelop&subject=Develop%20Branch%20Tests)](https://jenkins.crowleybrynn.com/job/EndpointInsights-UnitTesting/job/develop/) [![codecov](https://codecov.io/gh/git-stuff-done/EndpointInsights/graph/badge.svg?token=4FFNP3JSPE)](https://codecov.io/gh/git-stuff-done/EndpointInsights)
 </div>
-
+  
 ## Overview
 
 Endpoint Insights is a performance and integration testing dashboard that we are building for our senior project.
@@ -15,9 +15,26 @@ Our client, VSP, is having us reimplement (from scratch) a dashboard that they u
 
 **Project Duration**: Fall 2025 - Spring 2026 (CSC 190/191)
 
-### Key Features
+## Key Features
+### 1. Test Configurations:
+   - Support a single test or you can batch tests together
+   - Tests are configurable for their testing thresholds for performance testing
+   - Tests can be for APIs, Integration testing, and UI testing
+   - Schedule automated tests to run at certain times
 
-**Features**
+### 2. Authentication and Authorization:
+   - Single sign on via OpenID Connect
+   - Support for role based access control which enables control over what users are allowed access to in the application
+
+### 3. Email Notifications:
+   - Emails the specified user a summary of tests performed and their configurations
+   - Provides the user with a synopsis of important information from the tests completed
+   - The emails will have color coordination for the test results so the user can quickly recognize the test performances
+
+### 4. Comprehensive Results Summary:
+   - Show the performance test result information
+   - Highlight important parts of the results such as the maximum, minimum, and average response times
+   - Shows what tests were performed, the duration of the tests, and who initiated the test
 
 ## Technology Stack
 
@@ -76,6 +93,13 @@ The system consists of:
      - interprets results
      - triggers alerts based on thresholds
 
+ ## Application UI Visual
+ ![Image](./docs/document-assets/UI1.jpg)
+ ![Image](./docs/document-assets/UI2.jpg)
+ ![Image](./docs/document-assets/UI3.jpg)
+ ![Image](./docs/document-assets/UI4.jpg)
+ ![Image](./docs/document-assets/UI5.jpg)
+
 ## Getting Started
 
 Tests are run automatically on all first-party branches and pull requests. 
@@ -92,7 +116,28 @@ Tests are run automatically on all first-party branches and pull requests.
 
 ## Running Locally
 
-**stuff**
+### Backend
+1. Configure the following environment variables: 
+
+    | Environment Variable     | Description                                                      | Required |
+    |--------------------------|------------------------------------------------------------------|----------|
+    | DB_NAME                  | Username used for the db connection                              | **X**    |
+    | DB_PASSWORD              | Password used for the db connection                              | **X**    |
+    | DB_URI                   | URI in jdbc format to the db (including database name)           | **X**    |
+    | OIDC_CLIENT_ID           | Client ID for OIDC authentication flow                           | **X**    |
+    | OIDC_CLIENT_SECRET       | Client secret for authentication                                 | **X**    |
+    | OIDC_ISSUER_URI          | Token issuer URI                                                 | **X**    |
+    | OIDC_CLIENT_REDIRECT_URI | Redirect URI for the api call back when a user is authenticated. |          |
+
+2. `cd endpoint-insights-api`
+3. Run directly with a maven goal `mvn spring-boot:run` ***or*** build and run `mvn clean package` & `java -jar target/endpoint-insights-api-*.jar`
+4. Run a quick health check: `curl localhost:8080/api/health`
+
+### Frontend
+1. Ensure [`endpoint-insights-api`](#running-locally) is running
+2. `cd endpoint-insights-ui`
+3. Install dependencies with `npm install`
+4. Run with `ng serve`
 
 ## Testing
 
@@ -113,8 +158,100 @@ Code coverage reposts are automatically generated and published to CodeCov when 
 ## Deployment
 TBD
 
+## Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    JOB {
+        uuid job_id PK
+        string name
+        string description
+        string git_url
+        string run_command
+        string compile_command
+        string test_type
+        string status
+        jsonb config
+        string created_by
+        timestamp created_date
+        string updated_by
+        timestamp updated_date
+    }
+
+    TEST_BATCH {
+        uuid id PK
+        string batch_name
+        bigint schedule_id
+        date start_time
+        date last_time_run
+        boolean active
+        string created_by
+        timestamp created_date
+        string updated_by
+        timestamp updated_date
+    }
+
+    BATCH_JOBS {
+        uuid batch_id PK, FK
+        uuid job_id PK, FK
+    }
+
+    TEST_RESULT {
+        uuid result_id PK
+        int job_type
+    }
+
+    PERF_TEST_RESULT {
+        uuid result_id PK, FK
+        int p50_latency_ms
+        int p95_latency_ms
+        int p99_latency_ms
+        int volume_last_minute
+        int volume_last_5_minutes
+        float error_rate_percent
+    }
+
+    PERF_TEST_RESULT_CODE {
+        uuid result_id PK, FK
+        int error_code PK
+        int count
+    }
+
+    JOB ||--o{ BATCH_JOBS : "is linked to"
+    TEST_BATCH ||--o{ BATCH_JOBS : "groups jobs"
+
+    TEST_RESULT ||--|| PERF_TEST_RESULT : "performance details"
+    PERF_TEST_RESULT ||--o{ PERF_TEST_RESULT_CODE : "per error code"
+```
+
+
 ## Contributing
-TBD
+### 1. Create a branch sourced from `develop`
+  - Name your branch after your Jira story dedicated to the code implementation.
+  - Example: `feature/EI-21`
+  - Clone repo to local machine and target to new branch
+### 2. Develop & Test
+  - Implement code changes.
+  - Run local unit tests to verify functionality.
+    - Refer to [Testing](#testing)
+### 3. Commit your changes
+  - Each commit should include comments describing:
+    - Related Jira story/subtask
+    - The feature implemented or task completed
+### 4. Create a Pull Request
+  - Open a PR **into the `develop` branch** and include:
+      - Related Jira story
+      - Feature or task implemented
+### 5. Address Code Review Requests
+  - Commit any updates requested by Code Reviewer(s).
+### 6. Merge & Cleanup
+  - Once approved and all tests are passing, merge branch into `develop`.
+  - Delete branch after merge.
+
+
+## Timeline for Completion
+![Image](./docs/document-assets/timeline.png)
+
 
 
 ## Timeline for Completion
