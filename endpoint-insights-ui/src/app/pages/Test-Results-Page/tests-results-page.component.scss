@@ -14,3 +14,35 @@ main.container-fluid {
   flex-direction: column;
   gap: 1rem;
 }
+
+.test-runs {
+  .status-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .status-pill[data-status='PASS'] {
+    background: #e7f7ef;
+    color: #127a3d;
+  }
+
+  .status-pill[data-status='WARN'] {
+    background: #fff4e5;
+    color: #a85c00;
+  }
+
+  .status-pill[data-status='FAIL'] {
+    background: #fdeaea;
+    color: #b42318;
+  }
+
+  .status-pill[data-status='UNKNOWN'] {
+    background: #eef0f4;
+    color: #5b667a;
+  }
+}

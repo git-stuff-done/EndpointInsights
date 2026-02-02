@@ -4,4 +4,50 @@
             <app-test-results-card [test]="t"></app-test-results-card>
         }
     </section>
+
+    <section class="test-runs mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h2 class="h5 mb-0">Recent Test Runs</h2>
+            <span class="text-muted small">Showing latest 10 runs</span>
+        </div>
+
+        @if (isLoadingRuns) {
+            <div class="text-muted">Loading recent runs...</div>
+        } @else if (runsError) {
+            <div class="text-danger">{{ runsError }}</div>
+        } @else {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Run ID</th>
+                            <th scope="col">Job ID</th>
+                            <th scope="col">Run By</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Finished At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentRuns.length === 0) {
+                            <tr>
+                                <td colspan="5" class="text-muted">No recent runs found.</td>
+                            </tr>
+                        } @else {
+                            @for (run of recentRuns; track run.runId) {
+                                <tr>
+                                    <td class="text-truncate" style="max-width: 180px;">{{ run.runId }}</td>
+                                    <td class="text-truncate" style="max-width: 180px;">{{ run.jobId }}</td>
+                                    <td>{{ run.runBy }}</td>
+                                    <td>
+                                        <span class="status-pill" [attr.data-status]="run.status">{{ run.status }}</span>
+                                    </td>
+                                    <td>{{ run.finishedAt ? (run.finishedAt | date: 'short') : '—' }}</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
 </main>
