@@ -27,22 +27,22 @@ main.container-fluid {
   }
 
   .status-pill[data-status='PASS'] {
-    background: #e7f7ef;
-    color: #127a3d;
+    background: #2e7d32;
+    color: #ffffff;
   }
 
   .status-pill[data-status='WARN'] {
-    background: #fff4e5;
-    color: #a85c00;
+    background: #b26a00;
+    color: #ffffff;
   }
 
   .status-pill[data-status='FAIL'] {
-    background: #fdeaea;
-    color: #b42318;
+    background: #c62828;
+    color: #ffffff;
   }
 
   .status-pill[data-status='UNKNOWN'] {
-    background: #eef0f4;
-    color: #5b667a;
+    background: #455a64;
+    color: #ffffff;
   }
 }
