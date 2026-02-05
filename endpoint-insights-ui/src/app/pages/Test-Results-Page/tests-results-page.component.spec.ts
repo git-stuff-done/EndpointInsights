@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { TestsResultsPageComponent } from './tests-results-page.component';
 import { TestRunService } from '../../services/test-run.service';
@@ -61,5 +61,16 @@ describe('TestsResultsPageComponent', () => {
     expect(text).toContain('job-1');
     expect(text).toContain('alice');
     expect(text).toContain('PASS');
+  });
+
+  it('shows error message when service fails', () => {
+    serviceSpy.getRecentTestRuns.and.returnValue(throwError(() => new Error('fail')));
+
+    fixture = TestBed.createComponent(TestsResultsPageComponent);
+    fixture.componentInstance.tests = [];
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent || '';
+    expect(text).toContain('Unable to load recent test runs.');
   });
 });
