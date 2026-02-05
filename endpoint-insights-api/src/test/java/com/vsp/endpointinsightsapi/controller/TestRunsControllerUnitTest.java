@@ -80,7 +80,7 @@ class TestRunsControllerUnitTest {
 	}
 
 	@Test
-	void createTestRun_runtimeException_returnsOkWithNullBody() throws Exception {
+	void createTestRun_runtimeException_returnsServerError() throws Exception {
 		TestRun run = new TestRun();
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
@@ -93,6 +93,6 @@ class TestRunsControllerUnitTest {
 		mockMvc.perform(post("/api/test-runs")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(run)))
-				.andExpect(status().isOk());
+				.andExpect(status().isInternalServerError());
 	}
 }

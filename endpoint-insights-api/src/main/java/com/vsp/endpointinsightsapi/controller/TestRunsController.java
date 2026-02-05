@@ -36,7 +36,7 @@ public class TestRunsController {
 			return new ResponseEntity<>(saved, HttpStatus.CREATED);
 		} catch (RuntimeException e) {
 			LOG.error("Error creating test run: {}", e.getMessage());
-			return new ResponseEntity<>(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
 }
