@@ -4,11 +4,17 @@ export interface Batch {
     id: string;
 
     /** Display title (usually a short descriptive name) */
-    title: string;
+    batchName: string;
 
-    /** ISO string or timestamp representing when the batch was created or run */
-    date: string;
-
-    /** description or notes */
+    /** ISO s
+     * tring or timestamp representing when the batch was created or run */
+    startTime: string | Date;
+    lastRunTime?: string | Date;
+    lastRunDate?: string | Date;
+    nextRunTime?: string | Date;
+    nextRunDate?: string | Date;
+    scheduledDays?: string[];
+    notificationList?: string[];
     description?: string;
+    active: boolean;
 }

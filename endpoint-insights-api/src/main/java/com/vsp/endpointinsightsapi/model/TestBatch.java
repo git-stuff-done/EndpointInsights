@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -40,11 +40,14 @@ public class TestBatch extends AuditingEntity{
     Long scheduleId;
 
     @Column(name = "start_time")
-    LocalDate startTime;
+    LocalDateTime startTime;
 
     @Column(name = "last_time_run")
-    LocalDate lastTimeRun;
+    LocalDateTime lastTimeRun;
 
     @Column(name = "active")
     Boolean active;
+
+    @Transient
+    List<UUID> notificationList;
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -29,28 +30,10 @@ public class BatchesController {
 
     // GET /api/batches — stub list (unchanged)
 	@GetMapping
-	public ResponseEntity<List<BatchResponseDTO>> listBatches() {
-        List<BatchResponseDTO> batches = List.of(
-                BatchResponseDTO.builder()
-                        .id(UUID.randomUUID())
-                        .batchName("Daily API Tests")
-                        .scheduleId(334523453L)
-                        .startTime(LocalDate.now().minusDays(1))
-                        .lastTimeRun(LocalDate.now())
-                        .active(true)
-//                        .jobs(Collections.emptyList())
-                        .build(),
-                BatchResponseDTO.builder()
-                        .id(UUID.randomUUID())
-                        .batchName("Weekly Regression")
-                        .scheduleId(42L)
-                        .startTime(LocalDate.now().minusWeeks(1))
-                        .lastTimeRun(LocalDate.now().minusDays(3))
-                        .active(false)
-//                        .jobs(Collections.emptyList())
-                        .build()
-        );
-        return ResponseEntity.ok(batches);
+	public ResponseEntity<List<BatchResponseDTO>> listBatches(@RequestParam(required = false) String batchName,
+                                                              @RequestParam(required = false) LocalDateTime runDate) {
+        List<BatchResponseDTO> dto = batchService.getAllBatchesByCriteria(batchName, runDate);
+        return ResponseEntity.ok(dto);
 	}
 
 	// GET /api/batches/{id}
@@ -68,15 +51,10 @@ public class BatchesController {
 	}
 
 	// PUT /api/batches/{id} — stubbed
-	@PutMapping("/{id}")
-	public ResponseEntity<BatchResponseDTO> updateBatch(@PathVariable UUID id, @RequestBody BatchRequestDTO request) {
-        BatchResponseDTO updated = BatchResponseDTO.builder()
-                .id(id)
-                .batchName(request.getName())
-                .lastTimeRun(LocalDate.now())
-                .build();
-
-        return ResponseEntity.ok(updated);
+	@PutMapping("/update")
+	public ResponseEntity<BatchResponseDTO> updateBatch(@RequestBody BatchRequestDTO request) {
+        BatchResponseDTO result = batchService.updateBatch(request);
+        return ResponseEntity.ok(result);
 	}
 
 	// DELETE /api/batches/{id}
@@ -85,4 +63,11 @@ public class BatchesController {
 		batchService.deleteBatchById(id);
         return ResponseEntity.noContent().build();
 	}
+
+    @PutMapping("/remove-participants")
+    public ResponseEntity<List<UUID>> removeParticipants(@RequestParam("userIds") List<UUID> userIds,
+                                                   @RequestParam("batchId") UUID batchId) {
+        List<UUID> res = batchService.deleteParticipants(userIds, batchId);
+        return ResponseEntity.ok(res);
+    }
 }
