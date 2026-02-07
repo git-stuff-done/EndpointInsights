@@ -7,7 +7,7 @@ import {
     MatDialogTitle
 } from "@angular/material/dialog";
 import {MatButton} from "@angular/material/button";
-import {TestItem} from "../../pages/test-overview/test-overview";
+import {TestItem} from "../../models/test.model";
 import {CreateJobForm} from "../create-job-form/create-job-form";
 import {ToastService} from "../../services/toast.service";
 import {JobService} from "../../services/job-services";

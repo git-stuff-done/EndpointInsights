@@ -1,0 +1,14 @@
+<div class="modal-header">
+    <h2 mat-dialog-title>Create New Batch</h2>
+
+    <mat-dialog-content>
+        <app-batch-form (batchSubmitted)="onBatchCreated($event)"></app-batch-form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <div class="button-group">
+            <button class="create-batch-modal-cancel-button" mat-raised-button (click)="onCancel()">Cancel</button>
+            <button class="create-batch-modal-create-button" mat-raised-button (click)="onSubmit()">Create Batch</button>
+        </div>
+    </mat-dialog-actions>
+</div>
