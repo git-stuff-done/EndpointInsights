@@ -95,7 +95,7 @@ export class CreateBatchForm {
 
     private getFieldLabel(fieldName: string): string {
         const labels: { [key: string]: string } = {
-            'title': 'Batch Name',
+            'title': 'Batch Title',
             'description': 'Description',
         };
         return labels[fieldName] || fieldName;
