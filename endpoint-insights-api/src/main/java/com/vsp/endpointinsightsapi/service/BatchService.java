@@ -39,7 +39,7 @@ public class BatchService {
         //Find all notifications for this batch object and assign
         for (TestBatch testBatch : res) {
             List<UUID> notificationUserIds = batchNotificationListIdsRepository
-                    .findAllByBatchId(testBatch.getBatch_id())
+                    .findAllByBatchId(testBatch.getId())
                     .stream()
                     .map(BatchNotificationListUserId::getUserId)
                     .toList();
@@ -80,7 +80,7 @@ public class BatchService {
         TestBatch existing = testBatchRepository.findById(batchRequestDTO.getId())
                 .orElseThrow(() -> new BatchNotFoundException(batchRequestDTO.getId().toString()));
 
-        existing.setBatch_id(batchRequestDTO.getId());
+        existing.setId(batchRequestDTO.getId());
         existing.setBatchName(batchRequestDTO.getBatchName());
         existing.setScheduleId(batchRequestDTO.getScheduleId());
         existing.setLastTimeRun(batchRequestDTO.getLastTimeRun());

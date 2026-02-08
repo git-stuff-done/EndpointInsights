@@ -20,9 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
@@ -53,7 +51,7 @@ class BatchesControllerUnitTest {
     @Test
     void shouldReturnListOfBatches() throws Exception {
         TestBatch batch = new TestBatch();
-        batch.setBatch_id(UUID.randomUUID());
+        batch.setId(UUID.randomUUID());
         batch.setBatchName("Test Batch");
         batch.setActive(true);
 

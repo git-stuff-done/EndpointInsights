@@ -42,7 +42,7 @@ class BatchServiceTest {
         UUID id = UUID.randomUUID();
         TestBatch entity = new TestBatch();
         // adjust getters/setters to your model
-        entity.setBatch_id(id);
+        entity.setId(id);
         entity.setBatchName("Example");
         entity.setScheduleId(1001L);
         entity.setStartTime(LocalDate.parse("2025-11-08").atStartOfDay());
@@ -102,7 +102,7 @@ class BatchServiceTest {
         UUID userId = UUID.randomUUID();
 
         TestBatch batch = new TestBatch();
-        batch.setBatch_id(batchId);
+        batch.setId(batchId);
         batch.setBatchName("Test Batch");
 
         BatchResponseDTO dto = new BatchResponseDTO();
@@ -129,7 +129,7 @@ class BatchServiceTest {
     void update_batch(){
         UUID id = UUID.randomUUID();
         TestBatch batch = new TestBatch();
-        batch.setBatch_id(id);
+        batch.setId(id);
         batch.setBatchName("Test Batch");
         batch.setScheduleId(1001L);
         batch.setNotificationList(List.of(id));
@@ -147,15 +147,15 @@ class BatchServiceTest {
         dto2.setScheduleId(1001L);
         dto2.setNotificationList(List.of(id));
 
-        when(testBatchRepository.findById(batch.getBatch_id())).thenReturn(Optional.of(batch));
-        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getBatch_id())).thenReturn(List.of());
+        when(testBatchRepository.findById(batch.getId())).thenReturn(Optional.of(batch));
+        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getId())).thenReturn(List.of());
         when(batchMapper.toDto(batch)).thenReturn(dto2);
         when(testBatchRepository.save(any(TestBatch.class)))
                 .thenReturn(batch);
 
         BatchResponseDTO b = batchService.updateBatch(dto);
-        verify(testBatchRepository).findById(batch.getBatch_id());
-        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getBatch_id());
+        verify(testBatchRepository).findById(batch.getId());
+        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getId());
         verify(batchMapper).toDto(batch);
 
         assertEquals("Test Batch", b.getBatchName());

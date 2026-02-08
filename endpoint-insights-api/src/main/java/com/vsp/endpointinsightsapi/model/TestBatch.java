@@ -23,7 +23,7 @@ public class TestBatch extends AuditingEntity{
     @GeneratedValue
     @UuidGenerator
     @Column(name = "id", nullable = false)
-    private UUID batch_id;
+    private UUID id;
 
    @ManyToMany(fetch = FetchType.EAGER)
    @JoinTable(
