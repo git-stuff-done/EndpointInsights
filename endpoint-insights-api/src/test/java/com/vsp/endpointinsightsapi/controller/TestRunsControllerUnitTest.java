@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.service.TestRunService;
@@ -68,11 +69,19 @@ class TestRunsControllerUnitTest {
 		run.setStatus(TestRunStatus.PASS);
 		run.setStartedAt(Instant.now());
 
+		TestRunCreateRequest request = new TestRunCreateRequest(
+			run.getJobId(),
+			run.getRunBy(),
+			run.getStatus(),
+			run.getStartedAt(),
+			run.getFinishedAt()
+		);
+
 		when(testRunService.createTestRun(any(TestRun.class))).thenReturn(run);
 
 		mockMvc.perform(post("/api/test-runs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(run)))
+						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.runId").value(run.getRunId().toString()))
 				.andExpect(jsonPath("$.runBy").value("tester"))
@@ -81,10 +90,13 @@ class TestRunsControllerUnitTest {
 
 	@Test
 	void createTestRun_runtimeException_returnsServerError() throws Exception {
-		TestRun run = new TestRun();
-		run.setJobId(UUID.randomUUID());
-		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		TestRunCreateRequest request = new TestRunCreateRequest(
+			UUID.randomUUID(),
+			"tester",
+			TestRunStatus.PASS,
+			null,
+			null
+		);
 
 		doThrow(new RuntimeException("test error"))
 				.when(testRunService)
@@ -92,7 +104,7 @@ class TestRunsControllerUnitTest {
 
 		mockMvc.perform(post("/api/test-runs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(run)))
+						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isInternalServerError());
 	}
 }

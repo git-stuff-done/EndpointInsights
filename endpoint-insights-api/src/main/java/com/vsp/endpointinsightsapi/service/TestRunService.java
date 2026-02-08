@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +18,19 @@ public class TestRunService {
 	private static final Logger LOG = LoggerFactory.getLogger(TestRunService.class);
 
 	private final TestRunRepository testRunRepository;
+	private final JobRepository jobRepository;
 
-	public TestRunService(TestRunRepository testRunRepository) {
+	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository) {
 		this.testRunRepository = testRunRepository;
+		this.jobRepository = jobRepository;
 	}
 
 	public TestRun createTestRun(TestRun testRun) {
 		LOG.debug("Creating test run for job {}", testRun.getJobId());
+
+		if (testRun.getJobId() == null || !jobRepository.existsById(testRun.getJobId())) {
+			throw new JobNotFoundException(String.valueOf(testRun.getJobId()));
+		}
 		return testRunRepository.save(testRun);
 	}
 

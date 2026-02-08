@@ -1,7 +1,9 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.service.TestRunService;
+import com.vsp.endpointinsightsapi.exception.CustomException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +32,19 @@ public class TestRunsController {
 	}
 
 	@PostMapping
-	public ResponseEntity<TestRun> createTestRun(@RequestBody @Valid TestRun testRun) {
+	public ResponseEntity<TestRun> createTestRun(@RequestBody @Valid TestRunCreateRequest request) {
 		try {
+			TestRun testRun = new TestRun();
+			testRun.setJobId(request.getJobId());
+			testRun.setRunBy(request.getRunBy());
+			testRun.setStatus(request.getStatus());
+			testRun.setStartedAt(request.getStartedAt());
+			testRun.setFinishedAt(request.getFinishedAt());
+
 			TestRun saved = testRunService.createTestRun(testRun);
 			return new ResponseEntity<>(saved, HttpStatus.CREATED);
+		} catch (CustomException e) {
+			throw e;
 		} catch (RuntimeException e) {
 			LOG.error("Error creating test run: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
