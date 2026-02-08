@@ -89,9 +89,7 @@ export class AuthenticationService {
    */
   public isAuthenticated(): boolean {
 
-      //TODO: uncomment
-      return true;
-      //return this.authStateSubject.value;
+      return this.authStateSubject.value;
   }
 
   /**
