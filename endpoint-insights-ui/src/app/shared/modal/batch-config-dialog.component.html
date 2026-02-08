@@ -55,8 +55,66 @@
 
         <!-- Placeholder tabs for future content -->
         <mat-tab label="Overview" disabled></mat-tab>
-        <mat-tab label="Settings" disabled></mat-tab>
         <mat-tab label="Runs" disabled></mat-tab>
+        <mat-tab label="Settings">
+            <div class="tab-pane settings-tab" *ngIf="!loading(); else loadingTpl">
+                <!-- Current Batch Tests -->
+                <section class="tests-section">
+                        <h3>Current Batch Tests:</h3>
+                        <div class="tests-table">
+                            <div class="tests-header">
+                                <span>Name:</span>
+                                <span>Remove</span>
+                            </div>
+                            <div class="tests-list">
+                                @for (test of currentBatchTests(); track test.id) {
+                                    <div class="test-row">
+                                        <span class="test-name">{{ test.name }}</span>
+                                        <button mat-icon-button (click)="removeTest(test)" aria-label="Remove Test">
+                                            <mat-icon>remove</mat-icon>
+                                        </button>
+                                    </div>
+                                } @empty {
+                                    <div class="empty-state">No tests in batch</div>
+                                }
+                            </div>
+                        </div>
+                        <button mat-flat-button color="primary" (click)="clearAllTests()" class="clear-all-btn">
+                            Clear All
+                        </button>
+                    </section>
+
+                    <!-- Add New Tests -->
+                    <section class="tests-section">
+                        <h3>Add New Tests</h3>
+                        <mat-form-field appearance="outline" class="search-field">
+                            <mat-icon matPrefix>search</mat-icon>
+                            <input matInput
+                                   placeholder="Search..."
+                                   [value]="searchTerm()"
+                                   (input)="searchTerm.set($any($event.target).value)"/>
+                        </mat-form-field>
+                        <div class="tests-table">
+                            <div class="tests-header">
+                                <span>Name:</span>
+                                <span>Select</span>
+                            </div>
+                            <div class="tests-list">
+                                @for (test of filteredAvailableTests(); track test.id) {
+                                    <div class="test-row">
+                                        <span class="test-name">{{ test.name }}</span>
+                                        <button mat-icon-button (click)="addTest(test)" aria-label="Add test">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+                                    </div>
+                                } @empty {
+                                    <div class="empty-state">No tests available</div>
+                                }
+                            </div>
+                        </div>
+                </section>
+            </div>
+        </mat-tab>
     </mat-tab-group>
 
     <ng-template #loadingTpl>
