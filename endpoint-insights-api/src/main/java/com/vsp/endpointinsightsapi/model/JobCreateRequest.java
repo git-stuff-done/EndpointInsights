@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.model;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -27,7 +28,7 @@ public class JobCreateRequest {
 
     private String compileCommand;
 
-    @NotBlank(message = "testType is required")
+    @NotNull(message = "testType is required")
     private TestType testType;
 
     private Map<String, Object> config;

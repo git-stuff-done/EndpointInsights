@@ -46,7 +46,7 @@ public class JobControllerUnitTest {
 	public void createJob() throws Exception {
 		mockMvc.perform(post("/api/jobs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null))))
+						.content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null))))
 				.andExpect(status().isCreated());
 	}
 
