@@ -68,7 +68,7 @@ public class BatchesController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
-	// PUT /api/batches/{id} — stubbed
+	// PUT /api/batches/{id}
 	@PutMapping("/{id}")
 	public ResponseEntity<TestBatch> updateBatch(@PathVariable @NotNull UUID id, @RequestBody BatchUpdateRequest request) {
 		TestBatch batch = batchService.updateBatch(id, request);
