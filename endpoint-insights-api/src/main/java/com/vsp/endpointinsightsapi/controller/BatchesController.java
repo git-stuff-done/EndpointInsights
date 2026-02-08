@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import org.slf4j.Logger;
@@ -69,14 +70,10 @@ public class BatchesController {
 
 	// PUT /api/batches/{id} — stubbed
 	@PutMapping("/{id}")
-	public ResponseEntity<BatchResponseDTO> updateBatch(@PathVariable UUID id, @RequestBody BatchRequestDTO request) {
-        BatchResponseDTO updated = BatchResponseDTO.builder()
-                .id(id)
-                .batchName(request.getName())
-                .lastTimeRun(LocalDate.now())
-                .build();
+	public ResponseEntity<TestBatch> updateBatch(@PathVariable UUID id, @RequestBody BatchUpdateRequest request) {
+		TestBatch batch = batchService.updateBatch(id, request);
 
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(batch);
 	}
 
 	// DELETE /api/batches/{id}
