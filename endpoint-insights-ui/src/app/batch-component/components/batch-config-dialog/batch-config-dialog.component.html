@@ -11,14 +11,6 @@
                     <mat-form-field appearance="outline" class="full tight-field">
                         <mat-label>Application Name</mat-label>
                         <input matInput placeholder="e.g. Payments Service" formControlName="batchName" />
-                        <button
-                                mat-icon-button
-                                matSuffix
-                                (click)="saveTitle()"
-                                [disabled]="form.controls.batchName.invalid"
-                                aria-label="Save title">
-                            <mat-icon>save</mat-icon>
-                        </button>
                     </mat-form-field>
 
                     <!-- Test Count -->
@@ -127,7 +119,53 @@
                 </div>
             </form>
         </mat-tab>
-        <mat-tab label="Jobs"></mat-tab>
+
+        <!-- Jobs Tab-->
+        <mat-tab label="Jobs">
+            <form [formGroup]="form">
+                <div class="notification-container">
+                    <!-- Search Input -->
+                    <div class="notification-sub-container search">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Search Tests</mat-label>
+                            <div class="input-div">
+                                <input matInput
+                                       #findTestInput
+                                       [formControl]="searchJobControl"
+                                       placeholder="Type to search tests..." />
+                            </div>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="test-search-container" *ngIf="jobSearchResults.length > 0">
+                        <div class="test-search-item" *ngFor="let test of jobSearchResults">
+                            <p>{{ test.name }}</p>
+                            <button mat-raised-button color="primary" (click)="addJob(test)">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="participants-title-container">
+                        <h2>Active tests in batch:</h2>
+                    </div>
+
+                    <!-- Active Tests -->
+                    <div class="notification-sub-container">
+                        <div class="test-search-container">
+
+                        <div class="test-search-item" *ngFor="let test of activeJobs()">
+                            <p>{{ test.name }}</p>
+                            <button mat-raised-button color="primary" (click)="removeJob(test)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </mat-tab>
 
         <mat-tab label="Settings"></mat-tab>
     </mat-tab-group>

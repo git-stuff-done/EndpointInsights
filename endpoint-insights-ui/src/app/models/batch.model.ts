@@ -1,3 +1,5 @@
+import {Job} from "./job.model";
+
 /** Represents a single batch entry shown on the Dashboard. */
 export interface Batch {
     /** Unique ID for the batch (UUID) */
@@ -17,4 +19,5 @@ export interface Batch {
     notificationList?: string[];
     description?: string;
     active: boolean;
+    jobs: Job[];
 }

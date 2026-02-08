@@ -4,12 +4,10 @@ import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
-import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -53,7 +51,7 @@ public class JobControllerUnitTest {
 	public void getJobSuccess() throws Exception {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
-		job.setJobId(jobUuid);
+		job.setId(jobUuid);
 		jobService.createJob(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
@@ -83,7 +81,7 @@ public class JobControllerUnitTest {
 	public void getJobsSuccess() throws Exception {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
-		job.setJobId(jobUuid);
+		job.setId(jobUuid);
 		jobService.createJob(job);
 		Optional<List<Job>> jobs = Optional.of(List.of(job));
 		when(jobService.getAllJobs()).thenReturn(jobs);

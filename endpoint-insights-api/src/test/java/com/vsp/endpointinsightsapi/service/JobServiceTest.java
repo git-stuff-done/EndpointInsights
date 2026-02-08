@@ -8,14 +8,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -44,11 +42,11 @@ class JobServiceTest {
     void getAllJobs_ReturnListOfJobs() {
         Job job1 = new Job();
         UUID job1Id = UUID.randomUUID();
-        job1.setJobId(job1Id);
+        job1.setId(job1Id);
         jobRepository.save(job1);
         Job job2 = new Job();
         UUID job2Id = UUID.randomUUID();
-        job2.setJobId(job2Id);
+        job2.setId(job2Id);
         jobRepository.save(job2);
 
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
@@ -62,13 +60,13 @@ class JobServiceTest {
     void getJobById_ReturnJob() {
         UUID jobId = UUID.randomUUID();
         Job job = new Job();
-        job.setJobId(jobId);
+        job.setId(jobId);
         when(jobRepository.existsById(jobId)).thenReturn(true);
         when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);
         assertNotNull(testResult);
         assertTrue(testResult.isPresent());
-        assertEquals(jobId, testResult.get().getJobId());
+        assertEquals(jobId, testResult.get().getId());
         verify(jobRepository, times(1)).findById(jobId);
         verify(jobRepository, times(1)).existsById(jobId);
     }
@@ -113,7 +111,7 @@ class JobServiceTest {
     void updateExistingJob(){
         // Create job with ID
         Job job = new Job();
-        job.setJobId(UUID.randomUUID());
+        job.setId(UUID.randomUUID());
 
         // Stub the save to return the job with ID
         when(jobRepository.save(any(Job.class))).thenReturn(job);
@@ -123,10 +121,10 @@ class JobServiceTest {
         verify(jobRepository, times(1)).save(any(Job.class));
 
         // Stub findById
-        when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(saved));
+        when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(saved));
 
-        Job existing = jobRepository.findById(saved.getJobId())
-                .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
+        Job existing = jobRepository.findById(saved.getId())
+                .orElseThrow(() -> new JobNotFoundException(saved.getId().toString()));
 
         existing.setName("changedName");
 
@@ -137,10 +135,10 @@ class JobServiceTest {
         verify(jobRepository, times(2)).save(any(Job.class));
 
         // Stub findById to return updated job
-        when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(existing));
+        when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(existing));
 
-        existing = jobRepository.findById(saved.getJobId())
-                .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
+        existing = jobRepository.findById(saved.getId())
+                .orElseThrow(() -> new JobNotFoundException(saved.getId().toString()));
 
         assertEquals("changedName", existing.getName());
     }

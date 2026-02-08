@@ -261,6 +261,9 @@ End Styles for Create Job Form Components
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  max-width: 90vw !important;
+}
 
 .mat-mdc-option {
   background: white !important;

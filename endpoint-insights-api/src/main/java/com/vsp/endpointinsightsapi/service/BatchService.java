@@ -5,7 +5,6 @@ import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +16,6 @@ import com.vsp.endpointinsightsapi.repository.BatchNotificationListIdsRepository
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -87,6 +85,7 @@ public class BatchService {
         existing.setScheduleId(batchRequestDTO.getScheduleId());
         existing.setLastTimeRun(batchRequestDTO.getLastTimeRun());
         existing.setNotificationList(batchRequestDTO.getNotificationList());
+        existing.setJobs(batchRequestDTO.getJobs());
         existing.setActive(batchRequestDTO.getActive());
         TestBatch saved = testBatchRepository.save(existing);
 
@@ -106,9 +105,9 @@ public class BatchService {
         TestBatch batch = new TestBatch();
         batch.setBatchName(request.getBatchName());
 
-        if (request.getJobIds() != null && !request.getJobIds().isEmpty()) {
-            List<Job> jobs = jobRepository.findAllById(request.getJobIds());
-            if (jobs.size() != request.getJobIds().size()) {
+        if (request.getJobs() != null && !request.getJobs().isEmpty()) {
+            List<Job> jobs = jobRepository.findAllById(request.getJobs().stream().map(Job::getId).toList());
+            if (jobs.size() != request.getJobs().size()) {
                 LOG.warn("Job ID(s) in the request do not exist");
             }
             batch.setJobs(jobs);

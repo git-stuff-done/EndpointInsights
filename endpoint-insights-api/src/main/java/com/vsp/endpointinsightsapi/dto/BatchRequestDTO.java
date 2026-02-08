@@ -23,5 +23,5 @@ public class BatchRequestDTO {
     private LocalDateTime lastTimeRun;
     private Boolean active;
     private List<UUID> notificationList;
-    private List<UUID> jobIds;
+    private List<Job> jobs;
 }

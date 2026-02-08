@@ -6,12 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -28,7 +26,7 @@ public class Job  extends AuditingEntity {
     @GeneratedValue
     @UuidGenerator
     @Column(name = "job_id")
-    private UUID jobId;
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;

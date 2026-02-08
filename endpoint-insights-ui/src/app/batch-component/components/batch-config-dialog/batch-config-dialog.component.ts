@@ -14,8 +14,10 @@ import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-to
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import { MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
-import {debounceTime, distinctUntilChanged, Observable, switchMap} from "rxjs";
+import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
+import {Job} from "../../../models/job.model";
+import {JobService} from "../../../services/job-services";
 
 
 @Component({
@@ -47,14 +49,21 @@ export class BatchConfigDialogComponent implements OnInit {
     private readonly data = inject<Batch>(MAT_DIALOG_DATA);
     private readonly batchService = inject(BatchService);
     private readonly userService = inject(UserService)
+    private readonly jobService = inject(JobService)
     private readonly dialogRef = inject(MatDialogRef<BatchConfigDialogComponent>);
 
     @ViewChild('participantList') participantList!: MatSelectionList;
     searchControl = new FormControl('');
+    searchJobControl = new FormControl('');
+
 
     selectedParticipant: any = null;
     searchParticipants: User[] =[];
     activeParticipants = signal<User[]>([]);
+    jobSearchResults: Job[] = [];
+
+    activeJobs = signal<Job[]>([]);
+
     loading = signal(false);
 
 
@@ -66,9 +75,66 @@ export class BatchConfigDialogComponent implements OnInit {
         scheduledDays: [this.data.scheduledDays ?? ''],
         nextRunTime: [this.data.nextRunTime ?? ''],
         nextRunDate: [this.data.nextRunDate ?? ''],
-        notificationList: [this.data.notificationList ?? []]
+        notificationList: [this.data.notificationList ?? []],
+        jobs: [this.data.jobs ?? []]
 
     });
+
+
+    ngOnInit(): void {
+        this.loading.set(true);
+        this.form.patchValue({
+            id: this.data.id,
+            batchName: (this.data.batchName ?? '').trim(),
+            startTime: this.data.startTime,
+            lastRunTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            //scheduledDays: this.data.scheduledDays ?? [],
+            nextRunTime: this.data.nextRunTime ?? '',
+            nextRunDate: this.data.nextRunDate ?? '',
+            notificationList: this.data.notificationList || [],
+            jobs: this.data.jobs ?? []
+
+        });
+        this.activeJobs.set(this.data.jobs || []);
+
+        this.searchControl.valueChanges.pipe(
+            debounceTime(200),
+            distinctUntilChanged(),
+            switchMap(query => {
+                return this.userService.searchUsers(query as string);
+            })
+        ).subscribe(results => {
+            results = results.filter((user) => !this.activeParticipants().some(active => active.id === user.id));
+            this.searchParticipants = results || [];
+        });
+
+        this.searchJobControl.valueChanges.pipe(
+            debounceTime(200),
+            startWith(''),
+            distinctUntilChanged(),
+            switchMap(query => {
+                return this.jobService.getAllJobs().pipe(
+                    map(jobs =>
+                        jobs.filter(job =>
+                            !this.activeJobs().some(active => active.id === job.id)
+                        )
+                    )
+                );
+            })
+        ).subscribe(results => {
+            const query = this.searchJobControl.value?.toLowerCase() || '';
+
+            // Filter by query AND exclude active jobs
+            this.jobSearchResults = results.filter((job: Job) => {
+                return !query ||
+                    job.name.toLowerCase().includes(query) ||
+                    job.description?.toLowerCase().includes(query);
+            });
+        });
+
+        this.populateActiveParticipants();
+    }
+
 
     /* Notification methods */
     displayParticipant(participant: any): string {
@@ -136,37 +202,47 @@ export class BatchConfigDialogComponent implements OnInit {
     }
 
 
-    ngOnInit(): void {
-        this.loading.set(true);
+    /* Jobs */
+
+    addJob(job: Job) {
+
+        if (job) {
+            const currentList = this.form.get('jobs')?.value || [];
+
+            if (currentList.some(j => j.id === job.id)) {
+                this.searchJobControl.setValue('');
+                return;
+            }
+
+            const updatedList = [...currentList, job];
+
+            this.form.patchValue({
+                jobs: updatedList
+            });
+
+            this.jobSearchResults = this.jobSearchResults.filter(j => j.id !== job.id);
+
+            this.activeJobs.set(updatedList);
+            this.searchJobControl.setValue('');
+        }
+    }
+
+    removeJob(job: Job) {
+        const currentList = this.form.get('jobs')?.value || [];
+
+        const updatedList = currentList.filter((t: Job) => t.id !== job.id);
 
         this.form.patchValue({
-            id: this.data.id,
-            batchName: (this.data.batchName ?? '').trim(),
-            startTime: this.data.startTime,
-            lastRunTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            //scheduledDays: this.data.scheduledDays ?? [],
-            nextRunTime: this.data.nextRunTime ?? '',
-            nextRunDate: this.data.nextRunDate ?? '',
-            notificationList: this.data.notificationList || []
+            jobs: updatedList
         });
 
-        this.searchControl.valueChanges.pipe(
-            debounceTime(200),
-            distinctUntilChanged(),
-            switchMap(query => {
-                return this.userService.searchUsers(query as string);
-            })
-        ).subscribe(results => {
-            results = results.filter((user) => !this.activeParticipants().some(active => active.id === user.id));
-            this.searchParticipants = results || [];
-        });
+        this.jobSearchResults = [...this.jobSearchResults, job];
 
-        this.populateActiveParticipants();
+        this.activeJobs.set(updatedList);
+        this.searchJobControl.setValue('');
     }
 
-    saveTitle(): void {
-        // Hook for future PATCH /batches/:id {title}
-    }
+
 
     save() {
         if (this.form.invalid) {

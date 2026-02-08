@@ -43,10 +43,11 @@ export class BatchComponent implements OnInit, OnDestroy {
 
     onConfigure(batch: Batch) {
         this.dialog.open(BatchConfigDialogComponent, {
-            width: '1000px',
+            width: '900px',
+            height:'auto',
             data: batch
         }).afterClosed().subscribe(() => {
-            // Reload batches from backend to get fresh data
+
             this.loadBatches();
         });
     }

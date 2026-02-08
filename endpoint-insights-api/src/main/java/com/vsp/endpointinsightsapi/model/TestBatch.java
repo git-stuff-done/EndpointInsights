@@ -25,12 +25,12 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "id", nullable = false)
     private UUID batch_id;
 
-   @ManyToMany
+   @ManyToMany(fetch = FetchType.EAGER)
    @JoinTable(
-        name = "batch_jobs",
-        joinColumns = @JoinColumn(name = "batch_id"),
-        inverseJoinColumns = @JoinColumn(name = "job_id")
-        )
+           name = "batch_jobs",
+           joinColumns = @JoinColumn(name = "batch_id", referencedColumnName = "id"),
+           inverseJoinColumns = @JoinColumn(name = "job_id", referencedColumnName = "job_id")
+   )
    private List<Job> jobs = new ArrayList<>();
 
     @Column(name = "batch_name", nullable = false)

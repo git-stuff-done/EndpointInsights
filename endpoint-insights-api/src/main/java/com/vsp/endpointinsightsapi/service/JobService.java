@@ -9,7 +9,6 @@ import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +45,7 @@ public class JobService {
 
     public Job updateJob(UUID id, Job job) {
         Job existingJob = jobRepository.findById(id)
-                .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
+                .orElseThrow(()  -> new JobNotFoundException(job.getId().toString()));
         existingJob.setName(job.getName());
         existingJob.setDescription(job.getDescription());
         existingJob.setStatus(job.getStatus());

@@ -211,7 +211,40 @@
 }
 
 
+.test-search-container {
+  min-height: 100px;
+  height:auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background: darkgrey;
+  border-radius: 10px;
+  overflow-y: scroll;
+}
 
+
+
+.test-search-item{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+  width: 90%;
+  margin: 10px;
+  background: white;
+  border-radius: 20px;
+  padding: 4px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.test-search-item  mat-icon{
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
 
 
 
