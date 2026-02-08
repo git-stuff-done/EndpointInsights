@@ -3,8 +3,9 @@ package com.vsp.endpointinsightsapi.controller;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
-import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,7 +70,7 @@ public class BatchesController {
 
 	// PUT /api/batches/{id} — stubbed
 	@PutMapping("/{id}")
-	public ResponseEntity<TestBatch> updateBatch(@PathVariable UUID id, @RequestBody BatchUpdateRequest request) {
+	public ResponseEntity<TestBatch> updateBatch(@PathVariable @NotNull UUID id, @RequestBody BatchUpdateRequest request) {
 		TestBatch batch = batchService.updateBatch(id, request);
 
         return ResponseEntity.ok(batch);
