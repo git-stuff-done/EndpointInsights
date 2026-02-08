@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,11 +36,28 @@ class JobServiceTest {
 
     @Test
     void createJob_returnSavedJobStatus() throws Exception {
+        JobCreateRequest createJobDto = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null);
         Job job = new Job();
-        when(jobRepository.save(job)).thenReturn(job);
-        Job testResult = jobService.createJob(job);
+        job.setJobId(UUID.randomUUID());
+        assertNotNull(job.getJobId(), "Job ID should be generated");
+        job.setName(createJobDto.getName());
+        assertEquals("test_job", job.getName());
+        job.setDescription(createJobDto.getDescription());
+        assertEquals("test description", job.getDescription());
+        job.setGitUrl(createJobDto.getGitUrl());
+        assertEquals("https://github.com/test/test.git", job.getGitUrl());
+        job.setRunCommand(createJobDto.getRunCommand());
+        assertEquals("npm run test", job.getRunCommand());
+        job.setCompileCommand(createJobDto.getCompileCommand());
+        assertEquals("npm run build", job.getCompileCommand());
+        job.setJobType(createJobDto.getTestType());
+        assertEquals(TestType.PERF, job.getJobType());
+        job.setConfig(createJobDto.getConfig());
+        assertEquals(null, job.getConfig());
+        when(jobRepository.save(any())).thenReturn(job);
+        Job testResult = jobService.createJob(createJobDto);
         assertNotNull(testResult);
-        verify(jobRepository, times(1)).save(job);
+        verify(jobRepository, times(1)).save(any());
     }
     
     @Test
@@ -50,7 +70,7 @@ class JobServiceTest {
         UUID job2Id = UUID.randomUUID();
         job2.setJobId(job2Id);
         jobRepository.save(job2);
-
+        
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
         Optional<List<Job>> testResult = jobService.getAllJobs();
         assertEquals(2, testResult.get().size());
