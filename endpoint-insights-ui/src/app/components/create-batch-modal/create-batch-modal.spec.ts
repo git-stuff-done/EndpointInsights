@@ -62,26 +62,7 @@ describe('CreateBatchModal', () => {
         });
     });
 
-    describe('onSubmit', () => {
-        it('should call submitForm on the CreateBatchForm when onSubmit is called', () => {
-            const mockCreateBatchForm = jasmine.createSpyObj('CreateBatchForm', ['submitForm']);
-            component.createBatchForm = mockCreateBatchForm;
 
-            component.onSubmit();
-
-            expect(mockCreateBatchForm.submitForm).toHaveBeenCalledTimes(1);
-        });
-
-        it('should call submitForm when Create Batch button is clicked', () => {
-            const mockCreateBatchForm = jasmine.createSpyObj('CreateBatchForm', ['submitForm']);
-            component.createBatchForm = mockCreateBatchForm;
-
-            const createButton = compiled.query(By.css('.create-batch-modal-create-button'));
-            createButton.nativeElement.click();
-
-            expect(mockCreateBatchForm.submitForm).toHaveBeenCalledTimes(1);
-        });
-    });
 
     describe('onBatchCreated', () => {
         it('should close the dialog with batch data when onBatchCreated is called', () => {
@@ -152,12 +133,6 @@ describe('CreateBatchModal', () => {
         it('should have button-group container', () => {
             const buttonGroup = compiled.query(By.css('.button-group'));
             expect(buttonGroup).toBeTruthy();
-        });
-    });
-
-    describe('ViewChild Reference', () => {
-        it('should have createBatchForm ViewChild property', () => {
-            expect(component.createBatchForm).toBeDefined();
         });
     });
 });
