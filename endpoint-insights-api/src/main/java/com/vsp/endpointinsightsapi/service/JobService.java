@@ -30,7 +30,7 @@ public class JobService {
 
     public Job createJob(JobCreateRequest jobRequest) {
         Job job = new Job();
-        job.setJobId(UUID.randomUUID());
+        job.setId(UUID.randomUUID());
         job.setName(jobRequest.getName());
         job.setDescription(jobRequest.getDescription());
         //TODO: Validate git URL
