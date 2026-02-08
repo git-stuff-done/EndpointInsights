@@ -54,10 +54,10 @@ class JobServiceTest {
         assertEquals(TestType.PERF, job.getJobType());
         job.setConfig(createJobDto.getConfig());
         assertEquals(null, job.getConfig());
-        when(jobRepository.save(job)).thenReturn(job);
-        Job testResult = jobService.createJob(job);
+        when(jobRepository.save(any())).thenReturn(job);
+        Job testResult = jobService.createJob(createJobDto);
         assertNotNull(testResult);
-        verify(jobRepository, times(1)).save(job);
+        verify(jobRepository, times(1)).save(any());
     }
     
     @Test
@@ -70,7 +70,7 @@ class JobServiceTest {
         UUID job2Id = UUID.randomUUID();
         job2.setJobId(job2Id);
         jobRepository.save(job2);
-
+        
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
         Optional<List<Job>> testResult = jobService.getAllJobs();
         assertEquals(2, testResult.get().size());

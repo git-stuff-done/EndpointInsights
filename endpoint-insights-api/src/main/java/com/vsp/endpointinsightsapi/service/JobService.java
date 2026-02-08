@@ -29,7 +29,6 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    //NEW
     public Job createJob(JobCreateRequest jobRequest) {
         Job job = new Job();
         job.setJobId(UUID.randomUUID());
