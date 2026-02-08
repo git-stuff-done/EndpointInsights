@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -105,11 +106,10 @@ class BatchServiceTest {
         job2.setJobId(jobId2);
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.addJobs = Arrays.asList(jobId1, jobId2);
+        request.addJobs = List.of(jobId1, jobId2);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(jobId1)).thenReturn(Optional.of(job1));
-        when(jobRepository.findById(jobId2)).thenReturn(Optional.of(job2));
+        when(jobRepository.findAllById(List.of(jobId1, jobId2))).thenReturn(List.of(job1, job2));
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
@@ -136,13 +136,13 @@ class BatchServiceTest {
 
         TestBatch existingBatch = new TestBatch();
         existingBatch.setBatch_id(batchId);
-        existingBatch.setJobs(new ArrayList<>(Arrays.asList(job1, job2)));
+        existingBatch.setJobs(new ArrayList<>(List.of(job1, job2)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.deleteJobs = Arrays.asList(jobId1);
+        request.deleteJobs = List.of(jobId1);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(jobId1)).thenReturn(Optional.of(job1));
+        when(jobRepository.findAllById(List.of(jobId1))).thenReturn(List.of(job1));
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
@@ -172,15 +172,15 @@ class BatchServiceTest {
 
         TestBatch existingBatch = new TestBatch();
         existingBatch.setBatch_id(batchId);
-        existingBatch.setJobs(new ArrayList<>(Arrays.asList(existingJob, jobToRemove)));
+        existingBatch.setJobs(new ArrayList<>(List.of(existingJob, jobToRemove)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.addJobs = Arrays.asList(newJobId);
-        request.deleteJobs = Arrays.asList(jobToRemoveId);
+        request.addJobs = List.of(newJobId);
+        request.deleteJobs = List.of(jobToRemoveId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(newJobId)).thenReturn(Optional.of(newJob));
-        when(jobRepository.findById(jobToRemoveId)).thenReturn(Optional.of(jobToRemove));
+        when(jobRepository.findAllById(List.of(newJobId))).thenReturn(List.of(newJob));
+        when(jobRepository.findAllById(List.of(jobToRemoveId))).thenReturn(List.of(jobToRemove));
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
@@ -220,10 +220,10 @@ class BatchServiceTest {
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.addJobs = Arrays.asList(nonExistentJobId);
+        request.addJobs = List.of(nonExistentJobId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(nonExistentJobId)).thenReturn(Optional.empty());
+        when(jobRepository.findAllById(List.of(nonExistentJobId))).thenReturn(List.of());
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
@@ -243,13 +243,13 @@ class BatchServiceTest {
 
         TestBatch existingBatch = new TestBatch();
         existingBatch.setBatch_id(batchId);
-        existingBatch.setJobs(new ArrayList<>(Arrays.asList(existingJob)));
+        existingBatch.setJobs(new ArrayList<>(List.of(existingJob)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.addJobs = Arrays.asList(existingJobId);
+        request.addJobs = List.of(existingJobId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(existingJobId)).thenReturn(Optional.of(existingJob));
+        when(jobRepository.findAllById(List.of(existingJobId))).thenReturn(List.of(existingJob));
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
@@ -269,10 +269,10 @@ class BatchServiceTest {
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.deleteJobs = Arrays.asList(nonExistentJobId);
+        request.deleteJobs = List.of(nonExistentJobId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(nonExistentJobId)).thenReturn(Optional.empty());
+        when(jobRepository.findAllById(List.of(nonExistentJobId))).thenReturn(List.of());
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
@@ -295,10 +295,10 @@ class BatchServiceTest {
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
-        request.deleteJobs = Arrays.asList(jobNotInBatchId);
+        request.deleteJobs = List.of(jobNotInBatchId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(jobNotInBatchId)).thenReturn(Optional.of(jobNotInBatch));
+        when(jobRepository.findAllById(List.of(jobNotInBatchId))).thenReturn(List.of(jobNotInBatch));
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
@@ -319,7 +319,7 @@ class BatchServiceTest {
         BatchUpdateRequest request = new BatchUpdateRequest();
         // No add or delete jobs specified
 
-        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        OngoingStubbing<Optional<TestBatch>> optionalOngoingStubbing = when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
@@ -341,14 +341,14 @@ class BatchServiceTest {
 
         TestBatch existingBatch = new TestBatch();
         existingBatch.setBatch_id(batchId);
-        existingBatch.setJobs(new ArrayList<>(Arrays.asList(job)));
+        existingBatch.setJobs(new ArrayList<>(List.of(job)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
         request.addJobs = null; // Null list
-        request.deleteJobs = Arrays.asList(jobId);
+        request.deleteJobs = List.of(jobId);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(jobRepository.findAllById(List.of(jobId))).thenReturn(List.of(job));
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
