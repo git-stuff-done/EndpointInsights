@@ -2,8 +2,10 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
-import com.vsp.endpointinsightsapi.service.BatchService;
+import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,16 +68,12 @@ public class BatchesController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
-	// PUT /api/batches/{id} — stubbed
+	// PUT /api/batches/{id}
 	@PutMapping("/{id}")
-	public ResponseEntity<BatchResponseDTO> updateBatch(@PathVariable UUID id, @RequestBody BatchRequestDTO request) {
-        BatchResponseDTO updated = BatchResponseDTO.builder()
-                .id(id)
-                .batchName(request.getName())
-                .lastTimeRun(LocalDate.now())
-                .build();
+	public ResponseEntity<TestBatch> updateBatch(@PathVariable @NotNull UUID id, @RequestBody BatchUpdateRequest request) {
+		TestBatch batch = batchService.updateBatch(id, request);
 
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(batch);
 	}
 
 	// DELETE /api/batches/{id}

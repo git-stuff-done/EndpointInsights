@@ -3,7 +3,10 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
+import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
+import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
@@ -12,14 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BatchServiceTest {
@@ -85,5 +87,275 @@ class BatchServiceTest {
         when(testBatchRepository.existsById(id)).thenReturn(false);
 
         assertThrows(BatchNotFoundException.class, () -> batchService.deleteBatchById(id));
+    }
+
+    @Test
+    void updateBatch_addJobs_success() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID jobId1 = UUID.randomUUID();
+        UUID jobId2 = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        Job job1 = new Job();
+        job1.setJobId(jobId1);
+        Job job2 = new Job();
+        job2.setJobId(jobId2);
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.addJobs = List.of(jobId1, jobId2);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(jobId1, jobId2))).thenReturn(List.of(job1, job2));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        // Act
+        TestBatch result = batchService.updateBatch(batchId, request);
+
+        // Assert
+        assertEquals(2, result.getJobs().size());
+        assertTrue(result.getJobs().contains(job1));
+        assertTrue(result.getJobs().contains(job2));
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
+    void updateBatch_removeJobs_success() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID jobId1 = UUID.randomUUID();
+        UUID jobId2 = UUID.randomUUID();
+
+        Job job1 = new Job();
+        job1.setJobId(jobId1);
+        Job job2 = new Job();
+        job2.setJobId(jobId2);
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>(List.of(job1, job2)));
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.deleteJobs = List.of(jobId1);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(jobId1))).thenReturn(List.of(job1));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        // Act
+        TestBatch result = batchService.updateBatch(batchId, request);
+
+        // Assert
+        assertEquals(1, result.getJobs().size());
+        assertFalse(result.getJobs().contains(job1));
+        assertTrue(result.getJobs().contains(job2));
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
+    void updateBatch_addAndRemoveJobs_success() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID existingJobId = UUID.randomUUID();
+        UUID newJobId = UUID.randomUUID();
+        UUID jobToRemoveId = UUID.randomUUID();
+
+        Job existingJob = new Job();
+        existingJob.setJobId(existingJobId);
+        Job newJob = new Job();
+        newJob.setJobId(newJobId);
+        Job jobToRemove = new Job();
+        jobToRemove.setJobId(jobToRemoveId);
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>(List.of(existingJob, jobToRemove)));
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.addJobs = List.of(newJobId);
+        request.deleteJobs = List.of(jobToRemoveId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(newJobId))).thenReturn(List.of(newJob));
+        when(jobRepository.findAllById(List.of(jobToRemoveId))).thenReturn(List.of(jobToRemove));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        // Act
+        TestBatch result = batchService.updateBatch(batchId, request);
+
+        // Assert
+        assertEquals(2, result.getJobs().size());
+        assertTrue(result.getJobs().contains(existingJob));
+        assertTrue(result.getJobs().contains(newJob));
+        assertFalse(result.getJobs().contains(jobToRemove));
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
+    void updateBatch_batchNotFound_throwsException() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        BatchUpdateRequest request = new BatchUpdateRequest();
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class,
+            () -> batchService.updateBatch(batchId, request));
+        assertTrue(exception.getErrorResponse().getDetails().contains("Batch does not exist with id=" + batchId));
+        verify(testBatchRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBatch_addNonExistentJob_throwsException() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID nonExistentJobId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.addJobs = List.of(nonExistentJobId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(nonExistentJobId))).thenReturn(List.of());
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class,
+            () -> batchService.updateBatch(batchId, request));
+        assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist with id=" + nonExistentJobId));
+        verify(testBatchRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBatch_addJobAlreadyInBatch_throwsException() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID existingJobId = UUID.randomUUID();
+
+        Job existingJob = new Job();
+        existingJob.setJobId(existingJobId);
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>(List.of(existingJob)));
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.addJobs = List.of(existingJobId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(existingJobId))).thenReturn(List.of(existingJob));
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class,
+            () -> batchService.updateBatch(batchId, request));
+        assertTrue(exception.getErrorResponse().getDetails().contains("Job already exists in batch with id=" + batchId));
+        verify(testBatchRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBatch_removeNonExistentJob_throwsException() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID nonExistentJobId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.deleteJobs = List.of(nonExistentJobId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(nonExistentJobId))).thenReturn(List.of());
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class,
+            () -> batchService.updateBatch(batchId, request));
+        assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist with id=" + nonExistentJobId));
+        verify(testBatchRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBatch_removeJobNotInBatch_throwsException() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID jobNotInBatchId = UUID.randomUUID();
+
+        Job jobNotInBatch = new Job();
+        jobNotInBatch.setJobId(jobNotInBatchId);
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.deleteJobs = List.of(jobNotInBatchId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(jobNotInBatchId))).thenReturn(List.of(jobNotInBatch));
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class,
+            () -> batchService.updateBatch(batchId, request));
+        assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist in batch with id=" + batchId));
+        verify(testBatchRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBatch_emptyRequest_noChanges() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        // No add or delete jobs specified
+
+        OngoingStubbing<Optional<TestBatch>> optionalOngoingStubbing = when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        // Act
+        TestBatch result = batchService.updateBatch(batchId, request);
+
+        // Assert
+        assertEquals(0, result.getJobs().size());
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
+    void updateBatch_nullAddJobsList_handledGracefully() {
+        // Arrange
+        UUID batchId = UUID.randomUUID();
+        UUID jobId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatch_id(batchId);
+        existingBatch.setJobs(new ArrayList<>(List.of(job)));
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.addJobs = null; // Null list
+        request.deleteJobs = List.of(jobId);
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(jobRepository.findAllById(List.of(jobId))).thenReturn(List.of(job));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        // Act
+        TestBatch result = batchService.updateBatch(batchId, request);
+
+        // Assert
+        assertEquals(0, result.getJobs().size());
+        verify(testBatchRepository).save(existingBatch);
     }
 }
