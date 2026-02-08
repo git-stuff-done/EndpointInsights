@@ -2,8 +2,8 @@ import {inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {ToastService} from "../services/toast.service";
 import { Observable} from "rxjs";
-import {TestItem} from "../pages/test-overview/test-overview";
 import {Job} from "../models/job.model";
+import {TestItem} from "../models/test.model";
 
 
 @Injectable({ providedIn: 'root' })

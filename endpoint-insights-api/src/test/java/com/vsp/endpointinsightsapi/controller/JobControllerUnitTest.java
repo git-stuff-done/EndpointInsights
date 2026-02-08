@@ -4,6 +4,8 @@ import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
+import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
@@ -43,7 +45,7 @@ public class JobControllerUnitTest {
 	public void createJob() throws Exception {
 		mockMvc.perform(post("/api/jobs")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(new JobCreateRequest("test_job"))))
+						.content(objectMapper.writeValueAsString(new JobCreateRequest())))
 				.andExpect(status().isCreated());
 	}
 

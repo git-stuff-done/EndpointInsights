@@ -5,6 +5,8 @@ import java.util.UUID;
 
 //import java.util.Optional;
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import org.slf4j.Logger;
@@ -23,6 +25,21 @@ public class JobService {
     }
 
     public Job createJob(Job job) {
+        return jobRepository.save(job);
+    }
+
+    public Job createJob(JobCreateRequest jobRequest) {
+        Job job = new Job();
+        job.setJobId(UUID.randomUUID());
+        job.setName(jobRequest.getName());
+        job.setDescription(jobRequest.getDescription());
+        //TODO: Validate git URL
+        job.setGitUrl(jobRequest.getGitUrl());
+        job.setRunCommand(jobRequest.getRunCommand());
+        job.setCompileCommand(jobRequest.getCompileCommand());
+        job.setJobType(jobRequest.getTestType());
+        job.setConfig(jobRequest.getConfig());
+        job.setStatus(JobStatus.PENDING);
         return jobRepository.save(job);
     }
 
