@@ -53,11 +53,12 @@ public class BatchesController {
 	}
 
 	// PUT /api/batches/{id} — stubbed
-	@PutMapping("/update")
-	public ResponseEntity<BatchResponseDTO> updateBatch(@RequestBody BatchRequestDTO request) {
-        BatchResponseDTO result = batchService.updateBatch(request);
-        return ResponseEntity.ok(result);
-	}
+    @PutMapping("/{id}")
+    public ResponseEntity<TestBatch> updateBatch(@PathVariable @NotNull UUID id, @RequestBody BatchUpdateRequest request) {
+        TestBatch batch = batchService.updateBatch(id, request);
+
+        return ResponseEntity.ok(batch);
+    }
 
 	// DELETE /api/batches/{id}
 	@DeleteMapping("/{id}")
