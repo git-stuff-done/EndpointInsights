@@ -15,6 +15,11 @@ public class CustomExceptionBuilder {
 		errorResponse = new ErrorResponse();
 	}
 
+	public CustomExceptionBuilder(HttpStatus status, String... details) {
+		this(details);
+		withStatus(status);
+	}
+
 	public CustomExceptionBuilder(String... details) {
 		this();
 		withDetails(details);

@@ -6,10 +6,11 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
-import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
+import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +19,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestPropertySource(properties = "app.authentication.enabled=false")
 @WebMvcTest(controllers = BatchesController.class)
@@ -112,33 +115,14 @@ class BatchesControllerUnitTest {
     }
 
     @Test
-    void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO();
-        UUID batchId = UUID.randomUUID();
-        request.setId(batchId);
-        request.setBatchName("Updated Batch");
-        request.setActive(true);
+    void shouldNotUpdateBatchWithBadId() throws Exception {
+        BatchUpdateRequest request = new BatchUpdateRequest();
 
-        BatchResponseDTO mockResponse = new BatchResponseDTO();
-        mockResponse.setId(batchId);
-        mockResponse.setBatchName("Updated Batch");
-        mockResponse.setActive(true);
-
-        when(batchService.updateBatch(any(BatchRequestDTO.class))).thenReturn(mockResponse);
-
-        MvcResult result = mockMvc.perform(put("/api/batches/update")
+        mockMvc.perform(put("/api/batches/{id}", "bad-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BatchResponseDTO response = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                BatchResponseDTO.class);
-
-        assertEquals("Updated Batch", response.getBatchName());
-        assertEquals(batchId, response.getId());
-        assertTrue(response.getActive());
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", containsString("Invalid Parameter Type")));
     }
 
     @Test
