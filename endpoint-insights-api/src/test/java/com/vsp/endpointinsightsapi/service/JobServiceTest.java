@@ -36,8 +36,8 @@ class JobServiceTest {
     void createJob_returnSavedJobStatus() throws Exception {
         JobCreateRequest createJobDto = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null);
         Job job = new Job();
-        job.setJobId(UUID.randomUUID());
-        assertNotNull(job.getJobId(), "Job ID should be generated");
+        job.setId(UUID.randomUUID());
+        assertNotNull(job.getId(), "Job ID should be generated");
         job.setName(createJobDto.getName());
         assertEquals("test_job", job.getName());
         job.setDescription(createJobDto.getDescription());

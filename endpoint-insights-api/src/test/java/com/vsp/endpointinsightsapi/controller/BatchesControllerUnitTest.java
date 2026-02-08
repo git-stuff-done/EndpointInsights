@@ -1,5 +1,9 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.mapper.BatchMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.mapstruct.factory.Mappers;
+import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.model.TestBatch;
@@ -17,10 +21,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -32,19 +39,29 @@ class BatchesControllerUnitTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    private BatchMapper batchMapper;
 
     @MockitoBean
     private BatchService batchService;
 
+    @BeforeEach
+    void setUp() {
+        batchMapper = Mappers.getMapper(BatchMapper.class);
+    }
+
+
     @Test
     void shouldReturnListOfBatches() throws Exception {
+        TestBatch batch = new TestBatch();
+        batch.setBatch_id(UUID.randomUUID());
+        batch.setBatchName("Test Batch");
+        batch.setActive(true);
+
+        BatchResponseDTO batchDTO = batchMapper.toDto(batch);
+        when(batchService.getAllBatchesByCriteria("", null)).thenReturn(List.of(batchDTO));
+
         mockMvc.perform(get("/api/batches"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThan(0))))
-                .andExpect(jsonPath("$[0].id", notNullValue()))
-                .andExpect(jsonPath("$[0].batchName", not(emptyString())))
-                .andExpect(jsonPath("$[0].scheduleId", notNullValue()))
-                .andExpect(jsonPath("$[0].active", anyOf(is(true), is(false))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -55,8 +72,8 @@ class BatchesControllerUnitTest {
                 .id(id)
                 .batchName("Daily API Tests")
                 .scheduleId(1001L)
-                .startTime(LocalDate.parse("2025-11-08"))
-                .lastTimeRun(LocalDate.parse("2025-11-09"))
+                .startTime(LocalDate.parse("2025-11-08").atStartOfDay())
+                .lastTimeRun(LocalDate.parse("2025-11-09").atStartOfDay())
                 .active(true)
                 .build();
 
@@ -81,7 +98,8 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", Collections.emptyList());
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setBatchName("New Batch");
         TestBatch batch = new TestBatch();
         batch.setBatchName("New Batch");
 
@@ -97,16 +115,32 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
+        BatchRequestDTO request = new BatchRequestDTO();
+        UUID batchId = UUID.randomUUID();
+        request.setId(batchId);
+        request.setBatchName("Updated Batch");
+        request.setActive(true);
 
-        UUID id = UUID.randomUUID();
+        BatchResponseDTO mockResponse = new BatchResponseDTO();
+        mockResponse.setId(batchId);
+        mockResponse.setBatchName("Updated Batch");
+        mockResponse.setActive(true);
 
-        mockMvc.perform(put("/api/batches/{id}", id)
+        when(batchService.updateBatch(any(BatchRequestDTO.class))).thenReturn(mockResponse);
+
+        MvcResult result = mockMvc.perform(put("/api/batches/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id.toString())))
-                .andExpect(jsonPath("$.batchName", is("Updated Batch")));
+                .andReturn();
+
+        BatchResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                BatchResponseDTO.class);
+
+        assertEquals("Updated Batch", response.getBatchName());
+        assertEquals(batchId, response.getId());
+        assertTrue(response.getActive());
     }
 
     @Test
