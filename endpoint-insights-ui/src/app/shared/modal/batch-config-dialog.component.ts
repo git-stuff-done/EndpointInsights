@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -13,6 +13,11 @@ import { MatNativeDateModule } from '@angular/material/core';
 export interface BatchConfigData {
     batchId: string;
     title?: string;
+}
+
+export interface ApiTest {
+    id: string;
+    name: string;
 }
 
 @Component({
@@ -45,6 +50,35 @@ export class BatchConfigDialogComponent implements OnInit {
     private _testCount = signal<number | null>(null);
     testCount = () => this._testCount();
 
+    // Tests currently in the batch (top list in Settings tab)
+    currentBatchTests = signal<ApiTest[]>([
+        { id: '1', name: 'Vision API' },
+        { id: '2', name: 'Open API' },
+        { id: '3', name: 'Records API' },
+    ]);
+
+    // All available tests that can be added (bottom list in Settings tab)
+    availableTests = signal<ApiTest[]>([
+        { id: '1', name: 'Vision API' },
+        { id: '2', name: 'Open API' },
+        { id: '3', name: 'Records API' },
+        { id: '4', name: 'Vision Express API' },
+        { id: '5', name: 'Auth API' },
+        { id: '6', name: 'Payment API' },
+    ]);
+
+    // Search term for filtering available tests
+    searchTerm = signal('');
+
+    // Filtered list: excludes tests already in batch, filters by search term
+    filteredAvailableTests = computed(() => {
+        const search = this.searchTerm().toLowerCase();
+        const currentIds = new Set(this.currentBatchTests().map(t => t.id));
+        return this.availableTests()
+            .filter(t => !currentIds.has(t.id))
+            .filter(t => t.name.toLowerCase().includes(search));
+    });
+
     form = this.fb.group({
         title: ['', [Validators.required, Validators.maxLength(120)]],
         nextRunDate: <Date | null>null,
@@ -72,10 +106,33 @@ export class BatchConfigDialogComponent implements OnInit {
         // Hook for future PATCH /batches/:id {title}
     }
 
+    // Remove a single test from the batch
+    removeTest(test: ApiTest): void {
+        this.currentBatchTests.update(tests => tests.filter(t => t.id !== test.id));
+    }
+
+    // Remove all tests from the batch
+    clearAllTests(): void {
+        this.currentBatchTests.set([]);
+    }
+
+    // Add a test to the batch
+    addTest(test: ApiTest): void {
+        if (!this.currentBatchTests().some(t => t.id === test.id)) {
+            this.currentBatchTests.update(tests => [...tests, test]);
+        }
+    }
+
+    // Check if a test is in the batch (for toggle icon in available list)
+    isInBatch(test: ApiTest): boolean {
+        return this.currentBatchTests().some(t => t.id === test.id);
+    }
+
     close(): void {
         this.dialogRef.close({
             title: this.form.controls.title.value?.trim() || this.data.title || '',
             nextRunIso: this.composeIso(this.form.controls.nextRunDate.value, this.form.controls.nextRunTime.value),
+            batchTests: this.currentBatchTests(),
         });
     }
 
