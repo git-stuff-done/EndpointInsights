@@ -18,15 +18,10 @@ import {CreateBatchForm} from "../create-batch-form/create-batch-form";
     styleUrl: './create-batch-modal.scss',
 })
 export class CreateBatchModal {
-    @ViewChild(CreateBatchForm) createBatchForm!: CreateBatchForm;
 
     constructor(
         private dialogRef: MatDialogRef<CreateBatchModal>
     ) {
-    }
-
-    onSubmit() {
-        this.createBatchForm.submitForm();
     }
 
     onBatchCreated(batchData: any) {

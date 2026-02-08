@@ -1,4 +1,4 @@
-<form [formGroup]="createBatchForm">
+<form id="createBatchForm" [formGroup]="createBatchForm" (ngSubmit)="submitForm()">
     <div class="form-row">
         <mat-form-field>
             <mat-label>Batch Name</mat-label>
