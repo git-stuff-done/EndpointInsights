@@ -400,42 +400,6 @@ class BatchServiceTest {
         assertEquals(1, result.get(0).getNotificationList().size());
     }
 
-    @Test
-    void update_batch(){
-        UUID id = UUID.randomUUID();
-        TestBatch batch = new TestBatch();
-        batch.setBatch_id(id);
-        batch.setBatchName("Test Batch");
-        batch.setScheduleId(1001L);
-        batch.setNotificationList(List.of(id));
-
-        BatchRequestDTO dto = new BatchRequestDTO();
-        dto.setId(id);
-        dto.setBatchName("Test Batch");
-        dto.setScheduleId(1001L);
-        dto.setNotificationList(List.of(id));
-
-
-        BatchResponseDTO dto2 = new BatchResponseDTO();
-        dto2.setId(id);
-        dto2.setBatchName("Test Batch");
-        dto2.setScheduleId(1001L);
-        dto2.setNotificationList(List.of(id));
-
-        when(testBatchRepository.findById(batch.getBatch_id())).thenReturn(Optional.of(batch));
-        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getBatch_id())).thenReturn(List.of());
-        when(batchMapper.toDto(batch)).thenReturn(dto2);
-        when(testBatchRepository.save(any(TestBatch.class)))
-                .thenReturn(batch);
-
-        BatchResponseDTO b = batchService.updateBatch(dto);
-        verify(testBatchRepository).findById(batch.getBatch_id());
-        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getBatch_id());
-        verify(batchMapper).toDto(batch);
-
-        assertEquals("Test Batch", b.getBatchName());
-
-    }
 
     @Test
     void delete_participants(){

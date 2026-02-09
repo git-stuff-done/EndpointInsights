@@ -81,31 +81,31 @@ public class BatchService {
         return r.stream().map(BatchNotificationListUserId::getUserId).toList();
     }
 
-    //TODO hook this up to work under one method
-    @Transactional
-    public BatchResponseDTO updateBatch(BatchRequestDTO batchRequestDTO) {
-        TestBatch existing = testBatchRepository.findById(batchRequestDTO.getId())
-                .orElseThrow(() -> new BatchNotFoundException(batchRequestDTO.getId().toString()));
-
-        existing.setBatch_id(batchRequestDTO.getId());
-        existing.setBatchName(batchRequestDTO.getBatchName());
-        existing.setScheduleId(batchRequestDTO.getScheduleId());
-        existing.setLastTimeRun(batchRequestDTO.getLastTimeRun());
-        existing.setNotificationList(batchRequestDTO.getNotificationList());
-        existing.setJobs(batchRequestDTO.getJobs());
-        existing.setActive(batchRequestDTO.getActive());
-        TestBatch saved = testBatchRepository.save(existing);
-
-        batchNotificationListIdsRepository.deleteAllByBatchId(batchRequestDTO.getId());
-
-        batchRequestDTO.getNotificationList().forEach(userId -> {
-            BatchNotificationListUserId batchNotificationListUserId = new BatchNotificationListUserId();
-            batchNotificationListUserId.setBatchId(batchRequestDTO.getId());
-            batchNotificationListUserId.setUserId(userId);
-            batchNotificationListIdsRepository.save(batchNotificationListUserId);
-        });
-        return batchMapper.toDto(saved);
-    }
+//    //TODO hook this up to work under one method
+//    @Transactional
+//    public BatchResponseDTO updateBatch(BatchRequestDTO batchRequestDTO) {
+//        TestBatch existing = testBatchRepository.findById(batchRequestDTO.getId())
+//                .orElseThrow(() -> new BatchNotFoundException(batchRequestDTO.getId().toString()));
+//
+//        existing.setBatch_id(batchRequestDTO.getId());
+//        existing.setBatchName(batchRequestDTO.getBatchName());
+//        existing.setScheduleId(batchRequestDTO.getScheduleId());
+//        existing.setLastTimeRun(batchRequestDTO.getLastTimeRun());
+//        existing.setNotificationList(batchRequestDTO.getNotificationList());
+//        existing.setJobs(batchRequestDTO.getJobs());
+//        existing.setActive(batchRequestDTO.getActive());
+//        TestBatch saved = testBatchRepository.save(existing);
+//
+//        batchNotificationListIdsRepository.deleteAllByBatchId(batchRequestDTO.getId());
+//
+//        batchRequestDTO.getNotificationList().forEach(userId -> {
+//            BatchNotificationListUserId batchNotificationListUserId = new BatchNotificationListUserId();
+//            batchNotificationListUserId.setBatchId(batchRequestDTO.getId());
+//            batchNotificationListUserId.setUserId(userId);
+//            batchNotificationListIdsRepository.save(batchNotificationListUserId);
+//        });
+//        return batchMapper.toDto(saved);
+//    }
 
     //Create Batch — used by POST /api/batches
     public TestBatch createBatch(BatchRequestDTO request) {
