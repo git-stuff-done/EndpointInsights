@@ -53,7 +53,7 @@ export class CreateBatchForm {
     ngOnChanges(changes: SimpleChanges) {
         if (changes['batch'] && this.batch) {
             this.createBatchForm.patchValue({
-                title: this.batch.title,
+                title: this.batch.batchName,
                 description: this.batch.description,
             });
         }

@@ -10,15 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -131,18 +129,14 @@ class JobServiceTest {
 
     @Test
     void updateExistingJob(){
-        // Create job with ID
         Job job = new Job();
         job.setJobId(UUID.randomUUID());
 
-        // Stub the save to return the job with ID
         when(jobRepository.save(any(Job.class))).thenReturn(job);
 
-        // Now this returns the job
         Job saved = jobRepository.save(job);
         verify(jobRepository, times(1)).save(any(Job.class));
 
-        // Stub findById
         when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(saved));
 
         Job existing = jobRepository.findById(saved.getJobId())
@@ -150,13 +144,11 @@ class JobServiceTest {
 
         existing.setName("changedName");
 
-        // Stub save again to return updated job
         when(jobRepository.save(existing)).thenReturn(existing);
 
         jobRepository.save(existing);
         verify(jobRepository, times(2)).save(any(Job.class));
 
-        // Stub findById to return updated job
         when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(existing));
 
         existing = jobRepository.findById(saved.getJobId())
@@ -164,6 +156,36 @@ class JobServiceTest {
 
         assertEquals("changedName", existing.getName());
     }
+
+
+    @Test
+    void updateJob_success() {
+        UUID id = UUID.randomUUID();
+
+        Job existingJob = new Job();
+        existingJob.setJobId(id);
+        existingJob.setName("changedName");
+        existingJob.setDescription("changedDescription");
+        existingJob.setJobType(TestType.E2E);
+
+        Job updatedJob = new Job();
+        updatedJob.setJobId(id);
+        updatedJob.setName("New name");
+        updatedJob.setDescription("New description");
+        updatedJob.setDescription("New desc");
+        updatedJob.setJobType(TestType.PERF);
+
+        when(jobRepository.findById(id)).thenReturn(Optional.of(existingJob));
+        when(jobRepository.save(existingJob)).thenReturn(existingJob);
+
+        Job result = jobService.updateJob(id, updatedJob);
+
+        assertEquals("New name", result.getName());
+        assertEquals("New desc", result.getDescription());
+        verify(jobRepository).save(existingJob);
+    }
+
+
 
 
 }

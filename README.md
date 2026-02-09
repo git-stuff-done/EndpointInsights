@@ -263,6 +263,11 @@ erDiagram
 ![Image](./docs/document-assets/timeline.png)
 
 
+
+## Timeline for Completion
+![Image](./docs/document-assets/timeline.png)
+
+
 ## Documentation
 
 For detailed information about the system architecture, deployment, and authentication:

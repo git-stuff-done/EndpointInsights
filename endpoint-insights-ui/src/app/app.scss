@@ -30,6 +30,12 @@
   gap: 0.75rem;
 }
 
+.accent-button {
+  font-weight: 600;
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
 .nav a[mat-button] {
   border-radius: 9999px;
   padding: 1rem 1.1rem;

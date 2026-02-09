@@ -8,14 +8,16 @@ export class ModalService {
     private dialog = inject(MatDialog);
 
     open(config: ModalConfig) {
-        return this.dialog.open(ModalComponent, {
-            data: config,
+        const isComponentModal = !!config.component;
+        return this.dialog.open(isComponentModal ? config.component! : ModalComponent, {
+            data: config.component ? config.componentData : config,
             width: config.width ?? '600px',
             maxWidth: config.maxWidth ?? '95vw',
             autoFocus: 'first-tabbable',
             restoreFocus: true,
             enterAnimationDuration: '150ms',
             exitAnimationDuration: '100ms'
-        });
+        }
+        );
     }
 }
