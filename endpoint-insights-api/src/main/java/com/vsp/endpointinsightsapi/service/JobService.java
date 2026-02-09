@@ -30,7 +30,7 @@ public class JobService {
 
     public Job createJob(JobCreateRequest jobRequest) {
         Job job = new Job();
-        job.setId(UUID.randomUUID());
+        job.setJobId(UUID.randomUUID());
         job.setName(jobRequest.getName());
         job.setDescription(jobRequest.getDescription());
         //TODO: Validate git URL
@@ -62,7 +62,7 @@ public class JobService {
 
     public Job updateJob(UUID id, Job job) {
         Job existingJob = jobRepository.findById(id)
-                .orElseThrow(()  -> new JobNotFoundException(job.getId().toString()));
+                .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
         existingJob.setName(job.getName());
         existingJob.setDescription(job.getDescription());
         existingJob.setStatus(job.getStatus());

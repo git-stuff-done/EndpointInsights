@@ -48,7 +48,7 @@ class BatchServiceTest {
         UUID id = UUID.randomUUID();
         TestBatch entity = new TestBatch();
         // adjust getters/setters to your model
-        entity.setId(id);
+        entity.setBatch_id(id);
         entity.setBatchName("Example");
         entity.setScheduleId(1001L);
         entity.setStartTime(LocalDate.parse("2025-11-08").atStartOfDay());
@@ -109,13 +109,13 @@ class BatchServiceTest {
         UUID jobId2 = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         Job job1 = new Job();
-        job1.setId(jobId1);
+        job1.setJobId(jobId1);
         Job job2 = new Job();
-        job2.setId(jobId2);
+        job2.setJobId(jobId2);
 
         BatchUpdateRequest request = new BatchUpdateRequest();
         request.addJobs = List.of(jobId1, jobId2);
@@ -142,12 +142,12 @@ class BatchServiceTest {
         UUID jobId2 = UUID.randomUUID();
 
         Job job1 = new Job();
-        job1.setId(jobId1);
+        job1.setJobId(jobId1);
         Job job2 = new Job();
-        job2.setId(jobId2);
+        job2.setJobId(jobId2);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(job1, job2)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -176,14 +176,14 @@ class BatchServiceTest {
         UUID jobToRemoveId = UUID.randomUUID();
 
         Job existingJob = new Job();
-        existingJob.setId(existingJobId);
+        existingJob.setJobId(existingJobId);
         Job newJob = new Job();
-        newJob.setId(newJobId);
+        newJob.setJobId(newJobId);
         Job jobToRemove = new Job();
-        jobToRemove.setId(jobToRemoveId);
+        jobToRemove.setJobId(jobToRemoveId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(existingJob, jobToRemove)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -228,7 +228,7 @@ class BatchServiceTest {
         UUID nonExistentJobId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -251,10 +251,10 @@ class BatchServiceTest {
         UUID existingJobId = UUID.randomUUID();
 
         Job existingJob = new Job();
-        existingJob.setId(existingJobId);
+        existingJob.setJobId(existingJobId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(existingJob)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -277,7 +277,7 @@ class BatchServiceTest {
         UUID nonExistentJobId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -300,10 +300,10 @@ class BatchServiceTest {
         UUID jobNotInBatchId = UUID.randomUUID();
 
         Job jobNotInBatch = new Job();
-        jobNotInBatch.setId(jobNotInBatchId);
+        jobNotInBatch.setJobId(jobNotInBatchId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -325,7 +325,7 @@ class BatchServiceTest {
         UUID batchId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -349,10 +349,10 @@ class BatchServiceTest {
         UUID jobId = UUID.randomUUID();
 
         Job job = new Job();
-        job.setId(jobId);
+        job.setJobId(jobId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setId(batchId);
+        existingBatch.setBatch_id(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(job)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -378,7 +378,7 @@ class BatchServiceTest {
         UUID userId = UUID.randomUUID();
 
         TestBatch batch = new TestBatch();
-        batch.setId(batchId);
+        batch.setBatch_id(batchId);
         batch.setBatchName("Test Batch");
 
         BatchResponseDTO dto = new BatchResponseDTO();
@@ -404,7 +404,7 @@ class BatchServiceTest {
     void update_batch(){
         UUID id = UUID.randomUUID();
         TestBatch batch = new TestBatch();
-        batch.setId(id);
+        batch.setBatch_id(id);
         batch.setBatchName("Test Batch");
         batch.setScheduleId(1001L);
         batch.setNotificationList(List.of(id));
@@ -422,15 +422,15 @@ class BatchServiceTest {
         dto2.setScheduleId(1001L);
         dto2.setNotificationList(List.of(id));
 
-        when(testBatchRepository.findById(batch.getId())).thenReturn(Optional.of(batch));
-        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getId())).thenReturn(List.of());
+        when(testBatchRepository.findById(batch.getBatch_id())).thenReturn(Optional.of(batch));
+        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getBatch_id())).thenReturn(List.of());
         when(batchMapper.toDto(batch)).thenReturn(dto2);
         when(testBatchRepository.save(any(TestBatch.class)))
                 .thenReturn(batch);
 
         BatchResponseDTO b = batchService.updateBatch(dto);
-        verify(testBatchRepository).findById(batch.getId());
-        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getId());
+        verify(testBatchRepository).findById(batch.getBatch_id());
+        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getBatch_id());
         verify(batchMapper).toDto(batch);
 
         assertEquals("Test Batch", b.getBatchName());

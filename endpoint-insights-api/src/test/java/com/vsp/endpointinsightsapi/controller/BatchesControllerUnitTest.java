@@ -3,7 +3,6 @@ package com.vsp.endpointinsightsapi.controller;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.mapstruct.factory.Mappers;
-import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
@@ -51,7 +50,7 @@ class BatchesControllerUnitTest {
     @Test
     void shouldReturnListOfBatches() throws Exception {
         TestBatch batch = new TestBatch();
-        batch.setId(UUID.randomUUID());
+        batch.setBatch_id(UUID.randomUUID());
         batch.setBatchName("Test Batch");
         batch.setActive(true);
 
@@ -150,7 +149,7 @@ class BatchesControllerUnitTest {
         UUID batchId = UUID.randomUUID();
         BatchUpdateRequest request = new BatchUpdateRequest();
         TestBatch updatedBatch = new TestBatch();
-        updatedBatch.setId(batchId);
+        updatedBatch.setBatch_id(batchId);
 
         mockMvc.perform(put("/api/batches/{id}", batchId)
                         .contentType(MediaType.APPLICATION_JSON)

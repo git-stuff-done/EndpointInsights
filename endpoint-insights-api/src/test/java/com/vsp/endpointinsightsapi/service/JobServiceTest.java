@@ -36,8 +36,8 @@ class JobServiceTest {
     void createJob_returnSavedJobStatus() throws Exception {
         JobCreateRequest createJobDto = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null);
         Job job = new Job();
-        job.setId(UUID.randomUUID());
-        assertNotNull(job.getId(), "Job ID should be generated");
+        job.setJobId(UUID.randomUUID());
+        assertNotNull(job.getJobId(), "Job ID should be generated");
         job.setName(createJobDto.getName());
         assertEquals("test_job", job.getName());
         job.setDescription(createJobDto.getDescription());
@@ -62,11 +62,11 @@ class JobServiceTest {
     void getAllJobs_ReturnListOfJobs() {
         Job job1 = new Job();
         UUID job1Id = UUID.randomUUID();
-        job1.setId(job1Id);
+        job1.setJobId(job1Id);
         jobRepository.save(job1);
         Job job2 = new Job();
         UUID job2Id = UUID.randomUUID();
-        job2.setId(job2Id);
+        job2.setJobId(job2Id);
         jobRepository.save(job2);
         
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
@@ -80,13 +80,13 @@ class JobServiceTest {
     void getJobById_ReturnJob() {
         UUID jobId = UUID.randomUUID();
         Job job = new Job();
-        job.setId(jobId);
+        job.setJobId(jobId);
         when(jobRepository.existsById(jobId)).thenReturn(true);
         when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);
         assertNotNull(testResult);
         assertTrue(testResult.isPresent());
-        assertEquals(jobId, testResult.get().getId());
+        assertEquals(jobId, testResult.get().getJobId());
         verify(jobRepository, times(1)).findById(jobId);
         verify(jobRepository, times(1)).existsById(jobId);
     }
@@ -130,17 +130,17 @@ class JobServiceTest {
     @Test
     void updateExistingJob(){
         Job job = new Job();
-        job.setId(UUID.randomUUID());
+        job.setJobId(UUID.randomUUID());
 
         when(jobRepository.save(any(Job.class))).thenReturn(job);
 
         Job saved = jobRepository.save(job);
         verify(jobRepository, times(1)).save(any(Job.class));
 
-        when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(saved));
+        when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(saved));
 
-        Job existing = jobRepository.findById(saved.getId())
-                .orElseThrow(() -> new JobNotFoundException(saved.getId().toString()));
+        Job existing = jobRepository.findById(saved.getJobId())
+                .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
 
         existing.setName("changedName");
 
@@ -149,10 +149,10 @@ class JobServiceTest {
         jobRepository.save(existing);
         verify(jobRepository, times(2)).save(any(Job.class));
 
-        when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(existing));
+        when(jobRepository.findById(saved.getJobId())).thenReturn(Optional.of(existing));
 
-        existing = jobRepository.findById(saved.getId())
-                .orElseThrow(() -> new JobNotFoundException(saved.getId().toString()));
+        existing = jobRepository.findById(saved.getJobId())
+                .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
 
         assertEquals("changedName", existing.getName());
     }
@@ -163,13 +163,13 @@ class JobServiceTest {
         UUID id = UUID.randomUUID();
 
         Job existingJob = new Job();
-        existingJob.setId(id);
+        existingJob.setJobId(id);
         existingJob.setName("changedName");
         existingJob.setDescription("changedDescription");
         existingJob.setJobType(TestType.E2E);
 
         Job updatedJob = new Job();
-        updatedJob.setId(id);
+        updatedJob.setJobId(id);
         updatedJob.setName("New name");
         updatedJob.setDescription("New description");
         updatedJob.setDescription("New desc");

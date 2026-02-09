@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import java.net.http.HttpResponse;
 import java.util.*;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
@@ -47,7 +46,7 @@ public class BatchService {
         //Find all notifications for this batch object and assign
         for (TestBatch testBatch : res) {
             List<UUID> notificationUserIds = batchNotificationListIdsRepository
-                    .findAllByBatchId(testBatch.getId())
+                    .findAllByBatchId(testBatch.getBatch_id())
                     .stream()
                     .map(BatchNotificationListUserId::getUserId)
                     .toList();
@@ -88,7 +87,7 @@ public class BatchService {
         TestBatch existing = testBatchRepository.findById(batchRequestDTO.getId())
                 .orElseThrow(() -> new BatchNotFoundException(batchRequestDTO.getId().toString()));
 
-        existing.setId(batchRequestDTO.getId());
+        existing.setBatch_id(batchRequestDTO.getId());
         existing.setBatchName(batchRequestDTO.getBatchName());
         existing.setScheduleId(batchRequestDTO.getScheduleId());
         existing.setLastTimeRun(batchRequestDTO.getLastTimeRun());
@@ -114,7 +113,7 @@ public class BatchService {
         batch.setBatchName(request.getBatchName());
 
         if (request.getJobs() != null && !request.getJobs().isEmpty()) {
-            List<Job> jobs = jobRepository.findAllById(request.getJobs().stream().map(Job::getId).toList());
+            List<Job> jobs = jobRepository.findAllById(request.getJobs().stream().map(Job::getJobId).toList());
             if (jobs.size() != request.getJobs().size()) {
                 LOG.warn("Job ID(s) in the request do not exist");
             }
@@ -134,7 +133,7 @@ public class BatchService {
 
         // handle adding jobs
         if (request.addJobs != null && !request.addJobs.isEmpty()) {
-            Map<UUID, Job> jobMap = jobRepository.findAllById(request.addJobs).stream().collect(Collectors.toMap(Job::getId, job -> job));
+            Map<UUID, Job> jobMap = jobRepository.findAllById(request.addJobs).stream().collect(Collectors.toMap(Job::getJobId, job -> job));
             for (UUID jobId : request.addJobs) {
 				Optional<Job> job = jobMap.containsKey(jobId) ? Optional.of(jobMap.get(jobId)) : Optional.empty();
                 if (job.isEmpty()) {
@@ -149,7 +148,7 @@ public class BatchService {
 
         // handle deleting jobs
         if (request.deleteJobs != null && !request.deleteJobs.isEmpty()) {
-            Map<UUID, Job> jobMap = jobRepository.findAllById(request.deleteJobs).stream().collect(Collectors.toMap(Job::getId, job -> job));
+            Map<UUID, Job> jobMap = jobRepository.findAllById(request.deleteJobs).stream().collect(Collectors.toMap(Job::getJobId, job -> job));
             for (UUID jobId : request.deleteJobs) {
                 Optional<Job> job = jobMap.containsKey(jobId) ? Optional.of(jobMap.get(jobId)) : Optional.empty();
                 if (job.isEmpty()) {

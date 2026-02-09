@@ -26,7 +26,7 @@ public class Job  extends AuditingEntity {
     @GeneratedValue
     @UuidGenerator
     @Column(name = "job_id")
-    private UUID id;
+    private UUID jobId;
 
     @Column(name = "name", nullable = false)
     private String name;

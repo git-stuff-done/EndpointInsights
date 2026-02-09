@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 public interface BatchMapper {
 
     // MapStruct will generate the implementation automatically
-    @Mapping(source = "id", target = "id")
+    @Mapping(source = "batch_id", target = "id")
     @Mapping(source = "jobs", target = "jobs")
 
     BatchResponseDTO toDto(TestBatch entity);
