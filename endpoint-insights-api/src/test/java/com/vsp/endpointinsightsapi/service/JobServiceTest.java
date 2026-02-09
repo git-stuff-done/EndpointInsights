@@ -129,18 +129,14 @@ class JobServiceTest {
 
     @Test
     void updateExistingJob(){
-        // Create job with ID
         Job job = new Job();
         job.setId(UUID.randomUUID());
 
-        // Stub the save to return the job with ID
         when(jobRepository.save(any(Job.class))).thenReturn(job);
 
-        // Now this returns the job
         Job saved = jobRepository.save(job);
         verify(jobRepository, times(1)).save(any(Job.class));
 
-        // Stub findById
         when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(saved));
 
         Job existing = jobRepository.findById(saved.getId())
@@ -148,13 +144,11 @@ class JobServiceTest {
 
         existing.setName("changedName");
 
-        // Stub save again to return updated job
         when(jobRepository.save(existing)).thenReturn(existing);
 
         jobRepository.save(existing);
         verify(jobRepository, times(2)).save(any(Job.class));
 
-        // Stub findById to return updated job
         when(jobRepository.findById(saved.getId())).thenReturn(Optional.of(existing));
 
         existing = jobRepository.findById(saved.getId())

@@ -1,10 +1,12 @@
 // BatchServiceTest.java
 package com.vsp.endpointinsightsapi.service;
 
+import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
+import com.vsp.endpointinsightsapi.model.BatchNotificationListUserId;
 import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
@@ -368,4 +370,97 @@ class BatchServiceTest {
         assertEquals(0, result.getJobs().size());
         verify(testBatchRepository).save(existingBatch);
     }
+
+
+    @Test
+    void get_all_match_by_criteria(){
+        UUID batchId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        TestBatch batch = new TestBatch();
+        batch.setId(batchId);
+        batch.setBatchName("Test Batch");
+
+        BatchResponseDTO dto = new BatchResponseDTO();
+        dto.setId(batchId);
+        dto.setBatchName("Test Batch");
+
+        BatchNotificationListUserId notification = new BatchNotificationListUserId();
+        notification.setUserId(userId);
+        dto.setNotificationList(List.of(userId));
+
+        when(testBatchRepository.findAllByCriteria("", null)).thenReturn(List.of(batch));
+        when(batchNotificationListIdsRepository.findAllByBatchId(batchId)).thenReturn(List.of(notification));
+        when(batchMapper.toDto(batch)).thenReturn(dto);
+        List<BatchResponseDTO> result = batchService.getAllBatchesByCriteria("", null);
+
+        System.out.println(result);
+        assertEquals(1, result.size());
+        assertEquals("Test Batch", result.get(0).getBatchName());
+        assertEquals(1, result.get(0).getNotificationList().size());
+    }
+
+    @Test
+    void update_batch(){
+        UUID id = UUID.randomUUID();
+        TestBatch batch = new TestBatch();
+        batch.setId(id);
+        batch.setBatchName("Test Batch");
+        batch.setScheduleId(1001L);
+        batch.setNotificationList(List.of(id));
+
+        BatchRequestDTO dto = new BatchRequestDTO();
+        dto.setId(id);
+        dto.setBatchName("Test Batch");
+        dto.setScheduleId(1001L);
+        dto.setNotificationList(List.of(id));
+
+
+        BatchResponseDTO dto2 = new BatchResponseDTO();
+        dto2.setId(id);
+        dto2.setBatchName("Test Batch");
+        dto2.setScheduleId(1001L);
+        dto2.setNotificationList(List.of(id));
+
+        when(testBatchRepository.findById(batch.getId())).thenReturn(Optional.of(batch));
+        when(batchNotificationListIdsRepository.deleteAllByBatchId(batch.getId())).thenReturn(List.of());
+        when(batchMapper.toDto(batch)).thenReturn(dto2);
+        when(testBatchRepository.save(any(TestBatch.class)))
+                .thenReturn(batch);
+
+        BatchResponseDTO b = batchService.updateBatch(dto);
+        verify(testBatchRepository).findById(batch.getId());
+        verify(batchNotificationListIdsRepository).deleteAllByBatchId(batch.getId());
+        verify(batchMapper).toDto(batch);
+
+        assertEquals("Test Batch", b.getBatchName());
+
+    }
+
+    @Test
+    void delete_participants(){
+        UUID batchId = UUID.randomUUID();
+        List<UUID> userIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+        BatchNotificationListUserId u1 = new BatchNotificationListUserId();
+        u1.setUserId(userIds.get(0));
+
+        BatchNotificationListUserId u2 = new BatchNotificationListUserId();
+        u2.setUserId(userIds.get(1));
+
+        when(batchNotificationListIdsRepository.findAllByBatchId(batchId))
+                .thenReturn(List.of(u1, u2));
+
+        List<UUID> result = batchService.deleteParticipants(userIds, batchId);
+
+        verify(batchNotificationListIdsRepository)
+                .deleteByBatchIdAndUserIdIn(batchId, userIds);
+        verify(batchNotificationListIdsRepository)
+                .findAllByBatchId(batchId);
+
+        assertEquals(userIds, result);
+    }
+
+
 }
+
