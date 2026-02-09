@@ -67,10 +67,4 @@ public class BatchesController {
         return ResponseEntity.noContent().build();
 	}
 
-    @PutMapping("/remove-participants")
-    public ResponseEntity<List<UUID>> removeParticipants(@RequestParam("userIds") List<UUID> userIds,
-                                                   @RequestParam("batchId") UUID batchId) {
-        List<UUID> res = batchService.deleteParticipants(userIds, batchId);
-        return ResponseEntity.ok(res);
-    }
 }
