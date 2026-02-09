@@ -164,11 +164,16 @@ class JobServiceTest {
 
         Job existingJob = new Job();
         existingJob.setId(id);
+        existingJob.setName("changedName");
+        existingJob.setDescription("changedDescription");
+        existingJob.setJobType(TestType.E2E);
 
         Job updatedJob = new Job();
         updatedJob.setId(id);
         updatedJob.setName("New name");
+        updatedJob.setDescription("New description");
         updatedJob.setDescription("New desc");
+        updatedJob.setJobType(TestType.PERF);
 
         when(jobRepository.findById(id)).thenReturn(Optional.of(existingJob));
         when(jobRepository.save(existingJob)).thenReturn(existingJob);
@@ -179,6 +184,8 @@ class JobServiceTest {
         assertEquals("New desc", result.getDescription());
         verify(jobRepository).save(existingJob);
     }
+
+
 
 
 }

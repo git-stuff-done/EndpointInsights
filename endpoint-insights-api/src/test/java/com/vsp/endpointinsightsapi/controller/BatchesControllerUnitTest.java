@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -142,6 +142,20 @@ class BatchesControllerUnitTest {
 
         mockMvc.perform(delete("/api/batches/{id}", id))
                 .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void updateBatch_ShouldReturnUpdatedBatch() throws Exception {
+        UUID batchId = UUID.randomUUID();
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        TestBatch updatedBatch = new TestBatch();
+        updatedBatch.setId(batchId);
+
+        mockMvc.perform(put("/api/batches/{id}", batchId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
     }
 
 }
