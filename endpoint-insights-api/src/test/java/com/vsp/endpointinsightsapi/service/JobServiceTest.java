@@ -158,4 +158,27 @@ class JobServiceTest {
     }
 
 
+    @Test
+    void updateJob_success() {
+        UUID id = UUID.randomUUID();
+
+        Job existingJob = new Job();
+        existingJob.setId(id);
+
+        Job updatedJob = new Job();
+        updatedJob.setId(id);
+        updatedJob.setName("New name");
+        updatedJob.setDescription("New desc");
+
+        when(jobRepository.findById(id)).thenReturn(Optional.of(existingJob));
+        when(jobRepository.save(existingJob)).thenReturn(existingJob);
+
+        Job result = jobService.updateJob(id, updatedJob);
+
+        assertEquals("New name", result.getName());
+        assertEquals("New desc", result.getDescription());
+        verify(jobRepository).save(existingJob);
+    }
+
+
 }

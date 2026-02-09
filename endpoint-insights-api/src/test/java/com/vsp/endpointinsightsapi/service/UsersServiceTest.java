@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,6 +125,26 @@ public class UsersServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             userService.findAllByIds(invalidIds);
+        });
+    }
+
+    @Test
+    void findAllByIds_WithMixedValidAndInvalidUUIDs_ShouldThrowException() {
+        UUID validId = UUID.randomUUID();
+        List<String> mixedIds = List.of(validId.toString(), "invalid-uuid");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            userService.findAllByIds(mixedIds);
+        });
+    }
+
+    @Test
+    void findAllByIds_WithNullInList_ShouldThrowException() {
+        List<String> idsWithNull = new ArrayList<>();
+        idsWithNull.add(null);
+
+        assertThrows(NullPointerException.class, () -> {
+            userService.findAllByIds(idsWithNull);
         });
     }
 
