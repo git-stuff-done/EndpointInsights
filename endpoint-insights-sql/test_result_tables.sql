@@ -32,3 +32,15 @@ create table perf_test_result_code
         primary key (result_id, error_code)
 );
 
+create table test_run
+(
+    run_id      uuid default gen_random_uuid()
+        constraint test_run_pk
+            primary key,
+    job_id      uuid not null,
+    run_by      text not null,
+    status      text not null,
+    started_at  timestamptz,
+    finished_at timestamptz
+);
+
