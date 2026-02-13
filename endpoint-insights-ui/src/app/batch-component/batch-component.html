@@ -1,9 +1,16 @@
 <main class="container-fluid py-3">
+    <div class="button-container">
+    <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
+        <span>New Batch</span>
+        <mat-icon fontIcon="add"></mat-icon>
+    </button>
+    </div>
   <section class="grid">
     <app-batch-card
       *ngFor="let b of batch; trackBy: trackById"
       [batch]="b"
       (configure)="onConfigure($event)">
+    >
     </app-batch-card>
   </section>
 </main>

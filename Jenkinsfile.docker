@@ -1,0 +1,64 @@
+pipeline {
+    agent {
+        label 'vm-docker'
+    }
+
+    environment {
+        REGISTRY = 'ghcr.io'
+        IMAGE_NAME = 'git-stuff-done/endpoint-insights-api'
+
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    def tags = "-t ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT} -t ${REGISTRY}/${IMAGE_NAME}:${BRANCH_NAME}"
+
+                    if (BRANCH_NAME == 'main') {
+                        tags += " -t ${REGISTRY}/${IMAGE_NAME}:latest"
+                    }
+
+                    sh """
+                        docker build -f ./endpoint-insights-api/Dockerfile ${tags} ./endpoint-insights-api
+                    """
+                }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-registry-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                            echo \$DOCKER_PASS | docker login ${REGISTRY} -u \$DOCKER_USER --password-stdin
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT}
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${BRANCH_NAME}
+                        """
+
+                        if (BRANCH_NAME == 'main') {
+                            sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            sh "docker logout ${REGISTRY} || true"
+            sh "docker image prune -f || true"
+        }
+    }
+}

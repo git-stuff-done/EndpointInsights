@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Batch } from '../models/batch.model';
+import {BatchService} from "./batch.service";
 
 const STORAGE_KEY = 'vsp.batches';
 
 @Injectable({ providedIn: 'root' })
 export class BatchStore {
     private readonly _batches$ = new BehaviorSubject<Batch[]>(this.load());
+    private batchService = inject(BatchService);
 
     readonly batches$ = this._batches$.asObservable();
 
@@ -20,8 +22,8 @@ export class BatchStore {
         }
         // Seed defaults once:
         const seed: Batch[] = [
-            { id: 'B-2025-00123', title: 'Nightly ETL (US-East)', date: '2025-10-17T02:13:00Z' },
-            { id: 'B-2025-00124', title: 'Customer Backfill – Oct', date: '2025-10-18T15:45:00Z' },
+            // { id: 'B-2025-00123', title: 'Nightly ETL (US-East)', startTime: '2025-10-17T02:13:00Z' },
+            // { id: 'B-2025-00124', title: 'Customer Backfill – Oct', startTime: '2025-10-18T15:45:00Z' },
         ];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
         return seed;

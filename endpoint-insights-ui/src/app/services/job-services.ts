@@ -1,22 +1,26 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
 import { Observable } from 'rxjs';
-import {TestItem} from "../pages/test-overview/test-overview";
+import {JobsApi} from "../jobsApi/jobsApi";
+import {Job} from "../models/job.model";
+import {TestItem} from "../models/test.model";
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class JobService {
-    private apiUrl = 'http://localhost:8080/api/jobs';
+    private jobApi = inject(JobsApi);
+    constructor() {}
 
-    constructor(private http: HttpClient) {}
+    getAllJobs():Observable<Job[]>{
+        return this.jobApi.getAllJobs();
+    }
 
     createJob(test:TestItem): Observable<TestItem>{
-        return this.http.post<TestItem>(this.apiUrl, test);
+        return this.jobApi.createJob(test);
     }
 
     updateJob(id: string, test: TestItem): Observable<TestItem> {
-        return this.http.put<TestItem>(`${this.apiUrl}/${id}`, test);
+        return this.jobApi.updateJob(id, test);
     }
 }
