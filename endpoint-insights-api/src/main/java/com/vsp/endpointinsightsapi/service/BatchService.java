@@ -49,6 +49,13 @@ public class BatchService {
         testBatchEmailListsRepository.deleteAllByBatchId(batchId);
 
         List<TestBatchEmailList> entities = emails.stream()
+                .collect(Collectors.toMap(
+                        String::toLowerCase,
+                        email -> email,
+                        (existing, duplicate) -> existing
+                ))
+                .values()
+                .stream()
                 .map(email -> {
                     TestBatchEmailList entity = new TestBatchEmailList();
                     entity.setBatchId(batchId);

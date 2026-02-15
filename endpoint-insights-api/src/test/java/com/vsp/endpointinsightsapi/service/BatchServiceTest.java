@@ -8,7 +8,9 @@ import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
+import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,17 +34,27 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BatchServiceTest {
 
-    @Mock TestBatchRepository testBatchRepository;
-    @Mock BatchMapper batchMapper;
-    @InjectMocks BatchService batchService;
-    @Mock JobRepository jobRepository;
+    @Mock
+    TestBatchRepository testBatchRepository;
+
+    @Mock
+    TestBatchEmailListsRepository testBatchEmailListsRepository;
+
+    @Mock
+    BatchMapper batchMapper;
+
+    @InjectMocks
+    BatchService testBatchService;
+
+    @Mock
+    JobRepository jobRepository;
 
     @Test
     void getBatchById_returnsDto() {
         UUID id = UUID.randomUUID();
         TestBatch entity = new TestBatch();
         // adjust getters/setters to your model
-        entity.setBatch_id(id);
+        entity.setBatchId(id);
         entity.setBatchName("Example");
         entity.setScheduleId(1001L);
         entity.setStartTime(LocalDate.parse("2025-11-08").atStartOfDay());
@@ -61,7 +73,7 @@ class BatchServiceTest {
                 .build();
         when(batchMapper.toDto(entity)).thenReturn(dto);
 
-        BatchResponseDTO out = batchService.getBatchById(id);
+        BatchResponseDTO out = testBatchService.getBatchById(id);
 
         assertEquals(id, out.getId());
         assertEquals("Example", out.getBatchName());
@@ -74,7 +86,7 @@ class BatchServiceTest {
         UUID id = UUID.randomUUID();
         when(testBatchRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(BatchNotFoundException.class, () -> batchService.getBatchById(id));
+        assertThrows(BatchNotFoundException.class, () -> testBatchService.getBatchById(id));
     }
 
     @Test
@@ -82,7 +94,7 @@ class BatchServiceTest {
         UUID id = UUID.randomUUID();
         when(testBatchRepository.existsById(id)).thenReturn(true);
 
-        batchService.deleteBatchById(id);
+        testBatchService.deleteBatchById(id);
 
         verify(testBatchRepository).deleteById(id);
     }
@@ -92,7 +104,7 @@ class BatchServiceTest {
         UUID id = UUID.randomUUID();
         when(testBatchRepository.existsById(id)).thenReturn(false);
 
-        assertThrows(BatchNotFoundException.class, () -> batchService.deleteBatchById(id));
+        assertThrows(BatchNotFoundException.class, () -> testBatchService.deleteBatchById(id));
     }
 
     @Test
@@ -103,7 +115,7 @@ class BatchServiceTest {
         UUID jobId2 = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         Job job1 = new Job();
@@ -119,7 +131,7 @@ class BatchServiceTest {
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
-        TestBatch result = batchService.updateBatch(batchId, request);
+        TestBatch result = testBatchService.updateBatch(batchId, request);
 
         // Assert
         assertEquals(2, result.getJobs().size());
@@ -141,7 +153,7 @@ class BatchServiceTest {
         job2.setJobId(jobId2);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(job1, job2)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -152,7 +164,7 @@ class BatchServiceTest {
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
-        TestBatch result = batchService.updateBatch(batchId, request);
+        TestBatch result = testBatchService.updateBatch(batchId, request);
 
         // Assert
         assertEquals(1, result.getJobs().size());
@@ -177,7 +189,7 @@ class BatchServiceTest {
         jobToRemove.setJobId(jobToRemoveId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(existingJob, jobToRemove)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -190,7 +202,7 @@ class BatchServiceTest {
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
-        TestBatch result = batchService.updateBatch(batchId, request);
+        TestBatch result = testBatchService.updateBatch(batchId, request);
 
         // Assert
         assertEquals(2, result.getJobs().size());
@@ -210,7 +222,7 @@ class BatchServiceTest {
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
-            () -> batchService.updateBatch(batchId, request));
+            () -> testBatchService.updateBatch(batchId, request));
         assertTrue(exception.getErrorResponse().getDetails().contains("Batch does not exist with id=" + batchId));
         verify(testBatchRepository, never()).save(any());
     }
@@ -222,7 +234,7 @@ class BatchServiceTest {
         UUID nonExistentJobId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -233,7 +245,7 @@ class BatchServiceTest {
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
-            () -> batchService.updateBatch(batchId, request));
+            () -> testBatchService.updateBatch(batchId, request));
         assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist with id=" + nonExistentJobId));
         verify(testBatchRepository, never()).save(any());
     }
@@ -248,7 +260,7 @@ class BatchServiceTest {
         existingJob.setJobId(existingJobId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(existingJob)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -259,7 +271,7 @@ class BatchServiceTest {
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
-            () -> batchService.updateBatch(batchId, request));
+            () -> testBatchService.updateBatch(batchId, request));
         assertTrue(exception.getErrorResponse().getDetails().contains("Job already exists in batch with id=" + batchId));
         verify(testBatchRepository, never()).save(any());
     }
@@ -271,7 +283,7 @@ class BatchServiceTest {
         UUID nonExistentJobId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -282,7 +294,7 @@ class BatchServiceTest {
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
-            () -> batchService.updateBatch(batchId, request));
+            () -> testBatchService.updateBatch(batchId, request));
         assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist with id=" + nonExistentJobId));
         verify(testBatchRepository, never()).save(any());
     }
@@ -297,7 +309,7 @@ class BatchServiceTest {
         jobNotInBatch.setJobId(jobNotInBatchId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -308,7 +320,7 @@ class BatchServiceTest {
 
         // Act & Assert
         CustomException exception = assertThrows(CustomException.class,
-            () -> batchService.updateBatch(batchId, request));
+            () -> testBatchService.updateBatch(batchId, request));
         assertTrue(exception.getErrorResponse().getDetails().contains("Job does not exist in batch with id=" + batchId));
         verify(testBatchRepository, never()).save(any());
     }
@@ -319,7 +331,7 @@ class BatchServiceTest {
         UUID batchId = UUID.randomUUID();
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>());
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -329,7 +341,7 @@ class BatchServiceTest {
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
-        TestBatch result = batchService.updateBatch(batchId, request);
+        TestBatch result = testBatchService.updateBatch(batchId, request);
 
         // Assert
         assertEquals(0, result.getJobs().size());
@@ -346,7 +358,7 @@ class BatchServiceTest {
         job.setJobId(jobId);
 
         TestBatch existingBatch = new TestBatch();
-        existingBatch.setBatch_id(batchId);
+        existingBatch.setBatchId(batchId);
         existingBatch.setJobs(new ArrayList<>(List.of(job)));
 
         BatchUpdateRequest request = new BatchUpdateRequest();
@@ -358,7 +370,7 @@ class BatchServiceTest {
         when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
 
         // Act
-        TestBatch result = batchService.updateBatch(batchId, request);
+        TestBatch result = testBatchService.updateBatch(batchId, request);
 
         // Assert
         assertEquals(0, result.getJobs().size());
@@ -372,7 +384,7 @@ class BatchServiceTest {
         UUID userId = UUID.randomUUID();
 
         TestBatch batch = new TestBatch();
-        batch.setBatch_id(batchId);
+        batch.setBatchId(batchId);
         batch.setBatchName("Test Batch");
 
         BatchResponseDTO dto = new BatchResponseDTO();
@@ -381,14 +393,111 @@ class BatchServiceTest {
 
         when(testBatchRepository.findAllByCriteria("", null)).thenReturn(List.of(batch));
         when(batchMapper.toDto(batch)).thenReturn(dto);
-        List<BatchResponseDTO> result = batchService.getAllBatchesByCriteria("", null);
+        List<BatchResponseDTO> result = testBatchService.getAllBatchesByCriteria("", null);
 
         System.out.println(result);
         assertEquals(1, result.size());
         assertEquals("Test Batch", result.get(0).getBatchName());
-        assertEquals(1, result.get(0).getNotificationList().size());
     }
 
 
+    @Test
+    void TEST_getEmailsForBatch_ValidBatchWithEmailsShouldReturnEmails(){
+        UUID batchId = UUID.randomUUID();
+        List<String> emails = Arrays.asList("user1@example.com", "user2@example.com", "user3@example.com");
+
+
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setBatchName("Test Batch");
+
+        List<TestBatchEmailList> emailList = new ArrayList<>();
+
+        for (String email : emails) {
+            TestBatchEmailList item = new TestBatchEmailList();
+            item.setBatchId(batchId);
+            item.setEmail(email);
+            emailList.add(item);
+        }
+
+        when(testBatchEmailListsRepository.findAllByBatchId(batchId)).thenReturn(emailList);
+
+        List<String> result = testBatchService.getEmailsForBatch(batchId);
+
+        assertNotNull(result);
+        assertEquals(emails.size(), result.size());
+        assertTrue(result.containsAll(emails));
+        verify(testBatchEmailListsRepository, times(1)).findAllByBatchId(batchId);
+    }
+
+    @Test
+    void TEST_getEmailsForBatch_EmptyBatchShouldReturnEmptyEmails(){
+        UUID batchId = UUID.randomUUID();
+
+        when(testBatchEmailListsRepository.findAllByBatchId(batchId)).thenReturn(Collections.emptyList());
+
+        List<String> result = testBatchService.getEmailsForBatch(batchId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(testBatchEmailListsRepository, times(1)).findAllByBatchId(batchId);
+    }
+
+
+    @Test
+    void TEST_getEmailsForBatch_NonExistentBatchShouldReturnEmptyList() {
+        UUID batchId = UUID.randomUUID();
+
+        when(testBatchEmailListsRepository.findAllByBatchId(batchId)).thenReturn(Collections.emptyList());
+
+        List<String> result = testBatchService.getEmailsForBatch(batchId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void TEST_updateEmailsForBatch_ValidEmailsShouldDeleteOldAndSaveNew() {
+        UUID batchId = UUID.randomUUID();
+        List<String> newEmails = Arrays.asList("new1@example.com", "new2@example.com");
+
+        testBatchService.updateEmailsForBatch(batchId, newEmails);
+
+        verify(testBatchEmailListsRepository, times(1)).deleteAllByBatchId(batchId);
+        verify(testBatchEmailListsRepository, times(1)).saveAll(argThat(iterable -> {
+            List<TestBatchEmailList> list = (List<TestBatchEmailList>) iterable;
+            return list.size() == newEmails.size() &&
+                    list.stream().allMatch(item -> item.getBatchId().equals(batchId));
+        }));
+    }
+
+    @Test
+    void TEST_updateEmailsForBatch_SingleEmailShouldWork() {
+        UUID batchId = UUID.randomUUID();
+        List<String> singleEmail = Collections.singletonList("single@example.com");
+
+        testBatchService.updateEmailsForBatch(batchId, singleEmail);
+
+        verify(testBatchEmailListsRepository, times(1)).deleteAllByBatchId(batchId);
+        verify(testBatchEmailListsRepository, times(1)).saveAll(argThat(iterable -> {
+            List<TestBatchEmailList> list = (List<TestBatchEmailList>) iterable;
+            return list.size() == singleEmail.size() &&
+                    list.stream().allMatch(item -> item.getBatchId().equals(batchId));
+        }));
+    }
+
+    @Test
+    void TEST_updateEmailsForBatch_DuplicateEmailsShouldSaveAll() {
+        UUID batchId = UUID.randomUUID();
+        List<String> duplicateEmails = Arrays.asList("dup@example.com", "DUP@example.com", "dup@example.com");
+
+        testBatchService.updateEmailsForBatch(batchId, duplicateEmails);
+
+        verify(testBatchEmailListsRepository, times(1)).saveAll(argThat(iterable -> {
+            List<TestBatchEmailList> list = (List<TestBatchEmailList>) iterable;
+            return list.size() == 1 &&
+                    list.stream().allMatch(item -> item.getBatchId().equals(batchId));
+        }));
+    }
 }
 

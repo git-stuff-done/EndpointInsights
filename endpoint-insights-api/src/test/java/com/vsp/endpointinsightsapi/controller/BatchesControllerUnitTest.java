@@ -50,7 +50,7 @@ class BatchesControllerUnitTest {
     @Test
     void shouldReturnListOfBatches() throws Exception {
         TestBatch batch = new TestBatch();
-        batch.setBatch_id(UUID.randomUUID());
+        batch.setBatchId(UUID.randomUUID());
         batch.setBatchName("Test Batch");
         batch.setActive(true);
 
@@ -149,7 +149,7 @@ class BatchesControllerUnitTest {
         UUID batchId = UUID.randomUUID();
         BatchUpdateRequest request = new BatchUpdateRequest();
         TestBatch updatedBatch = new TestBatch();
-        updatedBatch.setBatch_id(batchId);
+        updatedBatch.setBatchId(batchId);
 
         mockMvc.perform(put("/api/batches/{id}", batchId)
                         .contentType(MediaType.APPLICATION_JSON)
