@@ -1,16 +1,13 @@
 // BatchServiceTest.java
 package com.vsp.endpointinsightsapi.service;
 
-import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
-import com.vsp.endpointinsightsapi.model.BatchNotificationListUserId;
-import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.repository.BatchNotificationListIdsRepository;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.Test;
@@ -39,9 +36,6 @@ class BatchServiceTest {
     @Mock BatchMapper batchMapper;
     @InjectMocks BatchService batchService;
     @Mock JobRepository jobRepository;
-
-    @Mock
-    private BatchNotificationListIdsRepository batchNotificationListIdsRepository;
 
     @Test
     void getBatchById_returnsDto() {
@@ -385,12 +379,7 @@ class BatchServiceTest {
         dto.setId(batchId);
         dto.setBatchName("Test Batch");
 
-        BatchNotificationListUserId notification = new BatchNotificationListUserId();
-        notification.setUserId(userId);
-        dto.setNotificationList(List.of(userId));
-
         when(testBatchRepository.findAllByCriteria("", null)).thenReturn(List.of(batch));
-        when(batchNotificationListIdsRepository.findAllByBatchId(batchId)).thenReturn(List.of(notification));
         when(batchMapper.toDto(batch)).thenReturn(dto);
         List<BatchResponseDTO> result = batchService.getAllBatchesByCriteria("", null);
 
@@ -398,31 +387,6 @@ class BatchServiceTest {
         assertEquals(1, result.size());
         assertEquals("Test Batch", result.get(0).getBatchName());
         assertEquals(1, result.get(0).getNotificationList().size());
-    }
-
-
-    @Test
-    void delete_participants(){
-        UUID batchId = UUID.randomUUID();
-        List<UUID> userIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-        BatchNotificationListUserId u1 = new BatchNotificationListUserId();
-        u1.setUserId(userIds.get(0));
-
-        BatchNotificationListUserId u2 = new BatchNotificationListUserId();
-        u2.setUserId(userIds.get(1));
-
-        when(batchNotificationListIdsRepository.findAllByBatchId(batchId))
-                .thenReturn(List.of(u1, u2));
-
-        List<UUID> result = batchService.deleteParticipants(userIds, batchId);
-
-        verify(batchNotificationListIdsRepository)
-                .deleteByBatchIdAndUserIdIn(batchId, userIds);
-        verify(batchNotificationListIdsRepository)
-                .findAllByBatchId(batchId);
-
-        assertEquals(userIds, result);
     }
 
 

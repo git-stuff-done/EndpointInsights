@@ -7,7 +7,7 @@ import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
-import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import org.junit.jupiter.api.Test;

@@ -12,19 +12,19 @@ import java.util.UUID;
 import java.util.*;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
-import com.vsp.endpointinsightsapi.model.BatchNotificationListUserId;
-import com.vsp.endpointinsightsapi.model.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.repository.BatchNotificationListIdsRepository;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
+import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
@@ -36,22 +36,36 @@ public class BatchService {
     private final TestBatchRepository testBatchRepository;
     private final BatchMapper batchMapper;
     private final JobRepository jobRepository;
-    private final BatchNotificationListIdsRepository batchNotificationListIdsRepository;
+    private final TestBatchEmailListsRepository testBatchEmailListsRepository;
+
+    public List<String> getEmailsForBatch(UUID batchId) {
+        return testBatchEmailListsRepository.findAllByBatchId(batchId).stream()
+                .map(TestBatchEmailList::getEmail)
+                .toList();
+    }
+
+    @Transactional
+    public void updateEmailsForBatch(UUID batchId, List<String> emails) {
+        testBatchEmailListsRepository.deleteAllByBatchId(batchId);
+
+        List<TestBatchEmailList> entities = emails.stream()
+                .map(email -> {
+                    TestBatchEmailList entity = new TestBatchEmailList();
+                    entity.setBatchId(batchId);
+                    entity.setEmail(email);
+                    return entity;
+                })
+                .toList();
+
+        testBatchEmailListsRepository.saveAll(entities);
+    }
+
+
 
 
     //TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
         List<TestBatch> res = testBatchRepository.findAllByCriteria(batchName, runDate);
-
-        //Find all notifications for this batch object and assign
-        for (TestBatch testBatch : res) {
-            List<UUID> notificationUserIds = batchNotificationListIdsRepository
-                    .findAllByBatchId(testBatch.getBatch_id())
-                    .stream()
-                    .map(BatchNotificationListUserId::getUserId)
-                    .toList();
-            testBatch.setNotificationList(notificationUserIds);
-        }
         return res.stream().map(batchMapper::toDto).toList();
     }
 
@@ -73,12 +87,6 @@ public class BatchService {
         }
         testBatchRepository.deleteById(batchId);
         LOG.info("Deleted batch {}", batchId);
-    }
-
-    public List<UUID> deleteParticipants(List<UUID> userIds, UUID batchId) {
-        batchNotificationListIdsRepository.deleteByBatchIdAndUserIdIn(batchId, userIds);
-        List<BatchNotificationListUserId> r = batchNotificationListIdsRepository.findAllByBatchId(batchId);
-        return r.stream().map(BatchNotificationListUserId::getUserId).toList();
     }
 
 //    //TODO hook this up to work under one method
