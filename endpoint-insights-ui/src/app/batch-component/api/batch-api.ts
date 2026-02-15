@@ -5,7 +5,6 @@ import {catchError, Observable, tap, throwError} from "rxjs";
 import {ToastService} from "../../services/toast.service";
 import {environment} from "../../../environment";
 import {HttpInterceptorService} from "../../services/http-interceptor.service";
-import {AuthenticationService} from "../../services/authentication.service";
 
 
 @Injectable({ providedIn: 'root' })

@@ -122,49 +122,63 @@
 
         <!-- Jobs Tab-->
         <mat-tab label="Jobs">
-            <form [formGroup]="form">
-                <div class="notification-container">
-                    <!-- Search Input -->
-                    <div class="notification-sub-container search">
-                        <mat-form-field appearance="outline">
-                            <mat-label>Search Tests</mat-label>
-                            <div class="input-div">
-                                <input matInput
-                                       #findTestInput
-                                       [formControl]="searchJobControl"
-                                       placeholder="Type to search tests..." />
-                            </div>
-                        </mat-form-field>
-                    </div>
-
-                    <div class="test-search-container" *ngIf="jobSearchResults.length > 0">
-                        <div class="test-search-item" *ngFor="let test of jobSearchResults">
-                            <p>{{ test.name }}</p>
-                            <button mat-raised-button color="primary" (click)="addJob(test)">
-                                <mat-icon>add</mat-icon>
-                            </button>
+            <div class="tab-pane settings-tab" *ngIf="!loading(); else loadingTpl">
+                <!-- Current Batch Tests -->
+                <section class="tests-section">
+                    <h3>Current Batch Tests:</h3>
+                    <div class="tests-table">
+                        <div class="tests-header">
+                            <span>Name:</span>
+                            <span>Remove</span>
+                        </div>
+                        <div class="tests-list">
+                            @for (test of currentBatchTests(); track test.id) {
+                                <div class="test-row">
+                                    <span class="test-name">{{ test.name }}</span>
+                                    <button mat-icon-button (click)="removeTest(test)" aria-label="Remove Test">
+                                        <mat-icon>remove</mat-icon>
+                                    </button>
+                                </div>
+                            } @empty {
+                                <div class="empty-state">No tests in batch</div>
+                            }
                         </div>
                     </div>
+                    <button mat-flat-button color="primary" (click)="clearAllTests()" class="clear-all-btn">
+                        Clear All
+                    </button>
+                </section>
 
-                    <div class="participants-title-container">
-                        <h2>Active tests in batch:</h2>
-                    </div>
-
-                    <!-- Active Tests -->
-                    <div class="notification-sub-container">
-                        <div class="test-search-container">
-
-                        <div class="test-search-item" *ngFor="let test of activeJobs()">
-                            <p>{{ test.name }}</p>
-                            <button mat-raised-button color="primary" (click)="removeJob(test)">
-                                <mat-icon>delete</mat-icon>
-                            </button>
+                <!-- Add New Tests -->
+                <section class="tests-section">
+                    <h3>Add New Tests</h3>
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-icon matPrefix>search</mat-icon>
+                        <input matInput
+                               placeholder="Search..."
+                               [value]="searchTerm()"
+                               (input)="searchTerm.set($any($event.target).value)"/>
+                    </mat-form-field>
+                    <div class="tests-table">
+                        <div class="tests-header">
+                            <span>Name:</span>
+                            <span>Select</span>
                         </div>
-
+                        <div class="tests-list">
+                            @for (test of filteredAvailableTests(); track test.id) {
+                                <div class="test-row">
+                                    <span class="test-name">{{ test.name }}</span>
+                                    <button mat-icon-button (click)="addTest(test)" aria-label="Add test">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                </div>
+                            } @empty {
+                                <div class="empty-state">No tests available</div>
+                            }
                         </div>
                     </div>
-                </div>
-            </form>
+                </section>
+            </div>
         </mat-tab>
 
         <mat-tab label="Settings"></mat-tab>

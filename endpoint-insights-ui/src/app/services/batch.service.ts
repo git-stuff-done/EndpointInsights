@@ -34,4 +34,8 @@ export class BatchService {
         }).pipe(delay(200));
     }
 
+    /** Simulated GET: just the count, if you want a quick refresh */
+    getBatchTestCount(batchId: string): Observable<number> {
+        return of(12).pipe(delay(150));
+    }
 }
