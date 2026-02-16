@@ -22,7 +22,6 @@ import java.util.Map;
 @Component
 @Aspect
 @RequiredArgsConstructor
-@Slf4j
 public class LogAspect {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogAspect.class);
@@ -35,29 +34,30 @@ public class LogAspect {
         log.setEventType(httpRequest.getMethod());
         log.setStatus("SUCCESS");
 
-        try {
-            Map<String, Object> json = new HashMap<>();
-            json.put("request", Map.of(
-                    "method", joinPoint.getSignature().getName(),
-                    "uri", httpRequest.getRequestURI(),
-                    "params", httpRequest.getParameterMap()
-            ));
-
-            if (result instanceof ResponseEntity<?> response) {
-                json.put("response", Map.of(
-                        "status", response.getStatusCode().value(),
-                        "body", response.getBody() != null ? response.getBody().toString() : "null"
+        if(!joinPoint.getSignature().getName().equals("GET")){
+            try {
+                Map<String, Object> json = new HashMap<>();
+                json.put("request", Map.of(
+                        "method", joinPoint.getSignature().getName(),
+                        "uri", httpRequest.getRequestURI(),
+                        "params", httpRequest.getParameterMap()
                 ));
-            } else {
-                json.put("response", result != null ? result.toString() : "null");
-            }
 
-            log.setDetails(objectMapper.writeValueAsString(json));
-            LOG.info(log.toString());
-        }
-        catch (JsonProcessingException e) {
-            LOG.error(e.getMessage());
-            log.setDetails("{\"error\": \"failed to serialize\"}");
+                if (result instanceof ResponseEntity<?> response) {
+                    json.put("response", Map.of(
+                            "status", response.getStatusCode().value()
+                    ));
+                } else {
+                    json.put("response", result != null ? result.toString() : "null");
+                }
+
+                log.setDetails(objectMapper.writeValueAsString(json));
+                LOG.info(log.toString());
+            }
+            catch (JsonProcessingException e) {
+                LOG.error(e.getMessage());
+                log.setDetails("{\"error\": \"failed to serialize\"}");
+            }
         }
 
     }
@@ -77,7 +77,7 @@ public class LogAspect {
                     "message", ex.getMessage()
             ));
             log.setDetails(objectMapper.writeValueAsString(json));
-            LOG.info(log.toString());
+            LOG.warn(log.toString());
         }
         catch (JsonProcessingException e) {
             LOG.error(e.getMessage());
