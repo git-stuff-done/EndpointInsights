@@ -1,9 +1,10 @@
 import {inject, Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Batch} from "../../models/batch.model";
 import {catchError, Observable, tap, throwError} from "rxjs";
 import {ToastService} from "../../services/toast.service";
 import {environment} from "../../../environment";
+import {HttpInterceptorService} from "../../services/http-interceptor.service";
 
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +12,7 @@ export class BatchApi {
     constructor(private http: HttpClient) {}
     private baseUrl = '/api/batches';
     private toast = inject(ToastService);
+    private httpInterceptService = inject(HttpInterceptorService);
 
     getAllBatches(): Observable<Batch[]>{
         return this.http.get<Batch[]>(`${environment.apiUrl}`);
@@ -20,8 +22,8 @@ export class BatchApi {
         return this.http.get<Batch>(`${environment.apiUrl}/${id}`)
     }
 
-    saveBatch(batch: Batch):Observable<Batch>{
-        return this.http.put<Batch>(`${environment.apiUrl}/${batch.id}`, batch)
+    saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
+        return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, batch)
             .pipe(
                 tap(() => this.toast.onSuccess("Successfully saved batch item")),
                 catchError(err => {

@@ -30,7 +30,7 @@ public class BatchesController {
         this.batchService = batchService;
     }
 
-    // GET /api/batches — stub list (unchanged)
+    // GET /api/batches
 	@GetMapping
 	public ResponseEntity<List<BatchResponseDTO>> listBatches(@RequestParam(required = false) String batchName,
                                                               @RequestParam(required = false) LocalDateTime runDate) {

@@ -231,14 +231,14 @@ export class BatchConfigDialogComponent implements OnInit {
         return this.batchService.saveBatch(this.form.value).subscribe({
             next: (response) => {
                 this.form.patchValue({
-                    id: response.id,
-                    batchName: response.batchName,
-                    startTime: response.startTime,
-                    lastRunTime: response.lastRunTime,
-                    scheduledDays: response.scheduledDays,
-                    nextRunTime: response.nextRunTime,
-                    nextRunDate: response.nextRunDate,
-                    notificationList: response.notificationList || []
+                    id: response.body?.id,
+                    batchName: response.body?.batchName,
+                    startTime: response.body?.startTime,
+                    lastRunTime: response.body?.lastRunTime,
+                    scheduledDays: response.body?.scheduledDays,
+                    nextRunTime: response.body?.nextRunTime,
+                    nextRunDate: response.body?.nextRunDate,
+                    notificationList: response.body?.notificationList || []
                 });
 
                 this.populateActiveParticipants();
