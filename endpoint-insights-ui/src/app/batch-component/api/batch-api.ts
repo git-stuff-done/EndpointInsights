@@ -10,7 +10,6 @@ import {HttpInterceptorService} from "../../services/http-interceptor.service";
 @Injectable({ providedIn: 'root' })
 export class BatchApi {
     constructor(private http: HttpClient) {}
-    private baseUrl = '/api/batches';
     private toast = inject(ToastService);
     private httpInterceptService = inject(HttpInterceptorService);
 
@@ -23,14 +22,27 @@ export class BatchApi {
     }
 
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
-        return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, batch)
-            .pipe(
-                tap(() => this.toast.onSuccess("Successfully saved batch item")),
-                catchError(err => {
-                    this.toast.onError("Unable to save batch item");
-                    return throwError(() => err);
-                })
-            );
+        if(batch.isNew){
+            return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, batch)
+                .pipe(
+                    tap(() => this.toast.onSuccess("Successfully saved batch item")),
+                    catchError(err => {
+                        this.toast.onError("Unable to save batch item");
+                        return throwError(() => err);
+                    })
+                );
+        }
+        else{
+            return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, batch)
+                .pipe(
+                    tap(() => this.toast.onSuccess("Successfully saved batch item")),
+                    catchError(err => {
+                        this.toast.onError("Unable to save batch item");
+                        return throwError(() => err);
+                    })
+                );
+        }
+
     }
 
 }

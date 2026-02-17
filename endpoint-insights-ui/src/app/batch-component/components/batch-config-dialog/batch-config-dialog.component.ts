@@ -12,7 +12,7 @@ import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/c
 import {Batch} from "../../../models/batch.model";
 import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
-import { MatListOption, MatSelectionList} from "@angular/material/list";
+import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
@@ -42,6 +42,7 @@ export interface ApiTest {
         MatAutocompleteModule,
         MatSelectionList,
         MatListOption,
+        MatDivider,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './batch-config-dialog.component.html',
@@ -53,6 +54,7 @@ export class BatchConfigDialogComponent implements OnInit {
     private readonly batchService = inject(BatchService);
     private readonly userService = inject(UserService)
     private readonly dialogRef = inject(MatDialogRef<BatchConfigDialogComponent>);
+    isNew = !this.data.id;
 
     @ViewChild('participantList') participantList!: MatSelectionList;
     searchControl = new FormControl('');
@@ -64,10 +66,15 @@ export class BatchConfigDialogComponent implements OnInit {
 
     // Tests currently in the batch (top list in Settings tab)
     currentBatchTests = signal<ApiTest[]>([
-        { id: '1', name: 'Vision API' },
-        { id: '2', name: 'Open API' },
-        { id: '3', name: 'Records API' },
+        { id: 'd10e18c5-13f8-45b6-91fd-74baa0fe6834', name: 'Vision API' },
+        // { id: '2', name: 'Open API' },
+        // { id: '3', name: 'Records API' },
     ]);
+
+
+    currentJobs = [
+        {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
+    ]
 
     // All available tests that can be added (bottom list in Settings tab)
     availableTests = signal<ApiTest[]>([
@@ -228,8 +235,15 @@ export class BatchConfigDialogComponent implements OnInit {
         if (this.form.invalid) {
             return;
         }
-        return this.batchService.saveBatch(this.form.value).subscribe({
+        const newBatch = {
+            ...this.form.value,
+            jobs: this.currentJobs,
+            isNew: this.isNew
+        };
+
+        return this.batchService.saveBatch(newBatch).subscribe({
             next: (response) => {
+                this.isNew = false;
                 this.form.patchValue({
                     id: response.body?.id,
                     batchName: response.body?.batchName,
@@ -238,7 +252,7 @@ export class BatchConfigDialogComponent implements OnInit {
                     scheduledDays: response.body?.scheduledDays,
                     nextRunTime: response.body?.nextRunTime,
                     nextRunDate: response.body?.nextRunDate,
-                    notificationList: response.body?.notificationList || []
+                    notificationList: response.body?.notificationList || [],
                 });
 
                 this.populateActiveParticipants();
