@@ -48,6 +48,9 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "active")
     Boolean active;
 
+    @Column(name = "cron_expression")
+    String cronExpression;
+
     @Transient
     List<UUID> notificationList;
 }

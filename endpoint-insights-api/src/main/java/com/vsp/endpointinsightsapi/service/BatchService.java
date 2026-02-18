@@ -130,6 +130,9 @@ public class BatchService {
 
 		TestBatch batch = batchOptional.get();
 
+        if (request.cronExpression != null) {
+            batch.setCronExpression(request.cronExpression);
+        }
 
         // handle adding jobs
         if (request.addJobs != null && !request.addJobs.isEmpty()) {

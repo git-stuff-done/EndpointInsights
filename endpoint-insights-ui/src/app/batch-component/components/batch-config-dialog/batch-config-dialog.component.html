@@ -27,36 +27,46 @@
         <mat-tab label="Schedule">
             <form [formGroup]="form">
                 <div class="schedule-container">
-                    <div class="schedule-row">
-                        <mat-form-field appearance="outline" class="tight-field">
-                            <mat-label>Next Run (Date)</mat-label>
-                            <input matInput [matDatepicker]="picker" formControlName="nextRunDate" />
-                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                        </mat-form-field>
+                    <!-- Frequency picker -->
+                    <mat-form-field appearance="outline" class="tight-field">
+                        <mat-label>Frequency</mat-label>
+                        <mat-select [value]="scheduleFrequency()" (selectionChange)="onFrequencyChange($event.value)">
+                            <mat-option value="daily">Daily</mat-option>
+                            <mat-option value="weekly">Weekly</mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
-                        <mat-form-field appearance="outline" class="tight-field">
-                            <mat-label>Time</mat-label>
-                            <input matInput type="time" placeholder="start time">
-                        </mat-form-field>
+                    <!-- Day checkboxes (only for weekly) -->
+                    @if (scheduleFrequency() === 'weekly') {
+                        <div class="day-checkboxes">
+                            @for (day of dayOptions; track day.value) {
+                                <mat-checkbox
+                                    [checked]="scheduleDays().includes(day.value)"
+                                    (change)="onDayToggle(day.value)">
+                                    {{ day.label }}
+                                </mat-checkbox>
+                            }
+                        </div>
+                    }
 
-                        <mat-button-toggle-group multiple class="schedule-day-container">
-                            <mat-button-toggle value="sun" class="schedule-day">Sunday</mat-button-toggle>
-                            <mat-button-toggle value="mon" class="schedule-day">Monday</mat-button-toggle>
-                            <mat-button-toggle value="tue" class="schedule-day">Tuesday</mat-button-toggle>
-                            <mat-button-toggle value="wed" class="schedule-day">Wednesday</mat-button-toggle>
-                            <mat-button-toggle value="thu" class="schedule-day">Thursday</mat-button-toggle>
-                            <mat-button-toggle value="fri" class="schedule-day">Friday</mat-button-toggle>
-                            <mat-button-toggle value="sat" class="schedule-day">Saturday</mat-button-toggle>
-                        </mat-button-toggle-group>
-                    </div>
-                    <div class="schedule-row">
-                        <mat-label>Next Run: </mat-label>
-                        <mat-label>Last Run: </mat-label>
+                    <!-- Time picker -->
+                    <mat-form-field appearance="outline" class="tight-field">
+                        <mat-label>Time</mat-label>
+                        <input matInput type="time" [value]="scheduleTime()" (change)="onTimeChange($any($event.target).value)" />
+                    </mat-form-field>
+
+                    <!-- Generated cron expression (editable) -->
+                    <mat-form-field appearance="outline" class="tight-field">
+                        <mat-label>Cron Expression</mat-label>
+                        <input matInput formControlName="cronExpression" placeholder="e.g. 0 30 14 * * MON,WED,FRI" />
+                    </mat-form-field>
+
+                    <!-- Run info -->
+                    <div class="run-info">
+                        <span>Last Run: {{ form.get('lastRunTime')?.value || 'Never' }}</span>
                     </div>
                 </div>
             </form>
-
         </mat-tab>
 
         <!-- Notifications Tab -->

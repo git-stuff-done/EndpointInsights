@@ -73,46 +73,22 @@
 
 .schedule-container {
   display: flex;
-  flex:1;
-  width: auto;
-  flex-direction: row;
-  gap: 24px;
-}
-
-.schedule-row {
-  display: flex;
-  flex:1;
-  margin: 20px;
-  width: auto;
   flex-direction: column;
-  gap: 24px;
-}
-@media (min-width: 720px) {
-  .schedule-row {
-    grid-template-columns: 1fr 1fr;
-  }
+  gap: 16px;
+  padding: 16px 0;
 }
 
-.schedule-day-container{
+.day-checkboxes {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background: darkgrey;
-  border-radius: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.schedule-day {
-  min-width: 70%;
-  max-width: 70%;
-  background: white;
-  margin: 4px;
-}
-
-
-.schedule-day-container .mat-button-toggle-checked {
-  background-color: var(--color-accent);
-  color: white;
+.run-info {
+  display: flex;
+  gap: 24px;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.55);
 }
 
 /* Notification Tab */
