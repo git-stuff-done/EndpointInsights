@@ -10,10 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {Batch} from "../../../models/batch.model";
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
-import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
-import {MatCheckboxModule} from "@angular/material/checkbox";
 import { MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
@@ -39,13 +36,8 @@ export interface ApiTest {
         MatTabsModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatButtonToggleGroup,
-        MatButtonToggle,
-        MatAutocompleteModule,
-        MatSelectionList,
         MatListOption,
         MatSelectModule,
-        MatCheckboxModule,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './batch-config-dialog.component.html',
@@ -133,10 +125,8 @@ export class BatchConfigDialogComponent implements OnInit {
         this.buildCron();
     }
 
-    onDayToggle(day: string): void {
-        this.scheduleDays.update(days =>
-            days.includes(day) ? days.filter(d => d !== day) : [...days, day]
-        );
+    onDaysChange(days: string[]): void {
+        this.scheduleDays.set(days);
         this.buildCron();
     }
 

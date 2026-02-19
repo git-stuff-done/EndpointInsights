@@ -36,17 +36,16 @@
                         </mat-select>
                     </mat-form-field>
 
-                    <!-- Day checkboxes (only for weekly) -->
+                    <!-- Day picker (only for weekly) -->
                     @if (scheduleFrequency() === 'weekly') {
-                        <div class="day-checkboxes">
-                            @for (day of dayOptions; track day.value) {
-                                <mat-checkbox
-                                    [checked]="scheduleDays().includes(day.value)"
-                                    (change)="onDayToggle(day.value)">
-                                    {{ day.label }}
-                                </mat-checkbox>
-                            }
-                        </div>
+                        <mat-form-field appearance="outline" class="tight-field">
+                            <mat-label>Days</mat-label>
+                            <mat-select multiple [value]="scheduleDays()" (selectionChange)="onDaysChange($event.value)">
+                                @for (day of dayOptions; track day.value) {
+                                    <mat-option [value]="day.value">{{ day.label }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
                     }
 
                     <!-- Time picker -->
