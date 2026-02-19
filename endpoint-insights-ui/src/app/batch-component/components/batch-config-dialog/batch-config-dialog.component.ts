@@ -10,6 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {Batch} from "../../../models/batch.model";
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
 import { MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
@@ -36,6 +37,8 @@ export interface ApiTest {
         MatTabsModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        MatAutocompleteModule,
+        MatSelectionList,
         MatListOption,
         MatSelectModule,
     ],
