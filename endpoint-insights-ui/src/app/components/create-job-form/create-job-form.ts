@@ -1,3 +1,4 @@
+import {CommonModule} from '@angular/common';
 import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
 import {
     AbstractControl,
@@ -16,6 +17,7 @@ import {TestItem} from "../../models/test.model";
     selector: 'app-job-form',
     standalone: true,
     imports: [
+        CommonModule,
         ReactiveFormsModule,
         MatFormField,
         MatInputModule,
