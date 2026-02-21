@@ -2,16 +2,18 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
-import com.vsp.endpointinsightsapi.service.BatchService;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
+import com.vsp.endpointinsightsapi.service.BatchService;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,30 +29,12 @@ public class BatchesController {
         this.batchService = batchService;
     }
 
-    // GET /api/batches — stub list (unchanged)
+    // GET /api/batches
 	@GetMapping
-	public ResponseEntity<List<BatchResponseDTO>> listBatches() {
-        List<BatchResponseDTO> batches = List.of(
-                BatchResponseDTO.builder()
-                        .id(UUID.randomUUID())
-                        .batchName("Daily API Tests")
-                        .scheduleId(334523453L)
-                        .startTime(LocalDate.now().minusDays(1))
-                        .lastTimeRun(LocalDate.now())
-                        .active(true)
-//                        .jobs(Collections.emptyList())
-                        .build(),
-                BatchResponseDTO.builder()
-                        .id(UUID.randomUUID())
-                        .batchName("Weekly Regression")
-                        .scheduleId(42L)
-                        .startTime(LocalDate.now().minusWeeks(1))
-                        .lastTimeRun(LocalDate.now().minusDays(3))
-                        .active(false)
-//                        .jobs(Collections.emptyList())
-                        .build()
-        );
-        return ResponseEntity.ok(batches);
+	public ResponseEntity<List<BatchResponseDTO>> listBatches(@RequestParam(required = false) String batchName,
+                                                              @RequestParam(required = false) LocalDateTime runDate) {
+        List<BatchResponseDTO> dto = batchService.getAllBatchesByCriteria(batchName, runDate);
+        return ResponseEntity.ok(dto);
 	}
 
 	// GET /api/batches/{id}
@@ -67,17 +51,12 @@ public class BatchesController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
-	// PUT /api/batches/{id} — stubbed
-	@PutMapping("/{id}")
-	public ResponseEntity<BatchResponseDTO> updateBatch(@PathVariable UUID id, @RequestBody BatchRequestDTO request) {
-        BatchResponseDTO updated = BatchResponseDTO.builder()
-                .id(id)
-                .batchName(request.getName())
-                .lastTimeRun(LocalDate.now())
-                .build();
-
-        return ResponseEntity.ok(updated);
-	}
+	// PUT /api/batches/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<TestBatch> updateBatch(@PathVariable @NotNull UUID id, @RequestBody BatchUpdateRequest request) {
+        TestBatch batch = batchService.updateBatch(id, request);
+        return ResponseEntity.ok(batch);
+    }
 
 	// DELETE /api/batches/{id}
 	@DeleteMapping("/{id}")
@@ -85,4 +64,20 @@ public class BatchesController {
 		batchService.deleteBatchById(id);
         return ResponseEntity.noContent().build();
 	}
+
+    // GET /api/batches/{id}/emails
+    @GetMapping("/{id}/emails")
+    public ResponseEntity<List<String>> getEmails(@PathVariable UUID id) {
+        List<String> emails =  batchService.getEmailsForBatch(id);
+        return ResponseEntity.ok(emails);
+    }
+
+    // PUT /api/batches/{id}/emails
+    @PutMapping("/{id}/emails")
+    public ResponseEntity<List<String>> updateEmails(@PathVariable UUID id, @RequestBody List<String> emails) {
+        batchService.updateEmailsForBatch(id, emails);
+        List<String> updatedEmails =  batchService.getEmailsForBatch(id);
+        return ResponseEntity.ok(updatedEmails);
+    }
+
 }

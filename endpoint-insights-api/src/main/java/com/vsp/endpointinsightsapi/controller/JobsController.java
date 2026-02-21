@@ -41,10 +41,10 @@ public class JobsController {
 	 * @return the created Job
 	 * */
 	@PostMapping
-	 public ResponseEntity<Job> createJob(@RequestBody @Valid Job jobRequest) {
+	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
-	 		jobService.createJob(jobRequest);
-	 		return new ResponseEntity<>(jobRequest, HttpStatus.CREATED);
+	 		Job job = jobService.createJob(jobRequest);
+	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
@@ -79,7 +79,7 @@ public class JobsController {
 	 * */
 	@GetMapping
 	public ResponseEntity<List<Job>> getJobs() {
-		return ((Optional<List<Job>>) jobService.getAllJobs()).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+		return jobService.getAllJobs().map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 	}
 
 	/**

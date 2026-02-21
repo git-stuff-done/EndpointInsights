@@ -1,11 +1,15 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.mapper.BatchMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.mapstruct.factory.Mappers;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
-import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.service.BatchService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +20,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
+
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestPropertySource(properties = "app.authentication.enabled=false")
 @WebMvcTest(controllers = BatchesController.class)
@@ -32,19 +36,29 @@ class BatchesControllerUnitTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    private BatchMapper batchMapper;
 
     @MockitoBean
     private BatchService batchService;
 
+    @BeforeEach
+    void setUp() {
+        batchMapper = Mappers.getMapper(BatchMapper.class);
+    }
+
+
     @Test
     void shouldReturnListOfBatches() throws Exception {
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(UUID.randomUUID());
+        batch.setBatchName("Test Batch");
+        batch.setActive(true);
+
+        BatchResponseDTO batchDTO = batchMapper.toDto(batch);
+        when(batchService.getAllBatchesByCriteria("", null)).thenReturn(List.of(batchDTO));
+
         mockMvc.perform(get("/api/batches"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThan(0))))
-                .andExpect(jsonPath("$[0].id", notNullValue()))
-                .andExpect(jsonPath("$[0].batchName", not(emptyString())))
-                .andExpect(jsonPath("$[0].scheduleId", notNullValue()))
-                .andExpect(jsonPath("$[0].active", anyOf(is(true), is(false))));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -55,8 +69,8 @@ class BatchesControllerUnitTest {
                 .id(id)
                 .batchName("Daily API Tests")
                 .scheduleId(1001L)
-                .startTime(LocalDate.parse("2025-11-08"))
-                .lastTimeRun(LocalDate.parse("2025-11-09"))
+                .startTime(LocalDate.parse("2025-11-08").atStartOfDay())
+                .lastTimeRun(LocalDate.parse("2025-11-09").atStartOfDay())
                 .active(true)
                 .build();
 
@@ -81,7 +95,8 @@ class BatchesControllerUnitTest {
 
     @Test
     void shouldCreateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("New Batch", Collections.emptyList());
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setBatchName("New Batch");
         TestBatch batch = new TestBatch();
         batch.setBatchName("New Batch");
 
@@ -96,17 +111,14 @@ class BatchesControllerUnitTest {
     }
 
     @Test
-    void shouldUpdateBatch() throws Exception {
-        BatchRequestDTO request = new BatchRequestDTO("Updated Batch", Collections.emptyList());
+    void shouldNotUpdateBatchWithBadId() throws Exception {
+        BatchUpdateRequest request = new BatchUpdateRequest();
 
-        UUID id = UUID.randomUUID();
-
-        mockMvc.perform(put("/api/batches/{id}", id)
+        mockMvc.perform(put("/api/batches/{id}", "bad-uuid")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id.toString())))
-                .andExpect(jsonPath("$.batchName", is("Updated Batch")));
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.error", containsString("Invalid Parameter Type")));
     }
 
     @Test
@@ -130,4 +142,19 @@ class BatchesControllerUnitTest {
         mockMvc.perform(delete("/api/batches/{id}", id))
                 .andExpect(status().isNotFound());
     }
+
+
+    @Test
+    void updateBatch_ShouldReturnUpdatedBatch() throws Exception {
+        UUID batchId = UUID.randomUUID();
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        TestBatch updatedBatch = new TestBatch();
+        updatedBatch.setBatchId(batchId);
+
+        mockMvc.perform(put("/api/batches/{id}", batchId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
 }

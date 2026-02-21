@@ -25,3 +25,32 @@
 
   width: 100%;
 }
+
+/* Button Styling */
+.button-container {
+    outline-offset: -5px;
+    display: flex;
+    justify-content: left; /* centers horizontally */
+    align-items: center;     /* centers vertically (if height set) */
+    margin: 20px 10px;
+    padding: 10px
+}
+
+.elevated-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 18px;
+    border: 1px solid var(--color-white);
+    border-radius: 14px;
+    background: var(--color-white);
+    color: #111;
+    font-weight: 700; /* Bold text */
+    cursor: pointer;
+
+    box-shadow: var(--shadow-sm),
+      var(--shadow-md);
+}
+.elevated-btn:hover { transform: translateY(-2px); }
+.elevated-btn:active { transform: translateY(0); }

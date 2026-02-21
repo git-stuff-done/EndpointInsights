@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
+import {inject, Inject, Injectable} from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
+import {HttpClient, HttpResponse} from "@angular/common/http";
+import {Batch} from "../models/batch.model";
+import {BatchApi} from "../batch-component/api/batch-api";
 
 export interface BatchMeta {
     id: string;
@@ -10,15 +13,15 @@ export interface BatchMeta {
 
 @Injectable({ providedIn: 'root' })
 export class BatchService {
-    /** Simulated GET: fetch meta for a batch */
-    getBatchMeta(batchId: string): Observable<BatchMeta> {
-        // TODO: replace with real HTTP call
-        return of({
-            id: batchId,
-            name: `Batch ${batchId}`,
-            testCount: 12,
-            nextRunIso: new Date(Date.now() + 36e5).toISOString(), // +1 hr
-        }).pipe(delay(200));
+
+    private batchApi = inject(BatchApi);
+
+    getAllBatches(): Observable<HttpResponse<Batch[]>> {
+        return this.batchApi.getAllBatches();
+    }
+
+    saveBatch(form: any):Observable<Batch>{
+        return this.batchApi.saveBatch(form)
     }
 
     /** Simulated PATCH/PUT: update name; return updated meta */
@@ -32,8 +35,4 @@ export class BatchService {
         }).pipe(delay(200));
     }
 
-    /** Simulated GET: just the count, if you want a quick refresh */
-    getBatchTestCount(batchId: string): Observable<number> {
-        return of(12).pipe(delay(150));
-    }
 }

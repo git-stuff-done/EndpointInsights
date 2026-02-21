@@ -1,0 +1,335 @@
+:host {
+  display: block;
+}
+
+.modal-body {
+  padding: 16px 24px;
+}
+
+.tab-pane {
+  padding-top: 12px;
+}
+
+.form.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+.kv .label {
+  color: var(--mat-sys-on-surface-variant, #5f6a74);
+  font-weight: 500;
+}
+.kv .value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.full,
+.tight-field {
+  width: 100%;
+}
+
+:host ::ng-deep {
+  .tight-field .mat-mdc-text-field-wrapper {
+    --mdc-outlined-text-field-content-padding-top: 12px;
+    --mdc-outlined-text-field-content-padding-bottom: 12px;
+    --mdc-outlined-text-field-content-padding-left: 12px;
+    --mdc-outlined-text-field-content-padding-right: 12px;
+  }
+
+  .tight-field .mat-mdc-form-field-infix {
+    padding-left: 12px !important;
+    padding-right: 12px;
+  }
+
+  .tight-field .mat-mdc-input-element {
+    text-indent: 2px;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 12px 24px 20px;
+  }
+
+  .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
+    margin-left: 4px;
+  }
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* Schedule Tab */
+
+.schedule-container {
+  display: flex;
+  flex:1;
+  width: auto;
+  flex-direction: row;
+  gap: 24px;
+}
+
+.schedule-row {
+  display: flex;
+  flex:1;
+  margin: 20px;
+  width: auto;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (min-width: 720px) {
+  .schedule-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.schedule-day-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: darkgrey;
+  border-radius: 10px;
+}
+
+.schedule-day {
+  min-width: 70%;
+  max-width: 70%;
+  background: white;
+  margin: 4px;
+}
+
+
+.schedule-day-container .mat-button-toggle-checked {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Notification Tab */
+
+.notification-container{
+  gap:24px;
+  width: 100%;
+}
+
+.notification-sub-container{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.notification-sub-container mat-form-field {
+  width: 100%;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.participant-list {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.participant-list-header {
+  display: flex;
+  background: #f5f5f5;
+  padding: 12px 16px;
+  font-weight: 600;
+  border-bottom: 1px solid #ccc;
+}
+
+.participant-list-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.participant-card {
+  display: flex;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.participant-card:last-child {
+  border-bottom: none;
+}
+
+.participants-title-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.col-name {
+  flex: 1;
+}
+
+.col-email {
+  flex: 1;
+}
+
+.col-position {
+  flex: 1;
+}
+.col-remove {
+  flex: 1;
+}
+
+
+
+.notification-search-result, .notification-search-header{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 50px;
+}
+
+
+.participant-panel .mat-mdc-option {
+  background: white !important;
+}
+
+.participant-panel .mat-mdc-option:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+
+}
+
+.add-button{
+  height: 20px;
+  width: 120px;
+  margin-top: 20px;
+}
+
+
+.test-search-container {
+  min-height: 100px;
+  height:auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background: darkgrey;
+  border-radius: 10px;
+  overflow-y: scroll;
+}
+
+
+
+.test-search-item{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+  width: 90%;
+  margin: 10px;
+  background: white;
+  border-radius: 20px;
+  padding: 4px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.test-search-item  mat-icon{
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+// Settings tab - Add/Remove APIs
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tests-section {
+  h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface, #1a1a1a);
+  }
+}
+
+.tests-table {
+  border: 1px solid var(--mat-sys-outline-variant, #c4c7c9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tests-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 8px 12px;
+  background: var(--color-primary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-white);
+}
+
+.tests-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.test-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 4px 8px;
+  border-radius: 4px;
+  background: var(--color-bg, #f7f9fc);
+
+  .test-name {
+    font-size: 14px;
+  }
+
+  .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 32px;
+    --mdc-icon-button-icon-size: 18px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.clear-all-btn {
+  margin-top: 12px;
+  align-self: center;
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 8px;
+
+  .mat-icon {
+    color: var(--mat-sys-on-surface-variant, #5f6a74);
+  }
+}
+
+.empty-state {
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant, #5f6a74);
+}
+
+
+
+
+

@@ -88,7 +88,8 @@ export class AuthenticationService {
    * Checks if user is authenticated
    */
   public isAuthenticated(): boolean {
-    return this.authStateSubject.value;
+
+      return this.authStateSubject.value;
   }
 
   /**

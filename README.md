@@ -93,12 +93,22 @@ The system consists of:
      - interprets results
      - triggers alerts based on thresholds
 
- ## Application UI Visual
- ![Image](./docs/document-assets/UI1.jpg)
- ![Image](./docs/document-assets/UI2.jpg)
- ![Image](./docs/document-assets/UI3.jpg)
- ![Image](./docs/document-assets/UI4.jpg)
- ![Image](./docs/document-assets/UI5.jpg)
+## Application UI Visual
+
+The dashboard page provides an overview of active jobs, fail rate, charts for performance, recent activity, and alerts.
+![Image](./docs/assets/dashboard-page.jpg)
+
+The login page allows users to log in with the configured single-sign on provider.
+![Image](./docs/assets/login-page.jpg)
+
+The batches page shows test batches and allows users to modify run configurations.
+![Image](./docs/assets/configure-batches-page.jpg)
+
+The tests page allows users to create and modify individual test runs.
+![Image](./docs/assets/tests-page.jpg)
+
+The test results page shows the latest tests and statistics for previous test runs.
+![Image](./docs/assets/test-results-page.jpg)
 
 ## Getting Started
 
@@ -247,6 +257,11 @@ erDiagram
 ### 6. Merge & Cleanup
   - Once approved and all tests are passing, merge branch into `develop`.
   - Delete branch after merge.
+
+
+## Timeline for Completion
+![Image](./docs/document-assets/timeline.png)
+
 
 
 ## Timeline for Completion

@@ -10,7 +10,7 @@ import {
 import {MatFormField} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatOption, MatSelect} from "@angular/material/select";
-import {TestItem} from "../../pages/test-overview/test-overview";
+import {TestItem} from "../../models/test.model";
 
 @Component({
     selector: 'app-job-form',
