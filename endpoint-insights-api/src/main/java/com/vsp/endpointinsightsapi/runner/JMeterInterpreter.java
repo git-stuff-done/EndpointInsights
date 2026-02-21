@@ -1,4 +1,4 @@
-package com.vsp.endpointinsightsrunnerapi.runner;
+package com.vsp.endpointinsightsapi.runner;
 
 public class JMeterInterpreter implements TestInterpreter {
 }

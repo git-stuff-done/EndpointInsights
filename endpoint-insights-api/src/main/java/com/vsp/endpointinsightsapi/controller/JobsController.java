@@ -1,5 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
+import com.vsp.endpointinsightsapi.authentication.PublicAPI;
 import com.vsp.endpointinsightsapi.model.*;
+import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
 // import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
@@ -49,6 +51,22 @@ public class JobsController {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
 	 	}
+	 }
+
+	 // todo: remove public api, implement
+	 @PublicAPI
+	 @PostMapping("/{id}/run")
+	 public ResponseEntity<JobRun> runJob(@PathVariable("id") UUID jobId) {
+		LOG.info("Running job {}", jobId);
+		var job = jobService.getJobById(jobId);
+		if (job.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Thread t = new Thread(new JobRunnerThread(job.get()));
+		t.start();
+
+		return ResponseEntity.ok(new JobRun(jobId, job.get().getName()));
 	 }
 
 	/**

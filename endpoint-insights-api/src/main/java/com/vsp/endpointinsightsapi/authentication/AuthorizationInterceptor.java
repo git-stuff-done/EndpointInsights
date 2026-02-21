@@ -127,6 +127,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			throw new CustomExceptionBuilder()
+					.withDescription("NOPE!")
 					.withStatus(HttpStatus.UNAUTHORIZED)
 					.build();
 		}
