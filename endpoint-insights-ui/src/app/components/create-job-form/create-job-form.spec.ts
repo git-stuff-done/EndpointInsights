@@ -28,6 +28,11 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('name')?.value).toBe('');
             expect(component.createJobForm.get('description')?.value).toBe('');
             expect(component.createJobForm.get('gitUrl')?.value).toBe('');
+            expect(component.createJobForm.get('gitAuthType')?.value).toBe('NONE');
+            expect(component.createJobForm.get('gitUsername')?.value).toBe('');
+            expect(component.createJobForm.get('gitPassword')?.value).toBe('');
+            expect(component.createJobForm.get('gitSshPrivateKey')?.value).toBe('');
+            expect(component.createJobForm.get('gitSshPassphrase')?.value).toBe('');
             expect(component.createJobForm.get('jobType')?.value).toBe('');
             expect(component.createJobForm.get('runCommand')?.value).toBe('');
             expect(component.createJobForm.get('compileCommand')?.value).toBe('');
@@ -37,6 +42,11 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('name')).toBeTruthy();
             expect(component.createJobForm.get('description')).toBeTruthy();
             expect(component.createJobForm.get('gitUrl')).toBeTruthy();
+            expect(component.createJobForm.get('gitAuthType')).toBeTruthy();
+            expect(component.createJobForm.get('gitUsername')).toBeTruthy();
+            expect(component.createJobForm.get('gitPassword')).toBeTruthy();
+            expect(component.createJobForm.get('gitSshPrivateKey')).toBeTruthy();
+            expect(component.createJobForm.get('gitSshPassphrase')).toBeTruthy();
             expect(component.createJobForm.get('jobType')).toBeTruthy();
             expect(component.createJobForm.get('runCommand')).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')).toBeTruthy();
@@ -144,6 +154,33 @@ describe('CreateJobForm', () => {
             const jobTypeControl = component.createJobForm.get('jobType');
             jobTypeControl?.setValue('jmeter');
             expect(jobTypeControl?.valid).toBeTruthy();
+        });
+    });
+
+    describe('Git Auth Field Validation', () => {
+        it('should require username and password for BASIC auth', () => {
+            component.createJobForm.patchValue({
+                gitAuthType: 'BASIC'
+            });
+
+            const usernameControl = component.createJobForm.get('gitUsername');
+            const passwordControl = component.createJobForm.get('gitPassword');
+            usernameControl?.setValue('');
+            passwordControl?.setValue('');
+
+            expect(usernameControl?.hasError('required')).toBeTruthy();
+            expect(passwordControl?.hasError('required')).toBeTruthy();
+        });
+
+        it('should require private key for SSH_KEY auth', () => {
+            component.createJobForm.patchValue({
+                gitAuthType: 'SSH_KEY'
+            });
+
+            const keyControl = component.createJobForm.get('gitSshPrivateKey');
+            keyControl?.setValue('');
+
+            expect(keyControl?.hasError('required')).toBeTruthy();
         });
     });
 
@@ -278,6 +315,7 @@ describe('CreateJobForm', () => {
                 name: 'test-job',
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
+                gitAuthType: 'NONE',
                 jobType: 'jmeter',
                 runCommand: 'npm run test',
                 compileCommand: 'npm run build'
@@ -295,6 +333,7 @@ describe('CreateJobForm', () => {
                 name: '',
                 description: '',
                 gitUrl: '',
+                gitAuthType: 'NONE',
                 jobType: '',
                 runCommand: '',
                 compileCommand: ''
@@ -311,6 +350,7 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('name')?.touched).toBeTruthy();
             expect(component.createJobForm.get('description')?.touched).toBeTruthy();
             expect(component.createJobForm.get('gitUrl')?.touched).toBeTruthy();
+            expect(component.createJobForm.get('gitAuthType')?.touched).toBeTruthy();
             expect(component.createJobForm.get('jobType')?.touched).toBeTruthy();
             expect(component.createJobForm.get('runCommand')?.touched).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')?.touched).toBeTruthy();
@@ -323,6 +363,7 @@ describe('CreateJobForm', () => {
                 name: 'test-job',
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
+                gitAuthType: 'NONE',
                 jobType: 'jmeter',
                 runCommand: 'npm run test',
                 compileCommand: 'npm run build'
@@ -336,6 +377,7 @@ describe('CreateJobForm', () => {
                 name: 'test-job',
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
+                gitAuthType: 'NONE',
                 jobType: 'jmeter',
                 runCommand: 'npm run test',
                 compileCommand: ''
