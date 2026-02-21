@@ -1,4 +1,4 @@
-package com.vsp.endpointinsightsapi.model;
+package com.vsp.endpointinsightsapi.model.entity;
 
 import java.util.List;
 import java.util.UUID;
