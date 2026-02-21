@@ -150,5 +150,39 @@ class JobServiceTest {
         assertEquals("changedName", existing.getName());
     }
 
+    @Test
+    void checkoutJobRepository_success() {
+        UUID jobId = UUID.randomUUID();
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setGitUrl("https://github.com/test/repo.git");
+
+        java.nio.file.Path mockPath = java.nio.file.Paths.get("/tmp/checkout");
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(gitRepositoryService.checkoutJobRepository(job)).thenReturn(mockPath);
+
+        java.nio.file.Path result = jobService.checkoutJobRepository(jobId);
+
+        assertNotNull(result);
+        assertEquals(mockPath, result);
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(gitRepositoryService, times(1)).checkoutJobRepository(job);
+    }
+
+    @Test
+    void checkoutJobRepository_jobNotFound_throwsException() {
+        UUID jobId = UUID.randomUUID();
+        when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        JobNotFoundException exception = assertThrows(JobNotFoundException.class, () -> {
+            jobService.checkoutJobRepository(jobId);
+        });
+
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(gitRepositoryService, times(0)).checkoutJobRepository(any());
+    }
+
 
 }
