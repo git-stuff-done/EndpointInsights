@@ -17,7 +17,7 @@ export class HttpInterceptorService {
   }
 
   get<T>(url: string, headers?: HttpHeaders) : Observable<HttpResponse<T>> {
-    this.injectAuthenticationToken(headers);
+    headers = this.injectAuthenticationToken(headers);
     return this.httpClient.get<T>(url, {headers: headers, observe: 'response'});
   }
 

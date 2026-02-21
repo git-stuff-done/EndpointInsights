@@ -13,8 +13,8 @@ export class BatchApi {
     private toast = inject(ToastService);
     private httpInterceptService = inject(HttpInterceptorService);
 
-    getAllBatches(): Observable<Batch[]>{
-        return this.http.get<Batch[]>(`${environment.apiUrl}`);
+    getAllBatches(): Observable<HttpResponse<Batch[]>>{
+        return this.httpInterceptService.get<Batch[]>(`${environment.apiUrl}/batches`)
     }
 
     getBatchById(id: string){

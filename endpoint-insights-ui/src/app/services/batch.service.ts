@@ -16,8 +16,7 @@ export class BatchService {
 
     private batchApi = inject(BatchApi);
 
-    /** Simulated GET: fetch meta for a batch */
-    getAllBatches(): Observable<Batch[]> {
+    getAllBatches(): Observable<HttpResponse<Batch[]>> {
         return this.batchApi.getAllBatches();
     }
 
