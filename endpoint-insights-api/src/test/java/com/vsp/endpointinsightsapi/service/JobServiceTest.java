@@ -151,6 +151,59 @@ class JobServiceTest {
     }
 
     @Test
+    void updateJob_withGitAuthFields_updatesSuccessfully() {
+        UUID jobId = UUID.randomUUID();
+        Job existingJob = new Job();
+        existingJob.setJobId(jobId);
+        existingJob.setName("original");
+
+        Job updateData = new Job();
+        updateData.setJobId(jobId);
+        updateData.setName("updated");
+        updateData.setDescription("updated description");
+        updateData.setGitUrl("https://github.com/test/repo.git");
+        updateData.setGitAuthType(com.vsp.endpointinsightsapi.model.enums.GitAuthType.BASIC);
+        updateData.setGitUsername("testuser");
+        updateData.setGitPassword("testpass");
+        updateData.setGitSshPrivateKey("ssh-key");
+        updateData.setGitSshPassphrase("passphrase");
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(existingJob));
+        when(jobRepository.save(any(Job.class))).thenReturn(existingJob);
+
+        Job result = jobService.updateJob(jobId, updateData);
+
+        assertNotNull(result);
+        assertEquals("updated", existingJob.getName());
+        assertEquals("updated description", existingJob.getDescription());
+        assertEquals("https://github.com/test/repo.git", existingJob.getGitUrl());
+        assertEquals(com.vsp.endpointinsightsapi.model.enums.GitAuthType.BASIC, existingJob.getGitAuthType());
+        assertEquals("testuser", existingJob.getGitUsername());
+        assertEquals("testpass", existingJob.getGitPassword());
+        assertEquals("ssh-key", existingJob.getGitSshPrivateKey());
+        assertEquals("passphrase", existingJob.getGitSshPassphrase());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(1)).save(existingJob);
+    }
+
+    @Test
+    void updateJob_jobNotFound_throwsException() {
+        UUID jobId = UUID.randomUUID();
+        Job updateData = new Job();
+        updateData.setJobId(jobId);
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        JobNotFoundException exception = assertThrows(JobNotFoundException.class, () -> {
+            jobService.updateJob(jobId, updateData);
+        });
+
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(0)).save(any());
+    }
+
+    @Test
     void checkoutJobRepository_success() {
         UUID jobId = UUID.randomUUID();
         Job job = new Job();
