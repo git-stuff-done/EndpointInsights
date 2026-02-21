@@ -254,7 +254,7 @@ export class BatchConfigDialogComponent implements OnInit {
                     nextRunDate: response.body?.nextRunDate,
                     notificationList: response.body?.notificationList || [],
                 });
-
+                this.dialogRef.close(response.body);
                 this.populateActiveParticipants();
             },
             error: (error) => console.error('Error:', error)

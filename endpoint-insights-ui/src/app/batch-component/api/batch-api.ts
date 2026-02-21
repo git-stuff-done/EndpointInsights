@@ -18,7 +18,7 @@ export class BatchApi {
     }
 
     getBatchById(id: string){
-        return this.http.get<Batch>(`${environment.apiUrl}/${id}`)
+        return this.http.get<Batch>(`${environment.apiUrl}/batches/${id}`)
     }
 
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
