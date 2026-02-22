@@ -44,7 +44,7 @@ export class AuthenticationService {
    * Stores current route for post-auth redirect
    */
   public login(): void {
-    window.location.href = this.authUrl;
+    window.location.assign(this.authUrl);
   }
 
   public getUserInfo(): UserInfo {
