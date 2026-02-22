@@ -5,7 +5,7 @@ import {EditJobModal} from './edit-job-modal';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import { MOCK_TESTS } from '../../models/test.model';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('EditJobModal', () => {
@@ -53,6 +53,13 @@ describe('EditJobModal', () => {
             spyOn(component['jobService'], 'updateJob').and.returnValue(of(payload));
             component.onUpdate(MOCK_TESTS[0]);
             expect(component['jobService'].updateJob).toHaveBeenCalledWith(component.data.id, MOCK_TESTS[0]);
+        });
+        it("Should show invalid form toast if form is invalid", () => {
+            spyOn(component['jobService'], 'updateJob').and.returnValue(throwError(() => new Error("Invalid form")));
+            expect(mockDialogRef.close).not.toHaveBeenCalled();
+            spyOn(component['toastService'], 'onError');
+            component.onUpdate(MOCK_TESTS[0]);
+            expect(component['toastService'].onError).toHaveBeenCalledWith("Failed to update job");
         });
     });
 

@@ -59,6 +59,7 @@ export class EditJobModal{
             next: (response) => {
                 console.log('Job updated:', response);
                 this.toastService.onSuccess('Job updated successfully!');
+                this.dialogRef.close(jobData);
             },
             error: (error) => {
                 console.error('Error updating job:', error);
