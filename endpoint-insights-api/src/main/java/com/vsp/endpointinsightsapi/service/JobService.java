@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 
 @Service
@@ -24,7 +25,15 @@ public class JobService {
         this.gitRepositoryService = gitRepositoryService;
     }
 
-    public Job createJob(Job job) {
+    public Job createJob(JobCreateRequest jobRequest) {
+        Job job = new Job();
+        job.setName(jobRequest.getName());
+        job.setDescription(jobRequest.getDescription());
+        job.setGitUrl(jobRequest.getGitUrl());
+        job.setRunCommand(jobRequest.getRunCommand());
+        job.setCompileCommand(jobRequest.getCompileCommand());
+        job.setJobType(jobRequest.getTestType());
+        job.setConfig(jobRequest.getConfig());
         return jobRepository.save(job);
     }
 

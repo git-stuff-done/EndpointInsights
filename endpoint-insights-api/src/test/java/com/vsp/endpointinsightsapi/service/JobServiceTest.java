@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +40,21 @@ class JobServiceTest {
 
     @Test
     void createJob_returnSavedJobStatus() throws Exception {
-        Job job = new Job();
-        when(jobRepository.save(job)).thenReturn(job);
-        Job testResult = jobService.createJob(job);
+        JobCreateRequest jobRequest = new JobCreateRequest();
+        jobRequest.setName("Test Job");
+        jobRequest.setDescription("Test Description");
+        jobRequest.setTestType(TestType.UNIT);
+        
+        Job savedJob = new Job();
+        savedJob.setJobId(UUID.randomUUID());
+        savedJob.setName(jobRequest.getName());
+        
+        when(jobRepository.save(any(Job.class))).thenReturn(savedJob);
+        Job testResult = jobService.createJob(jobRequest);
         assertNotNull(testResult);
-        verify(jobRepository, times(1)).save(job);
+        assertNotNull(testResult.getJobId());
+        assertEquals("Test Job", testResult.getName());
+        verify(jobRepository, times(1)).save(any(Job.class));
     }
     
     @Test
