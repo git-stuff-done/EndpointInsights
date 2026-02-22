@@ -68,7 +68,11 @@ describe('AuthenticationService', () => {
 
   it('login redirects to authUrl', () => {
     service = TestBed.inject(AuthenticationService);
-    expect(() => service.login()).not.toThrow();
+    const hrefSetter = spyOnProperty(window.location, 'href', 'set');
+
+    service.login();
+
+    expect(hrefSetter).toHaveBeenCalledWith(environment.authUrl);
   });
 
   it('loadTokenFromCookie navigates to root on valid token', fakeAsync(() => {
