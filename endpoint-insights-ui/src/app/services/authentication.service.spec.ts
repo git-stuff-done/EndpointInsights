@@ -69,20 +69,12 @@ describe('AuthenticationService', () => {
   it('login redirects to authUrl', () => {
     service = TestBed.inject(AuthenticationService);
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { href: '' }
-    });
+    const mockLocation = { href: '' } as Location;
+    spyOnProperty(window, 'location', 'get').and.returnValue(mockLocation);
 
     service.login();
 
-    expect(window.location.href).toBe(environment.authUrl);
-
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: originalLocation
-    });
+    expect(mockLocation.href).toBe(environment.authUrl);
   });
 
   it('loadTokenFromCookie navigates to root on valid token', fakeAsync(() => {
@@ -93,33 +85,29 @@ describe('AuthenticationService', () => {
       groups: ['admin'],
       exp: Math.floor(Date.now() / 1000) + 3600
     });
-    const originalCookieStore = (window as any).cookieStore;
-    (window as any).cookieStore = {
+    const mockCookieStore = {
       get: jasmine.createSpy().and.returnValue(Promise.resolve({ value: token })),
       delete: jasmine.createSpy().and.returnValue(Promise.resolve())
     };
+    spyOnProperty(window, 'cookieStore', 'get').and.returnValue(mockCookieStore as any);
 
     service.loadTokenFromCookie();
     flush();
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
-
-    (window as any).cookieStore = originalCookieStore;
   }));
 
   it('loadTokenFromCookie navigates to login when missing', fakeAsync(() => {
     service = TestBed.inject(AuthenticationService);
-    const originalCookieStore = (window as any).cookieStore;
-    (window as any).cookieStore = {
+    const mockCookieStore = {
       get: jasmine.createSpy().and.returnValue(Promise.resolve(null)),
       delete: jasmine.createSpy().and.returnValue(Promise.resolve())
     };
+    spyOnProperty(window, 'cookieStore', 'get').and.returnValue(mockCookieStore as any);
 
     service.loadTokenFromCookie();
     flush();
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
-
-    (window as any).cookieStore = originalCookieStore;
   }));
 });
