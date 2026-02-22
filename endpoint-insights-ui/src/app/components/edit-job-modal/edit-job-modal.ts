@@ -54,15 +54,15 @@ export class EditJobModal{
     }
 
 
-    onUpdate(){
-        this.jobService.updateJob(this.data.id,this.data).subscribe({
+    onUpdate(jobData?: any){
+        this.jobService.updateJob(this.data.id,jobData).subscribe({
             next: (response) => {
-                console.log('Job created:', response);
-                this.toastService.onSuccess('Job created successfully!');
+                console.log('Job updated:', response);
+                this.toastService.onSuccess('Job updated successfully!');
             },
             error: (error) => {
-                console.error('Error creating job:', error);
-                this.toastService.onError('Failed to create job');
+                console.error('Error updating job:', error);
+                this.toastService.onError('Failed to update job');
             }
         });
     }
