@@ -68,21 +68,11 @@ describe('AuthenticationService', () => {
 
   it('login redirects to authUrl', () => {
     service = TestBed.inject(AuthenticationService);
-    const originalAssign = Object.getOwnPropertyDescriptor(window.location, 'assign');
-    const assignSpy = jasmine.createSpy('assign');
-    Object.defineProperty(window.location, 'assign', {
-      configurable: true,
-      writable: true,
-      value: assignSpy
-    });
+    const redirectSpy = spyOn<any>(service, 'redirectToAuth');
 
     service.login();
 
-    expect(assignSpy).toHaveBeenCalledWith(environment.authUrl);
-
-    if (originalAssign) {
-      Object.defineProperty(window.location, 'assign', originalAssign);
-    }
+    expect(redirectSpy).toHaveBeenCalledWith(environment.authUrl);
   });
 
   it('loadTokenFromCookie navigates to root on valid token', fakeAsync(() => {
