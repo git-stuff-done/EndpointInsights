@@ -40,4 +40,12 @@ it('should make a POST request', () => {
     req.flush({});
 });
 
+it('should make a PUT request', () => {
+    service.put('/api/test', { name: 'test' }).subscribe(response => {
+        expect(response).toBeTruthy();
+    });
+    const req = httpMock.expectOne('/api/test');
+    expect(req.request.method).toBe('PUT');
+})
+
 });
