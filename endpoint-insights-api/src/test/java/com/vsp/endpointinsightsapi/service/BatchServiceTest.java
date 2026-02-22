@@ -146,6 +146,34 @@ class BatchServiceTest {
     }
 
     @Test
+    void createBatch_withMissingJobs_stillCreatesBatch() {
+        UUID jobId1 = UUID.randomUUID();
+        UUID jobId2 = UUID.randomUUID();
+
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setName("Test Batch");
+        request.setJobIds(Arrays.asList(jobId1, jobId2));
+
+        Job job1 = new Job();
+        job1.setJobId(jobId1);
+
+        when(jobRepository.findAllById(request.getJobIds())).thenReturn(Collections.singletonList(job1));
+
+        TestBatch savedBatch = new TestBatch();
+        savedBatch.setBatch_id(UUID.randomUUID());
+        savedBatch.setBatchName("Test Batch");
+
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(savedBatch);
+
+        TestBatch result = batchService.createBatch(request);
+
+        assertNotNull(result);
+        assertEquals("Test Batch", result.getBatchName());
+        verify(jobRepository).findAllById(request.getJobIds());
+        verify(testBatchRepository).save(any(TestBatch.class));
+    }
+
+    @Test
     void createBatch_withNullJobIds_createsBatch() {
         BatchRequestDTO request = new BatchRequestDTO();
         request.setName("Test Batch");

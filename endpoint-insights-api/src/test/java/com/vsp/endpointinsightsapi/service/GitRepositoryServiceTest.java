@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,5 +171,55 @@ class GitRepositoryServiceTest {
         );
 
         assertNotNull(provider);
+    }
+
+    @Test
+    void checkoutJobRepository_clonesAndPullsLocalRepo() throws Exception {
+        Path originDir = Files.createTempDirectory(tempDir, "origin-repo");
+        createLocalRepo(originDir, "initial");
+
+        Job job = new Job();
+        job.setJobId(UUID.randomUUID());
+        job.setGitUrl(originDir.toUri().toString());
+        job.setGitAuthType(GitAuthType.NONE);
+
+        Path checkoutPath = gitRepositoryService.checkoutJobRepository(job);
+
+        assertTrue(Files.exists(checkoutPath.resolve(".git")));
+
+        try (Git git = Git.open(originDir.toFile())) {
+            Files.writeString(originDir.resolve("README.md"), "update", StandardOpenOption.TRUNCATE_EXISTING);
+            git.add().addFilepattern("README.md").call();
+            git.commit().setMessage("update").call();
+        }
+
+        Path secondCheckout = gitRepositoryService.checkoutJobRepository(job);
+
+        assertEquals(checkoutPath, secondCheckout);
+    }
+
+    @Test
+    void checkoutJobRepository_withSshAuth_clonesLocalRepo() throws Exception {
+        Path originDir = Files.createTempDirectory(tempDir, "origin-ssh-repo");
+        createLocalRepo(originDir, "initial");
+
+        Job job = new Job();
+        job.setJobId(UUID.randomUUID());
+        job.setGitUrl(originDir.toUri().toString());
+        job.setGitAuthType(GitAuthType.SSH_KEY);
+        job.setGitSshPrivateKey("dummy-key");
+
+        Path checkoutPath = gitRepositoryService.checkoutJobRepository(job);
+
+        assertTrue(Files.exists(checkoutPath.resolve(".git")));
+    }
+
+    private void createLocalRepo(Path repoDir, String content) throws Exception {
+        try (Git git = Git.init().setDirectory(repoDir.toFile()).call()) {
+            Path readme = repoDir.resolve("README.md");
+            Files.writeString(readme, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            git.add().addFilepattern("README.md").call();
+            git.commit().setMessage("init").call();
+        }
     }
 }

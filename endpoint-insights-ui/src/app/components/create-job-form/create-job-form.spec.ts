@@ -1,7 +1,9 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {SimpleChange} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CreateJobForm} from './create-job-form';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
+import {TestItem} from '../../models/test.model';
 
 describe('CreateJobForm', () => {
     let component: CreateJobForm;
@@ -54,6 +56,35 @@ describe('CreateJobForm', () => {
 
         it('should be invalid when empty', () => {
             expect(component.createJobForm.valid).toBeFalsy();
+        });
+    });
+
+    describe('ngOnChanges', () => {
+        it('should patch form values when job input changes', () => {
+            const job: TestItem = {
+                id: '1',
+                name: 'Updated Job',
+                batch: 'Batch A',
+                description: 'Updated description',
+                gitUrl: 'https://github.com/user/repo.git',
+                gitAuthType: 'NONE',
+                runCommand: 'npm run test',
+                compileCommand: 'npm run build',
+                jobType: 'jmeter',
+                createdAt: new Date(),
+                createdBy: 'user',
+                status: 'RUNNING'
+            };
+
+            component.job = job;
+            component.ngOnChanges({ job: new SimpleChange(null, job, true) });
+
+            expect(component.createJobForm.get('name')?.value).toBe(job.name);
+            expect(component.createJobForm.get('description')?.value).toBe(job.description);
+            expect(component.createJobForm.get('gitUrl')?.value).toBe(job.gitUrl);
+            expect(component.createJobForm.get('jobType')?.value).toBe(job.jobType);
+            expect(component.createJobForm.get('runCommand')?.value).toBe(job.runCommand);
+            expect(component.createJobForm.get('compileCommand')?.value).toBe(job.compileCommand);
         });
     });
 
