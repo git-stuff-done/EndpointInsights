@@ -53,7 +53,8 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		jobService.createJob(job);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		when(jobService.createJob(jobRequest)).thenReturn(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
 				.andExpect(status().isOk())
@@ -83,7 +84,8 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		jobService.createJob(job);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		when(jobService.createJob(jobRequest)).thenReturn(job);
 		Optional<List<Job>> jobs = Optional.of(List.of(job));
 		when(jobService.getAllJobs()).thenReturn(jobs);
 		mockMvc.perform(get("/api/jobs")).andExpect(status().isOk());

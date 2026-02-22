@@ -43,7 +43,7 @@ class JobServiceTest {
         JobCreateRequest jobRequest = new JobCreateRequest();
         jobRequest.setName("Test Job");
         jobRequest.setDescription("Test Description");
-        jobRequest.setTestType(TestType.UNIT);
+        jobRequest.setTestType(TestType.INTEGRATION);
         
         Job savedJob = new Job();
         savedJob.setJobId(UUID.randomUUID());
