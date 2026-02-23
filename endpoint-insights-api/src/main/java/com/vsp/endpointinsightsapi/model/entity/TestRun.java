@@ -47,4 +47,8 @@ public class TestRun {
 
 	@Column(name = "finished_at")
 	private Instant finishedAt;
+
+    @Column(name = "batch_id")
+    private UUID batchId;
+
 }
