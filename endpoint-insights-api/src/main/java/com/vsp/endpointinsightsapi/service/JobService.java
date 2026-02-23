@@ -6,7 +6,6 @@ import java.util.UUID;
 //import java.util.Optional;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import org.slf4j.Logger;
@@ -39,7 +38,6 @@ public class JobService {
         job.setCompileCommand(jobRequest.getCompileCommand());
         job.setJobType(jobRequest.getTestType());
         job.setConfig(jobRequest.getConfig());
-        job.setStatus(JobStatus.PENDING);
         return jobRepository.save(job);
     }
 
@@ -65,7 +63,6 @@ public class JobService {
                 .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
         existingJob.setName(job.getName());
         existingJob.setDescription(job.getDescription());
-        existingJob.setStatus(job.getStatus());
         existingJob.setTestBatches(job.getTestBatches());
         existingJob.setJobType(job.getJobType());
         existingJob.setConfig(job.getConfig());

@@ -1,5 +1,4 @@
 package com.vsp.endpointinsightsapi.model;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -65,10 +64,6 @@ public class Job  extends AuditingEntity {
     @JoinColumn(name = "created_by")
     private User createdBy;
 */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private JobStatus status = JobStatus.PENDING;
-
 
     // JSONB config: arbitrary key/value settings for the job
     @JdbcTypeCode(SqlTypes.JSON)

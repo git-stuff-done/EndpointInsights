@@ -47,7 +47,7 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		run.setStatus(TestRunStatus.COMPLETED);
 		run.setFinishedAt(Instant.now());
 
 		when(testRunService.getRecentTestRuns(5)).thenReturn(List.of(run));
@@ -57,7 +57,7 @@ class TestRunsControllerUnitTest {
 				.andExpect(jsonPath("$[0].runId").value(run.getRunId().toString()))
 				.andExpect(jsonPath("$[0].jobId").value(run.getJobId().toString()))
 				.andExpect(jsonPath("$[0].runBy").value("tester"))
-				.andExpect(jsonPath("$[0].status").value("PASS"));
+				.andExpect(jsonPath("$[0].status").value("COMPLETED"));
 	}
 
 	@Test
@@ -66,7 +66,7 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		run.setStatus(TestRunStatus.COMPLETED);
 		run.setStartedAt(Instant.now());
 
 		TestRunCreateRequest request = new TestRunCreateRequest(
@@ -85,7 +85,7 @@ class TestRunsControllerUnitTest {
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.runId").value(run.getRunId().toString()))
 				.andExpect(jsonPath("$.runBy").value("tester"))
-				.andExpect(jsonPath("$.status").value("PASS"));
+				.andExpect(jsonPath("$.status").value("COMPLETED"));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ class TestRunsControllerUnitTest {
 		TestRunCreateRequest request = new TestRunCreateRequest(
 			UUID.randomUUID(),
 			"tester",
-			TestRunStatus.PASS,
+			TestRunStatus.COMPLETED,
 			null,
 			null
 		);

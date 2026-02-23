@@ -26,18 +26,28 @@ public class PerfTestResultCodeId implements Serializable {
 	@Column(name = "error_code", nullable = false)
 	private Integer errorCode;
 
+	@NotNull
+	@Column(name = "sampler_name", nullable = false)
+	private String samplerName;
+
+	@NotNull
+	@Column(name = "thread_group", nullable = false)
+	private String threadGroup;
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
 		PerfTestResultCodeId entity = (PerfTestResultCodeId) o;
 		return Objects.equals(this.resultId, entity.resultId) &&
-				Objects.equals(this.errorCode, entity.errorCode);
+				Objects.equals(this.errorCode, entity.errorCode) &&
+				Objects.equals(this.samplerName, entity.samplerName) &&
+				Objects.equals(this.threadGroup, entity.threadGroup);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(resultId, errorCode);
+		return Objects.hash(resultId, errorCode, samplerName, threadGroup);
 	}
 
 }
