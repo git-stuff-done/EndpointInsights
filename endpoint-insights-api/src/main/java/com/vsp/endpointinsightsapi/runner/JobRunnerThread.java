@@ -1,9 +1,14 @@
 package com.vsp.endpointinsightsapi.runner;
 
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.TestRunResult;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -13,11 +18,13 @@ import java.util.Optional;
 public class JobRunnerThread implements Runnable {
 
 	private final Job job;
+	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
 	private File tempDir = null;
 
-	public JobRunnerThread(Job job, JMeterInterpreterService jMeterInterpreterService) {
+	public JobRunnerThread(Job job, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService) {
 		this.job = job;
+		this.testRunRepository = testRunRepository;
 
 		// todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -28,6 +35,13 @@ public class JobRunnerThread implements Runnable {
 
 	@Override
 	public void run() {
+
+		TestRun testRun = new TestRun();
+		testRun.setStartedAt(Instant.now());
+		testRun.setStatus(TestRunStatus.PENDING);
+		testRun.setRunBy("system"); //todo: needs to be updated
+		testRun = testRunRepository.save(testRun);
+
 		// step 1 - pull from git (setup temp dir)
 		try {
 			pullFromGit();
@@ -35,15 +49,28 @@ public class JobRunnerThread implements Runnable {
 			// step 2 - compile test
 			compileTest();
 
+			testRun.setStatus(TestRunStatus.RUNNING);
+			testRunRepository.save(testRun);
+
 			// step 3 - execute test
 			Optional<File> resultFile = executeTest();
 
 			// step 4 - interpret results
 			if (resultFile.isPresent()) {
 				System.out.println("Test results available in: " + resultFile.get().getAbsolutePath());
-				testInterpreter.processResults(resultFile.get());
+
+				TestRunResult pass = testInterpreter.processResults(resultFile.get());
+
+				testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
+				testRun.setResultId(pass.resultId());
+				testRun.setFinishedAt(Instant.now());
+				testRunRepository.save(testRun);
 			} else {
 				System.out.println("No test results file available for interpretation");
+
+				testRun.setStatus(TestRunStatus.FAILED);
+				testRun.setFinishedAt(Instant.now());
+				testRunRepository.save(testRun);
 			}
 		} catch (IOException e) {} finally {
 			cleanupTempDir();

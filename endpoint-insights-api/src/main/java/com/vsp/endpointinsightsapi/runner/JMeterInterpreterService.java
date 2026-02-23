@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.*;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
@@ -44,7 +45,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 	}
 
 	@Override
-	public boolean processResults(File file) throws IOException {
+	public TestRunResult processResults(File file) throws IOException {
 		// Create test result so we can get the UUID
 		TestResult testResult = new TestResult();
 		testResult.setId(UUID.randomUUID());
@@ -83,10 +84,9 @@ public class JMeterInterpreterService implements TestInterpreter {
 				try {
 					timeStamp = Long.parseLong(cols[headerIndex.get("timeStamp")]);
 				} catch (Exception e) { timeStamp = 0; }
-				String respCodeStr = responseCode;
 				int responseCodeInt;
 				try {
-					responseCodeInt = Integer.parseInt(respCodeStr.trim());
+					responseCodeInt = Integer.parseInt(responseCode.trim());
 				} catch (Exception e) {
 					responseCodeInt = -1; // fallback
 				}
@@ -94,7 +94,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 				final String groupKey = threadGroup + "|" + samplerName;
 
-				SampleRecord rec = new SampleRecord(elapsed, responseCodeInt, respCodeStr, timeStamp, success);
+				SampleRecord rec = new SampleRecord(elapsed, responseCodeInt, responseCode, timeStamp, success);
 
 				grouped.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(rec);
 
@@ -102,88 +102,99 @@ public class JMeterInterpreterService implements TestInterpreter {
 				errorCodeCount.put(codeKey, errorCodeCount.getOrDefault(codeKey, 0) + 1);
 			}
 
-			// Results will be made here
-			List<PerfTestResult> perfTestResults = new ArrayList<>();
-			List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
+			// Create results
+			boolean passed = createResults(testResult, grouped, errorCodeCount);
 
-			for (Map.Entry<String, List<SampleRecord>> groupEntry : grouped.entrySet()) {
-				String groupKey = groupEntry.getKey();
-				String[] parts = groupKey.split("\\|");
-				String threadGroup = parts[0];
-				String samplerName = parts[1];
-				List<SampleRecord> samples = groupEntry.getValue();
-
-				List<Long> latencies = new ArrayList<>();
-				int total = samples.size();
-				int errorCount = 0;
-
-				int volumeLastMinute = 0;
-				int volumeLast5Minutes = 0;
-				long maxTimeStamp = samples.stream().mapToLong(r -> r.timeStamp).max().orElse(0);
-
-				for (SampleRecord r : samples) {
-					latencies.add(r.elapsed);
-					if (!r.success) errorCount++;
-				}
-
-				long oneMinuteAgo = maxTimeStamp - 60_000;
-				long fiveMinutesAgo = maxTimeStamp - 5 * 60_000;
-				for (SampleRecord r : samples) {
-					if (r.timeStamp >= oneMinuteAgo) volumeLastMinute++;
-					if (r.timeStamp >= fiveMinutesAgo) volumeLast5Minutes++;
-				}
-
-				Collections.sort(latencies);
-				int p50 = !latencies.isEmpty() ? calculatePercentile(latencies, 50) : 0;
-				int p95 = !latencies.isEmpty() ? calculatePercentile(latencies, 95) : 0;
-				int p99 = !latencies.isEmpty() ? calculatePercentile(latencies, 99) : 0;
-
-				double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
-
-				PerfTestResult res = new PerfTestResult();
-				PerfTestResultId resId = new PerfTestResultId();
-				// Needs a resultId (TestResult id), for demo will generate random
-				resId.setResultId(testResult.getId());
-				resId.setSamplerName(samplerName);
-				resId.setThreadGroup(threadGroup);
-				res.setId(resId);
-				res.setTestResult(testResult);
-				res.setSamplerName(samplerName);
-				res.setThreadGroup(threadGroup);
-				res.setP50LatencyMs(p50);
-				res.setP95LatencyMs(p95);
-				res.setP99LatencyMs(p99);
-				res.setVolumeLastMinute(volumeLastMinute);
-				res.setVolumeLast5Minutes(volumeLast5Minutes);
-				res.setErrorRatePercent(errorRate);
-
-				perfTestResults.add(res);
-
-				// Now, PerfTestResultCode per error code
-				Set<Integer> seenCodes = new HashSet<>();
-				for (SampleRecord r : samples) seenCodes.add(r.responseCodeInt);
-
-				for (int errorCode : seenCodes) {
-					PerfTestResultCodeId codeId = new PerfTestResultCodeId();
-					codeId.setResultId(testResult.getId());
-					codeId.setErrorCode(errorCode);
-					codeId.setSamplerName(samplerName);
-					codeId.setThreadGroup(threadGroup);
-
-					PerfTestResultCode prc = new PerfTestResultCode();
-					prc.setId(codeId);
-					String countKey = groupKey + "|" + errorCode;
-					prc.setCount(errorCodeCount.getOrDefault(countKey, 0));
-					perfTestResultCodes.add(prc);
-				}
-			}
-
-			perfTestResultRepository.saveAll(perfTestResults);
-			perfTestResultCodeRepository.saveAll(perfTestResultCodes);
-
-			return true;
+			return new TestRunResult(passed, testResult.getId());
 		} catch (IOException e) {
 			throw new IOException("Failed to process JMeter results: " + e.getMessage(), e);
 		}
+	}
+
+	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount) {
+		// Results will be made here
+		List<PerfTestResult> perfTestResults = new ArrayList<>();
+		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
+
+		for (Map.Entry<String, List<SampleRecord>> groupEntry : grouped.entrySet()) {
+			String groupKey = groupEntry.getKey();
+			String[] parts = groupKey.split("\\|");
+			String threadGroup = parts[0];
+			String samplerName = parts[1];
+			List<SampleRecord> samples = groupEntry.getValue();
+
+			List<Long> latencies = new ArrayList<>();
+			int total = samples.size();
+			int errorCount = 0;
+
+			int volumeLastMinute = 0;
+			int volumeLast5Minutes = 0;
+			long maxTimeStamp = samples.stream().mapToLong(r -> r.timeStamp).max().orElse(0);
+
+			for (SampleRecord r : samples) {
+				latencies.add(r.elapsed);
+				if (!r.success) errorCount++;
+			}
+
+			long oneMinuteAgo = maxTimeStamp - 60_000;
+			long fiveMinutesAgo = maxTimeStamp - 5 * 60_000;
+			for (SampleRecord r : samples) {
+				if (r.timeStamp >= oneMinuteAgo) volumeLastMinute++;
+				if (r.timeStamp >= fiveMinutesAgo) volumeLast5Minutes++;
+			}
+
+			Collections.sort(latencies);
+			int p50 = !latencies.isEmpty() ? calculatePercentile(latencies, 50) : 0;
+			int p95 = !latencies.isEmpty() ? calculatePercentile(latencies, 95) : 0;
+			int p99 = !latencies.isEmpty() ? calculatePercentile(latencies, 99) : 0;
+
+			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
+
+			PerfTestResult res = new PerfTestResult();
+			PerfTestResultId resId = new PerfTestResultId();
+			// Needs a resultId (TestResult id), for demo will generate random
+			resId.setResultId(testResult.getId());
+			resId.setSamplerName(samplerName);
+			resId.setThreadGroup(threadGroup);
+			res.setId(resId);
+			res.setTestResult(testResult);
+			res.setSamplerName(samplerName);
+			res.setThreadGroup(threadGroup);
+			res.setP50LatencyMs(p50);
+			res.setP95LatencyMs(p95);
+			res.setP99LatencyMs(p99);
+			res.setVolumeLastMinute(volumeLastMinute);
+			res.setVolumeLast5Minutes(volumeLast5Minutes);
+			res.setErrorRatePercent(errorRate);
+
+			perfTestResults.add(res);
+
+			// Now, PerfTestResultCode per error code
+			Set<Integer> seenCodes = new HashSet<>();
+			for (SampleRecord r : samples) seenCodes.add(r.responseCodeInt);
+
+			for (int errorCode : seenCodes) {
+				PerfTestResultCodeId codeId = new PerfTestResultCodeId();
+				codeId.setResultId(testResult.getId());
+				codeId.setErrorCode(errorCode);
+				codeId.setSamplerName(samplerName);
+				codeId.setThreadGroup(threadGroup);
+
+				PerfTestResultCode prc = new PerfTestResultCode();
+				prc.setId(codeId);
+				String countKey = groupKey + "|" + errorCode;
+				prc.setCount(errorCodeCount.getOrDefault(countKey, 0));
+				perfTestResultCodes.add(prc);
+			}
+		}
+
+
+
+		boolean passed = perfTestResults.stream().noneMatch(r -> r.getErrorRatePercent() > 0.5);
+
+		perfTestResultRepository.saveAll(perfTestResults);
+		perfTestResultCodeRepository.saveAll(perfTestResultCodes);
+
+		return passed;
 	}
 }

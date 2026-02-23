@@ -5,6 +5,7 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobRun;
 import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
@@ -30,10 +31,12 @@ public class JobsController {
 	private final JobService jobService;
 
 	private final JMeterInterpreterService jMeterInterpreterService;
+	private final TestRunRepository testRunRepository;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService) {
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
+		this.testRunRepository = testRunRepository;
 	}
 
 	/**
@@ -63,7 +66,7 @@ public class JobsController {
 			return ResponseEntity.notFound().build();
 		}
 
-		Thread t = new Thread(new JobRunnerThread(job.get(), jMeterInterpreterService));
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRunRepository, jMeterInterpreterService));
 		t.start();
 
 		return ResponseEntity.ok(new JobRun(jobId, job.get().getName()));
