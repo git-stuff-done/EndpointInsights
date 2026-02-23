@@ -32,6 +32,9 @@ public class TestRun {
 	@Column(name = "job_id", nullable = false)
 	private UUID jobId;
 
+	@Column(name = "result_id", nullable = true)
+	private UUID resultId;
+
 	@Column(name = "run_by", nullable = false)
 	private String runBy;
 

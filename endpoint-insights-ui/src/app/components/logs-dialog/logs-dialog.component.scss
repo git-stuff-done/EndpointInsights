@@ -1,0 +1,73 @@
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spacer { flex: 1; }
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(1100px, 95vw);
+  max-width: 95vw;
+}
+
+.search {
+  width: 100%;
+  margin: 0;
+}
+
+.logs-pre {
+  margin: 0;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.04);
+
+  white-space: pre;
+  font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+/* Ensure the outline field has enough internal left padding */
+:host ::ng-deep .search .mat-mdc-form-field-infix {
+  padding-left: 12px !important;
+}
+
+/* Color Coding On Log Lines */
+.logs-container {
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #111; // darker background makes colors pop
+  font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.log-line {
+  white-space: pre;
+}
+
+.log-line.info {
+  color: #90caf9;  // light blue
+}
+
+.log-line.warn {
+  color: #ffb74d;  // amber
+}
+
+.log-line.error {
+  color: #ef5350;  // red
+}
+
+.log-line.none {
+  color: #e0e0e0;  // default light gray
+}

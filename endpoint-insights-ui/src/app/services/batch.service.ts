@@ -20,7 +20,7 @@ export class BatchService {
         return this.batchApi.getAllBatches();
     }
 
-    saveBatch(form: any):Observable<Batch>{
+    saveBatch(form: any):Observable<HttpResponse<Batch>>{
         return this.batchApi.saveBatch(form)
     }
 
