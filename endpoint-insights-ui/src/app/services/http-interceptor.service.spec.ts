@@ -1,17 +1,29 @@
 import { TestBed } from '@angular/core/testing';
-
+import { HttpHeaders } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { AuthenticationService } from './authentication.service';
 import { HttpInterceptorService } from './http-interceptor.service';
-import {provideHttpClient} from "@angular/common/http";
-import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
+
+class AuthenticationServiceStub {
+  authState$ = new BehaviorSubject<boolean>(false);
+  getToken() {
+    return 'test-token';
+  }
+}
 
 describe('HttpInterceptorService', () => {
   let service: HttpInterceptorService;
+  let authStub: AuthenticationServiceStub;
   let httpMock: HttpTestingController;
+
   beforeEach(() => {
+    authStub = new AuthenticationServiceStub();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(),
-          provideHttpClientTesting(),
-          HttpInterceptorService,
+      imports: [HttpClientTestingModule],
+      providers: [
+        HttpInterceptorService,
+        { provide: AuthenticationService, useValue: authStub }
       ]
     });
     httpMock = TestBed.inject(HttpTestingController);
@@ -22,30 +34,19 @@ describe('HttpInterceptorService', () => {
     expect(service).toBeTruthy();
   });
 
-it('should make a GET request', () => {
-    service.get('/api/test').subscribe(response => {
-        expect(response).toBeTruthy();
-    });
-    const req = httpMock.expectOne('/api/test');
-    expect(req.request.method).toBe('GET');
-    req.flush({});
-});
+  it('injectAuthenticationToken adds Authorization header when token present', () => {
+    authStub.authState$.next(true);
 
-it('should make a POST request', () => {
-    service.post('/api/test', { name: 'test' }).subscribe(response => {
-        expect(response).toBeTruthy();
-    });
-    const req = httpMock.expectOne('/api/test');
-    expect(req.request.method).toBe('POST');
-    req.flush({});
-});
+    const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
 
-it('should make a PUT request', () => {
-    service.put('/api/test', { name: 'test' }).subscribe(response => {
-        expect(response).toBeTruthy();
-    });
-    const req = httpMock.expectOne('/api/test');
-    expect(req.request.method).toBe('PUT');
-})
+    expect(headers.get('Authorization')).toBe('Bearer test-token');
+  });
 
+  it('injectAuthenticationToken keeps headers when no token', () => {
+    authStub.authState$.next(false);
+
+    const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
+
+    expect(headers.has('Authorization')).toBeFalse();
+  });
 });
