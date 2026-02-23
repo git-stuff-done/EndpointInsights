@@ -22,7 +22,7 @@ public class NotificationService {
 
     public void sendTestCompletionNotifications(UUID batchId, UUID runId, UUID resultId) {
 
-        List<TestBatchEmailList> recipients = emailListsRepository.findByBatchId(batchId);
+        List<TestBatchEmailList> recipients = emailListsRepository.findAllByBatchId(batchId);
 
         LOG.info("Sending test completion notifications for run {} to {} recipients", runId, recipients.size());
 
