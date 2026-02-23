@@ -112,7 +112,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
     // Schedule editor state
     scheduleFrequency = signal<'daily' | 'weekly'>('daily');
-    scheduleTime = signal('12:00');
+    scheduleTime = signal('');
     scheduleDays = signal<string[]>([]);
 
     readonly dayOptions = [
