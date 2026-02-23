@@ -59,8 +59,7 @@ public class JobsController {
 	 	}
 	 }
 
-	 // todo: remove public api, implement
-	 @PublicAPI
+
 	 @PostMapping("/{id}/run")
 	 public ResponseEntity<TestRun> runJob(@PathVariable("id") UUID jobId) {
 		LOG.info("Running job {}", jobId);
