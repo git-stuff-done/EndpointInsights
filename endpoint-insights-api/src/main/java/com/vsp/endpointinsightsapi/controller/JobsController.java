@@ -1,15 +1,21 @@
 package com.vsp.endpointinsightsapi.controller;
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
 import com.vsp.endpointinsightsapi.model.*;
-import com.vsp.endpointinsightsapi.service.JobService;
-// import com.vsp.endpointinsightsapi.model.enums.JobStatus;
-import com.vsp.endpointinsightsapi.validation.ErrorMessages;
-import com.vsp.endpointinsightsapi.validation.Patterns;
 
+import com.vsp.endpointinsightsapi.authentication.PublicAPI;
+import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.JobRun;
+import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
+import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
+import com.vsp.endpointinsightsapi.service.JobService;
+import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,10 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-// import java.time.LocalDate;
-// import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -31,8 +35,13 @@ public class JobsController {
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
 
-	public JobsController(JobService jobService) {
+	private final JMeterInterpreterService jMeterInterpreterService;
+	private final TestRunRepository testRunRepository;
+
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository) {
 		this.jobService = jobService;
+		this.jMeterInterpreterService = jMeterInterpreterService;
+		this.testRunRepository = testRunRepository;
 	}
 
 	/**
@@ -50,6 +59,28 @@ public class JobsController {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
 	 	}
+	 }
+
+
+	 @PostMapping("/{id}/run")
+	 public ResponseEntity<TestRun> runJob(@PathVariable("id") UUID jobId) {
+		LOG.info("Running job {}", jobId);
+		var job = jobService.getJobById(jobId);
+		if (job.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		 TestRun testRun = new TestRun();
+		 testRun.setStartedAt(Instant.now());
+		 testRun.setStatus(TestRunStatus.PENDING);
+		 testRun.setJobId(job.get().getJobId());
+		 testRun.setRunBy("system"); //todo: needs to be updated
+		 testRun = testRunRepository.save(testRun);
+
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService));
+		t.start();
+
+		return ResponseEntity.ok(testRun);
 	 }
 
 	/**

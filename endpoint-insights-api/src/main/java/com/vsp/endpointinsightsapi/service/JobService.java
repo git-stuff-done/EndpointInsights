@@ -59,7 +59,6 @@ public class JobService {
                 .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
         existingJob.setName(job.getName());
         existingJob.setDescription(job.getDescription());
-        existingJob.setStatus(job.getStatus());
         existingJob.setTestBatches(job.getTestBatches());
         existingJob.setJobType(job.getJobType());
         existingJob.setConfig(job.getConfig());
