@@ -47,6 +47,7 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
+        run.setBatchId(UUID.randomUUID());
 		run.setStatus(TestRunStatus.PASS);
 		run.setFinishedAt(Instant.now());
 
@@ -65,6 +66,7 @@ class TestRunsControllerUnitTest {
 		TestRun run = new TestRun();
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
+        run.setBatchId(UUID.randomUUID());
 		run.setRunBy("tester");
 		run.setStatus(TestRunStatus.PASS);
 		run.setStartedAt(Instant.now());
@@ -73,9 +75,9 @@ class TestRunsControllerUnitTest {
 			run.getJobId(),
 			run.getRunBy(),
 			run.getStatus(),
+            run.getBatchId(),
 			run.getStartedAt(),
-			run.getFinishedAt(),
-            run.getBatchId()
+			run.getFinishedAt()
 		);
 
 		when(testRunService.createTestRun(any(TestRun.class))).thenReturn(run);
@@ -95,7 +97,7 @@ class TestRunsControllerUnitTest {
 			UUID.randomUUID(),
 			"tester",
 			TestRunStatus.PASS,
-			null,
+            UUID.randomUUID(),
 			null,
             null
 		);
