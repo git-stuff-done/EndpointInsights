@@ -1,6 +1,6 @@
 package com.vsp.endpointinsightsapi.service;
 
-import com.vsp.endpointinsightsapi.model.TestBatchEmailList;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
