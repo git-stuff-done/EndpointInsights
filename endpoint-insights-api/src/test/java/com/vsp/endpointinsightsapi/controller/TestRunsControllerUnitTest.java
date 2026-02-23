@@ -71,11 +71,11 @@ class TestRunsControllerUnitTest {
 
 		TestRunCreateRequest request = new TestRunCreateRequest(
 			run.getJobId(),
-            run.getBatchId(),
 			run.getRunBy(),
 			run.getStatus(),
 			run.getStartedAt(),
-			run.getFinishedAt()
+			run.getFinishedAt(),
+            run.getBatchId()
 		);
 
 		when(testRunService.createTestRun(any(TestRun.class))).thenReturn(run);
