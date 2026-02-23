@@ -10,8 +10,8 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {Batch} from "../../../models/batch.model";
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
+import {MatSelectModule} from "@angular/material/select";
 import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
@@ -37,11 +37,10 @@ export interface ApiTest {
         MatTabsModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatButtonToggleGroup,
-        MatButtonToggle,
         MatAutocompleteModule,
         MatSelectionList,
         MatListOption,
+        MatSelectModule,
         MatDivider,
     ],
     providers: [provideNativeDateAdapter()],
@@ -65,7 +64,6 @@ export class BatchConfigDialogComponent implements OnInit {
     activeParticipants = signal<User[]>([]);
 
     currentBatchTests = signal<ApiTest[]>([]);
-
 
     currentJobs = [
         {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
@@ -101,13 +99,82 @@ export class BatchConfigDialogComponent implements OnInit {
         batchName: [this.data.batchName ?? '', [Validators.required, Validators.maxLength(120)]],
         startTime: [this.data.startTime ?? ''],
         lastRunTime: [this.data.lastRunTime ?? ''],
-        scheduledDays: [this.data.scheduledDays ?? ''],
-        nextRunTime: [this.data.nextRunTime ?? ''],
-        nextRunDate: [this.data.nextRunDate ?? ''],
+        cronExpression: [this.data.cronExpression ?? ''],
         notificationList: [this.data.notificationList ?? []],
         jobs: [this.data.jobs ?? []]
-
     });
+
+    // Schedule editor state
+    scheduleFrequency = signal<'daily' | 'weekly'>('daily');
+    scheduleTime = signal('');
+    scheduleDays = signal<string[]>([]);
+
+    readonly dayOptions = [
+        { value: 'MON', label: 'Monday' },
+        { value: 'TUE', label: 'Tuesday' },
+        { value: 'WED', label: 'Wednesday' },
+        { value: 'THU', label: 'Thursday' },
+        { value: 'FRI', label: 'Friday' },
+        { value: 'SAT', label: 'Saturday' },
+        { value: 'SUN', label: 'Sunday' },
+    ];
+
+    onFrequencyChange(value: 'daily' | 'weekly'): void {
+        this.scheduleFrequency.set(value);
+        this.buildCron();
+    }
+
+    onTimeChange(value: string): void {
+        this.scheduleTime.set(value);
+        this.buildCron();
+    }
+
+    onDaysChange(days: string[]): void {
+        this.scheduleDays.set(days);
+        this.buildCron();
+    }
+
+    /** Build a cron string from the editor state and set it on the form */
+    private buildCron(): void {
+        const time = this.scheduleTime();
+        const [hours, minutes] = time.split(':').map(Number);
+
+        let cron: string;
+        if (this.scheduleFrequency() === 'daily') {
+            cron = `0 ${minutes} ${hours} * * *`;
+        } else {
+            const days = this.scheduleDays();
+            if (days.length === 0) {
+                cron = `0 ${minutes} ${hours} * * *`;
+            } else {
+                cron = `0 ${minutes} ${hours} * * ${days.join(',')}`;
+            }
+        }
+
+        this.form.patchValue({ cronExpression: cron });
+    }
+
+    /** Parse a cron string and update the editor state to match */
+    private parseCronToEditor(cron: string): void {
+        if (!cron) return;
+
+        const parts = cron.trim().split(/\s+/);
+        if (parts.length < 6) return;
+
+        const minutes = parts[1];
+        const hours = parts[2];
+        const dayOfWeek = parts[5];
+
+        this.scheduleTime.set(`${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`);
+
+        if (dayOfWeek === '*') {
+            this.scheduleFrequency.set('daily');
+            this.scheduleDays.set([]);
+        } else {
+            this.scheduleFrequency.set('weekly');
+            this.scheduleDays.set(dayOfWeek.split(',').map(d => d.trim().toUpperCase()));
+        }
+    }
 
 
     ngOnInit(): void {
@@ -116,14 +183,15 @@ export class BatchConfigDialogComponent implements OnInit {
             id: this.data.id,
             batchName: (this.data.batchName ?? '').trim(),
             startTime: this.data.startTime,
-            lastRunTime: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'}),
-            //scheduledDays: this.data.scheduledDays ?? [],
-            nextRunTime: this.data.nextRunTime ?? '',
-            nextRunDate: this.data.nextRunDate ?? '',
+            lastRunTime: this.data.lastRunTime,
+            cronExpression: this.data.cronExpression ?? '',
             notificationList: this.data.notificationList || [],
             jobs: this.data.jobs ?? []
-
         });
+
+        // Sync existing cron string into the editor
+        this.parseCronToEditor(this.data.cronExpression ?? '');
+
         this.searchControl.valueChanges.pipe(
             debounceTime(200),
             distinctUntilChanged(),
@@ -243,9 +311,7 @@ export class BatchConfigDialogComponent implements OnInit {
                     batchName: response.body?.batchName,
                     startTime: response.body?.startTime,
                     lastRunTime: response.body?.lastRunTime,
-                    scheduledDays: response.body?.scheduledDays,
-                    nextRunTime: response.body?.nextRunTime,
-                    nextRunDate: response.body?.nextRunDate,
+                    cronExpression: response.body?.cronExpression ?? '',
                     notificationList: response.body?.notificationList || [],
                 });
                 this.dialogRef.close(response.body);
@@ -264,30 +330,5 @@ export class BatchConfigDialogComponent implements OnInit {
         });
     }
 
-    /** Compose an ISO string from a date control and "HH:MM" time string */
-    private composeIso(date: Date | null, time: string | null): string | undefined {
-        if (!date) return undefined;
-
-        // Local date components selected by the user
-        const yyyy = date.getFullYear();
-        const mm = date.getMonth();      // zero based
-        const dd = date.getDate();
-
-        // Default time
-        let hh = 0;
-        let mi = 0;
-
-        // Validate and clamp the "HH:MM" string
-        if (time && /^\d{1,2}:\d{2}$/.test(time.trim())) {
-            const [h, m] = time.trim().split(':');
-            hh = Math.min(23, Math.max(0, parseInt(h, 10) || 0));
-            mi = Math.min(59, Math.max(0, parseInt(m, 10) || 0));
-        }
-
-        // Build a proper UTC Date
-        const utcDate = new Date(Date.UTC(yyyy, mm, dd, hh, mi, 0));
-
-        return utcDate.toISOString();
-    }
 
 }

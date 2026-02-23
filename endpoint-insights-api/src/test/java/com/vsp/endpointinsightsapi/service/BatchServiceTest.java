@@ -326,6 +326,47 @@ class BatchServiceTest {
     }
 
     @Test
+    void updateBatch_setCronExpression_success() {
+        UUID batchId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatchId(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.cronExpression = "0 30 14 * * MON,WED,FRI";
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        TestBatch result = testBatchService.updateBatch(batchId, request);
+
+        assertEquals("0 30 14 * * MON,WED,FRI", result.getCronExpression());
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
+    void updateBatch_nullCronExpression_doesNotOverwrite() {
+        UUID batchId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatchId(batchId);
+        existingBatch.setCronExpression("0 0 12 * * *");
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.cronExpression = null;
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+
+        TestBatch result = testBatchService.updateBatch(batchId, request);
+
+        assertEquals("0 0 12 * * *", result.getCronExpression());
+        verify(testBatchRepository).save(existingBatch);
+    }
+
+    @Test
     void updateBatch_emptyRequest_noChanges() {
         // Arrange
         UUID batchId = UUID.randomUUID();
