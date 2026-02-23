@@ -47,8 +47,8 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
-    run.setBatchId(UUID.randomUUID());
-		run.setStatus(TestRunStatus.PASS);
+        run.setBatchId(UUID.randomUUID());
+		run.setStatus(TestRunStatus.COMPLETED);
 		run.setFinishedAt(Instant.now());
 
 		when(testRunService.getRecentTestRuns(5)).thenReturn(List.of(run));
@@ -96,10 +96,10 @@ class TestRunsControllerUnitTest {
 		TestRunCreateRequest request = new TestRunCreateRequest(
 			UUID.randomUUID(),
 			"tester",
-			TestRunStatus.PASS,
-      UUID.randomUUID(),
-			null,
-      null
+			TestRunStatus.COMPLETED,
+            UUID.randomUUID(),
+    null,
+   null
 		);
 
 		doThrow(new RuntimeException("test error"))
