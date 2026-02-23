@@ -8,16 +8,13 @@ export interface Batch {
     /** Display title (usually a short descriptive name) */
     batchName: string;
 
-    /** ISO s
-     * tring or timestamp representing when the batch was created or run */
+    /** ISO string or timestamp representing when the batch was created or run */
     startTime: string | Date;
     lastRunTime?: string | Date;
-    lastRunDate?: string | Date;
-    nextRunTime?: string | Date;
-    nextRunDate?: string | Date;
-    scheduledDays?: string[];
+    cronExpression?: string;
     notificationList?: string[];
     description?: string;
     active: boolean;
     jobs: Job[];
+    isNew?: boolean;
 }

@@ -145,6 +145,9 @@ public class BatchService {
 
 		TestBatch batch = batchOptional.get();
 
+        if (request.cronExpression != null) {
+            batch.setCronExpression(request.cronExpression);
+        }
 
         // handle adding jobs
         if (request.addJobs != null && !request.addJobs.isEmpty()) {
@@ -175,6 +178,9 @@ public class BatchService {
                 batch.getJobs().remove(job.get());
             }
         }
+
+        // Other fields
+        batch.setBatchName(request.getBatchName());
 
         testBatchRepository.save(batch);
         return batch;

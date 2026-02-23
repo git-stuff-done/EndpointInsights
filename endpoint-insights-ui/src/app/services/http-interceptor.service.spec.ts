@@ -25,6 +25,7 @@ describe('HttpInterceptorService', () => {
         { provide: AuthenticationService, useValue: authStub }
       ]
     });
+    httpMock = TestBed.inject(HttpTestingController);
     service = TestBed.inject(HttpInterceptorService);
   });
 
