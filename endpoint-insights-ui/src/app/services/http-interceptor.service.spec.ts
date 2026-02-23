@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpHeaders } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 import { HttpInterceptorService } from './http-interceptor.service';
@@ -15,6 +15,7 @@ class AuthenticationServiceStub {
 describe('HttpInterceptorService', () => {
   let service: HttpInterceptorService;
   let authStub: AuthenticationServiceStub;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     authStub = new AuthenticationServiceStub();
@@ -25,6 +26,7 @@ describe('HttpInterceptorService', () => {
         { provide: AuthenticationService, useValue: authStub }
       ]
     });
+    httpMock = TestBed.inject(HttpTestingController);
     service = TestBed.inject(HttpInterceptorService);
   });
 
