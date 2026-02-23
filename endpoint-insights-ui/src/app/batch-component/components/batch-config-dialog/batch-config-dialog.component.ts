@@ -1,13 +1,13 @@
 import {Component, OnInit, inject, signal, computed, ViewChild} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {Batch} from "../../../models/batch.model";
 import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
@@ -61,15 +61,10 @@ export class BatchConfigDialogComponent implements OnInit {
 
 
     selectedParticipant: any = null;
-    searchParticipants: User[] =[];
+    searchParticipants: User[] = [];
     activeParticipants = signal<User[]>([]);
 
-    // Tests currently in the batch (top list in Settings tab)
-    currentBatchTests = signal<ApiTest[]>([
-        { id: 'd10e18c5-13f8-45b6-91fd-74baa0fe6834', name: 'Vision API' },
-        // { id: '2', name: 'Open API' },
-        // { id: '3', name: 'Records API' },
-    ]);
+    currentBatchTests = signal<ApiTest[]>([]);
 
 
     currentJobs = [
@@ -78,12 +73,12 @@ export class BatchConfigDialogComponent implements OnInit {
 
     // All available tests that can be added (bottom list in Settings tab)
     availableTests = signal<ApiTest[]>([
-        { id: '1', name: 'Vision API' },
-        { id: '2', name: 'Open API' },
-        { id: '3', name: 'Records API' },
-        { id: '4', name: 'Vision Express API' },
-        { id: '5', name: 'Auth API' },
-        { id: '6', name: 'Payment API' },
+        {id: '1', name: 'Vision API'},
+        {id: '2', name: 'Open API'},
+        {id: '3', name: 'Records API'},
+        {id: '4', name: 'Vision Express API'},
+        {id: '5', name: 'Auth API'},
+        {id: '6', name: 'Payment API'},
     ]);
 
     // Search term for filtering available tests
@@ -121,7 +116,7 @@ export class BatchConfigDialogComponent implements OnInit {
             id: this.data.id,
             batchName: (this.data.batchName ?? '').trim(),
             startTime: this.data.startTime,
-            lastRunTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            lastRunTime: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'}),
             //scheduledDays: this.data.scheduledDays ?? [],
             nextRunTime: this.data.nextRunTime ?? '',
             nextRunDate: this.data.nextRunDate ?? '',
@@ -228,7 +223,6 @@ export class BatchConfigDialogComponent implements OnInit {
             this.currentBatchTests.update(tests => [...tests, test]);
         }
     }
-
 
 
     save() {
