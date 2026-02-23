@@ -71,6 +71,7 @@ class TestRunsControllerUnitTest {
 
 		TestRunCreateRequest request = new TestRunCreateRequest(
 			run.getJobId(),
+            run.getBatchId(),
 			run.getRunBy(),
 			run.getStatus(),
 			run.getStartedAt(),
@@ -95,7 +96,8 @@ class TestRunsControllerUnitTest {
 			"tester",
 			TestRunStatus.PASS,
 			null,
-			null
+			null,
+            null
 		);
 
 		doThrow(new RuntimeException("test error"))
