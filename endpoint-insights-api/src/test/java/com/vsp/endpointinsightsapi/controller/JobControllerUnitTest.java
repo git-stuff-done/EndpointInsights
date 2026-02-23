@@ -1,5 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
@@ -39,6 +41,12 @@ public class JobControllerUnitTest {
 
 	@MockitoBean
 	private JobService jobService;
+
+	@MockitoBean
+	private JMeterInterpreterService jMeterInterpreterService;
+
+	@MockitoBean
+	private TestRunRepository testRunRepository;
 
 	@Test
 	public void createJob() throws Exception {

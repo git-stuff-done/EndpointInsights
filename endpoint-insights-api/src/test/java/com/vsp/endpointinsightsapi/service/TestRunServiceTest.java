@@ -45,7 +45,7 @@ class TestRunServiceTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(jobId);
 		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		run.setStatus(TestRunStatus.COMPLETED);
 
 		when(jobRepository.existsById(jobId)).thenReturn(true);
 		when(testRunRepository.save(run)).thenReturn(run);
@@ -62,7 +62,7 @@ class TestRunServiceTest {
 		UUID jobId = UUID.randomUUID();
 		run.setJobId(jobId);
 		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		run.setStatus(TestRunStatus.COMPLETED);
 
 		when(jobRepository.existsById(jobId)).thenReturn(false);
 
@@ -76,7 +76,7 @@ class TestRunServiceTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
-		run.setStatus(TestRunStatus.PASS);
+		run.setStatus(TestRunStatus.COMPLETED);
 		run.setFinishedAt(Instant.now());
 
 		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
