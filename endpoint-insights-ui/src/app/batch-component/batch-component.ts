@@ -10,6 +10,7 @@ import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
+import {HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-batches',
@@ -28,7 +29,7 @@ export class BatchComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.batchService.getAllBatches().subscribe({
-            next: (data) => this.batch = data,
+            next: (data) => this.batch = data.body ?? [],
             error: (err) => console.error('Error:', err)
         });
     }
@@ -36,7 +37,7 @@ export class BatchComponent implements OnInit, OnDestroy {
 
     loadBatches() {
         this.batchService.getAllBatches().subscribe({
-            next: (data) => this.batch = data,
+            next: (data) => this.batch = data.body ?? [],
             error: (err) => console.error('Error:', err)
         });
     }

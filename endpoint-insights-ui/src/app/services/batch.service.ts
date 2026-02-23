@@ -1,6 +1,6 @@
 import {inject, Inject, Injectable} from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Batch} from "../models/batch.model";
 import {BatchApi} from "../batch-component/api/batch-api";
 
@@ -16,8 +16,7 @@ export class BatchService {
 
     private batchApi = inject(BatchApi);
 
-    /** Simulated GET: fetch meta for a batch */
-    getAllBatches(): Observable<Batch[]> {
+    getAllBatches(): Observable<HttpResponse<Batch[]>> {
         return this.batchApi.getAllBatches();
     }
 
