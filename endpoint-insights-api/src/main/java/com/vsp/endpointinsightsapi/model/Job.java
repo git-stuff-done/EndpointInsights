@@ -1,5 +1,4 @@
 package com.vsp.endpointinsightsapi.model;
-import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

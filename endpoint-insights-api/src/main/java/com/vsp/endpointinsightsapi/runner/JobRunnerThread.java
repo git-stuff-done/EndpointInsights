@@ -39,6 +39,7 @@ public class JobRunnerThread implements Runnable {
 		TestRun testRun = new TestRun();
 		testRun.setStartedAt(Instant.now());
 		testRun.setStatus(TestRunStatus.PENDING);
+		testRun.setJobId(job.getJobId());
 		testRun.setRunBy("system"); //todo: needs to be updated
 		testRun = testRunRepository.save(testRun);
 
