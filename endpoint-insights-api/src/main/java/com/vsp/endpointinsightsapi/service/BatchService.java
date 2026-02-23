@@ -179,6 +179,9 @@ public class BatchService {
             }
         }
 
+        // Other fields
+        batch.setBatchName(request.getBatchName());
+
         testBatchRepository.save(batch);
         return batch;
     }
