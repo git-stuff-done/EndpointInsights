@@ -18,12 +18,14 @@ import java.util.Optional;
 public class JobRunnerThread implements Runnable {
 
 	private final Job job;
+	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
 	private File tempDir = null;
 
-	public JobRunnerThread(Job job, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService) {
+	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService) {
 		this.job = job;
+		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
 
 		// todo: add new interpreters as needed
@@ -35,14 +37,6 @@ public class JobRunnerThread implements Runnable {
 
 	@Override
 	public void run() {
-
-		TestRun testRun = new TestRun();
-		testRun.setStartedAt(Instant.now());
-		testRun.setStatus(TestRunStatus.PENDING);
-		testRun.setJobId(job.getJobId());
-		testRun.setRunBy("system"); //todo: needs to be updated
-		testRun = testRunRepository.save(testRun);
-
 		// step 1 - pull from git (setup temp dir)
 		try {
 			pullFromGit();

@@ -5,6 +5,8 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobRun;
 import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,17 +62,24 @@ public class JobsController {
 	 // todo: remove public api, implement
 	 @PublicAPI
 	 @PostMapping("/{id}/run")
-	 public ResponseEntity<JobRun> runJob(@PathVariable("id") UUID jobId) {
+	 public ResponseEntity<TestRun> runJob(@PathVariable("id") UUID jobId) {
 		LOG.info("Running job {}", jobId);
 		var job = jobService.getJobById(jobId);
 		if (job.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRunRepository, jMeterInterpreterService));
+		 TestRun testRun = new TestRun();
+		 testRun.setStartedAt(Instant.now());
+		 testRun.setStatus(TestRunStatus.PENDING);
+		 testRun.setJobId(job.get().getJobId());
+		 testRun.setRunBy("system"); //todo: needs to be updated
+		 testRun = testRunRepository.save(testRun);
+
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService));
 		t.start();
 
-		return ResponseEntity.ok(new JobRun(jobId, job.get().getName()));
+		return ResponseEntity.ok(testRun);
 	 }
 
 	/**
