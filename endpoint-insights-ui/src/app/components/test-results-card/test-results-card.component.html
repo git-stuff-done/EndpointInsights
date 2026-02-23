@@ -175,6 +175,32 @@ Typically non-2xx responses are considered errors for error rate calculation (e.
                             </table>
                         </mat-card-content>
                     </mat-card>
+
+                    <!-- Logs (small scrollable panel + expand button) -->
+                    <mat-card class="panel logs-panel">
+                        <mat-card-title class="logs-title">
+                            <span>Logs Preview</span>
+                            <span class="spacer"></span>
+                            <button mat-stroked-button color="primary" (click)="openLogsModal(); $event.stopPropagation()">
+                                Expand
+                            </button>
+                        </mat-card-title>
+
+                        <mat-card-content class="logs-content">
+                            <ng-container *ngIf="logsLoading; else logsLoaded">
+                                <div class="muted">Loading logs…</div>
+                            </ng-container>
+
+                            <ng-template #logsLoaded>
+                                <div *ngIf="logsError" class="error">{{ logsError }}</div>
+                                <pre class="logs-pre" *ngIf="!logsError">{{ logsText || 'No logs available.' }}</pre>
+                                <div class="preview-note" *ngIf="fullLogsText && fullLogsText !== logsText">
+                                    Showing first 80 lines. Click <strong>Expand</strong> to view full logs.
+                                </div>
+                            </ng-template>
+                        </mat-card-content>
+                    </mat-card>
+
                 </div>
             </div>
         </mat-expansion-panel>
