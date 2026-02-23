@@ -16,12 +16,12 @@ public class JobRunnerThread implements Runnable {
 	private final TestInterpreter testInterpreter;
 	private File tempDir = null;
 
-	public JobRunnerThread(Job job) {
+	public JobRunnerThread(Job job, JMeterInterpreterService jMeterInterpreterService) {
 		this.job = job;
 
 		// todo: add new interpreters as needed
 		switch (job.getJobType()) {
-			case PERF -> testInterpreter = new JMeterInterpreter();
+			case PERF -> testInterpreter = jMeterInterpreterService;
 			default -> testInterpreter = null;
 		}
 	}
@@ -41,11 +41,11 @@ public class JobRunnerThread implements Runnable {
 			// step 4 - interpret results
 			if (resultFile.isPresent()) {
 				System.out.println("Test results available in: " + resultFile.get().getAbsolutePath());
-				// TODO: Pass resultFile to test interpreter
+				testInterpreter.processResults(resultFile.get());
 			} else {
 				System.out.println("No test results file available for interpretation");
 			}
-		} finally {
+		} catch (IOException e) {} finally {
 			cleanupTempDir();
 		}
 	}
@@ -134,7 +134,6 @@ public class JobRunnerThread implements Runnable {
 			userArgs.add("-Jjmeter.save.saveservice.timestamp=true");
 			userArgs.add("-Jjmeter.save.saveservice.response_message=true");
 			userArgs.add("-Jjmeter.save.saveservice.thread_name=true");
-			userArgs.add("-Jjmeter.save.saveservice.bytes=true");
 			userArgs.add("-Jjmeter.save.saveservice.latency=true");
 
 			return userArgs.toArray(String[]::new);
@@ -240,9 +239,10 @@ public class JobRunnerThread implements Runnable {
 						processBuilder.directory(workingDir);
 					} else {
 						System.err.println("Could not determine repo directory under " + tempDir.getAbsolutePath());
-						processBuilder.directory(tempDir); // fallback
+						processBuilder.directory(tempDir);
 					}
 				}
+
 				// Place result file into working dir
 				resultFile = new File(workingDir, resultFileName);
 
