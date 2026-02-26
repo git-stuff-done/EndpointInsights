@@ -1,4 +1,7 @@
 package com.vsp.endpointinsightsapi.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,6 +38,26 @@ public class Job  extends AuditingEntity {
 
     @Column(name = "git_url")
     private String gitUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "git_auth_type", length = 20)
+    private GitAuthType gitAuthType = GitAuthType.NONE;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_username")
+    private String gitUsername;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_password")
+    private String gitPassword;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_ssh_private_key", columnDefinition = "text")
+    private String gitSshPrivateKey;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_ssh_passphrase")
+    private String gitSshPassphrase;
 
     @Column(name = "run_command")
     private String runCommand;

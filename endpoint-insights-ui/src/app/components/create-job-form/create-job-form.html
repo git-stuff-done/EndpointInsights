@@ -21,6 +21,16 @@
         </mat-form-field>
 
         <mat-form-field>
+            <mat-label>Git Auth</mat-label>
+            <mat-select formControlName="gitAuthType">
+                <mat-option value="NONE">None (public repo)</mat-option>
+                <mat-option value="BASIC">Basic (username/password)</mat-option>
+                <mat-option value="SSH_KEY">SSH key</mat-option>
+            </mat-select>
+            <mat-error>{{ getErrorMessage('gitAuthType') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
             <mat-label>Job Type</mat-label>
             <mat-select panelClass="create-job-form-type-select-panel" formControlName="jobType">
                 <mat-option class="create-job-form-type-select-option" value="jmeter">JMeter</mat-option>
@@ -42,6 +52,34 @@
             <mat-label>Compile Command</mat-label>
             <input matInput formControlName="compileCommand">
             <mat-error>{{ getErrorMessage('compileCommand') }}</mat-error>
+        </mat-form-field>
+    </div>
+
+    <div class="form-row" *ngIf="createJobForm.get('gitAuthType')?.value === 'BASIC'">
+        <mat-form-field>
+            <mat-label>Git Username</mat-label>
+            <input matInput formControlName="gitUsername">
+            <mat-error>{{ getErrorMessage('gitUsername') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Git Password</mat-label>
+            <input matInput type="password" formControlName="gitPassword">
+            <mat-error>{{ getErrorMessage('gitPassword') }}</mat-error>
+        </mat-form-field>
+    </div>
+
+    <div class="form-row" *ngIf="createJobForm.get('gitAuthType')?.value === 'SSH_KEY'">
+        <mat-form-field>
+            <mat-label>SSH Private Key</mat-label>
+            <textarea matInput rows="4" formControlName="gitSshPrivateKey"></textarea>
+            <mat-error>{{ getErrorMessage('gitSshPrivateKey') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>SSH Passphrase (optional)</mat-label>
+            <input matInput type="password" formControlName="gitSshPassphrase">
+            <mat-error>{{ getErrorMessage('gitSshPassphrase') }}</mat-error>
         </mat-form-field>
     </div>
 </form>

@@ -1,4 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
+import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
+import com.vsp.endpointinsightsapi.model.*;
 
 import com.vsp.endpointinsightsapi.authentication.PublicAPI;
 import com.vsp.endpointinsightsapi.model.Job;
@@ -163,6 +165,20 @@ public class JobsController {
 			String jobId) {
 		// note to implementer: this is a great place to put some serious service level logic to aggregate data
 		return ResponseEntity.ok(new JobRunHistory(List.of(new JobRun(UUID.fromString("1"), jobId))));
+	}
+
+	/**
+	 * Endpoint to checkout the job repository.
+	 *
+	 * @param jobId the id of the job to checkout
+	 * @return checkout information
+	 * */
+	@PostMapping("/{id}/checkout")
+	public ResponseEntity<GitCheckoutResponse> checkoutJobRepository(
+			@PathVariable("id")
+			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
+			UUID jobId) {
+		return ResponseEntity.ok(new GitCheckoutResponse(jobId, jobService.checkoutJobRepository(jobId)));
 	}
 
 

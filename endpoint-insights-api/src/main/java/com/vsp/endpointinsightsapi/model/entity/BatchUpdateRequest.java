@@ -9,7 +9,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class BatchUpdateRequest {
-    String batchName;
+
+	public String cronExpression;
+	public String batchName;
 	public List<UUID> addJobs;
 	public List<UUID> deleteJobs;
 

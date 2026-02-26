@@ -47,6 +47,7 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
+        run.setBatchId(UUID.randomUUID());
 		run.setStatus(TestRunStatus.COMPLETED);
 		run.setFinishedAt(Instant.now());
 
@@ -65,6 +66,7 @@ class TestRunsControllerUnitTest {
 		TestRun run = new TestRun();
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
+        run.setBatchId(UUID.randomUUID());
 		run.setRunBy("tester");
 		run.setStatus(TestRunStatus.COMPLETED);
 		run.setStartedAt(Instant.now());
@@ -73,6 +75,7 @@ class TestRunsControllerUnitTest {
 			run.getJobId(),
 			run.getRunBy(),
 			run.getStatus(),
+            run.getBatchId(),
 			run.getStartedAt(),
 			run.getFinishedAt()
 		);
@@ -94,8 +97,9 @@ class TestRunsControllerUnitTest {
 			UUID.randomUUID(),
 			"tester",
 			TestRunStatus.COMPLETED,
-			null,
-			null
+            UUID.randomUUID(),
+    null,
+   null
 		);
 
 		doThrow(new RuntimeException("test error"))

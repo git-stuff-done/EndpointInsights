@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatDialog} from "@angular/material/dialog";
 import {CreateJobModal} from "../../components/create-job-modal/create-job-modal";
 import {EditJobModal} from "../../components/edit-job-modal/edit-job-modal";
-import { MOCK_TESTS, TestItem } from '../../models/test.model';
+import {MOCK_TESTS, TestItem} from "../../models/test.model";
 
 @Component({
   selector: 'app-test-overview',
@@ -25,7 +25,7 @@ export class TestOverview {
 
 
 
-    tests: TestItem[] = MOCK_TESTS;
+        tests: TestItem[] = MOCK_TESTS;
 
     onOpen(t: TestItem)  { console.log('Open Clicked') }
     onRun(t: TestItem)   { console.log('Run Clicked') }

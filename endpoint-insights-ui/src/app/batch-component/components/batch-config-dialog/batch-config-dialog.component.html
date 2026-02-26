@@ -17,33 +17,42 @@
         <!-- Schedule -->
         <section class="form-section">
             <h3>Schedule</h3>
-            <div class="form-row">
-                <mat-form-field appearance="outline">
-                    <mat-label>Next Run (Date)</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="nextRunDate" />
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Time</mat-label>
-                    <input matInput type="time" formControlName="nextRunTime" />
-                </mat-form-field>
-            </div>
+            <!-- Frequency picker -->
+            <mat-form-field appearance="outline">
+                <mat-label>Frequency</mat-label>
+                <mat-select [value]="scheduleFrequency()" (selectionChange)="onFrequencyChange($event.value)">
+                    <mat-option value="daily">Daily</mat-option>
+                    <mat-option value="weekly">Weekly</mat-option>
+                </mat-select>
+            </mat-form-field>
 
-            <label class="field-label">Scheduled Days</label>
-            <mat-button-toggle-group multiple formControlName="scheduledDays" class="day-toggles">
-                <mat-button-toggle value="sun">Sun</mat-button-toggle>
-                <mat-button-toggle value="mon">Mon</mat-button-toggle>
-                <mat-button-toggle value="tue">Tue</mat-button-toggle>
-                <mat-button-toggle value="wed">Wed</mat-button-toggle>
-                <mat-button-toggle value="thu">Thu</mat-button-toggle>
-                <mat-button-toggle value="fri">Fri</mat-button-toggle>
-                <mat-button-toggle value="sat">Sat</mat-button-toggle>
-            </mat-button-toggle-group>
+            <!-- Day picker (only for weekly) -->
+            @if (scheduleFrequency() === 'weekly') {
+                <mat-form-field appearance="outline">
+                    <mat-label>Days</mat-label>
+                    <mat-select multiple [value]="scheduleDays()" (selectionChange)="onDaysChange($event.value)">
+                        @for (day of dayOptions; track day.value) {
+                            <mat-option [value]="day.value">{{ day.label }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            }
+
+            <!-- Time picker -->
+            <mat-form-field appearance="outline">
+                <mat-label>Time</mat-label>
+                <input matInput type="time" [value]="scheduleTime()" (change)="onTimeChange($any($event.target).value)" />
+            </mat-form-field>
+
+            <!-- Generated cron expression (editable) -->
+            <mat-form-field appearance="outline">
+                <mat-label>Cron Expression</mat-label>
+                <input matInput formControlName="cronExpression" placeholder="e.g. 0 30 14 * * MON,WED,FRI" />
+            </mat-form-field>
 
             <div class="run-info">
-                <span>Last Run: {{ form.get('lastRunTime')?.value || 'N/A' }}</span>
+                <span>Last Run: {{ form.get('lastRunTime')?.value || 'Never' }}</span>
             </div>
         </section>
 
