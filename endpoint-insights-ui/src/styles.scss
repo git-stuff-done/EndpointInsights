@@ -165,6 +165,8 @@ body {
   padding: 8px 10px;
   letter-spacing: .2px;
   box-shadow: var(--shadow-lg);
+  width: 1000px;
+
 }
 // Toast Notifications
 
@@ -251,3 +253,28 @@ mat-option.mat-mdc-option.create-job-form-type-select-option:hover {
 End Styles for Create Job Form Components
  */
 
+
+.mat-datepicker-content {
+  background-color: white !important;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  max-width: 90vw !important;
+}
+
+.mat-mdc-option {
+  background: white !important;
+}
+
+.mat-mdc-menu-panel {
+  background-color: white !important;
+
+  .mat-mdc-menu-item {
+    border: none;
+    box-shadow: none;
+    padding: 8px 16px;
+  }
+}

@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TestResultsCardComponent } from '../../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../../models/test-record.model';
+import { TestRun } from '../../models/test-run.model';
+import { TestRunService } from '../../services/test-run.service';
 
 @Component({
     selector: 'app-tests-results-page',
@@ -10,7 +12,25 @@ import { TestRecord } from '../../models/test-record.model';
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
 })
-export class TestsResultsPageComponent {
+export class TestsResultsPageComponent implements OnInit {
+    recentRuns: TestRun[] = [];
+    isLoadingRuns = true;
+    runsError: string | null = null;
+
+    constructor(private testRunService: TestRunService) {}
+
+    ngOnInit(): void {
+        this.testRunService.getRecentTestRuns(10).subscribe({
+            next: (runs: TestRun[]) => {
+                this.recentRuns = runs;
+                this.isLoadingRuns = false;
+            },
+            error: () => {
+                this.runsError = 'Unable to load recent test runs.';
+                this.isLoadingRuns = false;
+            },
+        });
+    }
     tests: TestRecord[] = [
         {
             id: 'login-api',
@@ -61,4 +81,5 @@ export class TestsResultsPageComponent {
     ];
 
     trackById = (_: number, t: TestRecord) => t.id;
+    trackRunById = (_: number, r: TestRun) => r.runId;
 }

@@ -1,25 +1,29 @@
 package com.vsp.endpointinsightsapi.service;
 
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
@@ -27,17 +31,30 @@ class JobServiceTest {
     @Mock
     private JobRepository jobRepository;
 
+    @Mock
+    private GitRepositoryService gitRepositoryService;
+
     @InjectMocks
     private JobService jobService;
         //test if job exists it is deleted
 
     @Test
     void createJob_returnSavedJobStatus() throws Exception {
-        Job job = new Job();
-        when(jobRepository.save(job)).thenReturn(job);
-        Job testResult = jobService.createJob(job);
+        JobCreateRequest jobRequest = new JobCreateRequest();
+        jobRequest.setName("Test Job");
+        jobRequest.setDescription("Test Description");
+        jobRequest.setTestType(TestType.INTEGRATION);
+        
+        Job savedJob = new Job();
+        savedJob.setJobId(UUID.randomUUID());
+        savedJob.setName(jobRequest.getName());
+        
+        when(jobRepository.save(any(Job.class))).thenReturn(savedJob);
+        Job testResult = jobService.createJob(jobRequest);
         assertNotNull(testResult);
-        verify(jobRepository, times(1)).save(job);
+        assertNotNull(testResult.getJobId());
+        assertEquals("Test Job", testResult.getName());
+        verify(jobRepository, times(1)).save(any(Job.class));
     }
     
     @Test
@@ -143,6 +160,93 @@ class JobServiceTest {
                 .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
 
         assertEquals("changedName", existing.getName());
+    }
+
+    @Test
+    void updateJob_withGitAuthFields_updatesSuccessfully() {
+        UUID jobId = UUID.randomUUID();
+        Job existingJob = new Job();
+        existingJob.setJobId(jobId);
+        existingJob.setName("original");
+
+        Job updateData = new Job();
+        updateData.setJobId(jobId);
+        updateData.setName("updated");
+        updateData.setDescription("updated description");
+        updateData.setGitUrl("https://github.com/test/repo.git");
+        updateData.setGitAuthType(com.vsp.endpointinsightsapi.model.enums.GitAuthType.BASIC);
+        updateData.setGitUsername("testuser");
+        updateData.setGitPassword("testpass");
+        updateData.setGitSshPrivateKey("ssh-key");
+        updateData.setGitSshPassphrase("passphrase");
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(existingJob));
+        when(jobRepository.save(any(Job.class))).thenReturn(existingJob);
+
+        Job result = jobService.updateJob(jobId, updateData);
+
+        assertNotNull(result);
+        assertEquals("updated", existingJob.getName());
+        assertEquals("updated description", existingJob.getDescription());
+        assertEquals("https://github.com/test/repo.git", existingJob.getGitUrl());
+        assertEquals(com.vsp.endpointinsightsapi.model.enums.GitAuthType.BASIC, existingJob.getGitAuthType());
+        assertEquals("testuser", existingJob.getGitUsername());
+        assertEquals("testpass", existingJob.getGitPassword());
+        assertEquals("ssh-key", existingJob.getGitSshPrivateKey());
+        assertEquals("passphrase", existingJob.getGitSshPassphrase());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(1)).save(existingJob);
+    }
+
+    @Test
+    void updateJob_jobNotFound_throwsException() {
+        UUID jobId = UUID.randomUUID();
+        Job updateData = new Job();
+        updateData.setJobId(jobId);
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        JobNotFoundException exception = assertThrows(JobNotFoundException.class, () -> {
+            jobService.updateJob(jobId, updateData);
+        });
+
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(0)).save(any());
+    }
+
+    @Test
+    void checkoutJobRepository_success() {
+        UUID jobId = UUID.randomUUID();
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setGitUrl("https://github.com/test/repo.git");
+
+        java.nio.file.Path mockPath = java.nio.file.Paths.get("/tmp/checkout");
+
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(gitRepositoryService.checkoutJobRepository(job)).thenReturn(mockPath);
+
+        java.nio.file.Path result = jobService.checkoutJobRepository(jobId);
+
+        assertNotNull(result);
+        assertEquals(mockPath, result);
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(gitRepositoryService, times(1)).checkoutJobRepository(job);
+    }
+
+    @Test
+    void checkoutJobRepository_jobNotFound_throwsException() {
+        UUID jobId = UUID.randomUUID();
+        when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        JobNotFoundException exception = assertThrows(JobNotFoundException.class, () -> {
+            jobService.checkoutJobRepository(jobId);
+        });
+
+        assertEquals("Job not found with ID: " + jobId.toString(), exception.getErrorResponse().getDescription());
+        verify(jobRepository, times(1)).findById(jobId);
+        verify(gitRepositoryService, times(0)).checkoutJobRepository(any());
     }
 
 

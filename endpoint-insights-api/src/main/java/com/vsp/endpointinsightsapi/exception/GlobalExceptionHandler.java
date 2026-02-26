@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
@@ -53,6 +54,39 @@ public class GlobalExceptionHandler {
 		CustomException ce = (new CustomExceptionBuilder(details))
 				.withStatus(HttpStatus.BAD_REQUEST).build();
 		return handleCustomException(ce);
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+		String errorMessage = ex.getMessage() != null ? ex.getMessage() : "Invalid argument provided";
+
+		CustomExceptionBuilder builder = new CustomExceptionBuilder()
+				.withStatus(HttpStatus.BAD_REQUEST)
+				.withError("Invalid Argument")
+				.withDescription("The provided argument is invalid");
+
+		builder.withDetail(errorMessage);
+
+		return handleCustomException(builder.build());
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+		String parameterName = ex.getName();
+		String providedValue = String.valueOf(ex.getValue());
+		String expectedType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+
+		String errorMessage = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
+				providedValue, parameterName, expectedType);
+
+		CustomExceptionBuilder builder = new CustomExceptionBuilder()
+				.withStatus(HttpStatus.BAD_REQUEST)
+				.withError("Invalid Parameter Type")
+				.withDescription("The provided parameter value cannot be converted to the expected type");
+
+		builder.withDetail(errorMessage);
+
+		return handleCustomException(builder.build());
 	}
 
 	@ExceptionHandler(ResponseStatusException.class)

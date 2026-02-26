@@ -44,7 +44,11 @@ export class AuthenticationService {
    * Stores current route for post-auth redirect
    */
   public login(): void {
-    window.location.href = this.authUrl;
+    this.redirectToAuth(this.authUrl);
+  }
+
+  private redirectToAuth(url: string): void {
+    window.location.assign(url);
   }
 
   public getUserInfo(): UserInfo {
@@ -88,7 +92,8 @@ export class AuthenticationService {
    * Checks if user is authenticated
    */
   public isAuthenticated(): boolean {
-    return this.authStateSubject.value;
+
+      return this.authStateSubject.value;
   }
 
   /**
@@ -98,7 +103,9 @@ export class AuthenticationService {
     if (!token) return true;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
       const currentTime = Math.floor(Date.now() / 1000);
       return payload.exp < currentTime;
     } catch {
@@ -125,13 +132,18 @@ export class AuthenticationService {
     const token = window.cookieStore.get(this.AUTH_TOKEN_COOKIE);
     token.then(t => {
       if (t == null) {
-          this.router.navigate(['/']);
+          this.router.navigate(['/login']);
       } else if (t?.value) {
         window.cookieStore.delete(this.AUTH_TOKEN_COOKIE);
-        this.setToken(t.value);
-        this.loadTokenFromStorage();
-        this.loadUserInfo();
-        this.router.navigate(['/']);
+        if (!this.isTokenExpired(t.value)) {
+          this.setToken(t.value);
+          this.authStateSubject.next(true);
+          this.loadUserInfo();
+          this.router.navigate(['/']);
+        } else {
+          this.clearAuthData();
+          this.router.navigate(['/login']);
+        }
       }
 
     }).catch(e => console.log(e));

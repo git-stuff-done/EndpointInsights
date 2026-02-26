@@ -7,7 +7,7 @@ import {
     MatDialogTitle
 } from "@angular/material/dialog";
 import {MatButton} from "@angular/material/button";
-import {TestItem} from "../../pages/test-overview/test-overview";
+import {TestItem} from "../../models/test.model";
 import {CreateJobForm} from "../create-job-form/create-job-form";
 import {ToastService} from "../../services/toast.service";
 import {JobService} from "../../services/job-services";
@@ -54,15 +54,16 @@ export class EditJobModal{
     }
 
 
-    onUpdate(){
-        this.jobService.updateJob(this.data.id,this.data).subscribe({
+    onUpdate(jobData?: any){
+        this.jobService.updateJob(this.data.id,jobData).subscribe({
             next: (response) => {
-                console.log('Job created:', response);
-                this.toastService.onSuccess('Job created successfully!');
+                console.log('Job updated:', response);
+                this.toastService.onSuccess('Job updated successfully!');
+                this.dialogRef.close(jobData);
             },
             error: (error) => {
-                console.error('Error creating job:', error);
-                this.toastService.onError('Failed to create job');
+                console.error('Error updating job:', error);
+                this.toastService.onError('Failed to update job');
             }
         });
     }

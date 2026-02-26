@@ -1,0 +1,77 @@
+.batch-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h3 {
+    margin: 8px 0 0;
+    font-weight: 500;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.flex-grow {
+  flex: 1;
+}
+
+.field-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 4px;
+}
+
+.run-info {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.54);
+  display: flex;
+  gap: 24px;
+}
+
+.participants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.job-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.empty-state {
+  color: rgba(0, 0, 0, 0.38);
+  font-style: italic;
+  padding: 8px;
+}
+
+.participant-panel .mat-mdc-option {
+  background: white !important;
+}
+
+.participant-panel .mat-mdc-option:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}

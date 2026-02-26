@@ -1,3 +1,5 @@
+import {ComponentType} from "@angular/cdk/portal";
+
 export interface ModalTab {
     /** Text shown on the tab button */
     label: string;
@@ -9,9 +11,12 @@ export interface ModalConfig {
     /** Title shown in the modal header */
     title?: string;
     /** Tabs to render. 0, 1, or many allowed. */
-    tabs: ModalTab[];
-    initialState?: Record<string, any>
+    tabs?: ModalTab[];
+    initialState?: Record<string, any>;
+    component?: ComponentType<any>;
+    componentData?: any;
     /** Optional width constraints */
     width?: string;
+    height?: string;
     maxWidth?: string;
 }

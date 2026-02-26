@@ -1,15 +1,16 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
-import com.vsp.endpointinsightsapi.validation.ErrorMessages;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -41,12 +42,18 @@ public class JobControllerUnitTest {
 	@MockitoBean
 	private JobService jobService;
 
+	@MockitoBean
+	private JMeterInterpreterService jMeterInterpreterService;
+
+	@MockitoBean
+	private TestRunRepository testRunRepository;
+
 	@Test
 	public void createJob() throws Exception {
-		mockMvc.perform(post("/api/jobs")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(new JobCreateRequest("test_job"))))
-				.andExpect(status().isCreated());
+        mockMvc.perform(post("/api/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null))))
+                .andExpect(status().isCreated());
 	}
 
 	@Test
@@ -54,7 +61,8 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		jobService.createJob(job);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		when(jobService.createJob(jobRequest)).thenReturn(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
 				.andExpect(status().isOk())
@@ -84,7 +92,8 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		jobService.createJob(job);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		when(jobService.createJob(jobRequest)).thenReturn(job);
 		Optional<List<Job>> jobs = Optional.of(List.of(job));
 		when(jobService.getAllJobs()).thenReturn(jobs);
 		mockMvc.perform(get("/api/jobs")).andExpect(status().isOk());
@@ -99,6 +108,31 @@ public class JobControllerUnitTest {
 				.deleteJobById(jobUuid);
 
 		mockMvc.perform(delete("/api/jobs/{id}", jobUuid.toString()))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void checkoutJobRepository_success() throws Exception {
+		UUID jobId = UUID.randomUUID();
+		java.nio.file.Path mockPath = java.nio.file.Paths.get("/tmp/checkout");
+		when(jobService.checkoutJobRepository(jobId)).thenReturn(mockPath);
+
+		mockMvc.perform(post("/api/jobs/{id}/checkout", jobId.toString()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.jobId").value(jobId.toString()))
+				.andExpect(jsonPath("$.checkoutPath").value(mockPath.toString()));
+	}
+
+	@Test
+	public void checkoutJobRepository_invalidJobId_returnsNotFound() throws Exception {
+		UUID jobId = UUID.randomUUID();
+		when(jobService.checkoutJobRepository(jobId))
+				.thenThrow(new org.springframework.web.server.ResponseStatusException(
+						org.springframework.http.HttpStatus.NOT_FOUND,
+						"Job not found"
+				));
+
+		mockMvc.perform(post("/api/jobs/{id}/checkout", jobId.toString()))
 				.andExpect(status().isNotFound());
 	}
 }

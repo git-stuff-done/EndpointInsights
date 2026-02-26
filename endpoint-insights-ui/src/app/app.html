@@ -1,7 +1,7 @@
 @if (authService.isAuthenticated()) {
     <header class="app-header">
+        <img src="VSP_Logo.png" alt="VSP Logo" class="nav-logo" />
         <nav class="nav">
-            <a mat-button (click)="authService.logout()">Logout</a>
             <a
                     mat-button
                     routerLink="/"
@@ -20,6 +20,34 @@
                 Test Results
             </a>
         </nav>
+
+        <button class="profile-btn" [matMenuTriggerFor]="profileMenu">
+            {{ userInitials }}
+        </button>
+
+        <mat-menu #profileMenu="matMenu" xPosition="before">
+            <div class="profile-header" (click)="$event.stopPropagation()">
+                <div class="profile-avatar">{{ userInitials }}</div>
+                <div class="profile-details">
+                    <span class="profile-username">{{ authService.getUserInfo().username }}</span>
+                    <span class="profile-email">{{ authService.getUserInfo().email }}</span>
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="profile-roles" (click)="$event.stopPropagation()">
+                <span class="profile-roles-label">Roles</span>
+                <div class="profile-roles-list">
+                    @for (role of authService.getUserInfo().roles; track role) {
+                        <span class="role-chip">{{ role }}</span>
+                    }
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="authService.logout()">
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+            </button>
+        </mat-menu>
     </header>
 }
 

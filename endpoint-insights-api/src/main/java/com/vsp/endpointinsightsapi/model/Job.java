@@ -1,4 +1,6 @@
 package com.vsp.endpointinsightsapi.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
@@ -6,12 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +38,26 @@ public class Job  extends AuditingEntity {
 
     @Column(name = "git_url")
     private String gitUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "git_auth_type", length = 20)
+    private GitAuthType gitAuthType = GitAuthType.NONE;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_username")
+    private String gitUsername;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_password")
+    private String gitPassword;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_ssh_private_key", columnDefinition = "text")
+    private String gitSshPrivateKey;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "git_ssh_passphrase")
+    private String gitSshPassphrase;
 
     @Column(name = "run_command")
     private String runCommand;
@@ -67,10 +87,6 @@ public class Job  extends AuditingEntity {
     @JoinColumn(name = "created_by")
     private User createdBy;
 */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private JobStatus status = JobStatus.PENDING;
-
 
     // JSONB config: arbitrary key/value settings for the job
     @JdbcTypeCode(SqlTypes.JSON)

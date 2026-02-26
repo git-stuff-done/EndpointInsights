@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -23,14 +23,14 @@ public class TestBatch extends AuditingEntity{
     @GeneratedValue
     @UuidGenerator
     @Column(name = "id", nullable = false)
-    private UUID batch_id;
+    private UUID batchId;
 
-   @ManyToMany
+   @ManyToMany(fetch = FetchType.EAGER)
    @JoinTable(
-        name = "batch_jobs",
-        joinColumns = @JoinColumn(name = "batch_id"),
-        inverseJoinColumns = @JoinColumn(name = "job_id")
-        )
+           name = "batch_jobs",
+           joinColumns = @JoinColumn(name = "batch_id", referencedColumnName = "id"),
+           inverseJoinColumns = @JoinColumn(name = "job_id", referencedColumnName = "job_id")
+   )
    private List<Job> jobs = new ArrayList<>();
 
     @Column(name = "batch_name", nullable = false)
@@ -40,11 +40,17 @@ public class TestBatch extends AuditingEntity{
     Long scheduleId;
 
     @Column(name = "start_time")
-    LocalDate startTime;
+    LocalDateTime startTime;
 
     @Column(name = "last_time_run")
-    LocalDate lastTimeRun;
+    LocalDateTime lastTimeRun;
 
     @Column(name = "active")
     Boolean active;
+
+    @Column(name = "cron_expression")
+    String cronExpression;
+
+    @Transient
+    List<UUID> notificationList;
 }

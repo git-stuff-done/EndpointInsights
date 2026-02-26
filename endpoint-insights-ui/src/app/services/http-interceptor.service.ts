@@ -17,17 +17,17 @@ export class HttpInterceptorService {
   }
 
   get<T>(url: string, headers?: HttpHeaders) : Observable<HttpResponse<T>> {
-    this.injectAuthenticationToken(headers);
+    headers = this.injectAuthenticationToken(headers);
     return this.httpClient.get<T>(url, {headers: headers, observe: 'response'});
   }
 
   post<T>(url: string, body: any, headers?: HttpHeaders) : Observable<HttpResponse<T>> {
-    this.injectAuthenticationToken(headers);
+    headers = this.injectAuthenticationToken(headers);
     return this.httpClient.post<T>(url, body, {headers: headers, observe: 'response'});
   }
 
   put<T>(url: string, body: any, headers?: HttpHeaders) : Observable<HttpResponse<T>> {
-    this.injectAuthenticationToken(headers);
+    headers = this.injectAuthenticationToken(headers);
     return this.httpClient.put<T>(url, body, {headers: headers, observe: 'response'});
   }
 

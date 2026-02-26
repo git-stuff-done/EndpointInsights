@@ -1,4 +1,15 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+  datasource:
+    url: jdbc:${DB_URI}
+    username: ${DB_NAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   security:
     oauth2:
       client:
@@ -28,6 +39,8 @@ app:
       username: ${AUTH_USERNAME_CLAIM:preferred_username}
       email: ${AUTH_EMAIL_CLAIM:email}
       groups: ${AUTH_GROUPS_CLAIM:groups}
+  git:
+    checkout-dir: ${GIT_CHECKOUT_DIR:./.git-checkouts}
   cors:
     allow-credentials: true
     allowed-methods:
