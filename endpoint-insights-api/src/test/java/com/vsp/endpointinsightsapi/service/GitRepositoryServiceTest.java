@@ -190,7 +190,7 @@ class GitRepositoryServiceTest {
         try (Git git = Git.open(originDir.toFile())) {
             Files.writeString(originDir.resolve("README.md"), "update", StandardOpenOption.TRUNCATE_EXISTING);
             git.add().addFilepattern("README.md").call();
-            git.commit().setMessage("update").call();
+            git.commit().setSign(false).setMessage("update").call();
         }
 
         Path secondCheckout = gitRepositoryService.checkoutJobRepository(job);
@@ -219,7 +219,7 @@ class GitRepositoryServiceTest {
             Path readme = repoDir.resolve("README.md");
             Files.writeString(readme, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             git.add().addFilepattern("README.md").call();
-            git.commit().setMessage("init").call();
+            git.commit().setSign(false).setMessage("init").call();
         }
     }
 }
