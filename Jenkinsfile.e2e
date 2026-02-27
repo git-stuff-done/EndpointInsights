@@ -42,14 +42,14 @@ pipeline {
                     ## Based on docker healthcheck max time + 15s
                     TIMEOUT=70 
                     ELAPSED=0
-                    until [ "$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" == "healthy" ]; do
-                        if [ $ELAPSED -ge $TIMEOUT ]; then
-                            echo "Container failed to become healthy within ${TIMEOUT}s"
+                    until [ "\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" == "healthy" ]; do
+                        if [ \$ELAPSED -ge \$TIMEOUT ]; then
+                            echo "Container failed to become healthy within \${TIMEOUT}s"
                             exit 1
                         fi
-                        echo "Waiting for container to be healthy... (${ELAPSED}s)"
+                        echo "Waiting for container to be healthy... (\${ELAPSED}s)"
                         sleep 5
-                        ELAPSED=$((ELAPSED + 5))
+                        ELAPSED=\$((ELAPSED + 5))
                     done
                 """
             }
