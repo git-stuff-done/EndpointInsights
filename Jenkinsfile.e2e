@@ -29,18 +29,19 @@ pipeline {
         stage('Start') {
             steps {
                 sh """
-            docker run -d \
-                --name ${CONTAINER_NAME} \
-                --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
-                -p 8080:8080 \
-                ${IMAGE_NAME}:${IMAGE_TAG}
-        """
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
+                        -p 8080:8080 \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
+                """
 
                 sh """
+                    #!/bin/bash
                     ## Based on docker healthcheck max time + 15s
                     TIMEOUT=70 
                     ELAPSED=0
-                    until [ "\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" == "healthy" ]; do
+                    until [ "\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" = "healthy" ]; do
                         if [ \$ELAPSED -ge \$TIMEOUT ]; then
                             echo "Container failed to become healthy within \${TIMEOUT}s"
                             exit 1
