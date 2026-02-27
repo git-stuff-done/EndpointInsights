@@ -11,6 +11,30 @@ import java.util.regex.Pattern;
 public class JMeterCommandEnhancer {
     private final String jmeterHome;
 
+    private static final String[][] REQUIRED_SAVE_SERVICE_FLAGS = {
+            {"jmeter.save.saveservice.output_format", "csv"},
+            {"jmeter.save.saveservice.successful", "true"},
+            {"jmeter.save.saveservice.label", "true"},
+            {"jmeter.save.saveservice.time", "true"},
+            {"jmeter.save.saveservice.response_code", "true"},
+            {"jmeter.save.saveservice.timestamp", "true"},
+            {"jmeter.save.saveservice.response_message", "true"},
+            {"jmeter.save.saveservice.thread_name", "true"},
+            {"jmeter.save.saveservice.latency", "true"},
+    };
+
+    /**
+     * Tokenizes a string by splitting on whitespace while preserving quoted values as single tokens.
+     * <br>
+     * Matches one of three alternatives:
+     * <ul>
+     *   <li>{@code [^\s"']+}    — one or more characters that are not whitespace or quotes (plain token)</li>
+     *   <li>{@code "([^"]*)"} — a double-quoted string (captures inner content)</li>
+     *   <li>{@code '([^']*)'} — a single-quoted string (captures inner content)</li>
+     * </ul>
+     */
+    private static final Pattern SHELL_TOKENIZER_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+
     public JMeterCommandEnhancer(@Value("${jmeter.home:#{environment['JMETER_HOME']}}") String jmeterHome) {
         this.jmeterHome = jmeterHome;
     }
@@ -32,6 +56,7 @@ public class JMeterCommandEnhancer {
             // Detect OS and select correct JMeter executable
             String os = System.getProperty("os.name").toLowerCase();
             String jmeterExecutable = jmeterHome + File.separator + "bin" + File.separator + "jmeter";
+
             // Windows compatibility for dev environments
             if (os.contains("win")) {
                 jmeterExecutable += ".bat";
@@ -44,8 +69,7 @@ public class JMeterCommandEnhancer {
             userArgs.add(jmeterExecutable);
 
             // Tokenize userCommand safely (respecting quoted testplan etc)
-            Pattern pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-            Matcher matcher = pattern.matcher(userCommand);
+            Matcher matcher = SHELL_TOKENIZER_PATTERN.matcher(userCommand);
 
             boolean skipL = false;
             while (matcher.find()) {
@@ -65,18 +89,10 @@ public class JMeterCommandEnhancer {
                     continue;
                 }
                 // Remove any jmeter.save.saveservice.* that we overwrite below
-                if (token.startsWith("-Jjmeter.save.saveservice.output_format")
-                        || token.startsWith("-Jjmeter.save.saveservice.successful")
-                        || token.startsWith("-Jjmeter.save.saveservice.label")
-                        || token.startsWith("-Jjmeter.save.saveservice.time")
-                        || token.startsWith("-Jjmeter.save.saveservice.response_code")
-                        || token.startsWith("-Jjmeter.save.saveservice.timestamp")
-                        || token.startsWith("-Jjmeter.save.saveservice.response_message")
-                        || token.startsWith("-Jjmeter.save.saveservice.thread_name")
-                        || token.startsWith("-Jjmeter.save.saveservice.bytes")
-                        || token.startsWith("-Jjmeter.save.saveservice.latency")) {
+                if (isOverriddenSaveServiceFlag(token)) {
                     continue;
                 }
+
                 // Add the token, removing quotes if present
                 if ((token.startsWith("\"") && token.endsWith("\"")) || (token.startsWith("'") && token.endsWith("'"))) {
                     token = token.substring(1, token.length() - 1);
@@ -89,20 +105,23 @@ public class JMeterCommandEnhancer {
             userArgs.add(resultFileName);
 
             // 4. Ensure CSV output, and add required columns for parsing
-            userArgs.add("-Jjmeter.save.saveservice.output_format=csv");
-            userArgs.add("-Jjmeter.save.saveservice.successful=true");
-            userArgs.add("-Jjmeter.save.saveservice.label=true");
-            userArgs.add("-Jjmeter.save.saveservice.time=true");
-            userArgs.add("-Jjmeter.save.saveservice.response_code=true");
-            userArgs.add("-Jjmeter.save.saveservice.timestamp=true");
-            userArgs.add("-Jjmeter.save.saveservice.response_message=true");
-            userArgs.add("-Jjmeter.save.saveservice.thread_name=true");
-            userArgs.add("-Jjmeter.save.saveservice.latency=true");
+            for (String[] flag : REQUIRED_SAVE_SERVICE_FLAGS) {
+                userArgs.add("-J" + flag[0] + "=" + flag[1]);
+            }
 
             return userArgs.toArray(String[]::new);
         }
 
         // Default: just tokenize on whitespace
         return userCommand.trim().split("\\s+");
+    }
+
+    private static boolean isOverriddenSaveServiceFlag(String token) {
+        for (String[] flag : REQUIRED_SAVE_SERVICE_FLAGS) {
+            if (token.startsWith("-J" + flag[0])) {
+                return true;
+            }
+        }
+        return false;
     }
 }

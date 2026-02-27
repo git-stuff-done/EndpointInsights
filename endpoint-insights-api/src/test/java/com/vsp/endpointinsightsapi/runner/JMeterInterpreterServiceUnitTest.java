@@ -17,9 +17,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,18 +54,77 @@ class JMeterInterpreterServiceUnitTest {
 
     @Test
     void TEST_BoundaryErrorRate_ShouldFail() throws IOException {
-        // 1000 requests, 6 failures = 0.6% - just over threshold
+        // 1000 requests, 6 failures = 0.6%
         File file = generateJtlFile(1000, 6);
         TestRunResult result = service.processResults(file);
         assertFalse(result.passed());
     }
 
     @Test
-    void TEST_EmptyFile_ShouldFail() throws IOException {
-        // 1000 requests, 6 failures = 0.6% - just over threshold
+    void TEST_ExactBoundaryErrorRate_ShouldPass() throws IOException {
+        // 1000 requests, 5 failures = exactly 0.5%
+        File file = generateJtlFile(1000, 5);
+        TestRunResult result = service.processResults(file);
+        assertTrue(result.passed());
+    }
+
+    @Test
+    void TEST_EmptyFileWithHeader_ShouldPass() throws IOException {
         File file = generateJtlFile(0, 0);
         TestRunResult result = service.processResults(file);
         assertTrue(result.passed());
+    }
+
+    @Test
+    void TEST_EmptyFile_ShouldFail() throws IOException {
+        File tempFile = File.createTempFile("jmeter-empty", ".jtl");
+        tempFile.deleteOnExit();
+
+        assertThrows(IOException.class, () -> service.processResults(tempFile));
+    }
+
+    @Test
+    void TEST_ResultId_IsAlwaysPopulated() throws IOException {
+        File file = generateJtlFile(10, 0);
+        TestRunResult result = service.processResults(file);
+        assertNotNull(result.resultId());
+    }
+
+    @Test
+    void TEST_MultipleThreadGroups_EvaluatedIndependently() throws IOException {
+        File tempFile = File.createTempFile("jmeter-multi", ".jtl");
+        tempFile.deleteOnExit();
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+            writer.write("timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect");
+            writer.newLine();
+
+            long ts = 1000000L;
+            // Group A: all passing
+            for (int i = 0; i < 100; i++) {
+                writer.write(ts + "," + 10 + ",GET /health,200,,GroupA-1,text,true,,100,50,1,1,http://localhost/health,4,0,1");
+                writer.newLine();
+            }
+            // Group B: 60% failure rate
+            for (int i = 0; i < 100; i++) {
+                boolean fail = i < 60;
+                writer.write(ts + "," + 10 + ",GET /orders," + (fail ? "500" : "200") + ",," + "GroupB-1" + ",text," + (!fail) + ",,100,50,1,1,http://localhost/orders,4,0,1");
+                writer.newLine();
+            }
+        }
+
+        TestRunResult result = service.processResults(tempFile);
+        assertFalse(result.passed());
+    }
+
+    @Test
+    void TEST_Repositories_AreCalled() throws IOException {
+        File file = generateJtlFile(10, 0);
+        service.processResults(file);
+
+        verify(testResultRepository).save(any(TestResult.class));
+        verify(perfTestResultRepository).saveAll(anyList());
+        verify(perfTestResultCodeRepository).saveAll(anyList());
     }
 
 
