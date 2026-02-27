@@ -28,15 +28,13 @@ pipeline {
 
         stage('Start') {
             steps {
-                withCredentials([file(credentialsId: 'endpoint-insights-e2e-env', variable: 'ENV_FILE')]) {
-                    sh """
-                        docker run -d \
-                            --name ${CONTAINER_NAME} \
-                            --env-file \$ENV_FILE \
-                            -p 8080:8080 \
-                            ${IMAGE_NAME}:${IMAGE_TAG}
-                    """
-                }
+                sh """
+            docker run -d \
+                --name ${CONTAINER_NAME} \
+                --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
+                -p 8080:8080 \
+                ${IMAGE_NAME}:${IMAGE_TAG}
+        """
 
                 sh """
                     ## Based on docker healthcheck max time + 15s
