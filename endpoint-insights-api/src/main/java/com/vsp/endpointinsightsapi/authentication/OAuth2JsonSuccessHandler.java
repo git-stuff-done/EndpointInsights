@@ -2,6 +2,8 @@ package com.vsp.endpointinsightsapi.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
+import com.vsp.endpointinsightsapi.config.SecurityConfig;
+import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
