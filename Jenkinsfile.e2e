@@ -3,6 +3,10 @@ pipeline {
         label 'vm-docker'
     }
 
+    options {
+        disableConcurrentBuilds()
+    }
+
     environment {
         IMAGE_NAME = 'endpoint-insights-e2e'
         IMAGE_TAG = "${GIT_COMMIT}"
@@ -10,6 +14,12 @@ pipeline {
     }
     
     stages {
+        stage('Cleanup') {
+            steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
