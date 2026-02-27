@@ -21,3 +21,4 @@ target/
 endpoint-insights-ui/lcov-report
 endpoint-insights-ui/coverage
 .env
+endpoint-insights-api/src/main/resources/static/
