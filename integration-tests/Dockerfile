@@ -1,4 +1,4 @@
-FROM node:22 AS frontend-build
+FROM node:24 AS frontend-build
 WORKDIR /app
 
 COPY endpoint-insights-ui/package*.json ./
@@ -26,9 +26,16 @@ RUN groupadd -r endpointinsights && useradd -r -g endpointinsights endpointinsig
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
+RUN curl -L https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz \
+    | tar -xz -C /opt && \
+    ln -s /opt/apache-jmeter-5.6.3 /opt/jmeter
+
+ENV JMETER_HOME=/opt/jmeter
+ENV PATH="${JMETER_HOME}/bin:${PATH}"
+
 COPY --from=backend-build /app/target/*.jar app.jar
 
-RUN chown -R endpointinsights:endpointinsights /app
+RUN chown -R endpointinsights:endpointinsights /app /opt/apache-jmeter-5.6.3
 
 USER endpointinsights
 

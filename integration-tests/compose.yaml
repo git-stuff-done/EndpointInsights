@@ -1,7 +1,6 @@
 services:
   app:
-#    image: ghcr.io/git-stuff-done/endpoint-insights-api:develop
-    image: sha256:ef8104c847b06a6e5919acb7ec78c34ce4f8e017f4808faf63f357c70788cca4
+    image: ghcr.io/git-stuff-done/endpoint-insights-api:develop
     env_file:
       - .env
     ports:
