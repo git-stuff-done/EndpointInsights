@@ -1,9 +1,11 @@
 package com.vsp.endpointinsightsapi.service;
 
+import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,9 @@ class TestRunServiceTest {
 
 	@Mock
 	private JobRepository jobRepository;
+
+	@Mock
+	private TestBatchRepository testBatchRepository;
 
 	@InjectMocks
 	private TestRunService testRunService;
