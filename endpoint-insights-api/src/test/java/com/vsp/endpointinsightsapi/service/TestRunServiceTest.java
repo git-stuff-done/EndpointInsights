@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
+import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
@@ -93,5 +95,70 @@ class TestRunServiceTest {
 		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
 		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
 		assertEquals(1, captor.getValue().getPageSize());
+	}
+
+	// ── getRecentActivity tests ─────────────────────────────────────────────
+
+	private TestRun buildRun(UUID jobId, UUID batchId, TestRunStatus status) {
+		TestRun run = new TestRun();
+		run.setRunId(UUID.randomUUID());
+		run.setJobId(jobId);
+		run.setBatchId(batchId);
+		run.setRunBy("tester");
+		run.setStatus(status);
+		run.setStartedAt(Instant.now());
+		run.setFinishedAt(Instant.now());
+		return run;
+	}
+
+	@Test
+	void getRecentActivity_mapsJobNameCorrectly() {
+		UUID jobId = UUID.randomUUID();
+		Job job = new Job();
+		job.setJobId(jobId);
+		job.setName("Vision API");
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(buildRun(jobId, null, TestRunStatus.COMPLETED))));
+		when(jobRepository.findAllById(any())).thenReturn(List.of(job));
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+		assertEquals("Vision API", testRunService.getRecentActivity(1).get(0).getTestName());
+	}
+
+	@Test
+	void getRecentActivity_naWhenNoBatch() {
+		UUID jobId = UUID.randomUUID();
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(buildRun(jobId, null, TestRunStatus.COMPLETED))));
+		when(jobRepository.findAllById(any())).thenReturn(List.of());
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+		assertEquals("N/A", testRunService.getRecentActivity(1).get(0).getGroup());
+	}
+
+	@Test
+	void getRecentActivity_dailyWhenCronRunsEveryDay() {
+		UUID jobId = UUID.randomUUID();
+		UUID batchId = UUID.randomUUID();
+		TestBatch batch = new TestBatch();
+		batch.setBatchId(batchId);
+		batch.setCronExpression("0 0 8 * * *");
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(buildRun(jobId, batchId, TestRunStatus.COMPLETED))));
+		when(jobRepository.findAllById(any())).thenReturn(List.of());
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of(batch));
+
+		assertEquals("Daily", testRunService.getRecentActivity(1).get(0).getGroup());
+	}
+
+	@Test
+	void getRecentActivity_mapsCompletedToPass() {
+		UUID jobId = UUID.randomUUID();
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(buildRun(jobId, null, TestRunStatus.COMPLETED))));
+		when(jobRepository.findAllById(any())).thenReturn(List.of());
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+		assertEquals("PASS", testRunService.getRecentActivity(1).get(0).getStatus());
 	}
 }

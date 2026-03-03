@@ -13,7 +13,7 @@ export interface DashboardTestActivity {
     dateRun: Date;
     durationMs: number;
     startedBy: string;
-    status: 'PASS' | 'FAIL';
+    status: 'PASS' | 'FAIL' | 'RUNNING' | 'PENDING';
 }
 
 export interface DashboardAlert {
@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit {
                     dateRun: new Date(r.dateRun),
                     durationMs: r.durationMs,
                     startedBy: r.startedBy,
-                    status: r.status as DashboardTestActivity['status']
+                    status: r.status as DashboardTestActivity['status'],
                 }));
             },
             error: (err) => console.error('Failed to load recent activity', err)
