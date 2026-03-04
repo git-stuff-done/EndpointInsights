@@ -73,6 +73,7 @@
         <mat-form-field>
             <mat-label>SSH Private Key</mat-label>
             <textarea matInput rows="4" formControlName="gitSshPrivateKey"></textarea>
+            <input type="file" (change)="onSshKeyFileSelected($event)" accept=".pem,.key">
             <mat-error>{{ getErrorMessage('gitSshPrivateKey') }}</mat-error>
         </mat-form-field>
 
