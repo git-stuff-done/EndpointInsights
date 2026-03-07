@@ -1,0 +1,40 @@
+<h2 mat-dialog-title class="title-row">
+    <span class="title">{{ data.title }}</span>
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="copyAll()" matTooltip="Copy all">
+        <mat-icon>content_copy</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="download()" matTooltip="Download">
+        <mat-icon>download</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="close()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+    </button>
+</h2>
+
+<mat-dialog-content class="content">
+    <mat-form-field appearance="outline" class="search">
+        <mat-label>Search logs</mat-label>
+        <input matInput [value]="query()" (input)="query.set(($any($event.target)).value)" />
+        <button *ngIf="query()" mat-icon-button matSuffix (click)="query.set('')" aria-label="Clear">
+            <mat-icon>close</mat-icon>
+        </button>
+    </mat-form-field>
+
+    <div class="logs-container">
+        <div
+                class="log-line"
+                *ngFor="let line of lines(); let i = index"
+                [ngClass]="getLogLevel(line)"
+        >
+            {{ line }}
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="close()">Close</button>
+</mat-dialog-actions>

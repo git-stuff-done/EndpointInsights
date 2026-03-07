@@ -11,6 +11,6 @@ import java.util.UUID;
 @Repository
 public interface PerfTestResultCodeRepository extends JpaRepository<PerfTestResultCode, PerfTestResultCodeId> {
 
-	List<PerfTestResultCode> findAllByResultId(UUID runId);
+	List<PerfTestResultCode> findAllByIdResultId(UUID resultId);
 	List<PerfTestResultCode> findAllByIdErrorCode(Integer errorCode);
 }

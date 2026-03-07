@@ -308,6 +308,39 @@ $chip-unk:  #455a64;
 }
 
 /* ================================
+Logs Table Scrollable
+=================================== */
+
+.logs-content {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.logs-pre {
+  margin: 0;
+  white-space: pre;
+  word-break: break-word;
+  font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+}
+
+.logs-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.preview-note {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* ================================
    Misc
    ================================ */
 .sp { margin: 8px 0; }

@@ -11,14 +11,19 @@ import java.util.UUID;
 @Entity
 @Table(name = "perf_test_result")
 public class PerfTestResult {
-	@Id
-	@Column(name = "result_id", nullable = false)
-	private UUID id;
+	@EmbeddedId
+	private PerfTestResultId id;
 
-	@MapsId
+	@MapsId("resultId")
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "result_id", nullable = false)
+	@JoinColumn(name = "result_id", nullable = false, insertable = false, updatable = false)
 	private TestResult testResult;
+
+	@Column(name = "sampler_name", nullable = false, insertable = false, updatable = false)
+	private String samplerName;
+
+	@Column(name = "thread_group", nullable = false, insertable = false, updatable = false)
+	private String threadGroup;
 
 	@Column(name = "p50_latency_ms")
 	private Integer p50LatencyMs;

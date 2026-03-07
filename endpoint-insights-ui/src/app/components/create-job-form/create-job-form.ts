@@ -1,3 +1,4 @@
+import {CommonModule} from '@angular/common';
 import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
 import {
     AbstractControl,
@@ -11,11 +12,13 @@ import {MatFormField} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatOption, MatSelect} from "@angular/material/select";
 import {TestItem} from "../../models/test.model";
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-job-form',
     standalone: true,
     imports: [
+        CommonModule,
         ReactiveFormsModule,
         MatFormField,
         MatInputModule,
@@ -28,7 +31,11 @@ import {TestItem} from "../../models/test.model";
 export class CreateJobForm {
     createJobForm: FormGroup;
     @Input() job!: TestItem;
-    constructor(private formBuilder: FormBuilder) {
+    filename: string | null = null;
+    constructor(
+        private formBuilder: FormBuilder,
+        private toastService: ToastService
+    ) {
         this.createJobForm = this.formBuilder.group({
             name: ["", [
                 Validators.required,
@@ -38,6 +45,11 @@ export class CreateJobForm {
             ]],
             description: ["", [Validators.maxLength(500)]],
             gitUrl: ["", [Validators.required, this.gitUrlValidator]],
+            gitAuthType: ["NONE"],
+            gitUsername: [""],
+            gitPassword: [""],
+            gitSshPrivateKey: [""],
+            gitSshPassphrase: [""],
             jobType: ["", [Validators.required]],
             runCommand: ["", [
                 Validators.required,
@@ -51,7 +63,12 @@ export class CreateJobForm {
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
-        })
+        });
+
+        this.applyAuthValidators(this.createJobForm.get('gitAuthType')?.value);
+        this.createJobForm.get('gitAuthType')?.valueChanges.subscribe((value) => {
+            this.applyAuthValidators(value);
+        });
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -60,11 +77,27 @@ export class CreateJobForm {
                 name: this.job.name,
                 description: this.job.description,
                 gitUrl: this.job.gitUrl,
+                gitAuthType: this.job.gitAuthType ?? 'NONE',
+                gitUsername: this.job.gitUsername,
+                gitPassword: this.job.gitPassword,
+                gitSshPrivateKey: this.job.gitSshPrivateKey,
+                gitSshPassphrase: this.job.gitSshPassphrase,
                 jobType: this.job.jobType,
                 runCommand: this.job.runCommand,
                 compileCommand: this.job.compileCommand,
             });
         }
+    }
+    onSshKeyFileSelected(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+        this.filename = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const sshKeyContent = reader.result as string;
+            this.createJobForm.patchValue({ gitSshPrivateKey: sshKeyContent });
+        };
+        reader.readAsText(file);
     }
 
 
@@ -110,6 +143,11 @@ export class CreateJobForm {
             'name': 'Job Name',
             'description': 'Description',
             'gitUrl': 'Git URL',
+            'gitAuthType': 'Git auth type',
+            'gitUsername': 'Git username',
+            'gitPassword': 'Git password',
+            'gitSshPrivateKey': 'SSH private key',
+            'gitSshPassphrase': 'SSH passphrase',
             'jobType': 'Job type',
             'runCommand': 'Run command',
             'compileCommand': 'Compile command',
@@ -150,14 +188,38 @@ export class CreateJobForm {
         return {invalidGitUrl: true};
     }
 
+    private applyAuthValidators(authType: string | null) {
+        const usernameControl = this.createJobForm.get('gitUsername');
+        const passwordControl = this.createJobForm.get('gitPassword');
+        const keyControl = this.createJobForm.get('gitSshPrivateKey');
+
+        if (authType === 'BASIC') {
+            usernameControl?.setValidators([Validators.required, this.noWhitespaceValidator]);
+            passwordControl?.setValidators([Validators.required, this.noWhitespaceValidator]);
+            keyControl?.clearValidators();
+        } else if (authType === 'SSH_KEY') {
+            keyControl?.setValidators([Validators.required, this.noWhitespaceValidator]);
+            usernameControl?.clearValidators();
+            passwordControl?.clearValidators();
+        } else {
+            usernameControl?.clearValidators();
+            passwordControl?.clearValidators();
+            keyControl?.clearValidators();
+        }
+
+        usernameControl?.updateValueAndValidity({emitEvent: false});
+        passwordControl?.updateValueAndValidity({emitEvent: false});
+        keyControl?.updateValueAndValidity({emitEvent: false});
+    }
+
     submitForm() {
         if (this.createJobForm.valid) {
             this.jobSubmitted.emit(this.createJobForm.value);
-            //TODO: Trigger success notification and call backend.
+            
 
         } else {
             this.createJobForm.markAllAsTouched();
-            //TODO: Trigger error notification.
+            this.toastService.onError('Please fill in all required fields correctly.');
         }
     }
 }

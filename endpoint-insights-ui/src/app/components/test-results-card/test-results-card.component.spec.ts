@@ -1,8 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatExpansionPanelHarness } from '@angular/material/expansion/testing';
+import { MatDialog } from '@angular/material/dialog';
 
 import { TestResultsCardComponent } from './test-results-card.component';
 import { TestRecord } from '../../models/test-record.model';
@@ -10,6 +11,8 @@ import { TestRecord } from '../../models/test-record.model';
 describe('TestResultsCardComponent', () => {
     let fixture: ComponentFixture<TestResultsCardComponent>;
     let component: TestResultsCardComponent;
+
+    const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
     // convenience setter
     function setTest(t: Partial<TestRecord>) {
@@ -43,6 +46,8 @@ describe('TestResultsCardComponent', () => {
                 TestResultsCardComponent,         // standalone component (brings its deps)
             ],
         }).compileComponents();
+
+        TestBed.overrideProvider(MatDialog, { useValue: matDialogSpy });
 
         fixture = TestBed.createComponent(TestResultsCardComponent);
         component = fixture.componentInstance;
@@ -170,4 +175,43 @@ describe('TestResultsCardComponent', () => {
         expect(text).toContain('500');
         expect(text).toContain('2');
     });
+
+    it('loads logs on first open', fakeAsync(() => {
+        setTest({});
+        expect(component.logsText).toBe('');
+
+        component.onOpened();
+        tick(0);
+        fixture.detectChanges();
+
+        expect(component.logsText.length).toBeGreaterThan(0);
+      }));
+
+      it('does not reload logs if already loaded', fakeAsync(() => {
+        setTest({});
+        component.onOpened();
+        tick(0);
+        fixture.detectChanges();
+
+        const first = component.logsText;
+
+        component.onClosed();
+        component.onOpened();
+        tick(0);
+        fixture.detectChanges();
+
+        expect(component.logsText).toBe(first);
+      }));
+
+      it('openLogsModal opens a dialog', () => {
+        setTest({});
+        // ensure something exists
+        component.logsText = 'preview';
+        (component as any).fullLogsText = 'full'; // if you added full logs
+
+        // call your method (with or without param depending on your signature)
+        component.openLogsModal();
+
+        expect(matDialogSpy.open).toHaveBeenCalled();
+      });
 });

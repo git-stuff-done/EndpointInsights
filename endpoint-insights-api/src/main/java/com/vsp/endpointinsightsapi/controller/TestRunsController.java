@@ -36,6 +36,7 @@ public class TestRunsController {
 		try {
 			TestRun testRun = new TestRun();
 			testRun.setJobId(request.getJobId());
+            testRun.setBatchId(request.getBatchId());
 			testRun.setRunBy(request.getRunBy());
 			testRun.setStatus(request.getStatus());
 			testRun.setStartedAt(request.getStartedAt());

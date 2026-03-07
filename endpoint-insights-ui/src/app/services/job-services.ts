@@ -1,7 +1,6 @@
-import {inject, Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {JobsApi} from "../jobsApi/jobsApi";
-import {Job} from "../models/job.model";
 import {TestItem} from "../models/test.model";
 
 
@@ -9,18 +8,15 @@ import {TestItem} from "../models/test.model";
     providedIn: 'root'
 })
 export class JobService {
-    private jobApi = inject(JobsApi);
-    constructor() {}
+    private apiUrl = 'http://localhost:8080/api/jobs';
 
-    getAllJobs():Observable<Job[]>{
-        return this.jobApi.getAllJobs();
-    }
+    constructor(private http: HttpClient) {}
 
     createJob(test:TestItem): Observable<TestItem>{
-        return this.jobApi.createJob(test);
+        return this.http.post<TestItem>(this.apiUrl, test);
     }
 
     updateJob(id: string, test: TestItem): Observable<TestItem> {
-        return this.jobApi.updateJob(id, test);
+        return this.http.put<TestItem>(`${this.apiUrl}/${id}`, test);
     }
 }

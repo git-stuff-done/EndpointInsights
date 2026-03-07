@@ -22,6 +22,7 @@ public class BatchResponseDTO {
     private LocalDateTime startTime;
     private LocalDateTime lastTimeRun;
     private Boolean active;
+    private String cronExpression;
     private List<UUID> notificationList;
     private List<Job> jobs;
 

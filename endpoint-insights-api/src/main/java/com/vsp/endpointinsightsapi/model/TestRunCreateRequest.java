@@ -26,6 +26,9 @@ public class TestRunCreateRequest {
 	@NotNull(message = "status is required")
 	private TestRunStatus status;
 
+    @NotNull(message = "batchId is required")
+    private UUID batchId;
+
 	private Instant startedAt;
 	private Instant finishedAt;
 }
