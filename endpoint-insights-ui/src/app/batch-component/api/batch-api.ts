@@ -21,6 +21,10 @@ export class BatchApi {
         return this.http.get<Batch>(`${environment.apiUrl}/batches/${id}`)
     }
 
+    deleteBatch(id: string){
+        return this.httpInterceptService.delete<Batch>(`${environment.apiUrl}/batches/${id}`)
+    }
+
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
         if(batch.isNew){
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, batch)
