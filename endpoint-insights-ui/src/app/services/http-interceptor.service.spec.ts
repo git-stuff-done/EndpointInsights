@@ -77,4 +77,11 @@ describe('HttpInterceptorService', () => {
         expect(req.request.method).toBe('PUT');
     })
 
+    it('should make a DELETE request', () => {
+        service.delete('/api/test').subscribe(response => {
+            expect(response).toBeTruthy();
+        });
+        const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+        expect(req.request.method).toBe('DELETE');
+    })
 });
