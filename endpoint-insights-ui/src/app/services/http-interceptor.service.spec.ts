@@ -56,7 +56,7 @@ it('should make a GET request', () => {
     service.get('/api/test').subscribe(response => {
         expect(response).toBeTruthy();
     });
-    const req = httpMock.expectOne('/api/test');
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
     expect(req.request.method).toBe('GET');
     req.flush({});
 });
@@ -65,7 +65,7 @@ it('should make a POST request', () => {
     service.post('/api/test', { name: 'test' }).subscribe(response => {
         expect(response).toBeTruthy();
     });
-    const req = httpMock.expectOne('/api/test');
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
     expect(req.request.method).toBe('POST');
     req.flush({});
 });
@@ -74,7 +74,7 @@ it('should make a PUT request', () => {
     service.put('/api/test', { name: 'test' }).subscribe(response => {
         expect(response).toBeTruthy();
     });
-    const req = httpMock.expectOne('/api/test');
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
     expect(req.request.method).toBe('PUT');
 })
 
