@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class JobRunnerThread implements Runnable {
 
@@ -21,12 +19,14 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
+    private final Collection<TestRun> failedTests;
 	private File tempDir = null;
 
-	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService) {
+	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, Collection<TestRun> failedTests) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
+        this.failedTests = failedTests;
 
 		// todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -65,6 +65,7 @@ public class JobRunnerThread implements Runnable {
 
 				testRun.setStatus(TestRunStatus.FAILED);
 				testRun.setFinishedAt(Instant.now());
+                this.failedTests.add(testRun);
 				testRunRepository.save(testRun);
 			}
 		} catch (IOException e) {} finally {

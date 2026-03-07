@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpHeaders } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {HttpHeaders} from '@angular/common/http';
+import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 import { HttpInterceptorService } from './http-interceptor.service';
@@ -49,4 +49,31 @@ describe('HttpInterceptorService', () => {
 
     expect(headers.has('Authorization')).toBeFalse();
   });
+
+it('should make a GET request', () => {
+    service.get('/api/test').subscribe(response => {
+        expect(response).toBeTruthy();
+    });
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+});
+
+it('should make a POST request', () => {
+    service.post('/api/test', { name: 'test' }).subscribe(response => {
+        expect(response).toBeTruthy();
+    });
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+    expect(req.request.method).toBe('POST');
+    req.flush({});
+});
+
+it('should make a PUT request', () => {
+    service.put('/api/test', { name: 'test' }).subscribe(response => {
+        expect(response).toBeTruthy();
+    });
+    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+    expect(req.request.method).toBe('PUT');
+})
+
 });

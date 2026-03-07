@@ -65,6 +65,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
     currentBatchTests = signal<ApiTest[]>([]);
 
+
     currentJobs = [
         {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
     ]
