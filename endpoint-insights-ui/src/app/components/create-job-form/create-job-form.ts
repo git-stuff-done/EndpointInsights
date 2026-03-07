@@ -12,6 +12,7 @@ import {MatFormField} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatOption, MatSelect} from "@angular/material/select";
 import {TestItem} from "../../models/test.model";
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-job-form',
@@ -30,7 +31,11 @@ import {TestItem} from "../../models/test.model";
 export class CreateJobForm {
     createJobForm: FormGroup;
     @Input() job!: TestItem;
-    constructor(private formBuilder: FormBuilder) {
+    filename: string | null = null;
+    constructor(
+        private formBuilder: FormBuilder,
+        private toastService: ToastService
+    ) {
         this.createJobForm = this.formBuilder.group({
             name: ["", [
                 Validators.required,
@@ -82,6 +87,17 @@ export class CreateJobForm {
                 compileCommand: this.job.compileCommand,
             });
         }
+    }
+    onSshKeyFileSelected(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+        this.filename = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const sshKeyContent = reader.result as string;
+            this.createJobForm.patchValue({ gitSshPrivateKey: sshKeyContent });
+        };
+        reader.readAsText(file);
     }
 
 
@@ -199,11 +215,11 @@ export class CreateJobForm {
     submitForm() {
         if (this.createJobForm.valid) {
             this.jobSubmitted.emit(this.createJobForm.value);
-            //TODO: Trigger success notification and call backend.
+            
 
         } else {
             this.createJobForm.markAllAsTouched();
-            //TODO: Trigger error notification.
+            this.toastService.onError('Please fill in all required fields correctly.');
         }
     }
 }
