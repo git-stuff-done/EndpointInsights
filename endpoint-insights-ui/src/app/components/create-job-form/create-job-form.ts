@@ -31,6 +31,7 @@ import { ToastService } from '../../services/toast.service';
 export class CreateJobForm {
     createJobForm: FormGroup;
     @Input() job!: TestItem;
+    filename: string | null = null;
     constructor(
         private formBuilder: FormBuilder,
         private toastService: ToastService
@@ -90,7 +91,7 @@ export class CreateJobForm {
     onSshKeyFileSelected(event: Event) {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;
-
+        this.filename = file.name;
         const reader = new FileReader();
         reader.onload = () => {
             const sshKeyContent = reader.result as string;
