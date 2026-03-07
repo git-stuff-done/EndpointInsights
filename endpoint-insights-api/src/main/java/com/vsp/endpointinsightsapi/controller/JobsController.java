@@ -13,6 +13,7 @@ import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
+import com.vsp.endpointinsightsapi.service.NotificationService;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -34,14 +35,16 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
-
 	private final JMeterInterpreterService jMeterInterpreterService;
 	private final TestRunRepository testRunRepository;
+	private final NotificationService notificationService;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository) {
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
+						  TestRunRepository testRunRepository, NotificationService notificationService) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
 		this.testRunRepository = testRunRepository;
+		this.notificationService = notificationService;
 	}
 
 	/**
@@ -77,7 +80,7 @@ public class JobsController {
 		 testRun.setRunBy("system"); //todo: needs to be updated
 		 testRun = testRunRepository.save(testRun);
 
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService));
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService));
 		t.start();
 
 		return ResponseEntity.ok(testRun);
