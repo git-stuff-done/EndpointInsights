@@ -5,11 +5,23 @@
             <span>New Test</span>
             <mat-icon fontIcon="add"></mat-icon>
         </button>
-        <div class="search-wrapper">
-            <mat-icon class="search-icon">search</mat-icon>
-            <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-                <input matInput [formControl]="searchControl" placeholder="Search by name or description">
-            </mat-form-field>
+        <div class="search-group">
+            <div class="search-wrapper">
+                <mat-icon class="search-icon">search</mat-icon>
+                <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+                    <input matInput [formControl]="searchControl" placeholder="Search by name or description">
+                </mat-form-field>
+            </div>
+            <button class="filter-btn elevated-btn" [matMenuTriggerFor]="filterMenu"
+                [matBadge]="hasActiveFilters ? selectedStatuses.size.toString() : ''" matBadgeSize="small" matBadgeColor="accent">
+                <mat-icon>filter_list</mat-icon>
+            </button>
+            <mat-menu #filterMenu="matMenu">
+                <div class="filter-menu-item" *ngFor="let s of JOB_STATUSES" (click)="toggleStatus(s); $event.stopPropagation()">
+                    <mat-icon>{{ isStatusSelected(s) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                    <span>{{ s }}</span>
+                </div>
+            </mat-menu>
         </div>
     </div>
     <div class="test-list-container">

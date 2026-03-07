@@ -5,10 +5,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 import {MatDialog} from "@angular/material/dialog";
 import {CreateJobModal} from "../../components/create-job-modal/create-job-modal";
 import {EditJobModal} from "../../components/edit-job-modal/edit-job-modal";
 import {MOCK_TESTS, TestItem} from "../../models/test.model";
+import { JOB_STATUSES, JobStatus } from '../../common/job.constants';
 
 @Component({
   selector: 'app-test-overview',
@@ -19,6 +22,8 @@ import {MOCK_TESTS, TestItem} from "../../models/test.model";
       CommonModule,
       MatIconModule,
       MatButtonModule,
+      MatMenuModule,
+      MatBadgeModule,
       ReactiveFormsModule,
       MatFormFieldModule,
       MatInputModule,
@@ -27,14 +32,34 @@ import {MOCK_TESTS, TestItem} from "../../models/test.model";
 export class TestOverview {
     tests: TestItem[] = MOCK_TESTS;
     searchControl = new FormControl('');
+    selectedStatuses = new Set<JobStatus>();
+    readonly JOB_STATUSES = JOB_STATUSES;
+
+    get hasActiveFilters(): boolean {
+        return this.selectedStatuses.size > 0;
+    }
+
+    toggleStatus(s: JobStatus) {
+        if (this.selectedStatuses.has(s)) {
+            this.selectedStatuses.delete(s);
+        } else {
+            this.selectedStatuses.add(s);
+        }
+    }
+
+    isStatusSelected(s: JobStatus): boolean {
+        return this.selectedStatuses.has(s);
+    }
 
     get filteredTests(): TestItem[] {
         const term = (this.searchControl.value ?? '').toLowerCase();
-        if (!term) return this.tests;
-        return this.tests.filter(t =>
-            t.name.toLowerCase().includes(term) ||
-            (t.description ?? '').toLowerCase().includes(term)
-        );
+        return this.tests.filter(t => {
+            const matchesSearch = !term ||
+                t.name.toLowerCase().includes(term) ||
+                (t.description ?? '').toLowerCase().includes(term);
+            const matchesStatus = this.selectedStatuses.size === 0 || this.selectedStatuses.has(t.status);
+            return matchesSearch && matchesStatus;
+        });
     }
 
     onOpen(t: TestItem)  { console.log('Open Clicked') }

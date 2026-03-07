@@ -10,6 +10,17 @@
     padding: 10px;
 }
 
+.search-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn {
+    padding: 10px 12px;
+    flex-shrink: 0;
+}
+
 .search-wrapper {
     position: relative;
     display: flex;

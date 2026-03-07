@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 import { BatchCardComponent } from './components/batch-card/batch-card.component';
 import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
@@ -17,7 +19,7 @@ import {HttpResponse} from "@angular/common/http";
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
@@ -28,11 +30,24 @@ export class BatchComponent implements OnInit, OnDestroy {
     private sub?: Subscription;
     batch: Batch[] = [];
     searchControl = new FormControl('');
+    statusFilter: 'all' | 'active' | 'inactive' = 'all';
+
+    get hasActiveFilter(): boolean {
+        return this.statusFilter !== 'all';
+    }
+
+    setStatusFilter(value: 'all' | 'active' | 'inactive') {
+        this.statusFilter = value;
+    }
 
     get filteredBatches(): Batch[] {
         const term = (this.searchControl.value ?? '').toLowerCase();
-        if (!term) return this.batch;
-        return this.batch.filter(b => b.batchName.toLowerCase().includes(term));
+        return this.batch.filter(b => {
+            const matchesSearch = !term || b.batchName.toLowerCase().includes(term);
+            const matchesStatus = this.statusFilter === 'all' ||
+                (this.statusFilter === 'active' ? b.active : !b.active);
+            return matchesSearch && matchesStatus;
+        });
     }
 
     ngOnInit() {
