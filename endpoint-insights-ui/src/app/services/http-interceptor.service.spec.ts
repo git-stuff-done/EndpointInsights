@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import {HttpHeaders, provideHttpClient} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
+import {HttpHeaders} from '@angular/common/http';
+import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 import { HttpInterceptorService } from './http-interceptor.service';
@@ -23,8 +23,6 @@ describe('HttpInterceptorService', () => {
       imports: [HttpClientTestingModule],
       providers: [
         HttpInterceptorService,
-          provideHttpClientTesting(),
-          provideHttpClient(),
         { provide: AuthenticationService, useValue: authStub }
       ]
     });
