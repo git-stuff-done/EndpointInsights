@@ -1,9 +1,12 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { BatchCardComponent } from './components/batch-card/batch-card.component';
 import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
@@ -14,7 +17,7 @@ import {HttpResponse} from "@angular/common/http";
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule],
+    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
@@ -24,6 +27,13 @@ export class BatchComponent implements OnInit, OnDestroy {
     private batchService = inject(BatchService);
     private sub?: Subscription;
     batch: Batch[] = [];
+    searchControl = new FormControl('');
+
+    get filteredBatches(): Batch[] {
+        const term = (this.searchControl.value ?? '').toLowerCase();
+        if (!term) return this.batch;
+        return this.batch.filter(b => b.batchName.toLowerCase().includes(term));
+    }
 
     ngOnInit() {
         this.batchService.getAllBatches().subscribe({
