@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.runner;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class JMeterCommandEnhancer {
     private final String jmeterHome;
 
