@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/test-runs")
@@ -29,6 +30,11 @@ public class TestRunsController {
 	public ResponseEntity<List<TestRun>> getRecentTestRuns(
 			@RequestParam(name = "limit", defaultValue = "10") int limit) {
 		return ResponseEntity.ok(testRunService.getRecentTestRuns(limit));
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<TestRun> getTestRunById(@PathVariable("id") UUID runId) {
+		return ResponseEntity.ok(testRunService.getTestRunById(runId));
 	}
 
 	@PostMapping
@@ -50,5 +56,11 @@ public class TestRunsController {
 			LOG.error("Error creating test run: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteTestRun(@PathVariable("id") UUID runId) {
+		testRunService.deleteTestRunById(runId);
+		return ResponseEntity.ok(String.format("Test run %s deleted", runId));
 	}
 }

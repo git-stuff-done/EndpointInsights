@@ -73,6 +73,16 @@ class TestRunServiceTest {
 	}
 
 	@Test
+	void createTestRun_nullJobId_throwsException() {
+		TestRun run = new TestRun();
+		run.setJobId(null);
+		run.setRunBy("tester");
+		run.setStatus(TestRunStatus.COMPLETED);
+
+		assertThrows(JobNotFoundException.class, () -> testRunService.createTestRun(run));
+	}
+
+	@Test
 	void getRecentTestRuns_limitsResults() {
 		TestRun run = new TestRun();
 		run.setRunId(UUID.randomUUID());
@@ -86,6 +96,30 @@ class TestRunServiceTest {
 
 		List<TestRun> result = testRunService.getRecentTestRuns(1);
 		assertEquals(1, result.size());
+
+		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
+		assertEquals(1, captor.getValue().getPageSize());
+	}
+
+	@Test
+	void getRecentTestRuns_capsLimitAt100() {
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
+				.thenReturn(new PageImpl<>(List.of()));
+
+		testRunService.getRecentTestRuns(500);
+
+		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
+		assertEquals(100, captor.getValue().getPageSize());
+	}
+
+	@Test
+	void getRecentTestRuns_raisesLimitToMinimumOf1() {
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
+				.thenReturn(new PageImpl<>(List.of()));
+
+		testRunService.getRecentTestRuns(0);
 
 		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
 		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
