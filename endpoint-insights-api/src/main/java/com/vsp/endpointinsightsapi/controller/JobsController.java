@@ -10,6 +10,8 @@ import com.vsp.endpointinsightsapi.model.JobRunHistory;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.GitService;
+import com.vsp.endpointinsightsapi.runner.JMeterCommandEnhancer;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
@@ -37,22 +39,28 @@ public class JobsController {
 	private final JMeterInterpreterService jMeterInterpreterService;
 	private final TestRunRepository testRunRepository;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository) {
+    private final GitService gitService;
+    private final JMeterCommandEnhancer jMeterCommandEnhancer;
+
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository, GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
 		this.testRunRepository = testRunRepository;
+        this.gitService = gitService;
+        this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 	}
 
 	/**
 	 * Endpoint to create a job.
 	 *
-	 * @param request the job details
+	 * @param jobRequest the job details
 	 * @return the created Job
 	 * */
 	@PostMapping
 	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
 	 		Job job = jobService.createJob(jobRequest);
+             //TODO: Sanitize user input `job`
 	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
@@ -77,7 +85,7 @@ public class JobsController {
 		 testRun = testRunRepository.save(testRun);
 
         Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, failedTestRuns));
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, failedTestRuns, gitService, jMeterCommandEnhancer));
 		t.start();
 
         // TODO, add check to make sure all threads finish before proceeding to email
