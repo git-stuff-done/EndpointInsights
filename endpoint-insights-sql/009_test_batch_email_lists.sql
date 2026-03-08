@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS test_batch_email_lists (
     CONSTRAINT fk_batch
         FOREIGN KEY (batch_id)
         REFERENCES test_batch (id)
-        ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_test_batch_email_lists_batch_id
