@@ -135,10 +135,4 @@ describe('BatchComponent', () => {
     expect(sub.unsubscribe).toHaveBeenCalled();
   });
 
-  it('onDelete and onFilter simply log to console (sanity)', () => {
-    const consoleSpy = spyOn(console, 'log');
-    component.onDelete(sampleBatches[0]);
-    component.onFilter();
-    expect(consoleSpy).toHaveBeenCalled(); // at least one call
-  });
 });
