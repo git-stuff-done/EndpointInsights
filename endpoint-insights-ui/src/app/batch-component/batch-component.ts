@@ -9,14 +9,12 @@ import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
-import {HttpResponse} from "@angular/common/http";
-import {ModalComponent} from "../shared/modal/modal.component";
 import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule],
+    imports: [CommonModule, MatIconModule, MatButtonModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
@@ -68,6 +66,7 @@ export class BatchComponent implements OnInit, OnDestroy {
             }
         });
     }
+    onFilter() { console.log('Filter Button clicked'); }
 
     openCreateBatchModal() {
         this.dialog.open(BatchConfigDialogComponent, {
