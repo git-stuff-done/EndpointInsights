@@ -1,14 +1,11 @@
 package com.vsp.endpointinsightsapi.runner;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.event.annotation.AfterTestClass;
-import org.springframework.test.context.event.annotation.BeforeTestClass;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(value = MockitoExtension.class)
-class JMeterCommandEnhancerUnitTest {
+class JMeterCommandServiceTest {
 
     JMeterCommandService enhancer = new JMeterCommandService();
 
