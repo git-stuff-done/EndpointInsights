@@ -3,6 +3,9 @@ import {MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/materia
 import {MatDialogTitle} from "@angular/material/dialog";
 import {MatButton} from "@angular/material/button";
 import {CreateJobForm} from "../create-job-form/create-job-form";
+import {ToastService} from "../../services/toast.service";
+import {JobService} from "../../services/job-services";
+
 
 @Component({
     selector: 'app-create-job-modal',
@@ -21,11 +24,24 @@ export class CreateJobModal {
     @ViewChild(CreateJobForm) createJobForm!: CreateJobForm;
 
     constructor(
-        private dialogRef: MatDialogRef<CreateJobModal>
+        private dialogRef: MatDialogRef<CreateJobModal>,
+        private toastService: ToastService,
+        private jobService: JobService
     ) {
     }
 
-    onSubmit() {
+    onSubmit(jobData: any) {
+        this.jobService.createJob(jobData).subscribe({
+                next: (response) => {
+                    console.log('Job created:', response);
+                    this.toastService.onSuccess('Job created successfully!');
+                    this.onJobCreated(response);
+                },
+                error: (error) => {
+                    console.error('Error creating job:', error);
+                    this.toastService.onError('Failed to create job. Please try again.');
+                }
+            });
         this.createJobForm.submitForm();
     }
 
