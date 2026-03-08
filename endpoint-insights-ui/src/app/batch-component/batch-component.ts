@@ -9,12 +9,11 @@ import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
-import {HttpResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule],
+    imports: [CommonModule, MatIconModule, MatButtonModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
