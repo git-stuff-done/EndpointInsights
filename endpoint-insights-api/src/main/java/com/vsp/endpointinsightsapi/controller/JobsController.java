@@ -40,13 +40,12 @@ public class JobsController {
 	private final JMeterInterpreterService jMeterInterpreterService;
 	private final TestRunRepository testRunRepository;
 	private final NotificationService notificationService;
-
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
-						  TestRunRepository testRunRepository, NotificationService notificationService) {
     private final GitService gitService;
     private final JMeterCommandEnhancer jMeterCommandEnhancer;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository, GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
+						  TestRunRepository testRunRepository, NotificationService notificationService,
+                          GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
 		this.testRunRepository = testRunRepository;

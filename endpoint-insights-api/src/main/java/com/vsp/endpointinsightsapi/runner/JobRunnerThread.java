@@ -27,16 +27,14 @@ public class JobRunnerThread implements Runnable {
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
 	private final NotificationService notificationService;
-	private File tempDir = null;
     private final GitService gitService;
     private final JMeterCommandEnhancer jMeterCommandEnhancer;
+    private File jobProjectRepoDirectory = null;
 
 	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
 						   JMeterInterpreterService jMeterInterpreterService,
-						   NotificationService notificationService) {
-    private File jobProjectRepoDirectory = null;
-
-	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
+						   NotificationService notificationService,
+                           GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
@@ -62,50 +60,40 @@ public class JobRunnerThread implements Runnable {
 			testRun.setStatus(TestRunStatus.RUNNING);
 			testRunRepository.save(testRun);
 
-			// step 3 - execute test
 			Optional<File> testResultFile = executeTest(workingDirectory);
 
-			// step 4 - interpret results
             if (testResultFile.isEmpty()) {
                 LOG.info("No test results file available for interpretation");
 
                 testRun.setStatus(TestRunStatus.FAILED);
                 testRun.setFinishedAt(Instant.now());
                 testRunRepository.save(testRun);
-                return;
+            } else {
+                LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
+
+                TestRunResult pass = testInterpreter.processResults(testResultFile.get());
+
+                testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
+                testRun.setResultId(pass.resultId());
+                testRun.setFinishedAt(Instant.now());
+                testRunRepository.save(testRun);
             }
-
-            LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
-
-            TestRunResult pass = testInterpreter.processResults(testResultFile.get());
-
-            testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
-            testRun.setResultId(pass.resultId());
-            testRun.setFinishedAt(Instant.now());
-            testRunRepository.save(testRun);
-		} catch (IOException e) {
-
-            LOG.error("Running job failed with exception: {}", e.getMessage());
-            testRun.setStatus(TestRunStatus.FAILED);
-            testRun.setFinishedAt(Instant.now());
-            testRunRepository.save(testRun);
-
-        } finally {
-				testRun.setStatus(TestRunStatus.FAILED);
-				testRun.setFinishedAt(Instant.now());
-				testRunRepository.save(testRun);
-			}
 
 			if (testRun.getBatchId() != null) {
 				notificationService.sendTestCompletionNotifications(
 						testRun.getBatchId(), testRun.getRunId(), testRun.getResultId());
 			}
-		} catch (IOException e) {} finally {
+		} catch (IOException e) {
+            LOG.error("Running job failed with exception: {}", e.getMessage());
+            testRun.setStatus(TestRunStatus.FAILED);
+            testRun.setFinishedAt(Instant.now());
+            testRunRepository.save(testRun);
+        } finally {
 			cleanupTempDir();
 		}
 	}
 
-	private void compileTest(File workingDirectory){
+	private void compileTest(File workingDirectory) {
 		try {
 			String compileCommand = job.getCompileCommand();
             if (compileCommand == null || compileCommand.trim().isEmpty()) {
@@ -165,8 +153,7 @@ public class JobRunnerThread implements Runnable {
             File resultFile = new File(workingDirectory, resultFileName);
             String[] command = jMeterCommandEnhancer.enhanceRunCommand(originalCommand, resultFileName);
 
-            ProcessBuilder processBuilder;
-            processBuilder = new ProcessBuilder(command);
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
 
             LOG.info("Executing enhanced command for job: {}", job.getName());
             LOG.info("Command: {}", Arrays.stream(command).reduce("", String::concat));
@@ -181,7 +168,6 @@ public class JobRunnerThread implements Runnable {
                 LOG.error("Test execution failed with exit code: {} for job: {}", exitCode, job.getName());
             }
 
-            // Return the result file regardless of exit code since execution completed
             return Optional.of(resultFile);
 
 		} catch (IOException | InterruptedException e) {
