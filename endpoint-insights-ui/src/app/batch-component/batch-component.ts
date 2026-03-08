@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { BatchCardComponent } from './components/batch-card/batch-card.component';
 import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
