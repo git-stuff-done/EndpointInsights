@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.service.TestRunService;
@@ -30,6 +31,12 @@ public class TestRunsController {
 	public ResponseEntity<List<TestRun>> getRecentTestRuns(
 			@RequestParam(name = "limit", defaultValue = "10") int limit) {
 		return ResponseEntity.ok(testRunService.getRecentTestRuns(limit));
+	}
+
+	@GetMapping("/recent-activity")
+	public ResponseEntity<List<RecentActivityDTO>> getRecentActivity(
+			@RequestParam(name = "limit", defaultValue = "10") int limit) {
+		return ResponseEntity.ok(testRunService.getRecentActivity(limit));
 	}
 
 	@GetMapping("/{id}")
