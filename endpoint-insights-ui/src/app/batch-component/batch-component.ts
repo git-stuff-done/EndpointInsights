@@ -78,6 +78,9 @@ export class BatchComponent implements OnInit, OnDestroy {
         });
     }
 
+    onDelete(batch: Batch){ console.log('Delete Clicked') }
+    onFilter() { console.log('Filter Button clicked'); }
+
     openCreateBatchModal() {
         this.dialog.open(BatchConfigDialogComponent, {
             width: '900px',

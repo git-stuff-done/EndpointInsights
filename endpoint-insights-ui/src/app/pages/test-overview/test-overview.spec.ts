@@ -1,12 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TestOverview } from './test-overview';
+import { CreateJobModal } from '../../components/create-job-modal/create-job-modal';
+import { EditJobModal } from '../../components/edit-job-modal/edit-job-modal';
 import { TestItem } from '../../models/test.model';
 
 describe('TestOverview', () => {
   let component: TestOverview;
   let fixture: ComponentFixture<TestOverview>;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
 
   const mockTests: TestItem[] = [
     {
@@ -27,11 +31,13 @@ describe('TestOverview', () => {
   ];
 
   beforeEach(async () => {
+    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+
     await TestBed.configureTestingModule({
       imports: [TestOverview],
       providers: [
         provideNoopAnimations(),
-        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        { provide: MatDialog, useValue: dialogSpy },
       ],
     }).compileComponents();
 
@@ -108,5 +114,90 @@ describe('TestOverview', () => {
       component.toggleStatus('RUNNING');
       expect(component.hasActiveFilters).toBeTrue();
     });
+  });
+
+  it('onOpen logs to console', () => {
+    const logSpy = spyOn(console, 'log');
+    component.onOpen(mockTests[0]);
+    expect(logSpy).toHaveBeenCalledWith('Open Clicked');
+  });
+
+  it('onRun logs to console', () => {
+    const logSpy = spyOn(console, 'log');
+    component.onRun(mockTests[0]);
+    expect(logSpy).toHaveBeenCalledWith('Run Clicked');
+  });
+
+  it('onDelete logs to console', () => {
+    const logSpy = spyOn(console, 'log');
+    component.onDelete(mockTests[0]);
+    expect(logSpy).toHaveBeenCalledWith('Delete Clicked');
+  });
+
+  it('onEdit calls openEditModal with the test', () => {
+    const openEditSpy = spyOn(component, 'openEditModal');
+    component.onEdit(mockTests[0]);
+    expect(openEditSpy).toHaveBeenCalledWith(mockTests[0]);
+  });
+
+  it('openCreateJobModal opens CreateJobModal with correct config', () => {
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+
+    component.openCreateJobModal();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(CreateJobModal, jasmine.objectContaining({
+      width: '600px',
+      maxWidth: '95vw',
+    }));
+  });
+
+  it('openCreateJobModal logs when dialog returns a truthy result', () => {
+    const logSpy = spyOn(console, 'log');
+    const result = { id: 'abc' };
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(result) } as any);
+
+    component.openCreateJobModal();
+
+    expect(logSpy).toHaveBeenCalledWith('New job created:', result);
+  });
+
+  it('openCreateJobModal does not log when dialog returns a falsy result', () => {
+    const logSpy = spyOn(console, 'log');
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(undefined) } as any);
+
+    component.openCreateJobModal();
+
+    expect(logSpy).not.toHaveBeenCalledWith('New job created:', jasmine.anything());
+  });
+
+  it('openEditModal opens EditJobModal with correct config and data', () => {
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+
+    component.openEditModal(mockTests[0]);
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(EditJobModal, jasmine.objectContaining({
+      width: '600px',
+      maxWidth: '95vw',
+      data: mockTests[0],
+    }));
+  });
+
+  it('openEditModal logs when dialog returns a truthy result', () => {
+    const logSpy = spyOn(console, 'log');
+    const result = { updated: true };
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(result) } as any);
+
+    component.openEditModal(mockTests[0]);
+
+    expect(logSpy).toHaveBeenCalledWith('New job created:', result);
+  });
+
+  it('openEditModal does not log when dialog returns a falsy result', () => {
+    const logSpy = spyOn(console, 'log');
+    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+
+    component.openEditModal(mockTests[0]);
+
+    expect(logSpy).not.toHaveBeenCalledWith('New job created:', jasmine.anything());
   });
 });

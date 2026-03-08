@@ -87,3 +87,94 @@
 }
 .elevated-btn:hover { transform: translateY(-2px); }
 .elevated-btn:active { transform: translateY(0); }
+
+/* Batch List Styling */
+.batch-list-container {
+    display: grid;
+    padding: 20px;
+}
+
+/* shared column recipe + a fixed actions width */
+:host {
+    --cols: 2fr 2fr 1fr 1fr;  /* Name | Batch | Date | Author */
+    --actions: 44px;            /* filter + row action buttons */
+    --gap: 24px;
+}
+
+/* HEADER */
+.batch-header-row{
+    display:grid;
+    grid-template-columns: var(--cols) var(--actions);
+    column-gap: var(--gap);
+    align-items:center;
+    padding: 8px 14px;
+    background:#f9fafb;
+    border-bottom:1px solid #e5e7eb;
+    position: sticky;  /* optional: keep visible while scrolling */
+    top: 0;
+    z-index: 2;
+}
+
+/* make the <h3> participate directly in the grid */
+.batch-headers{ display: contents; }
+.batch-headers h3{
+    margin:0; font-weight:700; font-size:.95rem; white-space:nowrap;
+}
+
+/* filter occupies the actions column */
+.filter-btn{
+    justify-self:end;
+}
+.filter-btn[mat-icon-button],
+.filter-btn button{
+    width: 36px; height: 36px; min-width: 0; padding: 0; border-radius: 10px;
+    display: grid; place-items: center; line-height: 0; background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+.filter-btn .mat-icon{ display:block; margin-top:1px; font-size:20px; line-height:1; }
+
+
+/* batch + rows */
+.batch-list { display: grid; gap: 10px; }
+
+/* ROWS — same grid as header */
+.batch-row{
+    display:grid;
+    grid-template-columns: var(--cols) var(--actions);
+    column-gap: var(--gap);
+    align-items:center;
+
+    background: #fff;
+    border: 1px solid #e9e9e9;
+    border-radius: 12px;
+    padding: 12px 14px;
+
+    box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 8px 16px rgba(0,0,0,.10);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+/* cells */
+.cell { min-width: 0; } /* allow text truncation */
+.name { display: flex; align-items: center; gap: 10px; }
+.title { font-weight: 600; }
+.active {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .75rem;
+    text-transform: capitalize;
+    border: 1px solid #ddd;
+}
+.active.false { background: #fdecea; color: #b3261e; border-color: #f6c7c2; }
+.active.true { background: #eef3ff; color: #2a5bd7; border-color: #d8e2ff; }
+
+.actions { display: inline-flex; gap: 4px; justify-self: end; }
+.actions button{
+    width: 36px; height: 36px; min-width: 0; padding: 0; border-radius: 10px;
+    display: grid; place-items: center; line-height: 0; background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+/* truncate long text nicely */
+.title, .id, .start, .lastRun {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
