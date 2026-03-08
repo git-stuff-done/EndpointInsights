@@ -42,6 +42,9 @@ spring:
           starttls:
             enable: true
 
+jmeter:
+  home: ${JMETER_HOME}
+
 app:
   authentication:
     enabled: true

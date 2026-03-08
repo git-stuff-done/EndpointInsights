@@ -43,6 +43,9 @@ spring:
             jwk-set-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/jwks.json
             user-name-attribute: preferred_username
 
+jmeter:
+  home: ${JMETER_HOME}
+
 app:
   authentication:
     enabled: true

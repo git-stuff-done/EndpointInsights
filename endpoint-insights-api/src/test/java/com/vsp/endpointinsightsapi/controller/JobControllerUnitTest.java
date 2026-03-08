@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.GitService;
+import com.vsp.endpointinsightsapi.runner.JMeterCommandEnhancer;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.service.NotificationService;
@@ -53,6 +55,14 @@ public class JobControllerUnitTest {
 	private NotificationService notificationService;
 
 	@Test
+    @MockitoBean
+    private GitService gitService;
+
+    @MockitoBean
+    private JMeterCommandEnhancer jMeterCommandEnhancer;
+
+
+    @Test
 	public void createJob() throws Exception {
         mockMvc.perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
