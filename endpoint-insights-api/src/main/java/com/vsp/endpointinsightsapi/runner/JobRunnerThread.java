@@ -5,6 +5,7 @@ import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.service.NotificationService;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,12 +22,16 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
+	private final NotificationService notificationService;
 	private File tempDir = null;
 
-	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService) {
+	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
+						   JMeterInterpreterService jMeterInterpreterService,
+						   NotificationService notificationService) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
+		this.notificationService = notificationService;
 
 		// todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -66,6 +71,11 @@ public class JobRunnerThread implements Runnable {
 				testRun.setStatus(TestRunStatus.FAILED);
 				testRun.setFinishedAt(Instant.now());
 				testRunRepository.save(testRun);
+			}
+
+			if (testRun.getBatchId() != null) {
+				notificationService.sendTestCompletionNotifications(
+						testRun.getBatchId(), testRun.getRunId(), testRun.getResultId());
 			}
 		} catch (IOException e) {} finally {
 			cleanupTempDir();
