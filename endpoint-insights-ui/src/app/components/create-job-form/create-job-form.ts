@@ -63,6 +63,7 @@ export class CreateJobForm {
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
+            jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
         });
 
         this.applyAuthValidators(this.createJobForm.get('gitAuthType')?.value);
