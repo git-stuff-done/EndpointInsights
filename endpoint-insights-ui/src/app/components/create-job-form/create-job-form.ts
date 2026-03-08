@@ -52,13 +52,11 @@ export class CreateJobForm {
             gitSshPassphrase: [""],
             jobType: ["", [Validators.required]],
             runCommand: ["", [
-                Validators.required,
                 Validators.minLength(3),
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
             compileCommand: ["", [
-                Validators.required,
                 Validators.minLength(3),
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
