@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TestRunService {
@@ -39,5 +41,17 @@ public class TestRunService {
 		return testRunRepository
 				.findAllByOrderByFinishedAtDesc(PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt")))
 				.getContent();
+	}
+
+	public TestRun getTestRunById(UUID runId) {
+		return testRunRepository.findById(runId)
+				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
+	}
+
+	public void deleteTestRunById(UUID runId) {
+		if (!testRunRepository.existsById(runId)) {
+			throw new TestRunNotFoundException(runId.toString());
+		}
+		testRunRepository.deleteById(runId);
 	}
 }
