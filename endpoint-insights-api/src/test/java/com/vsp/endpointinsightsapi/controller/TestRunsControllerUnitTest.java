@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
@@ -51,7 +52,7 @@ class TestRunsControllerUnitTest {
 		run.setRunId(UUID.randomUUID());
 		run.setJobId(UUID.randomUUID());
 		run.setRunBy("tester");
-        run.setBatchId(UUID.randomUUID());
+		run.setBatchId(UUID.randomUUID());
 		run.setStatus(TestRunStatus.COMPLETED);
 		run.setFinishedAt(Instant.now());
 

@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../models/test-record.model';
 import { MatButtonModule } from '@angular/material/button';
+import { TestRunService } from '../services/test-run.service';
 //import { ModalService } from '../shared/modal/modal.service';
 
 export interface DashboardTestActivity {
@@ -12,7 +13,7 @@ export interface DashboardTestActivity {
     dateRun: Date;
     durationMs: number;
     startedBy: string;
-    status: 'PASS' | 'FAIL';
+    status: 'PASS' | 'FAIL' | 'RUNNING' | 'PENDING';
 }
 
 export interface DashboardAlert {
@@ -28,7 +29,9 @@ export interface DashboardAlert {
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
+
+    private testRunService = inject(TestRunService);
 
     // KPI metrics
     activeJobsTotal = 12;
@@ -49,27 +52,24 @@ export class DashboardComponent {
     apiPerformanceData = [];   // replace with real shape later
     apiTrendData = [];         // same here
 
-    // Recent activity mock data
-    tests: DashboardTestActivity[] = [
-        {
-            id: 'vision-api-daily',
-            testName: 'Vision API',
-            group: 'Daily',
-            dateRun: new Date('2025-07-10'),
-            durationMs: 230,
-            startedBy: 'J. Brock',
-            status: 'PASS'
-        },
-        {
-            id: 'services-api-manual',
-            testName: 'Services API',
-            group: 'N/A',
-            dateRun: new Date('2025-07-10'),
-            durationMs: 20,
-            startedBy: 'F. Zappa',
-            status: 'PASS'
-        }
-    ];
+    tests: DashboardTestActivity[] = [];
+
+    ngOnInit(): void {
+        this.testRunService.getRecentActivity(10).subscribe({
+            next: (data) => {
+                this.tests = data.map(r => ({
+                    id: r.runId,
+                    testName: r.testName,
+                    group: r.group,
+                    dateRun: new Date(r.dateRun),
+                    durationMs: r.durationMs,
+                    startedBy: r.startedBy,
+                    status: r.status as DashboardTestActivity['status'],
+                }));
+            },
+            error: (err) => console.error('Failed to load recent activity', err)
+        });
+    }
 
     // Alerts mock data
     alerts: DashboardAlert[] = [
