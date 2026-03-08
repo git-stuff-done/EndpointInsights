@@ -9,10 +9,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-
-jmeter:
-  home: ${JMETER_HOME}
-
   security:
     oauth2:
       client:
@@ -32,6 +28,9 @@ jmeter:
             user-info-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/api/oidc/userinfo
             jwk-set-uri: ${OIDC_ISSUER_URI:https://auth.example.com}/jwks.json
             user-name-attribute: preferred_username
+
+jmeter:
+  home: ${JMETER_HOME}
 
 app:
   authentication:
