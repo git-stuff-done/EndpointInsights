@@ -1,17 +1,12 @@
 CREATE TABLE IF NOT EXISTS test_run (
-    run_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    job_id UUID NOT NULL,
-    result_id UUID,
-    batch_id UUID,
-    run_by TEXT NOT NULL,
-    status TEXT NOT NULL,
+    run_id UUID NOT NULL,
     started_at TIMESTAMPTZ,
     finished_at TIMESTAMPTZ,
-    CONSTRAINT fk_test_run_batch
-        FOREIGN KEY (batch_id)
-        REFERENCES test_batch (id)
-        ON DELETE SET NULL
+    job_id UUID NOT NULL,
+    run_by VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    result_id UUID,
+    batch_id UUID,
+    CONSTRAINT test_run_pkey PRIMARY KEY (run_id),
+    CONSTRAINT test_run_status_check CHECK ((status::TEXT = ANY ((ARRAY['PENDING', 'RUNNING', 'COMPLETED', 'FAILED'])::TEXT[])))
 );
-
-CREATE INDEX IF NOT EXISTS test_run_batch_id_idx
-    ON test_run (batch_id);
