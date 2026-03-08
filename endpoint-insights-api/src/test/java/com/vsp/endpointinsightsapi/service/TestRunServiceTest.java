@@ -6,6 +6,7 @@ import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,6 +77,16 @@ class TestRunServiceTest {
 
 		assertThrows(JobNotFoundException.class, () -> testRunService.createTestRun(run));
 		verify(jobRepository).existsById(jobId);
+	}
+
+	@Test
+	void createTestRun_nullJobId_throwsException() {
+		TestRun run = new TestRun();
+		run.setJobId(null);
+		run.setRunBy("tester");
+		run.setStatus(TestRunStatus.COMPLETED);
+
+		assertThrows(JobNotFoundException.class, () -> testRunService.createTestRun(run));
 	}
 
 	@Test
@@ -160,5 +172,71 @@ class TestRunServiceTest {
 		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
 
 		assertEquals("PASS", testRunService.getRecentActivity(1).get(0).getStatus());
+	}
+
+	@Test
+	void getRecentTestRuns_capsLimitAt100() {
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
+				.thenReturn(new PageImpl<>(List.of()));
+
+		testRunService.getRecentTestRuns(500);
+
+		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
+		assertEquals(100, captor.getValue().getPageSize());
+	}
+
+	@Test
+	void getRecentTestRuns_raisesLimitToMinimumOf1() {
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
+				.thenReturn(new PageImpl<>(List.of()));
+
+		testRunService.getRecentTestRuns(0);
+
+		ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+		verify(testRunRepository).findAllByOrderByFinishedAtDesc(captor.capture());
+		assertEquals(1, captor.getValue().getPageSize());
+	}
+
+	@Test
+	void getTestRunById_returnsRun() {
+		UUID runId = UUID.randomUUID();
+		TestRun run = new TestRun();
+		run.setRunId(runId);
+
+		when(testRunRepository.findById(runId)).thenReturn(Optional.of(run));
+
+		TestRun result = testRunService.getTestRunById(runId);
+		assertEquals(runId, result.getRunId());
+		verify(testRunRepository).findById(runId);
+	}
+
+	@Test
+	void getTestRunById_missingRun_throwsException() {
+		UUID runId = UUID.randomUUID();
+		when(testRunRepository.findById(runId)).thenReturn(Optional.empty());
+
+		assertThrows(TestRunNotFoundException.class, () -> testRunService.getTestRunById(runId));
+		verify(testRunRepository).findById(runId);
+	}
+
+	@Test
+	void deleteTestRunById_existingRun_deletesRun() {
+		UUID runId = UUID.randomUUID();
+		when(testRunRepository.existsById(runId)).thenReturn(true);
+
+		testRunService.deleteTestRunById(runId);
+
+		verify(testRunRepository).existsById(runId);
+		verify(testRunRepository).deleteById(runId);
+	}
+
+	@Test
+	void deleteTestRunById_missingRun_throwsException() {
+		UUID runId = UUID.randomUUID();
+		when(testRunRepository.existsById(runId)).thenReturn(false);
+
+		assertThrows(TestRunNotFoundException.class, () -> testRunService.deleteTestRunById(runId));
+		verify(testRunRepository).existsById(runId);
 	}
 }

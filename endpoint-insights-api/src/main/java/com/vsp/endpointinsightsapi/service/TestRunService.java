@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
@@ -106,5 +107,17 @@ public class TestRunService {
 		if (parts.length < 6) return "Custom";
 		String dayOfWeek = parts[5];
 		return ("*".equals(dayOfWeek) || "?".equals(dayOfWeek)) ? "Daily" : "Weekly";
+	}
+
+	public TestRun getTestRunById(UUID runId) {
+		return testRunRepository.findById(runId)
+				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
+	}
+
+	public void deleteTestRunById(UUID runId) {
+		if (!testRunRepository.existsById(runId)) {
+			throw new TestRunNotFoundException(runId.toString());
+		}
+		testRunRepository.deleteById(runId);
 	}
 }
