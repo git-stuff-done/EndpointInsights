@@ -29,6 +29,9 @@ spring:
             user-info-uri: https://auth.example.com/api/oidc/userinfo
             jwk-set-uri: https://auth.example.com/jwks.json
 
+jmeter:
+  home: ${JMETER_HOME}
+
 app:
   authentication:
     enabled: true
