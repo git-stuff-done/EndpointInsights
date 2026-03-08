@@ -9,15 +9,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(value = MockitoExtension.class)
+//@ExtendWith(value = MockitoExtension.class)
 class JMeterCommandEnhancerUnitTest {
 
-    JMeterCommandEnhancer enhancer = new JMeterCommandEnhancer("/fake/jmeter");
+    JMeterCommandService enhancer = new JMeterCommandService();
 
     @Test
     void TEST_JMeterCommand_StripsExistingFlagsAndInjectsResultFile() {
         String command = "jmeter -n -t test.jmx -l old-results.jtl";
-        String[] result = enhancer.enhanceRunCommand(command, "new-results.jtl");
+        String[] result = enhancer.getRunCommand(command, "new-results.jtl");
 
         List<String> args = Arrays.asList(result);
 
@@ -33,28 +33,28 @@ class JMeterCommandEnhancerUnitTest {
     @Test
     void TEST_NonJmeterCommand_SplitsOnWhitespace() {
         String command = "echo hello world";
-        String[] result = enhancer.enhanceRunCommand(command, "results.jtl");
+        String[] result = enhancer.getRunCommand(command, "results.jtl");
         assertArrayEquals(new String[]{"echo", "hello", "world"}, result);
     }
 
     @Test
     void TEST_NullJmeterHome_ThrowsIllegalState() {
-        JMeterCommandEnhancer noHome = new JMeterCommandEnhancer(null);
+        JMeterCommandService noHome = new JMeterCommandService(null);
         assertThrows(IllegalStateException.class,
-                () -> noHome.enhanceRunCommand("jmeter -n -t test.jmx", "out.jtl"));
+                () -> noHome.getRunCommand("jmeter -n -t test.jmx", "out.jtl"));
     }
 
     @Test
     void TEST_BlankJmeterHome_ThrowsIllegalState() {
-        JMeterCommandEnhancer noHome = new JMeterCommandEnhancer("   ");
+        JMeterCommandService noHome = new JMeterCommandService("   ");
         assertThrows(IllegalStateException.class,
-                () -> noHome.enhanceRunCommand("jmeter -n -t test.jmx", "out.jtl"));
+                () -> noHome.getRunCommand("jmeter -n -t test.jmx", "out.jtl"));
     }
 
     @Test
     void TEST_ExistingOutputFormatFlag_IsReplacedNotDuplicated() {
         String command = "jmeter -n -t test.jmx -Jjmeter.save.saveservice.output_format=xml";
-        String[] result = enhancer.enhanceRunCommand(command, "results.jtl");
+        String[] result = enhancer.getRunCommand(command, "results.jtl");
         List<String> args = Arrays.asList(result);
 
         long count = args.stream()
@@ -68,7 +68,7 @@ class JMeterCommandEnhancerUnitTest {
     @Test
     void TEST_QuotedTestPlanPath_IsUnquotedInResult() {
         String command = "jmeter -n -t \"/path/with spaces/test.jmx\"";
-        String[] result = enhancer.enhanceRunCommand(command, "results.jtl");
+        String[] result = enhancer.getRunCommand(command, "results.jtl");
         List<String> args = Arrays.asList(result);
 
         assertTrue(args.contains("/path/with spaces/test.jmx"));
@@ -77,7 +77,7 @@ class JMeterCommandEnhancerUnitTest {
 
     @Test
     void TEST_ExecutablePath_ContainsBinJmeter() {
-        String[] result = enhancer.enhanceRunCommand("jmeter -n -t test.jmx", "results.jtl");
+        String[] result = enhancer.getRunCommand("jmeter -n -t test.jmx", "results.jtl");
         // First arg should be the resolved executable
         assertTrue(result[0].contains("bin"));
         assertTrue(result[0].contains("jmeter"));
@@ -85,7 +85,7 @@ class JMeterCommandEnhancerUnitTest {
 
     @Test
     void TEST_AllRequiredSaveServiceFlags_ArePresent() {
-        String[] result = enhancer.enhanceRunCommand("jmeter -n -t test.jmx", "results.jtl");
+        String[] result = enhancer.getRunCommand("jmeter -n -t test.jmx", "results.jtl");
         List<String> args = Arrays.asList(result);
 
         List<String> requiredFlags = List.of(

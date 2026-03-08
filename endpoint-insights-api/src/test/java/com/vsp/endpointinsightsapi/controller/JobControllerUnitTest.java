@@ -2,7 +2,7 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandEnhancer;
+import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.model.Job;
@@ -54,7 +54,7 @@ public class JobControllerUnitTest {
     private GitService gitService;
 
     @MockitoBean
-    private JMeterCommandEnhancer jMeterCommandEnhancer;
+    private JMeterCommandService jMeterCommandEnhancer;
 
 
     @Test

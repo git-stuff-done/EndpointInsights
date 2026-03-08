@@ -26,11 +26,11 @@ public class JobRunnerThread implements Runnable {
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
     private final GitService gitService;
-    private final JMeterCommandEnhancer jMeterCommandEnhancer;
+    private final JMeterCommandService jMeterCommandEnhancer;
 
     private File jobProjectRepoDirectory = null;
 
-	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
+	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
@@ -137,22 +137,21 @@ public class JobRunnerThread implements Runnable {
 
 	private Optional<File> executeTest(File workingDirectory) {
 		try {
-			String originalCommand = job.getRunCommand();
-            if (originalCommand == null || originalCommand.trim().isEmpty()) {
-                LOG.error("No run command provided for job: {}", job.getName());
+			String jmeterTestName = job.getJmeterTestName();
+            if (jmeterTestName == null || jmeterTestName.trim().isEmpty()) {
+                LOG.error("No jmeter test name provided for job: {}", job.getName());
                 return Optional.empty();
             }
 
             String resultFileName = generateResultFileName();
 
             File resultFile = new File(workingDirectory, resultFileName);
-            String[] command = jMeterCommandEnhancer.enhanceRunCommand(originalCommand, resultFileName);
+            String[] command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
 
-            ProcessBuilder processBuilder;
-            processBuilder = new ProcessBuilder(command);
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
 
-            LOG.info("Executing enhanced command for job: {}", job.getName());
-            LOG.info("Command: {}", Arrays.stream(command).reduce("", String::concat));
+            LOG.info("Executing run command for job: {}", job.getName());
+            LOG.info("Command: {}", Arrays.stream(command).reduce("", (a, b) -> a + " " + b));
 
             Process process = processBuilder.start();
 
@@ -195,11 +194,10 @@ public class JobRunnerThread implements Runnable {
 					deleteRecursively(child);
 				}
 			}
-		}
-
-        if (!file.setWritable(true)) {
-            throw new IOException("Failed to delete file or directory: unable to set " + file.getAbsolutePath() + " as writable");
+		} else if (!file.setWritable(true)) {
+            LOG.warn("Failed to delete file or directory: unable to set {} as writable",  file.getAbsolutePath());
         }
+
 		if (!file.delete()) {
 			throw new IOException("Failed to delete file or directory: " + file.getAbsolutePath());
 		}
