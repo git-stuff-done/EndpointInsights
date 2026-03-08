@@ -61,7 +61,7 @@ public class JobControllerUnitTest {
 	public void createJob() throws Exception {
         mockMvc.perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null))))
+                        .content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null, TestType.PERF, null))))
                 .andExpect(status().isCreated());
 	}
 
@@ -70,7 +70,7 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null,  TestType.INTEGRATION, null);
 		when(jobService.createJob(jobRequest)).thenReturn(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
@@ -101,7 +101,7 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null, TestType.INTEGRATION, null);
 		when(jobService.createJob(jobRequest)).thenReturn(job);
 		Optional<List<Job>> jobs = Optional.of(List.of(job));
 		when(jobService.getAllJobs()).thenReturn(jobs);
