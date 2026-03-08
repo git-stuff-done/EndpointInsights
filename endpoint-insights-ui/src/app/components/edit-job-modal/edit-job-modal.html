@@ -34,10 +34,17 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-field">
-                        <label>Run Command</label>
-                        <p>{{ data.runCommand }}</p>
-                    </div>
+                    @if (data.jobType !== 'jmeter') {
+                        <div class="form-field">
+                            <label>Run Command</label>
+                            <p>{{ data.runCommand }}</p>
+                        </div>
+                    } @else {
+                        <div class="form-field">
+                            <label>JMeter Test Name</label>
+                            <p>{{ data.jmeterTestName }}</p>
+                        </div>
+                    }
                     <div class="form-field">
                         <label>Compile Command</label>
                         <p>{{ data.compileCommand }}</p>
