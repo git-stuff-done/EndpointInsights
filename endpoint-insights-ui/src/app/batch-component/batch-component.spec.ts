@@ -18,9 +18,9 @@ describe('BatchComponent', () => {
   let mockStore: jasmine.SpyObj<BatchStore>;
 
   const mockBatches: Batch[] = [
-    { id: '1', batchName: 'Nightly Build', startTime: new Date().toISOString(), active: true, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
-    { id: '2', batchName: 'Weekly Report', startTime: new Date().toISOString(), active: false, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
-    { id: '3', batchName: 'Auth Tests', startTime: new Date().toISOString(), active: true, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
+    { id: '1', batchName: 'Nightly Build', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
+    { id: '2', batchName: 'Weekly Report', startTime: new Date().toISOString(), active: false, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
+    { id: '3', batchName: 'Auth Tests', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
   ];
 
   beforeEach(async () => {
