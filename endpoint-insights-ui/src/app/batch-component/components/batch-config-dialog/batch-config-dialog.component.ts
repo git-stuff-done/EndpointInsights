@@ -64,6 +64,8 @@ export class BatchConfigDialogComponent implements OnInit {
     activeParticipants = signal<User[]>([]);
 
     currentBatchTests = signal<ApiTest[]>([]);
+    emailList = signal<string[]>([]);
+    emailInputControl = new FormControl('');
 
 
     currentJobs = [
@@ -193,6 +195,12 @@ export class BatchConfigDialogComponent implements OnInit {
         // Sync existing cron string into the editor
         this.parseCronToEditor(this.data.cronExpression ?? '');
 
+        // Populate existing jobs and emails from batch data
+        this.currentBatchTests.set(
+            (this.data.jobs ?? []).map(j => ({ id: j.id, name: j.name }))
+        );
+        this.emailList.set(this.data.emails ?? []);
+
         this.searchControl.valueChanges.pipe(
             debounceTime(200),
             distinctUntilChanged(),
@@ -273,6 +281,19 @@ export class BatchConfigDialogComponent implements OnInit {
         this.populateActiveParticipants();
     }
 
+    addEmail(): void {
+        const email = this.emailInputControl.value?.trim() ?? '';
+        if (!email) return;
+        if (!this.emailList().includes(email)) {
+            this.emailList.update(list => [...list, email]);
+        }
+        this.emailInputControl.setValue('');
+    }
+
+    removeEmail(email: string): void {
+        this.emailList.update(list => list.filter(e => e !== email));
+    }
+
 
     /* Jobs */
 
@@ -300,7 +321,8 @@ export class BatchConfigDialogComponent implements OnInit {
         }
         const newBatch = {
             ...this.form.value,
-            jobs: this.currentJobs,
+            jobs: this.currentBatchTests(),
+            emails: this.emailList(),
             isNew: this.isNew
         };
 
