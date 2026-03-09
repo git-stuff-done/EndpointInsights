@@ -14,7 +14,7 @@ import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
-import {HttpResponse} from "@angular/common/http";
+import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 
 @Component({
     selector: 'app-batches',
@@ -78,7 +78,19 @@ export class BatchComponent implements OnInit, OnDestroy {
         });
     }
 
-    onDelete(batch: Batch){ console.log('Delete Clicked') }
+    onDelete(batch: Batch){
+        this.dialog.open(DeleteBatchModalComponent, {
+            width: '400px',
+            height:'auto',
+            data: batch
+        }).afterClosed().subscribe(confirmed => {
+            console.log('Dialog closed, confirmed:', confirmed);
+            if (confirmed) {
+                console.log('Calling loadBatches');
+                this.loadBatches();
+            }
+        });
+    }
     onFilter() { console.log('Filter Button clicked'); }
 
     openCreateBatchModal() {

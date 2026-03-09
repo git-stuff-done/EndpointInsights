@@ -163,10 +163,4 @@ describe('BatchComponent', () => {
     expect(sub.unsubscribe).toHaveBeenCalled();
   });
 
-  it('onDelete and onFilter simply log to console', () => {
-    const consoleSpy = spyOn(console, 'log');
-    component.onDelete(mockBatches[0]);
-    component.onFilter();
-    expect(consoleSpy).toHaveBeenCalled();
-  });
 });
