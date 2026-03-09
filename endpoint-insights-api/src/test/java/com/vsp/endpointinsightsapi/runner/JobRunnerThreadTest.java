@@ -60,7 +60,7 @@ class JobRunnerThreadTest {
         testRun.setJobId(job.getJobId());
 
         when(testRunRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        when(gitService.cloneRepository(any(), any(), any())).thenReturn(null);
+        doReturn(null).when(gitService).cloneRepository(any(), any(), any());
     }
 
     private JobRunnerThread newThread() {
