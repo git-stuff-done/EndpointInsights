@@ -19,7 +19,7 @@ import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/dele
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, BatchCardComponent, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+    imports: [CommonModule,MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })

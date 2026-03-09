@@ -24,8 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -83,9 +82,15 @@ public class JobsController {
 		 testRun.setRunBy("system"); //todo: needs to be updated
 		 testRun = testRunRepository.save(testRun);
 
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, gitService, jMeterCommandEnhancer));
+        Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, failedTestRuns, gitService, jMeterCommandEnhancer));
 		t.start();
 
+        // TODO, add check to make sure all threads finish before proceeding to email
+
+         if(!failedTestRuns.isEmpty()) {
+             //Send ids of failed jobs to email service.
+         }
 		return ResponseEntity.ok(testRun);
 	 }
 

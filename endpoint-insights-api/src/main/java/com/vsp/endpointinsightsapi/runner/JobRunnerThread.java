@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public class JobRunnerThread implements Runnable {
@@ -25,15 +27,19 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
+    private final Collection<TestRun> failedTests;
+	private File tempDir = null;
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandEnhancer;
 
     private File jobProjectRepoDirectory = null;
 
-	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+
+    public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, Collection<TestRun> failedTests,GitService gitService,JMeterCommandService jMeterCommandEnhancer) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
+        this.failedTests = failedTests;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 
@@ -81,6 +87,7 @@ public class JobRunnerThread implements Runnable {
             LOG.error("Running job failed with exception: {}", e.getMessage());
             testRun.setStatus(TestRunStatus.FAILED);
             testRun.setFinishedAt(Instant.now());
+            this.failedTests.add(testRun);
             testRunRepository.save(testRun);
 
         } finally {
@@ -137,7 +144,7 @@ public class JobRunnerThread implements Runnable {
 
 	private Optional<File> executeTest(File workingDirectory) {
 		try {
-			String jmeterTestName = job.getJmeterTestName();
+            String jmeterTestName = job.getJmeterTestName();
             if (jmeterTestName == null || jmeterTestName.trim().isEmpty()) {
                 LOG.error("No jmeter test name provided for job: {}", job.getName());
                 return Optional.empty();
@@ -148,10 +155,11 @@ public class JobRunnerThread implements Runnable {
             File resultFile = new File(workingDirectory, resultFileName);
             String[] command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
 
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            ProcessBuilder processBuilder;
+            processBuilder = new ProcessBuilder(command);
 
-            LOG.info("Executing run command for job: {}", job.getName());
-            LOG.info("Command: {}", Arrays.stream(command).reduce("", (a, b) -> a + " " + b));
+            LOG.info("Executing enhanced command for job: {}", job.getName());
+            LOG.info("Command: {}", Arrays.stream(command).reduce("", String::concat));
 
             Process process = processBuilder.start();
 
@@ -194,10 +202,11 @@ public class JobRunnerThread implements Runnable {
 					deleteRecursively(child);
 				}
 			}
-		} else if (!file.setWritable(true)) {
-            LOG.warn("Failed to delete file or directory: unable to set {} as writable",  file.getAbsolutePath());
-        }
+		}
 
+        if (!file.setWritable(true)) {
+            throw new IOException("Failed to delete file or directory: unable to set " + file.getAbsolutePath() + " as writable");
+        }
 		if (!file.delete()) {
 			throw new IOException("Failed to delete file or directory: " + file.getAbsolutePath());
 		}
