@@ -54,7 +54,6 @@ public class JobControllerUnitTest {
 	@MockitoBean
 	private NotificationService notificationService;
 
-	@Test
     @MockitoBean
     private GitService gitService;
 
