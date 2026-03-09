@@ -1,0 +1,20 @@
+services:
+  app:
+    image: ghcr.io/git-stuff-done/endpoint-insights-api:develop
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_USERNAME_CLAIM: preferred_username
+      AUTH_EMAIL_CLAIM: email
+      AUTH_GROUPS_CLAIM: groups
+##    The options below should be set using a .env file. See .env.example for an example.
+#      DB_NAME: endpoint-insights
+#      DB_PASSWORD: password
+#      DB_URI: postgresql://db:5432/endpoint-insights
+#
+#      OIDC_CLIENT_ID: endpoint-insights
+#      OIDC_CLIENT_SECRET: insecure_secret
+#      OIDC_ISSUER_URI: https://auth.example.com
+#      OIDC_CLIENT_REDIRECT_URI: http://localhost:8080/login/oauth2/code/oidc

@@ -4,7 +4,6 @@ import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -64,20 +63,5 @@ public class BatchesController {
 		batchService.deleteBatchById(id);
         return ResponseEntity.noContent().build();
 	}
-
-    // GET /api/batches/{id}/emails
-    @GetMapping("/{id}/emails")
-    public ResponseEntity<List<String>> getEmails(@PathVariable UUID id) {
-        List<String> emails =  batchService.getEmailsForBatch(id);
-        return ResponseEntity.ok(emails);
-    }
-
-    // PUT /api/batches/{id}/emails
-    @PutMapping("/{id}/emails")
-    public ResponseEntity<List<String>> updateEmails(@PathVariable UUID id, @RequestBody List<String> emails) {
-        batchService.updateEmailsForBatch(id, emails);
-        List<String> updatedEmails =  batchService.getEmailsForBatch(id);
-        return ResponseEntity.ok(updatedEmails);
-    }
 
 }

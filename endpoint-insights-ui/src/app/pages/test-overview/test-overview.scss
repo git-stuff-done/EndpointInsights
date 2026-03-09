@@ -4,10 +4,43 @@
 .button-container {
     outline-offset: -5px;
     display: flex;
-    justify-content: left; /* centers horizontally */
-    align-items: center;     /* centers vertically (if height set) */
+    justify-content: space-between;
+    align-items: center;
     margin: 20px 10px;
-    padding: 10px
+    padding: 10px;
+}
+
+.search-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn {
+    padding: 10px 12px;
+    flex-shrink: 0;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    z-index: 1;
+    color: rgba(0, 0, 0, 0.54);
+    pointer-events: none;
+}
+
+.search-field {
+    width: 300px;
+}
+
+::ng-deep .search-field input {
+    padding-left: 36px !important;
 }
 
 .elevated-btn {
@@ -51,7 +84,7 @@
     padding: 8px 14px;
     background:#f9fafb;
     border-bottom:1px solid #e5e7eb;
-    position: sticky;  /* optional: keep visible while scrolling */
+    position: sticky;
     top: 0;
     z-index: 2;
 }

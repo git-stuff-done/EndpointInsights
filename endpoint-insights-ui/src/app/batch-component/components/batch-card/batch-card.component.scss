@@ -63,3 +63,12 @@ button[mat-stroked-button]:active {
   .row { flex-direction: column; align-items: stretch; }
   .actions { justify-content: flex-end; }
 }
+.close-batch {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  padding: 2px;
+  border: none;
+  box-shadow: none;
+  color: grey;
+}
