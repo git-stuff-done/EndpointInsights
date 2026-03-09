@@ -155,7 +155,7 @@ class JobRunnerThreadTest {
         job.setCompileCommand(null);
         job.setJmeterTestName("test.jmx");
 
-        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
 
         JobRunnerThread thread = newThread();
@@ -199,7 +199,7 @@ class JobRunnerThreadTest {
         job.setCompileCommand(null);
         job.setJmeterTestName("test.jmx");
 
-        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
 
         JobRunnerThread thread = newThread();
@@ -221,11 +221,11 @@ class JobRunnerThreadTest {
         );
 
         job.setJmeterTestName("test.jmx");
-        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
         UUID resultId = UUID.randomUUID();
-        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(true, resultId));
 
         JobRunnerThread thread = newThread();
@@ -234,7 +234,7 @@ class JobRunnerThreadTest {
         assertEquals(TestRunStatus.COMPLETED, testRun.getStatus());
         assertEquals(resultId, testRun.getResultId());
         assertNotNull(testRun.getFinishedAt());
-        verify(jMeterInterpreterService).processResults(any(File.class), any(UUID.class));
+        verify(jMeterInterpreterService).processResults(nullable(File.class), any(UUID.class));
     }
 
     @Test
@@ -249,10 +249,10 @@ class JobRunnerThreadTest {
         );
 
         job.setJmeterTestName("test.jmx");
-        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
-        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(false, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
@@ -273,14 +273,14 @@ class JobRunnerThreadTest {
         );
 
         job.setJmeterTestName("test.jmx");
-        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
-        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(true, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
         thread.run();
 
-        verify(jMeterCommandEnhancer).getRunCommand(any(File.class), eq("test.jmx"), anyString());
+        verify(jMeterCommandEnhancer).getRunCommand(nullable(File.class), eq("test.jmx"), anyString());
     }
 }
