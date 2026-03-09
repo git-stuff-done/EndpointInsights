@@ -16,6 +16,7 @@ import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/lis
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
+import {JobsApi} from "../../../jobsApi/jobsApi";
 
 
 export interface ApiTest {
@@ -51,7 +52,8 @@ export class BatchConfigDialogComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly data = inject<Batch>(MAT_DIALOG_DATA);
     private readonly batchService = inject(BatchService);
-    private readonly userService = inject(UserService)
+    private readonly userService = inject(UserService);
+    private readonly jobsApi = inject(JobsApi);
     private readonly dialogRef = inject(MatDialogRef<BatchConfigDialogComponent>);
     isNew = !this.data.id;
 
@@ -68,19 +70,8 @@ export class BatchConfigDialogComponent implements OnInit {
     emailInputControl = new FormControl('');
 
 
-    currentJobs = [
-        {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
-    ]
-
     // All available tests that can be added (bottom list in Settings tab)
-    availableTests = signal<ApiTest[]>([
-        {id: '1', name: 'Vision API'},
-        {id: '2', name: 'Open API'},
-        {id: '3', name: 'Records API'},
-        {id: '4', name: 'Vision Express API'},
-        {id: '5', name: 'Auth API'},
-        {id: '6', name: 'Payment API'},
-    ]);
+    availableTests = signal<ApiTest[]>([]);
 
     // Search term for filtering available tests
     searchTerm = signal('');
@@ -213,6 +204,16 @@ export class BatchConfigDialogComponent implements OnInit {
         });
 
         this.populateActiveParticipants();
+
+        this.jobsApi.getAllJobs().subscribe({
+            next: (jobs) => {
+                this.availableTests.set(jobs.map(j => ({ id: j.id, name: j.name })));
+                this.loading.set(false);
+            },
+            error: () => {
+                this.loading.set(false);
+            }
+        });
     }
 
 
