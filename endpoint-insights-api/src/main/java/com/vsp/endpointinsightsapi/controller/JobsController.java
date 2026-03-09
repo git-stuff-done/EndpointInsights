@@ -1,8 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
-import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
-import com.vsp.endpointinsightsapi.model.*;
 
-import com.vsp.endpointinsightsapi.authentication.PublicAPI;
+import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobRun;
@@ -10,6 +8,8 @@ import com.vsp.endpointinsightsapi.model.JobRunHistory;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.GitService;
+import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
@@ -24,8 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -38,22 +37,28 @@ public class JobsController {
 	private final JMeterInterpreterService jMeterInterpreterService;
 	private final TestRunRepository testRunRepository;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository) {
+    private final GitService gitService;
+    private final JMeterCommandService jMeterCommandEnhancer;
+
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository, GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
 		this.testRunRepository = testRunRepository;
+        this.gitService = gitService;
+        this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 	}
 
 	/**
 	 * Endpoint to create a job.
 	 *
-	 * @param request the job details
+	 * @param jobRequest the job details
 	 * @return the created Job
 	 * */
 	@PostMapping
 	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
 	 		Job job = jobService.createJob(jobRequest);
+             //TODO: Sanitize user input `job`
 	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
@@ -77,9 +82,15 @@ public class JobsController {
 		 testRun.setRunBy("system"); //todo: needs to be updated
 		 testRun = testRunRepository.save(testRun);
 
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService));
+        Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, failedTestRuns, gitService, jMeterCommandEnhancer));
 		t.start();
 
+        // TODO, add check to make sure all threads finish before proceeding to email
+
+         if(!failedTestRuns.isEmpty()) {
+             //Send ids of failed jobs to email service.
+         }
 		return ResponseEntity.ok(testRun);
 	 }
 
@@ -163,7 +174,7 @@ public class JobsController {
 			@PathVariable("id")
 			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
 			String jobId) {
-		// note to implementer: this is a great place to put some serious service level logic to aggregate data
+		// note to implementer: this is a great place t1 put some serious service level logic to aggregate data
 		return ResponseEntity.ok(new JobRunHistory(List.of(new JobRun(UUID.fromString("1"), jobId))));
 	}
 
@@ -180,8 +191,5 @@ public class JobsController {
 			UUID jobId) {
 		return ResponseEntity.ok(new GitCheckoutResponse(jobId, jobService.checkoutJobRepository(jobId)));
 	}
-
-
-
 
 }

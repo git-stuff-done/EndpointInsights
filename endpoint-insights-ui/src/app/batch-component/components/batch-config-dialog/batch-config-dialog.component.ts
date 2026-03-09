@@ -67,6 +67,11 @@ export class BatchConfigDialogComponent implements OnInit {
     emailList = signal<string[]>([]);
     emailInputControl = new FormControl('');
 
+
+    currentJobs = [
+        {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
+    ]
+
     // All available tests that can be added (bottom list in Settings tab)
     availableTests = signal<ApiTest[]>([
         {id: '1', name: 'Vision API'},
