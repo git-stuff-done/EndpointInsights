@@ -216,9 +216,9 @@ describe('CreateJobForm', () => {
     });
 
     describe('Run Command Field Validation', () => {
-        it('should be invalid when runCommand is empty', () => {
+        it('should be valid if runCommand is empty', () => {
             const runCommandControl = component.createJobForm.get('runCommand');
-            expect(runCommandControl?.hasError('required')).toBeTruthy();
+            expect(runCommandControl?.hasError('required')).toBeFalsy();
         });
 
         it('should be invalid when runCommand is less than 3 characters', () => {
@@ -247,9 +247,9 @@ describe('CreateJobForm', () => {
     });
 
     describe('Compile Command Field Validation', () => {
-        it('should be invalid when compileCommand is empty', () => {
+        it('should be valid if compileCommand is empty', () => {
             const compileCommandControl = component.createJobForm.get('compileCommand');
-            expect(compileCommandControl?.hasError('required')).toBeTruthy();
+            expect(compileCommandControl?.hasError('required')).toBeFalsy();
         });
 
         it('should be invalid when compileCommand is less than 3 characters', () => {
@@ -274,6 +274,31 @@ describe('CreateJobForm', () => {
             const compileCommandControl = component.createJobForm.get('compileCommand');
             compileCommandControl?.setValue('npm run build');
             expect(compileCommandControl?.valid).toBeTruthy();
+        });
+    });
+
+    describe('onSshKeyFileSelected', () => {
+        it('should update gitSshPrivateKey value when a file is selected', () => {
+            const mockFile = new File(['mock-private-key'], 'id_rsa', { type: 'text/plain' });
+            const event = { target: { files: [mockFile] } } as unknown as Event;
+            spyOn(window as any, 'FileReader').and.returnValue({
+                readAsText: function() {
+                    this.onload({ target: { result: 'mock-private-key' } });
+                },
+                onload: null,
+                result: 'mock-private-key'
+            });
+            component.onSshKeyFileSelected(event);
+            console.log('Filename after selection:', component.filename);
+            console.log('gitSshPrivateKey value after selection:', component.createJobForm.get('gitSshPrivateKey')?.value);
+            expect(component.filename).toBe('id_rsa');
+            expect(component.createJobForm.get('gitSshPrivateKey')?.value).toBe('mock-private-key');
+        });
+        it('should not update gitSshPrivateKey value when no file is selected', () => {
+            const event = { target: { files: [] } } as unknown as Event;
+            component.onSshKeyFileSelected(event);
+            const keyControl = component.createJobForm.get('gitSshPrivateKey');
+            expect(keyControl?.value).toBe('');
         });
     });
 
@@ -348,7 +373,7 @@ describe('CreateJobForm', () => {
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
                 jobType: 'jmeter',
-                runCommand: 'npm run test',
+                jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
 
@@ -396,7 +421,7 @@ describe('CreateJobForm', () => {
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
                 jobType: 'jmeter',
-                runCommand: 'npm run test',
+                jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
 
