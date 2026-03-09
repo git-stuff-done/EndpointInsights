@@ -30,12 +30,12 @@ public class JobRunnerThread implements Runnable {
     private final Collection<TestRun> failedTests;
 	private File tempDir = null;
     private final GitService gitService;
-    private final JMeterCommandEnhancer jMeterCommandEnhancer;
+    private final JMeterCommandService jMeterCommandEnhancer;
 
     private File jobProjectRepoDirectory = null;
 
 
-    public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, Collection<TestRun> failedTests,GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
+    public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, Collection<TestRun> failedTests,GitService gitService,JMeterCommandService jMeterCommandEnhancer) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
@@ -76,7 +76,7 @@ public class JobRunnerThread implements Runnable {
 
             LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
-            TestRunResult pass = testInterpreter.processResults(testResultFile.get());
+            TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId());
 
             testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
             testRun.setResultId(pass.resultId());
@@ -144,16 +144,16 @@ public class JobRunnerThread implements Runnable {
 
 	private Optional<File> executeTest(File workingDirectory) {
 		try {
-			String originalCommand = job.getRunCommand();
-            if (originalCommand == null || originalCommand.trim().isEmpty()) {
-                LOG.error("No run command provided for job: {}", job.getName());
+            String jmeterTestName = job.getJmeterTestName();
+            if (jmeterTestName == null || jmeterTestName.trim().isEmpty()) {
+                LOG.error("No jmeter test name provided for job: {}", job.getName());
                 return Optional.empty();
             }
 
             String resultFileName = generateResultFileName();
 
             File resultFile = new File(workingDirectory, resultFileName);
-            String[] command = jMeterCommandEnhancer.enhanceRunCommand(originalCommand, resultFileName);
+            String[] command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
 
             ProcessBuilder processBuilder;
             processBuilder = new ProcessBuilder(command);
