@@ -13,6 +13,7 @@ import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
+import com.vsp.endpointinsightsapi.service.NotificationService;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -33,17 +34,19 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
-
 	private final JMeterInterpreterService jMeterInterpreterService;
 	private final TestRunRepository testRunRepository;
-
+	private final NotificationService notificationService;
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandEnhancer;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService, TestRunRepository testRunRepository, GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
+						  TestRunRepository testRunRepository, NotificationService notificationService,
+                          GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
 		this.jobService = jobService;
 		this.jMeterInterpreterService = jMeterInterpreterService;
 		this.testRunRepository = testRunRepository;
+		this.notificationService = notificationService;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 	}
@@ -83,7 +86,7 @@ public class JobsController {
 		 testRun = testRunRepository.save(testRun);
 
         Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, failedTestRuns, gitService, jMeterCommandEnhancer));
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, failedTestRuns, gitService, jMeterCommandEnhancer));
 		t.start();
 
         // TODO, add check to make sure all threads finish before proceeding to email
