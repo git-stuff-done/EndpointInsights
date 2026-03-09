@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import {HttpHeaders} from '@angular/common/http';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import {HttpHeaders, provideHttpClient} from '@angular/common/http';
+import {HttpClientTestingModule, HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
 import { BehaviorSubject } from 'rxjs';
 import { AuthenticationService } from './authentication.service';
 import { HttpInterceptorService } from './http-interceptor.service';
@@ -12,68 +12,76 @@ class AuthenticationServiceStub {
   }
 }
 
+
 describe('HttpInterceptorService', () => {
-  let service: HttpInterceptorService;
-  let authStub: AuthenticationServiceStub;
-  let httpMock: HttpTestingController;
+    let service: HttpInterceptorService;
+    let authStub: AuthenticationServiceStub;
+    let httpMock: HttpTestingController;
 
-  beforeEach(() => {
-    authStub = new AuthenticationServiceStub();
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
-        HttpInterceptorService,
-        { provide: AuthenticationService, useValue: authStub }
-      ]
+    beforeEach(() => {
+        authStub = new AuthenticationServiceStub();
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
+            providers: [
+                HttpInterceptorService,
+                { provide: AuthenticationService, useValue: authStub }
+            ]
+        });
+        httpMock = TestBed.inject(HttpTestingController);
+        service = TestBed.inject(HttpInterceptorService);
     });
-    httpMock = TestBed.inject(HttpTestingController);
-    service = TestBed.inject(HttpInterceptorService);
-  });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  it('injectAuthenticationToken adds Authorization header when token present', () => {
-    authStub.authState$.next(true);
-
-    const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
-
-    expect(headers.get('Authorization')).toBe('Bearer test-token');
-  });
-
-  it('injectAuthenticationToken keeps headers when no token', () => {
-    authStub.authState$.next(false);
-
-    const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
-
-    expect(headers.has('Authorization')).toBeFalse();
-  });
-
-it('should make a GET request', () => {
-    service.get('/api/test').subscribe(response => {
-        expect(response).toBeTruthy();
+    it('should be created', () => {
+        expect(service).toBeTruthy();
     });
-    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
-    expect(req.request.method).toBe('GET');
-    req.flush({});
-});
 
-it('should make a POST request', () => {
-    service.post('/api/test', { name: 'test' }).subscribe(response => {
-        expect(response).toBeTruthy();
+    it('injectAuthenticationToken adds Authorization header when token present', () => {
+        authStub.authState$.next(true);
+
+        const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
+
+        expect(headers.get('Authorization')).toBe('Bearer test-token');
     });
-    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
-    expect(req.request.method).toBe('POST');
-    req.flush({});
-});
 
-it('should make a PUT request', () => {
-    service.put('/api/test', { name: 'test' }).subscribe(response => {
-        expect(response).toBeTruthy();
+    it('injectAuthenticationToken keeps headers when no token', () => {
+        authStub.authState$.next(false);
+
+        const headers = (service as any).injectAuthenticationToken(new HttpHeaders());
+
+        expect(headers.has('Authorization')).toBeFalse();
     });
-    const req = httpMock.expectOne(r => r.url.includes('/api/test'));
-    expect(req.request.method).toBe('PUT');
-})
 
+    it('should make a GET request', () => {
+        service.get('/api/test').subscribe(response => {
+            expect(response).toBeTruthy();
+        });
+        const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+        expect(req.request.method).toBe('GET');
+        req.flush({});
+    });
+
+    it('should make a POST request', () => {
+        service.post('/api/test', { name: 'test' }).subscribe(response => {
+            expect(response).toBeTruthy();
+        });
+        const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+        expect(req.request.method).toBe('POST');
+        req.flush({});
+    });
+
+    it('should make a PUT request', () => {
+        service.put('/api/test', { name: 'test' }).subscribe(response => {
+            expect(response).toBeTruthy();
+        });
+        const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+        expect(req.request.method).toBe('PUT');
+    })
+
+    it('should make a DELETE request', () => {
+        service.delete('/api/test').subscribe(response => {
+            expect(response).toBeTruthy();
+        });
+        const req = httpMock.expectOne(r => r.url.includes('/api/test'));
+        expect(req.request.method).toBe('DELETE');
+    })
 });

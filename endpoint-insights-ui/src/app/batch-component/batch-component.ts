@@ -9,15 +9,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { BatchCardComponent } from './components/batch-card/batch-card.component';
 import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
+import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+    imports: [CommonModule,MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
@@ -76,7 +78,19 @@ export class BatchComponent implements OnInit, OnDestroy {
         });
     }
 
-    onDelete(batch: Batch){ console.log('Delete Clicked') }
+    onDelete(batch: Batch){
+        this.dialog.open(DeleteBatchModalComponent, {
+            width: '400px',
+            height:'auto',
+            data: batch
+        }).afterClosed().subscribe(confirmed => {
+            console.log('Dialog closed, confirmed:', confirmed);
+            if (confirmed) {
+                console.log('Calling loadBatches');
+                this.loadBatches();
+            }
+        });
+    }
     onFilter() { console.log('Filter Button clicked'); }
 
     openCreateBatchModal() {
