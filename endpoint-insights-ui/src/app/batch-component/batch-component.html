@@ -1,66 +1,16 @@
-<main>
+<main class="container-fluid py-3">
     <div class="button-container">
-        <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
-            <span>New Batch</span>
-            <mat-icon fontIcon="add"></mat-icon>
-        </button>
-        <div class="search-group">
-            <div class="search-wrapper">
-                <mat-icon class="search-icon">search</mat-icon>
-                <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-                    <input matInput [formControl]="searchControl" placeholder="Search batches...">
-                </mat-form-field>
-            </div>
-            <button class="filter-btn elevated-btn" [matMenuTriggerFor]="filterMenu"
-                [matBadge]="hasActiveFilter ? '!' : ''" matBadgeSize="small" matBadgeColor="accent">
-                <mat-icon>filter_list</mat-icon>
-            </button>
-            <mat-menu #filterMenu="matMenu">
-                <button mat-menu-item (click)="setStatusFilter('all')">
-                    <mat-icon>{{ statusFilter === 'all' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
-                    All
-                </button>
-                <button mat-menu-item (click)="setStatusFilter('active')">
-                    <mat-icon>{{ statusFilter === 'active' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
-                    Active
-                </button>
-                <button mat-menu-item (click)="setStatusFilter('inactive')">
-                    <mat-icon>{{ statusFilter === 'inactive' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
-                    Inactive
-                </button>
-            </mat-menu>
-        </div>
+    <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
+        <span>New Batch</span>
+        <mat-icon fontIcon="add"></mat-icon>
+    </button>
     </div>
-    <div class="batch-list-container">
-        <div class="batch-header-row">
-            <div class="batch-headers">
-                <h3>Batch Name</h3>
-                <h3>Batch ID</h3>
-                <h3>Start Time</h3>
-                <h3>Last Run</h3>
-            </div>
-            <div class="filter-btn">
-                <button mat-icon-button class="elevated-btn mat-elev-2" color="basic" (click)="onFilter()">
-                    <mat-icon>filter_list</mat-icon>
-                </button>
-            </div>
-        </div>
-        <!-- List -->
-        <div class="batch-list">
-            <div class="batch-row" *ngFor="let b of batch">
-                <div class="cell name">
-                    <span class="title">{{ b.batchName }}</span>
-                     <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>
-                </div>
-                <div class="cell id">{{ b.id }}</div>
-                <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-                <div class="cell lastRun">{{ b.lastRunTime ? (b.lastRunTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-
-                 <div class="cell actions" (click)="$event.stopPropagation()">
-                     <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Edit" (click)="onConfigure(b)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Delete" (click)="onDelete(b)"><mat-icon>delete</mat-icon></button>
-                </div>
-            </div>
-        </div>
-    </div>
+  <section class="grid">
+    <app-batch-card
+      *ngFor="let b of batch; trackBy: trackById"
+      [batch]="b"
+      (configure)="onConfigure($event)">
+    >
+    </app-batch-card>
+  </section>
 </main>

@@ -4,7 +4,6 @@ import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {CreateJobModal} from './create-job-modal';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CreateJobModal', () => {
     let component: CreateJobModal;
@@ -16,7 +15,7 @@ describe('CreateJobModal', () => {
         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
         await TestBed.configureTestingModule({
-            imports: [CreateJobModal, HttpClientTestingModule],
+            imports: [CreateJobModal,],
             providers: [
                 {provide: MatDialogRef, useValue: mockDialogRef},
                 provideNoopAnimations()
@@ -68,7 +67,7 @@ describe('CreateJobModal', () => {
             const mockCreateJobForm = jasmine.createSpyObj('CreateJobForm', ['submitForm']);
             component.createJobForm = mockCreateJobForm;
 
-            component.onSubmit(mockCreateJobForm);
+            component.onSubmit();
 
             expect(mockCreateJobForm.submitForm).toHaveBeenCalledTimes(1);
         });

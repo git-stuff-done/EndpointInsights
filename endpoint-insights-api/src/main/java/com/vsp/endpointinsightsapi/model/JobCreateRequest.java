@@ -28,8 +28,6 @@ public class JobCreateRequest {
 
     private String compileCommand;
 
-    private String jmeterTestName;
-
     @NotNull(message = "testType is required")
     private TestType testType;
 

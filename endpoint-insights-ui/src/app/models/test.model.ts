@@ -13,7 +13,6 @@ export interface TestItem {
     gitSshPassphrase?: string;
     runCommand: string;
     compileCommand: string;
-    jmeterTestName?: string;
     jobType: string;
     createdAt: Date | string;
     createdBy: string;

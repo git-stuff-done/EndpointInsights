@@ -12,7 +12,7 @@ public class BatchUpdateRequest {
 
 	public String cronExpression;
 	public String batchName;
-	public List<UUID> jobs;
-	public List<String> emails;
+	public List<UUID> addJobs;
+	public List<UUID> deleteJobs;
 
 }

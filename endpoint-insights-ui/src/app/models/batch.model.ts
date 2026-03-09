@@ -16,6 +16,5 @@ export interface Batch {
     description?: string;
     active: boolean;
     jobs: Job[];
-    emails?: string[];
     isNew?: boolean;
 }

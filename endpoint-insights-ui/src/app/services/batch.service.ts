@@ -24,10 +24,6 @@ export class BatchService {
         return this.batchApi.saveBatch(form)
     }
 
-    deleteBatch(batch:Batch):Observable<HttpResponse<Batch>>{
-        return this.batchApi.deleteBatch(batch.id)
-    }
-
     /** Simulated PATCH/PUT: update name; return updated meta */
     updateBatchName(batchId: string, name: string): Observable<BatchMeta> {
         // TODO: replace with real HTTP call

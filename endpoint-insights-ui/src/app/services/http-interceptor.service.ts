@@ -32,7 +32,7 @@ export class HttpInterceptorService {
   }
 
   delete<T>(url: string, headers?: HttpHeaders) : Observable<HttpResponse<T>> {
-    headers = this.injectAuthenticationToken(headers);
+    this.injectAuthenticationToken(headers);
     return this.httpClient.delete<T>(url, {headers: headers, observe: 'response'});
   }
 

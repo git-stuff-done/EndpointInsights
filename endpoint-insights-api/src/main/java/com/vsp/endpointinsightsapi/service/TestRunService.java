@@ -1,14 +1,8 @@
 package com.vsp.endpointinsightsapi.service;
 
-import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
-import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
-import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class TestRunService {
@@ -31,12 +19,10 @@ public class TestRunService {
 
 	private final TestRunRepository testRunRepository;
 	private final JobRepository jobRepository;
-	private final TestBatchRepository testBatchRepository;
 
-	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository, TestBatchRepository testBatchRepository) {
+	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository) {
 		this.testRunRepository = testRunRepository;
 		this.jobRepository = jobRepository;
-		this.testBatchRepository = testBatchRepository;
 	}
 
 	public TestRun createTestRun(TestRun testRun) {
@@ -53,71 +39,5 @@ public class TestRunService {
 		return testRunRepository
 				.findAllByOrderByFinishedAtDesc(PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt")))
 				.getContent();
-	}
-
-	public List<RecentActivityDTO> getRecentActivity(int limit) {
-		int safeLimit = Math.max(1, Math.min(limit, 100));
-		List<TestRun> runs = testRunRepository
-				.findAllByOrderByFinishedAtDesc(PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt")))
-				.getContent();
-
-		Set<UUID> jobIds = runs.stream().map(TestRun::getJobId).collect(Collectors.toSet());
-		Set<UUID> batchIds = runs.stream()
-				.map(TestRun::getBatchId)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-
-		Map<UUID, Job> jobMap = jobRepository.findAllById(jobIds).stream()
-				.collect(Collectors.toMap(Job::getJobId, j -> j));
-		Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
-				.collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
-
-		return runs.stream().map(run -> {
-			Job job = jobMap.get(run.getJobId());
-			TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
-
-			long durationMs = 0;
-			if (run.getStartedAt() != null && run.getFinishedAt() != null) {
-				durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
-			}
-
-			return RecentActivityDTO.builder()
-					.runId(run.getRunId().toString())
-					.testName(job != null ? job.getName() : "Unknown")
-					.group(deriveScheduleType(batch))
-					.dateRun(run.getStartedAt())
-					.durationMs(durationMs)
-					.startedBy(run.getRunBy())
-					.status(toDisplayStatus(run.getStatus()))
-					.build();
-		}).collect(Collectors.toList());
-	}
-
-	private String toDisplayStatus(TestRunStatus status) {
-		return switch (status) {
-			case COMPLETED -> "PASS";
-			case FAILED -> "FAIL";
-			default -> status.name();
-		};
-	}
-
-	private String deriveScheduleType(TestBatch batch) {
-		if (batch == null || batch.getCronExpression() == null) return "N/A";
-		String[] parts = batch.getCronExpression().trim().split("\\s+");
-		if (parts.length < 6) return "Custom";
-		String dayOfWeek = parts[5];
-		return ("*".equals(dayOfWeek) || "?".equals(dayOfWeek)) ? "Daily" : "Weekly";
-	}
-
-	public TestRun getTestRunById(UUID runId) {
-		return testRunRepository.findById(runId)
-				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
-	}
-
-	public void deleteTestRunById(UUID runId) {
-		if (!testRunRepository.existsById(runId)) {
-			throw new TestRunNotFoundException(runId.toString());
-		}
-		testRunRepository.deleteById(runId);
 	}
 }
