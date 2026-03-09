@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public class JobRunnerThread implements Runnable {
@@ -26,19 +28,23 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
+    private final Collection<TestRun> failedTests;
+	private File tempDir = null;
 	private final NotificationService notificationService;
     private final GitService gitService;
-    private final JMeterCommandEnhancer jMeterCommandEnhancer;
+    private final JMeterCommandService jMeterCommandEnhancer;
+
     private File jobProjectRepoDirectory = null;
 
 	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
 						   JMeterInterpreterService jMeterInterpreterService,
-						   NotificationService notificationService,
-                           GitService gitService, JMeterCommandEnhancer jMeterCommandEnhancer) {
+						   NotificationService notificationService, Collection<TestRun> failedTests,
+                           GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
 		this.notificationService = notificationService;
+        this.failedTests = failedTests;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 
@@ -60,8 +66,10 @@ public class JobRunnerThread implements Runnable {
 			testRun.setStatus(TestRunStatus.RUNNING);
 			testRunRepository.save(testRun);
 
+			// step 3 - execute test
 			Optional<File> testResultFile = executeTest(workingDirectory);
 
+			// step 4 - interpret results
             if (testResultFile.isEmpty()) {
                 LOG.info("No test results file available for interpretation");
 
@@ -71,7 +79,7 @@ public class JobRunnerThread implements Runnable {
             } else {
                 LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
-                TestRunResult pass = testInterpreter.processResults(testResultFile.get());
+            TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId());
 
                 testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
                 testRun.setResultId(pass.resultId());
@@ -87,13 +95,14 @@ public class JobRunnerThread implements Runnable {
             LOG.error("Running job failed with exception: {}", e.getMessage());
             testRun.setStatus(TestRunStatus.FAILED);
             testRun.setFinishedAt(Instant.now());
+            this.failedTests.add(testRun);
             testRunRepository.save(testRun);
         } finally {
 			cleanupTempDir();
 		}
 	}
 
-	private void compileTest(File workingDirectory) {
+	private void compileTest(File workingDirectory){
 		try {
 			String compileCommand = job.getCompileCommand();
             if (compileCommand == null || compileCommand.trim().isEmpty()) {
@@ -142,18 +151,19 @@ public class JobRunnerThread implements Runnable {
 
 	private Optional<File> executeTest(File workingDirectory) {
 		try {
-			String originalCommand = job.getRunCommand();
-            if (originalCommand == null || originalCommand.trim().isEmpty()) {
-                LOG.error("No run command provided for job: {}", job.getName());
+            String jmeterTestName = job.getJmeterTestName();
+            if (jmeterTestName == null || jmeterTestName.trim().isEmpty()) {
+                LOG.error("No jmeter test name provided for job: {}", job.getName());
                 return Optional.empty();
             }
 
             String resultFileName = generateResultFileName();
 
             File resultFile = new File(workingDirectory, resultFileName);
-            String[] command = jMeterCommandEnhancer.enhanceRunCommand(originalCommand, resultFileName);
+            String[] command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
 
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            ProcessBuilder processBuilder;
+            processBuilder = new ProcessBuilder(command);
 
             LOG.info("Executing enhanced command for job: {}", job.getName());
             LOG.info("Command: {}", Arrays.stream(command).reduce("", String::concat));

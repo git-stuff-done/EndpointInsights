@@ -1,11 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of, Subscription } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
-import { MatDialog } from '@angular/material/dialog';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BatchComponent } from './batch-component';
-import { Batch } from '../models/batch.model';
 import { BatchService } from '../services/batch.service';
+import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
 
@@ -16,107 +17,136 @@ describe('BatchComponent', () => {
   let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockStore: jasmine.SpyObj<BatchStore>;
 
-  const sampleBatches: Batch[] = [
-    { id: '1', batchName: 'Batch 1', startTime: '', active: true, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
-    { id: '2', batchName: 'Batch 2', startTime: '', active: false, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
+  const mockBatches: Batch[] = [
+    { id: '1', batchName: 'Nightly Build', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
+    { id: '2', batchName: 'Weekly Report', startTime: new Date().toISOString(), active: false, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
+    { id: '3', batchName: 'Auth Tests', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
   ];
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     mockBatchService = jasmine.createSpyObj('BatchService', ['getAllBatches']);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockStore = jasmine.createSpyObj('BatchStore', ['/* methods if needed */']);
+    mockStore = jasmine.createSpyObj('BatchStore', ['setAll', 'update']);
+    mockBatchService.getAllBatches.and.returnValue(of(new HttpResponse({ body: mockBatches })));
 
-    // default getAllBatches to return sample batches wrapped in HttpResponse
-    mockBatchService.getAllBatches.and.returnValue(of(new HttpResponse<Batch[]>({ body: sampleBatches })));
-
-    TestBed.configureTestingModule({
-      imports: [BatchComponent], // component is standalone
+    await TestBed.configureTestingModule({
+      imports: [BatchComponent, HttpClientTestingModule],
       providers: [
+        provideNoopAnimations(),
         { provide: BatchService, useValue: mockBatchService },
         { provide: MatDialog, useValue: mockDialog },
         { provide: BatchStore, useValue: mockStore },
       ],
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(BatchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit should call batchService.getAllBatches and set batch', () => {
-    // ngOnInit already called by fixture.detectChanges() in this setup, but call explicitly to be safe
-    component.ngOnInit();
+  it('should load batches on init', () => {
     expect(mockBatchService.getAllBatches).toHaveBeenCalled();
-    expect(component.batch).toEqual(sampleBatches);
+    expect(component.batch.length).toBe(3);
+  });
+
+  describe('filteredBatches', () => {
+    it('should return all batches when search is empty and filter is "all"', () => {
+      expect(component.filteredBatches.length).toBe(3);
+    });
+
+    it('should filter by name (case-insensitive)', () => {
+      component.searchControl.setValue('nightly');
+      expect(component.filteredBatches.length).toBe(1);
+      expect(component.filteredBatches[0].batchName).toBe('Nightly Build');
+    });
+
+    it('should return empty when search matches nothing', () => {
+      component.searchControl.setValue('zzzzz');
+      expect(component.filteredBatches.length).toBe(0);
+    });
+
+    it('should return only active batches when filter is "active"', () => {
+      component.setStatusFilter('active');
+      expect(component.filteredBatches.length).toBe(2);
+      expect(component.filteredBatches.every(b => b.active)).toBeTrue();
+    });
+
+    it('should return only inactive batches when filter is "inactive"', () => {
+      component.setStatusFilter('inactive');
+      expect(component.filteredBatches.length).toBe(1);
+      expect(component.filteredBatches[0].batchName).toBe('Weekly Report');
+    });
+
+    it('should apply both search and status filter together', () => {
+      component.searchControl.setValue('weekly');
+      component.setStatusFilter('active');
+      expect(component.filteredBatches.length).toBe(0);
+    });
+  });
+
+  describe('hasActiveFilter', () => {
+    it('should return false when statusFilter is "all"', () => {
+      expect(component.hasActiveFilter).toBeFalse();
+    });
+
+    it('should return true when statusFilter is "active" or "inactive"', () => {
+      component.setStatusFilter('active');
+      expect(component.hasActiveFilter).toBeTrue();
+
+      component.setStatusFilter('inactive');
+      expect(component.hasActiveFilter).toBeTrue();
+    });
   });
 
   it('loadBatches should set batch from service response', () => {
-    // change the return value to a different set and call loadBatches
     const other: Batch[] = [
-      { id: '3', batchName: 'Batch 3', startTime: '', active: false, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
+      { id: '4', batchName: 'Batch 4', startTime: '', active: false, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
     ];
     mockBatchService.getAllBatches.and.returnValue(of(new HttpResponse<Batch[]>({ body: other })));
 
     component.loadBatches();
-    expect(mockBatchService.getAllBatches).toHaveBeenCalled();
     expect(component.batch).toEqual(other);
   });
 
   it('trackById returns batch id', () => {
-    const result = (component as any).trackById(0, sampleBatches[0]);
-    expect(result).toBe('1');
+    expect(component.trackById(0, mockBatches[0])).toBe('1');
   });
 
   it('onConfigure opens dialog and calls loadBatches after dialog closes', () => {
-    // Spy on loadBatches
     const loadSpy = spyOn(component, 'loadBatches');
+    mockDialog.open.and.returnValue({ afterClosed: () => of(true) } as any);
 
-    // mock dialog.open(...).afterClosed() returning observable
-    const afterClosed = of(true);
-    mockDialog.open.and.returnValue({ afterClosed: () => afterClosed } as any);
-
-    component.onConfigure(sampleBatches[0]);
+    component.onConfigure(mockBatches[0]);
 
     expect(mockDialog.open).toHaveBeenCalledWith(BatchConfigDialogComponent, jasmine.objectContaining({
       width: '900px',
       height: 'auto',
-      data: sampleBatches[0]
+      data: mockBatches[0],
     }));
-    // since afterClosed emits true, loadBatches should be called
     expect(loadSpy).toHaveBeenCalled();
   });
 
   it('openCreateBatchModal opens dialog with isNew true and reloads on truthy result', () => {
     const loadSpy = spyOn(component, 'loadBatches');
-
-    const dialogRefMock = {
-      afterClosed: () => of(true)
-    };
-    mockDialog.open.and.returnValue(dialogRefMock as any);
+    mockDialog.open.and.returnValue({ afterClosed: () => of(true) } as any);
 
     component.openCreateBatchModal();
 
     expect(mockDialog.open).toHaveBeenCalledWith(BatchConfigDialogComponent, jasmine.objectContaining({
       width: '900px',
       height: 'auto',
-      data: jasmine.objectContaining({ isNew: true })
+      data: jasmine.objectContaining({ isNew: true }),
     }));
     expect(loadSpy).toHaveBeenCalled();
   });
 
   it('openCreateBatchModal does not call loadBatches when dialog result is falsy', () => {
     const loadSpy = spyOn(component, 'loadBatches');
-
-    const dialogRefMock = {
-      afterClosed: () => of(null)
-    };
-    mockDialog.open.and.returnValue(dialogRefMock as any);
+    mockDialog.open.and.returnValue({ afterClosed: () => of(null) } as any);
 
     component.openCreateBatchModal();
 
@@ -124,10 +154,8 @@ describe('BatchComponent', () => {
   });
 
   it('ngOnDestroy unsubscribes from sub when present', () => {
-    // give component a subscription and spy on unsubscribe
     const sub = new Subscription();
     spyOn(sub, 'unsubscribe');
-    // access private sub via any
     (component as any).sub = sub;
 
     component.ngOnDestroy();
@@ -135,10 +163,4 @@ describe('BatchComponent', () => {
     expect(sub.unsubscribe).toHaveBeenCalled();
   });
 
-  it('onDelete and onFilter simply log to console (sanity)', () => {
-    const consoleSpy = spyOn(console, 'log');
-    component.onDelete(sampleBatches[0]);
-    component.onFilter();
-    expect(consoleSpy).toHaveBeenCalled(); // at least one call
-  });
 });
