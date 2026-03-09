@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS test_batch_email_lists (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    batch_id UUID NOT NULL,
+    email VARCHAR(320) NOT NULL,
+    CONSTRAINT fk_batch
+        FOREIGN KEY (batch_id)
+        REFERENCES test_batch (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_test_batch_email_lists_batch_id
+    ON test_batch_email_lists (batch_id);

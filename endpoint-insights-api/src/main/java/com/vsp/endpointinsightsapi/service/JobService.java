@@ -32,6 +32,7 @@ public class JobService {
         job.setGitUrl(jobRequest.getGitUrl());
         job.setRunCommand(jobRequest.getRunCommand());
         job.setCompileCommand(jobRequest.getCompileCommand());
+        job.setJmeterTestName(jobRequest.getJmeterTestName());
         job.setJobType(jobRequest.getTestType());
         job.setConfig(jobRequest.getConfig());
         return jobRepository.save(job);
@@ -61,6 +62,7 @@ public class JobService {
         existingJob.setDescription(job.getDescription());
         existingJob.setTestBatches(job.getTestBatches());
         existingJob.setJobType(job.getJobType());
+        existingJob.setJmeterTestName(job.getJmeterTestName());
         existingJob.setConfig(job.getConfig());
         existingJob.setGitUrl(job.getGitUrl());
         existingJob.setGitAuthType(job.getGitAuthType());

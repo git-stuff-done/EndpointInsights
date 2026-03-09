@@ -1,0 +1,85 @@
+pipeline {
+    agent {
+        label 'vm-docker'
+    }
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        IMAGE_NAME = 'endpoint-insights-e2e'
+        IMAGE_TAG = "${GIT_COMMIT}"
+        CONTAINER_NAME = "endpoint-insights-e2e-${GIT_COMMIT}"
+    }
+    
+    stages {
+        stage('Cleanup') {
+            steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    sh """
+                        docker build -f ./integration-tests/Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    """
+                }
+            }
+        }
+
+        stage('Start') {
+            steps {
+                sh """
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
+                        -p 8080:8080 \
+                        ${IMAGE_NAME}:${IMAGE_TAG}
+                """
+
+                sh """
+                    #!/bin/bash
+                    ## Based on docker healthcheck max time + 15s
+                    TIMEOUT=70 
+                    ELAPSED=0
+                    until [ "\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" = "healthy" ]; do
+                        if [ \$ELAPSED -ge \$TIMEOUT ]; then
+                            echo "Container failed to become healthy within \${TIMEOUT}s"
+                            exit 1
+                        fi
+                        echo "Waiting for container to be healthy... (\${ELAPSED}s)"
+                        sleep 5
+                        ELAPSED=\$((ELAPSED + 5))
+                    done
+                """
+            }
+        }
+
+        stage('E2E Tests') {
+            steps {
+                dir('integration-tests') {
+                    sh 'npm ci'
+                    sh 'npx nightwatch test --env chrome'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            junit 'integration-tests/tests_output/*.xml'
+            sh "docker stop ${CONTAINER_NAME} || true"
+            sh "docker rm ${CONTAINER_NAME} || true"
+            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+        }
+    }
+}
