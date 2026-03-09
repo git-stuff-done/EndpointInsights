@@ -18,6 +18,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +50,7 @@ class JobRunnerThreadTest {
     private TestRun testRun;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         job = new Job();
         job.setJobId(UUID.randomUUID());
         job.setName("Test Job");
@@ -204,7 +205,7 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_successfulProcess_callsProcessResultsAndSetsCompleted() {
+    void run_successfulProcess_callsProcessResultsAndSetsCompleted() throws IOException {
         job.setJobType(TestType.PERF);
         job.setGitUrl(null);
         job.setCompileCommand(null);
@@ -232,7 +233,7 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_failedProcessResults_setsFailedStatus() {
+    void run_failedProcessResults_setsFailedStatus() throws IOException {
         job.setJobType(TestType.PERF);
         job.setGitUrl(null);
         job.setCompileCommand(null);
@@ -257,7 +258,7 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_usesCommandEnhancer() {
+    void run_usesCommandEnhancer() throws IOException {
         job.setGitUrl(null);
         job.setCompileCommand(null);
 
