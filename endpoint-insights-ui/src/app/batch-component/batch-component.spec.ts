@@ -26,7 +26,7 @@ describe('BatchComponent', () => {
   beforeEach(async () => {
     mockBatchService = jasmine.createSpyObj('BatchService', ['getAllBatches']);
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockStore = jasmine.createSpyObj('BatchStore', []);
+    mockStore = jasmine.createSpyObj('BatchStore', ['setAll', 'update']);
     mockBatchService.getAllBatches.and.returnValue(of(new HttpResponse({ body: mockBatches })));
 
     await TestBed.configureTestingModule({
