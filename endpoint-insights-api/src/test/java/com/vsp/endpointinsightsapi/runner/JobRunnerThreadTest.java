@@ -20,6 +20,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,10 +46,11 @@ class JobRunnerThreadTest {
     private GitService gitService;
 
     @Mock
-    private JMeterCommandEnhancer jMeterCommandEnhancer;
+    private JMeterCommandService jMeterCommandEnhancer;
 
     private Job job;
     private TestRun testRun;
+    private Collection<TestRun> failedTestRuns;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -60,6 +63,7 @@ class JobRunnerThreadTest {
         testRun.setRunId(UUID.randomUUID());
         testRun.setJobId(job.getJobId());
 
+        failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
         when(testRunRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         doReturn(null).when(gitService).cloneRepository(any(), any(), any());
     }
@@ -71,6 +75,7 @@ class JobRunnerThreadTest {
                 testRunRepository,
                 jMeterInterpreterService,
                 notificationService,
+                failedTestRuns,
                 gitService,
                 jMeterCommandEnhancer
         );
@@ -104,9 +109,9 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_noRunCommand_setsFailedStatus() {
+    void run_noJmeterTestName_setsFailedStatus() {
         job.setGitUrl(null);
-        job.setRunCommand(null);
+        job.setJmeterTestName(null);
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -116,9 +121,9 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_noRunCommand_savesRunningThenFailed() {
+    void run_noJmeterTestName_savesRunningThenFailed() {
         job.setGitUrl(null);
-        job.setRunCommand(null);
+        job.setJmeterTestName(null);
 
         List<TestRunStatus> savedStatuses = new ArrayList<>();
         doAnswer(inv -> {
@@ -133,9 +138,9 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_emptyRunCommand_setsFailedStatus() {
+    void run_emptyJmeterTestName_setsFailedStatus() {
         job.setGitUrl(null);
-        job.setRunCommand("   ");
+        job.setJmeterTestName("   ");
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -148,9 +153,9 @@ class JobRunnerThreadTest {
     void run_nonExistentCommand_setsFailedStatus() {
         job.setGitUrl(null);
         job.setCompileCommand(null);
-        job.setRunCommand("this-command-does-not-exist-xyz123");
+        job.setJmeterTestName("test.jmx");
 
-        when(jMeterCommandEnhancer.enhanceRunCommand(eq("this-command-does-not-exist-xyz123"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
 
         JobRunnerThread thread = newThread();
@@ -165,7 +170,7 @@ class JobRunnerThreadTest {
         UUID batchId = UUID.randomUUID();
         testRun.setBatchId(batchId);
         job.setGitUrl(null);
-        job.setRunCommand(null);
+        job.setJmeterTestName(null);
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -178,7 +183,7 @@ class JobRunnerThreadTest {
     void run_withNullBatchId_doesNotSendNotification() {
         testRun.setBatchId(null);
         job.setGitUrl(null);
-        job.setRunCommand(null);
+        job.setJmeterTestName(null);
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -192,9 +197,9 @@ class JobRunnerThreadTest {
         testRun.setBatchId(batchId);
         job.setGitUrl(null);
         job.setCompileCommand(null);
-        job.setRunCommand("this-command-does-not-exist-xyz123");
+        job.setJmeterTestName("test.jmx");
 
-        when(jMeterCommandEnhancer.enhanceRunCommand(eq("this-command-does-not-exist-xyz123"), anyString()))
+        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
 
         JobRunnerThread thread = newThread();
@@ -215,12 +220,12 @@ class JobRunnerThreadTest {
                 "Skipped on Windows: test uses Unix 'true' command"
         );
 
-        job.setRunCommand("true");
-        when(jMeterCommandEnhancer.enhanceRunCommand(eq("true"), anyString()))
+        job.setJmeterTestName("test.jmx");
+        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
         UUID resultId = UUID.randomUUID();
-        when(jMeterInterpreterService.processResults(any(File.class)))
+        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(true, resultId));
 
         JobRunnerThread thread = newThread();
@@ -229,7 +234,7 @@ class JobRunnerThreadTest {
         assertEquals(TestRunStatus.COMPLETED, testRun.getStatus());
         assertEquals(resultId, testRun.getResultId());
         assertNotNull(testRun.getFinishedAt());
-        verify(jMeterInterpreterService).processResults(any(File.class));
+        verify(jMeterInterpreterService).processResults(any(File.class), any(UUID.class));
     }
 
     @Test
@@ -243,11 +248,11 @@ class JobRunnerThreadTest {
                 "Skipped on Windows: test uses Unix 'true' command"
         );
 
-        job.setRunCommand("true");
-        when(jMeterCommandEnhancer.enhanceRunCommand(eq("true"), anyString()))
+        job.setJmeterTestName("test.jmx");
+        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
-        when(jMeterInterpreterService.processResults(any(File.class)))
+        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(false, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
@@ -267,15 +272,15 @@ class JobRunnerThreadTest {
                 "Skipped on Windows: test uses Unix 'true' command"
         );
 
-        job.setRunCommand("true");
-        when(jMeterCommandEnhancer.enhanceRunCommand(eq("true"), anyString()))
+        job.setJmeterTestName("test.jmx");
+        when(jMeterCommandEnhancer.getRunCommand(any(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
-        when(jMeterInterpreterService.processResults(any(File.class)))
+        when(jMeterInterpreterService.processResults(any(File.class), any(UUID.class)))
                 .thenReturn(new TestRunResult(true, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
         thread.run();
 
-        verify(jMeterCommandEnhancer).enhanceRunCommand(eq("true"), anyString());
+        verify(jMeterCommandEnhancer).getRunCommand(any(File.class), eq("test.jmx"), anyString());
     }
 }
