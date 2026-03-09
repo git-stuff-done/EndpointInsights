@@ -1,9 +1,35 @@
-<main class="container-fluid py-3">
+<main>
     <div class="button-container">
-    <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
-        <span>New Batch</span>
-        <mat-icon fontIcon="add"></mat-icon>
-    </button>
+        <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
+            <span>New Batch</span>
+            <mat-icon fontIcon="add"></mat-icon>
+        </button>
+        <div class="search-group">
+            <div class="search-wrapper">
+                <mat-icon class="search-icon">search</mat-icon>
+                <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+                    <input matInput [formControl]="searchControl" placeholder="Search batches...">
+                </mat-form-field>
+            </div>
+            <button class="filter-btn elevated-btn" [matMenuTriggerFor]="filterMenu"
+                [matBadge]="hasActiveFilter ? '!' : ''" matBadgeSize="small" matBadgeColor="accent">
+                <mat-icon>filter_list</mat-icon>
+            </button>
+            <mat-menu #filterMenu="matMenu">
+                <button mat-menu-item (click)="setStatusFilter('all')">
+                    <mat-icon>{{ statusFilter === 'all' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                    All
+                </button>
+                <button mat-menu-item (click)="setStatusFilter('active')">
+                    <mat-icon>{{ statusFilter === 'active' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                    Active
+                </button>
+                <button mat-menu-item (click)="setStatusFilter('inactive')">
+                    <mat-icon>{{ statusFilter === 'inactive' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                    Inactive
+                </button>
+            </mat-menu>
+        </div>
     </div>
     <div class="batch-list-container">
         <div class="batch-header-row">

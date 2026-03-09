@@ -1,9 +1,14 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 import { Batch } from '../models/batch.model';
 import { BatchStore } from '../services/batch-store.service';
 import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
@@ -12,7 +17,7 @@ import {BatchService} from "../services/batch.service";
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatButtonModule],
+    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
@@ -22,6 +27,26 @@ export class BatchComponent implements OnInit, OnDestroy {
     private batchService = inject(BatchService);
     private sub?: Subscription;
     batch: Batch[] = [];
+    searchControl = new FormControl('');
+    statusFilter: 'all' | 'active' | 'inactive' = 'all';
+
+    get hasActiveFilter(): boolean {
+        return this.statusFilter !== 'all';
+    }
+
+    setStatusFilter(value: 'all' | 'active' | 'inactive') {
+        this.statusFilter = value;
+    }
+
+    get filteredBatches(): Batch[] {
+        const term = (this.searchControl.value ?? '').toLowerCase();
+        return this.batch.filter(b => {
+            const matchesSearch = !term || b.batchName.toLowerCase().includes(term);
+            const matchesStatus = this.statusFilter === 'all' ||
+                (this.statusFilter === 'active' ? b.active : !b.active);
+            return matchesSearch && matchesStatus;
+        });
+    }
 
     ngOnInit() {
         this.batchService.getAllBatches().subscribe({
