@@ -29,6 +29,19 @@ spring:
             user-info-uri: https://auth.example.com/api/oidc/userinfo
             jwk-set-uri: https://auth.example.com/jwks.json
 
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:noreply@example.com}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jmeter:
   home: ${JMETER_HOME}
 
