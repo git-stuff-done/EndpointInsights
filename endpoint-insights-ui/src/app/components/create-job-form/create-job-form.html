@@ -42,19 +42,11 @@
     </div>
 
     <div class="form-row form-row-commands">
-        @if (createJobForm.get('jobType')?.value !== 'jmeter') {
-            <mat-form-field>
-                <mat-label>Run Command</mat-label>
-                <input matInput formControlName="runCommand">
-                <mat-error>{{ getErrorMessage('runCommand') }}</mat-error>
-            </mat-form-field>
-        } @else {
-            <mat-form-field>
-                <mat-label>JMeter Test Name</mat-label>
-                <input matInput formControlName="jmeterTestName">
-                <mat-error>{{ getErrorMessage('jmeterTestName') }}</mat-error>
-            </mat-form-field>
-        }
+        <mat-form-field>
+            <mat-label>Run Command</mat-label>
+            <input matInput formControlName="runCommand">
+            <mat-error>{{ getErrorMessage('runCommand') }}</mat-error>
+        </mat-form-field>
 
         <mat-form-field>
             <mat-label>Compile Command</mat-label>
@@ -81,8 +73,6 @@
         <mat-form-field>
             <mat-label>SSH Private Key</mat-label>
             <textarea matInput rows="4" formControlName="gitSshPrivateKey"></textarea>
-            <input type="file" (change)="onSshKeyFileSelected($event)" accept=".pem,.key">
-            <div *ngIf="filename">Selected file: {{ filename }}</div>
             <mat-error>{{ getErrorMessage('gitSshPrivateKey') }}</mat-error>
         </mat-form-field>
 

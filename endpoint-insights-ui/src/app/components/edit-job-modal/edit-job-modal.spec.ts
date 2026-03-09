@@ -7,25 +7,21 @@ import {By} from '@angular/platform-browser';
 import { MOCK_TESTS } from '../../models/test.model';
 import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ToastService } from '../../services/toast.service';
 
 describe('EditJobModal', () => {
     let component: EditJobModal;
     let fixture: ComponentFixture<EditJobModal>;
     let mockDialogRef: jasmine.SpyObj<MatDialogRef<EditJobModal>>;
-    let mockToastService: jasmine.SpyObj<ToastService>;
     let compiled: DebugElement;
 
     beforeEach(async () => {
         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
-        mockToastService = jasmine.createSpyObj('ToastService', ['onSuccess', 'onError']);
 
         await TestBed.configureTestingModule({
             imports: [EditJobModal, HttpClientTestingModule],
             providers: [
                 {provide: MatDialogRef, useValue: mockDialogRef},
                 {provide: MAT_DIALOG_DATA, useValue: MOCK_TESTS[0]},
-                {provide: ToastService, useValue: mockToastService},
                 provideNoopAnimations()
             ]
         }).compileComponents();
@@ -61,8 +57,9 @@ describe('EditJobModal', () => {
         it("Should show invalid form toast if form is invalid", () => {
             spyOn(component['jobService'], 'updateJob').and.returnValue(throwError(() => new Error("Invalid form")));
             expect(mockDialogRef.close).not.toHaveBeenCalled();
+            spyOn(component['toastService'], 'onError');
             component.onUpdate(MOCK_TESTS[0]);
-            expect(mockToastService.onError).toHaveBeenCalledWith("Failed to update job");
+            expect(component['toastService'].onError).toHaveBeenCalledWith("Failed to update job");
         });
     });
 

@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -60,9 +61,6 @@ public class Job  extends AuditingEntity {
 
     @Column(name = "run_command")
     private String runCommand;
-
-    @Column(name = "jmeter_test_name")
-    private String jmeterTestName;
 
     @Column(name = "compile_command")
     private String compileCommand;

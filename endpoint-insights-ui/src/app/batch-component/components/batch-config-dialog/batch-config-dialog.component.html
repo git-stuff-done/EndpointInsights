@@ -70,7 +70,8 @@
                            [formControl]="searchControl" />
                     <mat-autocomplete #auto="matAutocomplete"
                                       [displayWith]="displayParticipant"
-                                      (optionSelected)="onParticipantSelected($event)">
+                                      (optionSelected)="onParticipantSelected($event)"
+                                      panelClass="participant-panel">
                         <mat-option *ngFor="let option of searchParticipants"
                                     [value]="option">
                             <span>{{ option.name }} — {{ option.email }}</span>
@@ -84,35 +85,13 @@
                 <label class="field-label">Active Participants</label>
                 <button mat-button color="warn" (click)="removeParticipant()">Remove Selected</button>
             </div>
-            <mat-selection-list #participantList>
+            <mat-selection-list #participantList dense>
                 @for (participant of activeParticipants(); track participant.id) {
                     <mat-list-option [value]="participant">
                         {{ participant.name }} — {{ participant.email }} — {{ participant.role }}
                     </mat-list-option>
                 }
             </mat-selection-list>
-
-
-            <h4>Email Recipients</h4>
-            <div class="form-row">
-                <mat-form-field appearance="outline" class="flex-grow">
-                    <mat-label>Add Email Address</mat-label>
-                    <input matInput type="email" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
-                </mat-form-field>
-                <button mat-raised-button (click)="addEmail()">Add</button>
-            </div>
-            <div class="job-list">
-                @for (email of emailList(); track email) {
-                    <div class="job-row">
-                        <span>{{ email }}</span>
-                        <button mat-icon-button (click)="removeEmail(email)">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </div>
-                } @empty {
-                    <p class="empty-state">No email recipients</p>
-                }
-            </div>
         </section>
 
         <mat-divider></mat-divider>

@@ -254,21 +254,6 @@ End Styles for Create Job Form Components
  */
 
 
-.filter-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  min-width: 160px;
-  user-select: none;
-}
-
-.filter-menu-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
 .mat-datepicker-content {
   background-color: white !important;
   border: 1px solid #ccc;

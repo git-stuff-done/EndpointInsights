@@ -1,11 +1,8 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
 import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.service.JobService;
-import com.vsp.endpointinsightsapi.service.NotificationService;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.JobUpdateRequest;
@@ -51,21 +48,11 @@ public class JobControllerUnitTest {
 	@MockitoBean
 	private TestRunRepository testRunRepository;
 
-	@MockitoBean
-	private NotificationService notificationService;
-
-    @MockitoBean
-    private GitService gitService;
-
-    @MockitoBean
-    private JMeterCommandService jMeterCommandEnhancer;
-
-
-    @Test
+	@Test
 	public void createJob() throws Exception {
         mockMvc.perform(post("/api/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null, TestType.PERF, null))))
+                        .content(objectMapper.writeValueAsString(new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.PERF, null))))
                 .andExpect(status().isCreated());
 	}
 
@@ -74,7 +61,7 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null,  TestType.INTEGRATION, null);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
 		when(jobService.createJob(jobRequest)).thenReturn(job);
 		when(jobService.getJobById(jobUuid)).thenReturn(Optional.of(job));
 		mockMvc.perform(get("/api/jobs/{id}", jobUuid.toString()))
@@ -105,7 +92,7 @@ public class JobControllerUnitTest {
 		UUID jobUuid = UUID.randomUUID();
 		Job job = new Job();
 		job.setJobId(jobUuid);
-		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", null, TestType.INTEGRATION, null);
+		JobCreateRequest jobRequest = new JobCreateRequest("test_job", "test description", "https://github.com/test/test.git", "npm run test", "npm run build", TestType.INTEGRATION, null);
 		when(jobService.createJob(jobRequest)).thenReturn(job);
 		Optional<List<Job>> jobs = Optional.of(List.of(job));
 		when(jobService.getAllJobs()).thenReturn(jobs);

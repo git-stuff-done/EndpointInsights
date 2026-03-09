@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.vsp.endpointinsightsapi.model.Job;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,5 @@ public class BatchRequestDTO {
     private LocalDateTime lastTimeRun;
     private Boolean active;
     private List<UUID> notificationList;
-    private List<UUID> jobs;
-    private List<String> emails;
+    private List<Job> jobs;
 }

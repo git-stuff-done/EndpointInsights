@@ -1,14 +1,13 @@
 package com.vsp.endpointinsightsapi.service;
 
+import org.springframework.stereotype.Service;
+
 import java.util.UUID;
 
-/**
- * No-op implementation of EmailSender for use in tests.
- * Not registered as a Spring bean — see JavaMailEmailSender for the active implementation.
- */
+@Service
 public class NoopEmailSender implements EmailSender {
     @Override
     public void sendTestCompletionEmail(UUID runId, UUID resultId, String recipientEmail) {
-        // intentional no-op
+        // TODO integrate real email sending later
     }
 }
