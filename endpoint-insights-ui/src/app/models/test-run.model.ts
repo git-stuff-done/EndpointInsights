@@ -8,3 +8,13 @@ export interface TestRun {
   startedAt?: string;
   finishedAt?: string;
 }
+
+export interface RecentActivity {
+  runId: string;
+  testName: string;
+  group: string;
+  dateRun: string;
+  durationMs: number;
+  startedBy: string;
+  status: TestRunStatus;
+}

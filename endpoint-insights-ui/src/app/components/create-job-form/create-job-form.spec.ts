@@ -216,9 +216,9 @@ describe('CreateJobForm', () => {
     });
 
     describe('Run Command Field Validation', () => {
-        it('should be invalid when runCommand is empty', () => {
+        it('should be valid if runCommand is empty', () => {
             const runCommandControl = component.createJobForm.get('runCommand');
-            expect(runCommandControl?.hasError('required')).toBeTruthy();
+            expect(runCommandControl?.hasError('required')).toBeFalsy();
         });
 
         it('should be invalid when runCommand is less than 3 characters', () => {
@@ -247,9 +247,9 @@ describe('CreateJobForm', () => {
     });
 
     describe('Compile Command Field Validation', () => {
-        it('should be invalid when compileCommand is empty', () => {
+        it('should be valid if compileCommand is empty', () => {
             const compileCommandControl = component.createJobForm.get('compileCommand');
-            expect(compileCommandControl?.hasError('required')).toBeTruthy();
+            expect(compileCommandControl?.hasError('required')).toBeFalsy();
         });
 
         it('should be invalid when compileCommand is less than 3 characters', () => {
@@ -373,7 +373,7 @@ describe('CreateJobForm', () => {
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
                 jobType: 'jmeter',
-                runCommand: 'npm run test',
+                jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
 
@@ -421,7 +421,7 @@ describe('CreateJobForm', () => {
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
                 jobType: 'jmeter',
-                runCommand: 'npm run test',
+                jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
 
