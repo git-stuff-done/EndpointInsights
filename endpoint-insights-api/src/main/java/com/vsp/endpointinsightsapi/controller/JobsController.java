@@ -1,10 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.model.JobRun;
-import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
@@ -14,6 +11,7 @@ import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.service.NotificationService;
+import com.vsp.endpointinsightsapi.util.CurrentUser;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -82,18 +80,19 @@ public class JobsController {
 		 testRun.setStartedAt(Instant.now());
 		 testRun.setStatus(TestRunStatus.PENDING);
 		 testRun.setJobId(job.get().getJobId());
-		 testRun.setRunBy("system"); //todo: needs to be updated
+		 testRun.setRunBy(CurrentUser.getUserId());
 		 testRun = testRunRepository.save(testRun);
 
-        Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, failedTestRuns, gitService, jMeterCommandEnhancer));
+		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, gitService, jMeterCommandEnhancer, (status) -> {
+			// Only setting final status here because in a batch I'll need to wait for all jobs to finish
+			TestRun run = status.run();
+			TestRunStatus s = status.status();
+			run.setStatus(s);
+			run.setFinishedAt(Instant.now());
+			testRunRepository.save(run);
+		}));
 		t.start();
 
-        // TODO, add check to make sure all threads finish before proceeding to email
-
-         if(!failedTestRuns.isEmpty()) {
-             //Send ids of failed jobs to email service.
-         }
 		return ResponseEntity.ok(testRun);
 	 }
 

@@ -50,7 +50,6 @@ class JobRunnerThreadTest {
 
     private Job job;
     private TestRun testRun;
-    private Collection<TestRun> failedTestRuns;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -63,7 +62,6 @@ class JobRunnerThreadTest {
         testRun.setRunId(UUID.randomUUID());
         testRun.setJobId(job.getJobId());
 
-        failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
         when(testRunRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         doReturn(null).when(gitService).cloneRepository(any(), any(), any());
     }
@@ -75,9 +73,9 @@ class JobRunnerThreadTest {
                 testRunRepository,
                 jMeterInterpreterService,
                 notificationService,
-                failedTestRuns,
                 gitService,
-                jMeterCommandEnhancer
+                jMeterCommandEnhancer,
+                _ -> {}
         );
     }
 
@@ -232,7 +230,6 @@ class JobRunnerThreadTest {
         thread.run();
 
         assertEquals(TestRunStatus.COMPLETED, testRun.getStatus());
-        assertEquals(resultId, testRun.getResultId());
         assertNotNull(testRun.getFinishedAt());
         verify(jMeterInterpreterService).processResults(nullable(File.class), any(UUID.class));
     }

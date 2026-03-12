@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.runner;
 
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobRunnerThreadStatus;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
@@ -16,8 +17,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class JobRunnerThread implements Runnable {
 
@@ -28,25 +29,29 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
-    private final Collection<TestRun> failedTests;
 	private File tempDir = null;
 	private final NotificationService notificationService;
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandEnhancer;
 
+	// Completed callback
+	private final Consumer<JobRunnerThreadStatus> onComplete;
+
     private File jobProjectRepoDirectory = null;
+
 
 	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
 						   JMeterInterpreterService jMeterInterpreterService,
-						   NotificationService notificationService, Collection<TestRun> failedTests,
-                           GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+						   NotificationService notificationService,
+                           GitService gitService, JMeterCommandService jMeterCommandEnhancer,
+						   Consumer<JobRunnerThreadStatus> onComplete) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
 		this.notificationService = notificationService;
-        this.failedTests = failedTests;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
+		this.onComplete = onComplete;
 
         // todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -73,29 +78,27 @@ public class JobRunnerThread implements Runnable {
             if (testResultFile.isEmpty()) {
                 LOG.info("No test results file available for interpretation");
 
-                testRun.setStatus(TestRunStatus.FAILED);
-                testRun.setFinishedAt(Instant.now());
-                testRunRepository.save(testRun);
+
+				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
             } else {
                 LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
-            TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId());
+            	TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId());
 
-                testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
-                testRun.setResultId(pass.resultId());
-                testRun.setFinishedAt(Instant.now());
-                testRunRepository.save(testRun);
+				onComplete.accept(new JobRunnerThreadStatus(testRun, pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED));
             }
 
+			// todo: this should probably be moved to either batch runner or callback
 			if (testRun.getBatchId() != null) {
 				notificationService.sendTestCompletionNotifications(
-						testRun.getBatchId(), testRun.getRunId(), testRun.getResultId());
+						testRun.getBatchId(), testRun.getRunId(), null);
 			}
 		} catch (IOException e) {
             LOG.error("Running job failed with exception: {}", e.getMessage());
             testRun.setStatus(TestRunStatus.FAILED);
             testRun.setFinishedAt(Instant.now());
-            this.failedTests.add(testRun);
+
+			onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
             testRunRepository.save(testRun);
         } finally {
 			cleanupTempDir();
