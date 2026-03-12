@@ -11,6 +11,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class RecentActivityDTO {
     private String runId;
+    private String jobId;
     private String testName;
     private String group;
     private Instant dateRun;
