@@ -29,7 +29,6 @@ public class JobRunnerThread implements Runnable {
 	private final TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
-	private File tempDir = null;
 	private final NotificationService notificationService;
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandEnhancer;

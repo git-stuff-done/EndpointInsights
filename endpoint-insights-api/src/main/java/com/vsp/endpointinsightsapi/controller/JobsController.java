@@ -1,9 +1,11 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.GitService;
 import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
@@ -74,6 +76,10 @@ public class JobsController {
 		var job = jobService.getJobById(jobId);
 		if (job.isEmpty()) {
 			return ResponseEntity.notFound().build();
+		}
+
+		if (!TestType.PERF.equals(job.get().getJobType())) {
+			throw new CustomExceptionBuilder(HttpStatus.NOT_IMPLEMENTED, "Test type is not supported at this time").build();
 		}
 
 		 TestRun testRun = new TestRun();
