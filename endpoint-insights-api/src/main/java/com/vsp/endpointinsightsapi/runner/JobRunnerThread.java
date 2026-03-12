@@ -95,11 +95,7 @@ public class JobRunnerThread implements Runnable {
 			}
 		} catch (IOException e) {
             LOG.error("Running job failed with exception: {}", e.getMessage());
-            testRun.setStatus(TestRunStatus.FAILED);
-            testRun.setFinishedAt(Instant.now());
-
 			onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
-            testRunRepository.save(testRun);
         } finally {
 			cleanupTempDir();
 		}
