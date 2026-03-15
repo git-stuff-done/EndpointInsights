@@ -1,11 +1,13 @@
 package com.vsp.endpointinsightsapi.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.UUID;
 
@@ -24,6 +26,8 @@ public class TestBatchEmailList {
     private UUID batchId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ToString.Exclude
     @JoinColumn(name = "batch_id", nullable = false, insertable = false, updatable = false)
     private TestBatch testBatch;
 
