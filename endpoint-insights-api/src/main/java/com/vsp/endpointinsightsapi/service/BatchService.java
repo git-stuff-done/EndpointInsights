@@ -78,7 +78,7 @@ public class BatchService {
             batch.setJobs(jobs);
         }
 
-        TestBatch saved = testBatchRepository.save(batch);
+        TestBatch saved = testBatchRepository.saveAndFlush(batch);
 
         if (request.getEmails() != null && !request.getEmails().isEmpty()) {
             updateEmailsForBatch(saved.getBatchId(), request.getEmails());
