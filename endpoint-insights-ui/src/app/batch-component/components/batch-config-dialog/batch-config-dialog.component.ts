@@ -38,8 +38,6 @@ export interface ApiTest {
         MatDatepickerModule,
         MatNativeDateModule,
         MatAutocompleteModule,
-        MatSelectionList,
-        MatListOption,
         MatSelectModule,
         MatDivider,
     ],
