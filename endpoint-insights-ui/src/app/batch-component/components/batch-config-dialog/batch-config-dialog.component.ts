@@ -199,7 +199,7 @@ export class BatchConfigDialogComponent implements OnInit {
         this.currentBatchTests.set(
             (this.data.jobs ?? []).map(j => ({ id: j.id, name: j.name }))
         );
-        this.emailList.set(this.data.emails ?? []);
+        this.emailList.set(this.data.notificationList ?? []);
 
         this.searchControl.valueChanges.pipe(
             debounceTime(200),
@@ -212,74 +212,8 @@ export class BatchConfigDialogComponent implements OnInit {
             this.searchParticipants = results || [];
         });
 
-        this.populateActiveParticipants();
     }
 
-
-    /* Notification methods */
-    displayParticipant(participant: any): string {
-        return participant ? participant.name : '';
-    }
-
-    onParticipantSelected(event: any) {
-        this.selectedParticipant = event.option.value;
-    }
-
-    populateActiveParticipants() {
-        this.loading.set(true);
-
-        const notificationIds = this.form.get('notificationList')?.value || [];
-        if (!notificationIds || notificationIds.length === 0) {
-            this.activeParticipants.set([]);
-            this.loading.set(false);
-            return;
-        }
-        this.userService.findUsersById(notificationIds).subscribe({
-            next: (users) => {
-                this.activeParticipants.set(users);
-                this.loading.set(false);
-
-            },
-            error: (err) => {
-                this.activeParticipants.set([]);
-                this.loading.set(false);
-            }
-        });
-    }
-
-    addParticipant() {
-        if (this.selectedParticipant) {
-            const currentList = this.form.get('notificationList')?.value || [];
-
-            if (currentList.includes(this.selectedParticipant.id)) {
-                this.selectedParticipant = null;
-                this.searchControl.setValue('');
-                return;
-            }
-
-            const updatedList = [...currentList, this.selectedParticipant.id];
-            this.form.patchValue({
-                notificationList: updatedList
-            });
-
-            this.populateActiveParticipants();
-
-            this.selectedParticipant = null;
-            this.searchControl.setValue('');
-        }
-    }
-
-    removeParticipant() {
-        const selectedIds = this.participantList.selectedOptions.selected.map(o => o.value.id);
-        const currentList = this.form.get('notificationList')?.value || [];
-        const updatedList = currentList.filter((id: string) => !selectedIds.includes(id));
-
-        this.form.patchValue({
-            notificationList: updatedList
-        });
-
-        this.populateActiveParticipants();
-    }
 
     addEmail(): void {
         const email = this.emailInputControl.value?.trim() ?? '';
@@ -338,7 +272,6 @@ export class BatchConfigDialogComponent implements OnInit {
                     notificationList: response.body?.notificationList || [],
                 });
                 this.dialogRef.close(response.body);
-                this.populateActiveParticipants();
             },
             error: (error) => console.error('Error:', error)
         });

@@ -129,9 +129,10 @@ public class BatchService {
     }
 
     @Transactional
-    private void updateEmailsForBatch(UUID batchId, List<String> emails) {
+    public void updateEmailsForBatch(UUID batchId, List<String> emails) {
         testBatchEmailListsRepository.deleteAllByBatchId(batchId);
-
+        List<TestBatchEmailList> existingEmails = testBatchEmailListsRepository.findAllByBatchId(batchId);
+        System.out.println(existingEmails);
         List<TestBatchEmailList> entities = emails.stream()
                 .collect(Collectors.toMap(
                         String::toLowerCase,
