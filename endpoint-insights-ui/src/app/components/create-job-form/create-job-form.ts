@@ -35,6 +35,7 @@ export class CreateJobForm {
     constructor(
         private formBuilder: FormBuilder,
         private toastService: ToastService
+
     ) {
         this.createJobForm = this.formBuilder.group({
             name: ["", [
@@ -61,7 +62,8 @@ export class CreateJobForm {
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
-            jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
+           // jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
+            threshold:[""]
         });
 
         this.applyAuthValidators(this.createJobForm.get('gitAuthType')?.value);
@@ -84,6 +86,7 @@ export class CreateJobForm {
                 jobType: this.job.jobType,
                 runCommand: this.job.runCommand,
                 compileCommand: this.job.compileCommand,
+                threshold:this.job.threshold,
             });
         }
     }
@@ -150,6 +153,7 @@ export class CreateJobForm {
             'jobType': 'Job type',
             'runCommand': 'Run command',
             'compileCommand': 'Compile command',
+            'threshold': 'Threshold',
         };
         return labels[fieldName] || fieldName;
     }

@@ -95,5 +95,8 @@ public class Job  extends AuditingEntity {
     @Column(name = "config", columnDefinition = "jsonb")
     private Map<String, Object> config;
 
+    @Column(name = "threshold")
+    private double threshold;
+
 
 }

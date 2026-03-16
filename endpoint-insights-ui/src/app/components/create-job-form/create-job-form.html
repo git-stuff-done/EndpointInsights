@@ -33,9 +33,9 @@
         <mat-form-field>
             <mat-label>Job Type</mat-label>
             <mat-select panelClass="create-job-form-type-select-panel" formControlName="jobType">
-                <mat-option class="create-job-form-type-select-option" value="jmeter">JMeter</mat-option>
-                <mat-option class="create-job-form-type-select-option" value="jbehave">JBehave</mat-option>
-                <mat-option class="create-job-form-type-select-option" value="nightwatch">Nightwatch</mat-option>
+                <mat-option class="create-job-form-type-select-option" value="E2E">End to end</mat-option>
+                <mat-option class="create-job-form-type-select-option" value="PERF">Performance</mat-option>
+                <mat-option class="create-job-form-type-select-option" value="INTEGRATION">Integration</mat-option>
             </mat-select>
             <mat-error>{{ getErrorMessage('jobType') }}</mat-error>
         </mat-form-field>
@@ -90,6 +90,15 @@
             <mat-label>SSH Passphrase (optional)</mat-label>
             <input matInput type="password" formControlName="gitSshPassphrase">
             <mat-error>{{ getErrorMessage('gitSshPassphrase') }}</mat-error>
+        </mat-form-field>
+    </div>
+
+    <div class="form-row">
+        <mat-form-field>
+            <mat-label>Passing Threshold</mat-label>
+            <input matInput formControlName="threshold" type="number">
+            <span matTextSuffix>ms</span>
+            <mat-error>{{ getErrorMessage('threshold') }}</mat-error>
         </mat-form-field>
     </div>
 </form>

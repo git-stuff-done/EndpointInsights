@@ -41,28 +41,56 @@ export class EditJobModal{
         this.dialogRef = dialogRef;
     }
 
-    toggleEditMode(){
-        this.state.update(s => ({
-            ...s,
-            inEditMode: !s.inEditMode
-        }))
 
-        // Check for sav3e
-        if (!this.state().inEditMode) {
-            this.onUpdate();
+    getThresholdDotColor(threshold: number): string {
+        if (threshold <= 99)  return '#4caf50';
+        if (threshold <= 199) return '#ff9800';
+        return '#f44336';
+    }
+    toggleEditMode(){
+        if (this.state().inEditMode) {
+            console.log('createJobForm:', this.createJobForm);
+            console.log('form value:', this.createJobForm?.createJobForm?.value);
+            if (this.createJobForm.createJobForm.invalid) {
+                const controls = this.createJobForm.createJobForm.controls;
+                for (const key of Object.keys(controls)) {
+                    if (controls[key].invalid) {
+                        console.log('invalid field:', key, controls[key].errors);
+                    }
+                }
+                this.createJobForm.createJobForm.markAllAsTouched();
+                return;
+            }
+
+            const formValue = this.createJobForm.createJobForm.value;
+
+            this.jobService.updateJob(this.data.id, formValue).subscribe({
+                next: (response) => {
+                    this.toastService.onSuccess('Job updated successfully!');
+                    this.data = { ...this.data, ...formValue };
+                    this.state.update(s => ({ ...s, inEditMode: false }));
+                    this.dialogRef.close(this.data);
+                },
+                error: (error) => {
+                    console.error('Error updating job:', error);
+                    this.toastService.onError('Failed to update job');
+                }
+            });
+
+        } else {
+            this.state.update(s => ({ ...s, inEditMode: true }));
         }
     }
 
-
-    onUpdate(jobData?: any){
-        this.jobService.updateJob(this.data.id,jobData).subscribe({
+    onUpdate(jobData?: any){ // still used by (jobSubmitted) output if needed
+        this.jobService.updateJob(this.data.id, jobData).subscribe({
             next: (response) => {
-                console.log('Job updated:', response);
                 this.toastService.onSuccess('Job updated successfully!');
-                this.dialogRef.close(jobData);
+                this.data = { ...this.data, ...jobData };
+                this.state.update(s => ({ ...s, inEditMode: false }));
+                this.dialogRef.close(this.data);
             },
             error: (error) => {
-                console.error('Error updating job:', error);
                 this.toastService.onError('Failed to update job');
             }
         });
