@@ -11,6 +11,7 @@ export interface TestRun {
 
 export interface RecentActivity {
   runId: string;
+  jobId?: string;
   testName: string;
   group: string;
   dateRun: string;
