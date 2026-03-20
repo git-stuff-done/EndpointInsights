@@ -1,14 +1,15 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.PublicAPI;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import com.vsp.endpointinsightsapi.util.CurrentUser;
 import jakarta.validation.constraints.NotNull;
@@ -61,20 +62,30 @@ public class BatchesController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
-	@PostMapping("/{jobId}/run")
-	public ResponseEntity<TestRun> runBatch(@PathVariable UUID jobId) {
-		LOG.info("Running job {}", jobId);
-		var batch = testBatchRepository.findById(jobId);
-		if (batch.isEmpty()) {
+	@PublicAPI
+	@PostMapping("/{batchId}/run")
+	public ResponseEntity<TestRun> runBatch(@PathVariable UUID batchId) {
+		LOG.info("Running job {}", batchId);
+		var batchOptional = testBatchRepository.findById(batchId);
+		if (batchOptional.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
+		var batch = batchOptional.get();
+
+		if (batch.getActive() != null && batch.getActive()) {
+			throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
+		}
+
+		batch.setActive(true);
+		batch = testBatchRepository.save(batch);
+
 		TestRun testRun = new TestRun();
-		testRun.setStartedAt(Instant.now());
-		testRun.setStatus(TestRunStatus.PENDING);
-		testRun.setBatchId(batch.get().getBatchId());
-		testRun.setRunBy(CurrentUser.getUserId());
-		testRun = testRunRepository.save(testRun);
+//		testRun.setStartedAt(Instant.now());
+//		testRun.setStatus(TestRunStatus.PENDING);
+//		testRun.setBatchId(batchOptional.get().getBatchId());
+//		testRun.setRunBy(CurrentUser.getUserId());
+//		testRun = testRunRepository.save(testRun);
 
 		//todo: batch runner thread to spawn job runner threads?
 
