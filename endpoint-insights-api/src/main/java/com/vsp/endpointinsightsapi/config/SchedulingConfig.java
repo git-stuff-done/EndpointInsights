@@ -20,7 +20,7 @@ public class SchedulingConfig {
 	private String threadNamePrefix = "TestBatchScheduler-";
 
 
-	@Bean
+	@Bean(name = "vspTaskScheduler")
 	public ThreadPoolTaskScheduler taskScheduler() {
 		var scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setPoolSize(poolSize);

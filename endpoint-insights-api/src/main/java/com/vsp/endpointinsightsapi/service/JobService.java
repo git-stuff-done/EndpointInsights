@@ -9,13 +9,10 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
-import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
 import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
-import com.vsp.endpointinsightsapi.util.CurrentUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,24 +29,23 @@ public class JobService {
     private final JobRepository jobRepository;
     private final GitRepositoryService gitRepositoryService;
     private final TestRunRepository testRunRepository;
-    private final JMeterInterpreterService jMeterInterpreterService;
-    private final GitService gitService;
-    private final JMeterCommandService jMeterCommandService;
-    private final NotificationService notificationService;
     private final JobRunnerThreadFactory jobRunnerThreadFactory;
     private final TestRunFactory testRunFactory;
+    private final ThreadPoolTaskScheduler vspTaskScheduler;
 
 
-    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandService, NotificationService notificationService, JobRunnerThreadFactory jobRunnerThreadFactory, TestRunFactory testRunFactory) {
+    public JobService(JobRepository jobRepository,
+                      GitRepositoryService gitRepositoryService,
+                      TestRunRepository testRunRepository,
+                      JobRunnerThreadFactory jobRunnerThreadFactory,
+                      TestRunFactory testRunFactory,
+                      ThreadPoolTaskScheduler vspTaskScheduler) {
         this.jobRepository = jobRepository;
         this.gitRepositoryService = gitRepositoryService;
 		this.testRunRepository = testRunRepository;
-		this.jMeterInterpreterService = jMeterInterpreterService;
-		this.gitService = gitService;
-		this.jMeterCommandService = jMeterCommandService;
-        this.notificationService = notificationService;
         this.jobRunnerThreadFactory = jobRunnerThreadFactory;
         this.testRunFactory = testRunFactory;
+        this.vspTaskScheduler = vspTaskScheduler;
     }
 
     public Job createJob(JobCreateRequest jobRequest) {
@@ -118,7 +114,7 @@ public class JobService {
         TestRun testRun = testRunFactory.createForJob(job);
 
         // ignoring returned thread
-        Thread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, false, (status) -> {
+		JobRunnerThread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, false, (status) -> {
             // Only setting final status here because in a batch I'll need to wait for all jobs to finish
             TestRun run = status.run();
             TestRunStatus s = status.status();
@@ -127,7 +123,7 @@ public class JobService {
             run.setFinishedAt(Instant.now());
             testRunRepository.save(run);
         });
-        jobRunnerThread.start();
+        vspTaskScheduler.execute(jobRunnerThread);
 
         return testRun;
     }

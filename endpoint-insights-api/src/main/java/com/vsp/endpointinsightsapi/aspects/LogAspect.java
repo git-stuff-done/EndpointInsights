@@ -59,9 +59,8 @@ public class LogAspect {
                     log.setDetails("{\"error\": \"failed to serialize\"}");
                 }
             }
-        } catch (IllegalStateException e) {
-            // this happens when job/batch threads are invoked. for now we can ignore but log
-            LOG.info(e.getMessage());
+        } catch (IllegalStateException ignored) {
+            // this happens when job/batch threads are invoked. for now we can ignore
         }
     }
 
@@ -87,9 +86,7 @@ public class LogAspect {
                 log.setDetails("{\"error\": \"failed to serialize\"}");
             }
 
-        } catch (IllegalStateException e) {
-            LOG.error(e.getMessage());
-        }
+        } catch (IllegalStateException ignored) {}
     }
 
 }

@@ -43,8 +43,8 @@ public class JobRunnerThreadFactory {
 	 * @param isBatchRun true when the job is executed as part of a batch
 	 * @return a new {@link Thread} ready to execute the job runner
 	 */
-	public Thread create(Job job, TestRun testRun, boolean isBatchRun, Consumer<JobRunnerThreadStatus> onComplete) {
-		return new Thread(new JobRunnerThread(job,
+	public JobRunnerThread create(Job job, TestRun testRun, boolean isBatchRun, Consumer<JobRunnerThreadStatus> onComplete) {
+		return new JobRunnerThread(job,
 				testRun,
 				testRunRepository,
 				jMeterInterpreterService,
@@ -52,7 +52,7 @@ public class JobRunnerThreadFactory {
 				gitService,
 				jMeterCommandService,
 				onComplete,
-				isBatchRun));
+				isBatchRun);
 	}
 
 }

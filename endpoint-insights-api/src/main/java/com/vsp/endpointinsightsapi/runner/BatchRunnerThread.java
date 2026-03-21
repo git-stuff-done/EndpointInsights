@@ -10,10 +10,13 @@ import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class BatchRunnerThread implements Runnable {
@@ -28,6 +31,7 @@ public class BatchRunnerThread implements Runnable {
 	private final TestRunRepository testRunRepository;
 	private final TestBatchRepository testBatchRepository;
 	private final JobRunnerThreadFactory jobRunnerThreadFactory;
+	private final ThreadPoolTaskScheduler vspTaskScheduler;
 
 
 	public BatchRunnerThread(TestBatch batch,
@@ -35,7 +39,8 @@ public class BatchRunnerThread implements Runnable {
 							 Consumer<BatchRunnerThreadStatus> onComplete,
 							 TestRunRepository testRunRepository,
 							 TestBatchRepository testBatchRepository,
-							 JobRunnerThreadFactory jobRunnerThreadFactory) {
+							 JobRunnerThreadFactory jobRunnerThreadFactory,
+							 ThreadPoolTaskScheduler vspTaskScheduler) {
 		this.batch = batch;
 		this.testRun = testRun;
 		this.onComplete = onComplete;
@@ -43,6 +48,7 @@ public class BatchRunnerThread implements Runnable {
 		this.testRunRepository = testRunRepository;
 		this.testBatchRepository = testBatchRepository;
 		this.jobRunnerThreadFactory = jobRunnerThreadFactory;
+		this.vspTaskScheduler = vspTaskScheduler;
 	}
 
 	@Override
@@ -56,22 +62,24 @@ public class BatchRunnerThread implements Runnable {
 		testRun = testRunRepository.save(testRun);
 
 		final Map<UUID, TestRunStatus> testRunMap = Collections.synchronizedMap(new HashMap<>());
-		final List<Thread> joinThreads = new ArrayList<>();
+		final List<JobRunnerThread> jobTasks = new ArrayList<>();
 		for (final Job job : batch.getJobs()) {
-			Thread thread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
+			var jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
 				testRunMap.put(job.getJobId(), status.status());
 			});
-
-			joinThreads.add(thread);
-
-			thread.start();
+			jobTasks.add(jobRunnerThread);
 		}
 
-		for (Thread thread : joinThreads) {
+		List<Future<?>> futures = new ArrayList<>();
+		for (JobRunnerThread task : jobTasks) {
+			futures.add(vspTaskScheduler.submit(task));
+		}
+
+		for (Future<?> future : futures) {
 			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				LOG.error("Error joining thread with id {}: {}", thread.threadId(), e.getMessage());
+				future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				LOG.error("Error waiting for job task to finish: {}", e.getMessage());
 				throw new RuntimeException(e);
 			}
 		}

@@ -6,6 +6,7 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
@@ -16,11 +17,13 @@ public class BatchRunnerThreadFactory {
 	private final TestRunRepository testRunRepository;
 	private final TestBatchRepository testBatchRepository;
 	private final JobRunnerThreadFactory jobRunnerThreadFactory;
+	private final ThreadPoolTaskScheduler vspTaskScheduler;
 
-	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, TestBatchRepository testBatchRepository, JobRunnerThreadFactory jobRunnerThreadFactory) {
+	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, TestBatchRepository testBatchRepository, JobRunnerThreadFactory jobRunnerThreadFactory, ThreadPoolTaskScheduler vspTaskScheduler) {
 		this.testRunRepository = testRunRepository;
 		this.testBatchRepository = testBatchRepository;
 		this.jobRunnerThreadFactory = jobRunnerThreadFactory;
+		this.vspTaskScheduler = vspTaskScheduler;
 	}
 
 	/**
@@ -33,13 +36,14 @@ public class BatchRunnerThreadFactory {
 	 * @param onComplete a {@link Consumer} to be called with the status of the batch runner upon completion
 	 * @return a new {@link Thread} ready to execute the batch runner
 	 */
-	public Thread create(TestBatch batch, TestRun testRun, Consumer<BatchRunnerThreadStatus> onComplete) {
-		return new Thread(new BatchRunnerThread(batch,
+	public BatchRunnerThread create(TestBatch batch, TestRun testRun, Consumer<BatchRunnerThreadStatus> onComplete) {
+		return new BatchRunnerThread(batch,
 				testRun,
 				onComplete,
 				testRunRepository,
 				testBatchRepository,
-				jobRunnerThreadFactory));
+				jobRunnerThreadFactory,
+				vspTaskScheduler);
 	}
 
 }

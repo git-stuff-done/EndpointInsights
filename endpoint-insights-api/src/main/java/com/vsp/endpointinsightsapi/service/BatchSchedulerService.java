@@ -42,7 +42,10 @@ public class BatchSchedulerService {
 	private void scheduleBatch(TestBatch batch) {
 		ScheduledFuture<?> prevFuture = scheduledBatches.get(batch.getBatchId());
 		if (prevFuture != null) {
-			prevFuture.cancel(false);
+			if (!prevFuture.cancel(false)) {
+				LOG.warn("Failed to cancel previous scheduled batch {}", batch.getBatchId());
+				return;
+			}
 		}
 
 

@@ -25,11 +25,13 @@ import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -48,6 +50,7 @@ public class BatchService {
     private final TestRunRepository testRunRepository;
     private final BatchRunPersistenceService batchRunPersistenceService;
     private final NotificationService notificationService;
+    private final ThreadPoolTaskScheduler vspTaskScheduler;
 
     //TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
@@ -170,7 +173,7 @@ public class BatchService {
 
         TestRun testRun = testRunFactory.createForBatch(batch);
 
-        Thread batchRunnerThread = batchRunnerThreadFactory.create(batch, testRun, (status) -> {
+		BatchRunnerThread batchRunnerThread = batchRunnerThreadFactory.create(batch, testRun, (status) -> {
             TestBatch returnedBatch = status.batch();
             TestRun run = status.run();
             TestRunStatus s = status.status();
@@ -189,7 +192,7 @@ public class BatchService {
             // Notify now that batch is completed
             notificationService.sendTestCompletionNotifications(run.getBatchId(), run.getRunId(), null);
         });
-        batchRunnerThread.start();
+        vspTaskScheduler.execute(batchRunnerThread);
 
         return testRun;
     }
