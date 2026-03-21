@@ -69,7 +69,7 @@ public class JobRunnerThread implements Runnable {
 			compileTest(workingDirectory);
 
 			// Only concerned with updating test run status if it's a single-job run
-			if (isBatchRun) {
+			if (!isBatchRun) {
 				testRun.setStatus(TestRunStatus.RUNNING);
 				testRun = testRunRepository.save(testRun);
 			}
