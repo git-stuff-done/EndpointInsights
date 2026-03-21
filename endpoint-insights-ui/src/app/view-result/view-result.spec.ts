@@ -94,4 +94,20 @@ describe('ViewResult', () => {
 
     expect(getTestRunSpy).not.toHaveBeenCalled();
   });
+
+  it('should return correct error rate class for different error rates', () => {
+    // Test for low error rate (<= 0.1)
+    expect(component.getErrorRateClass(0)).toBe('error-rate-low');
+    expect(component.getErrorRateClass(0.05)).toBe('error-rate-low');
+    expect(component.getErrorRateClass(0.1)).toBe('error-rate-low');
+
+    // Test for medium error rate (> 0.1, <= 0.5)
+    expect(component.getErrorRateClass(0.11)).toBe('error-rate-medium');
+    expect(component.getErrorRateClass(0.3)).toBe('error-rate-medium');
+    expect(component.getErrorRateClass(0.5)).toBe('error-rate-medium');
+
+    // Test for high error rate (> 0.5)
+    expect(component.getErrorRateClass(0.51)).toBe('error-rate-high');
+    expect(component.getErrorRateClass(1)).toBe('error-rate-high');
+  });
 });
