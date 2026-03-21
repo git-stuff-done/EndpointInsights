@@ -1,17 +1,14 @@
 package com.vsp.endpointinsightsapi.controller;
 
-import com.vsp.endpointinsightsapi.authentication.PublicAPI;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
-import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.service.BatchService;
-import com.vsp.endpointinsightsapi.util.CurrentUser;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +58,6 @@ public class BatchesController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
 	}
 
-	@PublicAPI
 	@PostMapping("/{batchId}/run")
 	public ResponseEntity<TestRun> runBatch(@PathVariable UUID batchId) {
 		LOG.info("Request received to run batch {}", batchId);
