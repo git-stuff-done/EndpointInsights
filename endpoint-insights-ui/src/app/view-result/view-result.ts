@@ -35,6 +35,7 @@ import {MatPaginator} from "@angular/material/paginator";
   ],
   templateUrl: './view-result.html',
   styleUrl: './view-result.scss',
+  standalone: true,
 })
 export class ViewResult implements OnInit, AfterViewInit {
 
@@ -55,7 +56,6 @@ export class ViewResult implements OnInit, AfterViewInit {
   }
 
   constructor(private testRunService: TestRunService,
-              private router: Router,
               private activatedRoute: ActivatedRoute) {
   }
 
@@ -63,7 +63,7 @@ export class ViewResult implements OnInit, AfterViewInit {
     const state = window.history.state;
 
     // First try to load from state, otherwise from query param
-    if (state.runId) {
+    if (state?.runId) {
       this.getTestRun(state.runId);
     } else {
       this.activatedRoute.queryParams.subscribe(params => {
