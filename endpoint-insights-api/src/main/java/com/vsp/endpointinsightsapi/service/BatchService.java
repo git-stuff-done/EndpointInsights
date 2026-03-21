@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.event.RunBatchEvent;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.factory.BatchRunnerThreadFactory;
@@ -30,6 +31,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
@@ -201,4 +203,11 @@ public class BatchService {
 
         return testRun;
     }
+
+    @EventListener
+    public void handleRunBatchEvent(RunBatchEvent event) {
+        LOG.info("Received RunBatchEvent for batch from scheduler {}", event.getBatch().getBatchId());
+        runBatch(event.getBatch());
+    }
+
 }

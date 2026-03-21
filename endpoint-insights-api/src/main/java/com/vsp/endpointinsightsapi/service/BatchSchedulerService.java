@@ -1,10 +1,12 @@
 package com.vsp.endpointinsightsapi.service;
 
+import com.vsp.endpointinsightsapi.event.RunBatchEvent;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
@@ -23,12 +25,14 @@ public class BatchSchedulerService {
 	private final Map<UUID, ScheduledFuture<?>> scheduledBatches = Collections.synchronizedMap(new HashMap<>());
 	private final TestBatchRepository testBatchRepository;
 	private final TaskScheduler taskScheduler;
-	private final BatchService batchService;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
-	public BatchSchedulerService(TestBatchRepository testBatchRepository, TaskScheduler taskScheduler, BatchService batchService) {
+	public BatchSchedulerService(TestBatchRepository testBatchRepository,
+								 TaskScheduler taskScheduler,
+								 ApplicationEventPublisher applicationEventPublisher) {
 		this.testBatchRepository = testBatchRepository;
 		this.taskScheduler = taskScheduler;
-		this.batchService = batchService;
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	@PostConstruct
@@ -78,7 +82,8 @@ public class BatchSchedulerService {
 			return;
 		}
 
-		batchService.runBatch(batch);
+		// To avoid circular dependencies I'm using the event system
+		applicationEventPublisher.publishEvent(new RunBatchEvent(this, batch));
 		LOG.info("Batch {} started successfully", batch.getBatchId());
 		LOG.info("Rescheduling next run for batch {}", batch.getBatchId());
 	}
