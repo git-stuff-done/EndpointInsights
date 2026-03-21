@@ -5,7 +5,6 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 public interface TestInterpreter {
 	TestRunResult processResults(File file, TestRun testRunId) throws IOException;

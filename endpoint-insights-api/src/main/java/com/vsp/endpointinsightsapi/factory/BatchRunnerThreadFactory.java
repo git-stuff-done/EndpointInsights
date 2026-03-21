@@ -6,7 +6,6 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
-import com.vsp.endpointinsightsapi.service.NotificationService;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
@@ -15,13 +14,13 @@ import java.util.function.Consumer;
 public class BatchRunnerThreadFactory {
 
 	private final TestRunRepository testRunRepository;
-	private final NotificationService notificationService;
 	private final TestBatchRepository testBatchRepository;
+	private final JobRunnerThreadFactory jobRunnerThreadFactory;
 
-	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, NotificationService notificationService, TestBatchRepository testBatchRepository) {
+	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, TestBatchRepository testBatchRepository, JobRunnerThreadFactory jobRunnerThreadFactory) {
 		this.testRunRepository = testRunRepository;
-		this.notificationService = notificationService;
 		this.testBatchRepository = testBatchRepository;
+		this.jobRunnerThreadFactory = jobRunnerThreadFactory;
 	}
 
 	/**
@@ -39,8 +38,8 @@ public class BatchRunnerThreadFactory {
 				testRun,
 				onComplete,
 				testRunRepository,
-				notificationService,
-				testBatchRepository));
+				testBatchRepository,
+				jobRunnerThreadFactory));
 	}
 
 }
