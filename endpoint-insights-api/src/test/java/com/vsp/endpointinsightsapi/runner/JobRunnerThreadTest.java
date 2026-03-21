@@ -19,9 +19,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +74,10 @@ class JobRunnerThreadTest {
                 notificationService,
                 gitService,
                 jMeterCommandEnhancer,
-                _ -> {},
+                s -> {
+                    testRun.setStatus(s.status());
+                    testRun.setFinishedAt(Instant.now());
+                },
                 false
         );
     }
@@ -108,18 +110,6 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_noJmeterTestName_setsFailedStatus() {
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        assertEquals(TestRunStatus.FAILED, testRun.getStatus());
-        assertNotNull(testRun.getFinishedAt());
-    }
-
-    @Test
     void run_noJmeterTestName_savesRunningThenFailed() {
         job.setGitUrl(null);
         job.setJmeterTestName(null);
@@ -133,7 +123,7 @@ class JobRunnerThreadTest {
         JobRunnerThread thread = newThread();
         thread.run();
 
-        assertEquals(List.of(TestRunStatus.RUNNING, TestRunStatus.FAILED), savedStatuses);
+        assertEquals(List.of(TestRunStatus.RUNNING), savedStatuses);
     }
 
     @Test
@@ -145,7 +135,8 @@ class JobRunnerThreadTest {
         thread.run();
 
         assertEquals(TestRunStatus.FAILED, testRun.getStatus());
-        verify(testRunRepository, times(2)).save(testRun);
+        // Failed status is sent to the callback which updates the testRun object, but does nto call the repo
+        verify(testRunRepository, times(1)).save(testRun);
     }
 
     @Test
@@ -162,50 +153,6 @@ class JobRunnerThreadTest {
 
         assertEquals(TestRunStatus.FAILED, testRun.getStatus());
         assertNotNull(testRun.getFinishedAt());
-    }
-
-    @Test
-    void run_withBatchId_sendsNotification() {
-        UUID batchId = UUID.randomUUID();
-        testRun.setBatchId(batchId);
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verify(notificationService).sendTestCompletionNotifications(
-                eq(batchId), eq(testRun.getRunId()), any());
-    }
-
-    @Test
-    void run_withNullBatchId_doesNotSendNotification() {
-        testRun.setBatchId(null);
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    void run_nonExistentCommand_withBatchId_sendsNotification() {
-        UUID batchId = UUID.randomUUID();
-        testRun.setBatchId(batchId);
-        job.setGitUrl(null);
-        job.setCompileCommand(null);
-        job.setJmeterTestName("test.jmx");
-
-        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
-                .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verify(notificationService).sendTestCompletionNotifications(
-                eq(batchId), eq(testRun.getRunId()), any());
     }
 
     @Test
