@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.factory.JobRunnerThreadFactory;
+import com.vsp.endpointinsightsapi.factory.TestRunFactory;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobCreateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
@@ -34,9 +36,11 @@ public class JobService {
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandService;
     private final NotificationService notificationService;
+    private final JobRunnerThreadFactory jobRunnerThreadFactory;
+    private final TestRunFactory testRunFactory;
 
 
-    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandService, NotificationService notificationService) {
+    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandService, NotificationService notificationService, JobRunnerThreadFactory jobRunnerThreadFactory, TestRunFactory testRunFactory) {
         this.jobRepository = jobRepository;
         this.gitRepositoryService = gitRepositoryService;
 		this.testRunRepository = testRunRepository;
@@ -44,6 +48,8 @@ public class JobService {
 		this.gitService = gitService;
 		this.jMeterCommandService = jMeterCommandService;
         this.notificationService = notificationService;
+        this.jobRunnerThreadFactory = jobRunnerThreadFactory;
+        this.testRunFactory = testRunFactory;
     }
 
     public Job createJob(JobCreateRequest jobRequest) {
@@ -100,23 +106,27 @@ public class JobService {
         return gitRepositoryService.checkoutJobRepository(job);
     }
 
-    public TestRun startJob(Job job) {
-        TestRun testRun = new TestRun();
-        testRun.setStartedAt(Instant.now());
-        testRun.setStatus(TestRunStatus.PENDING);
-        testRun.setJobId(job.getJobId());
-        testRun.setRunBy(CurrentUser.getUserId());
-        testRun = testRunRepository.save(testRun);
+    /**
+     * Initiates the execution of the specified job by creating a new test run, persisting its initial metadata,
+     * and starting a background process to execute the job. The method also ensures that the test run status and
+     * completion time are updated appropriately once the job completes through a callback.
+     *
+     * @param job the job to be executed
+     * @return the TestRun entity representing the initiated run
+     */
+    public TestRun runJob(Job job) {
+        TestRun testRun = testRunFactory.createForJob(job);
 
-        Thread t = new Thread(new JobRunnerThread(job, testRun, testRunRepository, jMeterInterpreterService, notificationService, gitService, jMeterCommandService, (status) -> {
+        // ignoring returned thread
+        Thread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, (status) -> {
             // Only setting final status here because in a batch I'll need to wait for all jobs to finish
             TestRun run = status.run();
             TestRunStatus s = status.status();
             run.setStatus(s);
             run.setFinishedAt(Instant.now());
             testRunRepository.save(run);
-        }));
-        t.start();
+        });
+        jobRunnerThread.start();
 
         return testRun;
     }

@@ -4,16 +4,8 @@ import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
-import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
-import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import com.vsp.endpointinsightsapi.service.JobService;
-import com.vsp.endpointinsightsapi.service.NotificationService;
-import com.vsp.endpointinsightsapi.util.CurrentUser;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.*;
 
 @RestController
@@ -70,7 +61,7 @@ public class JobsController {
 			throw new CustomExceptionBuilder(HttpStatus.NOT_IMPLEMENTED, "Test type is not supported at this time").build();
 		}
 
-		return ResponseEntity.ok(jobService.startJob(job.get()));
+		return ResponseEntity.ok(jobService.runJob(job.get()));
 	 }
 
 	/**
