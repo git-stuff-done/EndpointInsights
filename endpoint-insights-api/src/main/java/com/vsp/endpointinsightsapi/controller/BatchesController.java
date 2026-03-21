@@ -28,12 +28,10 @@ public class BatchesController {
 
     private final BatchService batchService;
 	private final TestBatchRepository testBatchRepository;
-	private final TestRunRepository testRunRepository;
 
-	public BatchesController(BatchService batchService, TestBatchRepository testBatchRepository, TestRunRepository testRunRepository){
+	public BatchesController(BatchService batchService, TestBatchRepository testBatchRepository){
         this.batchService = batchService;
     	this.testBatchRepository = testBatchRepository;
-		this.testRunRepository = testRunRepository;
 	}
 
     // GET /api/batches
