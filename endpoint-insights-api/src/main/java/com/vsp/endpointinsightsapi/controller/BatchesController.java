@@ -66,10 +66,6 @@ public class BatchesController {
 
 		var batch = batchOptional.get();
 
-		if (batch.getActive() != null && batch.getActive()) {
-			throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
-		}
-
 		return ResponseEntity.ok(batchService.runBatch(batch));
 	}
 

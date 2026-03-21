@@ -164,6 +164,10 @@ public class BatchService {
 
 
     public TestRun runBatch(TestBatch batch) {
+        if (batch.getActive() != null && batch.getActive()) {
+            throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
+        }
+
         TestRun testRun = testRunFactory.createForBatch(batch);
 
         Thread batchRunnerThread = batchRunnerThreadFactory.create(batch, testRun, (status) -> {
