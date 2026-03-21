@@ -34,21 +34,9 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
-	private final JMeterInterpreterService jMeterInterpreterService;
-	private final TestRunRepository testRunRepository;
-	private final NotificationService notificationService;
-    private final GitService gitService;
-    private final JMeterCommandService jMeterCommandEnhancer;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
-						  TestRunRepository testRunRepository, NotificationService notificationService,
-                          GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+	public JobsController(JobService jobService) {
 		this.jobService = jobService;
-		this.jMeterInterpreterService = jMeterInterpreterService;
-		this.testRunRepository = testRunRepository;
-		this.notificationService = notificationService;
-        this.gitService = gitService;
-        this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 	}
 
 	/**
@@ -82,24 +70,7 @@ public class JobsController {
 			throw new CustomExceptionBuilder(HttpStatus.NOT_IMPLEMENTED, "Test type is not supported at this time").build();
 		}
 
-		 TestRun testRun = new TestRun();
-		 testRun.setStartedAt(Instant.now());
-		 testRun.setStatus(TestRunStatus.PENDING);
-		 testRun.setJobId(job.get().getJobId());
-		 testRun.setRunBy(CurrentUser.getUserId());
-		 testRun = testRunRepository.save(testRun);
-
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, gitService, jMeterCommandEnhancer, (status) -> {
-			// Only setting final status here because in a batch I'll need to wait for all jobs to finish
-			TestRun run = status.run();
-			TestRunStatus s = status.status();
-			run.setStatus(s);
-			run.setFinishedAt(Instant.now());
-			testRunRepository.save(run);
-		}));
-		t.start();
-
-		return ResponseEntity.ok(testRun);
+		return ResponseEntity.ok(jobService.startJob(job.get()));
 	 }
 
 	/**

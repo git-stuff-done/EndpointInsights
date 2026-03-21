@@ -1,17 +1,27 @@
 package com.vsp.endpointinsightsapi.service;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
+import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.GitService;
+import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
+import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
+import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
+import com.vsp.endpointinsightsapi.util.CurrentUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JobService {
@@ -19,10 +29,21 @@ public class JobService {
     private static final Logger LOG = LoggerFactory.getLogger(JobService.class);
     private final JobRepository jobRepository;
     private final GitRepositoryService gitRepositoryService;
+    private final TestRunRepository testRunRepository;
+    private final JMeterInterpreterService jMeterInterpreterService;
+    private final GitService gitService;
+    private final JMeterCommandService jMeterCommandService;
+    private final NotificationService notificationService;
 
-    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService) {
+
+    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService, TestRunRepository testRunRepository, JMeterInterpreterService jMeterInterpreterService, GitService gitService, JMeterCommandService jMeterCommandService, NotificationService notificationService) {
         this.jobRepository = jobRepository;
         this.gitRepositoryService = gitRepositoryService;
+		this.testRunRepository = testRunRepository;
+		this.jMeterInterpreterService = jMeterInterpreterService;
+		this.gitService = gitService;
+		this.jMeterCommandService = jMeterCommandService;
+        this.notificationService = notificationService;
     }
 
     public Job createJob(JobCreateRequest jobRequest) {
@@ -73,10 +94,31 @@ public class JobService {
         return jobRepository.save(existingJob);
     }
 
-    public java.nio.file.Path checkoutJobRepository(UUID jobId) {
+    public Path checkoutJobRepository(UUID jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException(jobId.toString()));
         return gitRepositoryService.checkoutJobRepository(job);
+    }
+
+    public TestRun startJob(Job job) {
+        TestRun testRun = new TestRun();
+        testRun.setStartedAt(Instant.now());
+        testRun.setStatus(TestRunStatus.PENDING);
+        testRun.setJobId(job.getJobId());
+        testRun.setRunBy(CurrentUser.getUserId());
+        testRun = testRunRepository.save(testRun);
+
+        Thread t = new Thread(new JobRunnerThread(job, testRun, testRunRepository, jMeterInterpreterService, notificationService, gitService, jMeterCommandService, (status) -> {
+            // Only setting final status here because in a batch I'll need to wait for all jobs to finish
+            TestRun run = status.run();
+            TestRunStatus s = status.status();
+            run.setStatus(s);
+            run.setFinishedAt(Instant.now());
+            testRunRepository.save(run);
+        }));
+        t.start();
+
+        return testRun;
     }
 
     @Transactional
