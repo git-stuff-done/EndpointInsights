@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,8 +21,13 @@ public class TestResult {
 	@Column(name = "job_type")
 	private Integer jobType;
 
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "run_id", referencedColumnName = "run_id", nullable = false)
 	private TestRun testRun;
+
+	@OneToOne(mappedBy = "testResult")
+	private PerfTestResult perfTestResult;
+
 
 }
