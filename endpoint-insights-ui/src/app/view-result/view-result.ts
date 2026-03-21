@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {TestRunService} from "../services/test-run.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PerfTestResult, PerfTestResultId, TestResult, TestRun} from "../models/test-run.model";
@@ -12,6 +12,7 @@ import {
   MatTableDataSource
 } from "@angular/material/table";
 import {DatePipe, DecimalPipe, NgClass, SlicePipe} from "@angular/common";
+import {MatPaginator} from "@angular/material/paginator";
 
 @Component({
   selector: 'app-view-result',
@@ -29,16 +30,19 @@ import {DatePipe, DecimalPipe, NgClass, SlicePipe} from "@angular/common";
     MatColumnDef,
     NgClass,
     DatePipe,
-    SlicePipe
+    SlicePipe,
+    MatPaginator
   ],
   templateUrl: './view-result.html',
   styleUrl: './view-result.scss',
 })
-export class ViewResult implements OnInit {
+export class ViewResult implements OnInit, AfterViewInit {
 
   public testRun?: TestRun;
   public testResultsDataSource: MatTableDataSource<PerfTestResult> = new MatTableDataSource<PerfTestResult>();
   public displayedColumns: string[] = ['threadGroup', 'samplerName', 'p50LatencyMs', 'p95LatencyMs', 'p99LatencyMs', 'errorRatePercent', 'volumeLastMinute', 'volumeLast5Minutes']
+
+  @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
 
   get duration(): string {
     if (!this.testRun) return '';
@@ -71,12 +75,27 @@ export class ViewResult implements OnInit {
     }
   }
 
+  ngAfterViewInit() {
+    this.testResultsDataSource.paginator = this.paginator;
+  }
+
   private getTestRun(id: string) {
     this.testRunService.getRun(id).subscribe(run => {
       this.testRun = run;
       this.testResultsDataSource.data = run.results.map(result => result.perfTestResult as PerfTestResult);
+      this.testResultsDataSource.paginator = this.paginator;
       console.log(this.testResultsDataSource.data.length);
     })
+  }
+
+  public getErrorRateClass(errorRate: number): string {
+    if (errorRate > 0.5) {
+      return 'error-rate-high';
+    } else if (errorRate > 0.1) {
+      return 'error-rate-medium';
+    } else {
+      return 'error-rate-low';
+    }
   }
 
 }

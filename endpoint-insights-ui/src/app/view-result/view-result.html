@@ -38,7 +38,7 @@
 
                 <ng-container matColumnDef="errorRatePercent">
                     <mat-header-cell *matHeaderCellDef>Error Rate</mat-header-cell>
-                    <mat-cell *matCellDef="let row">{{ row.errorRatePercent | number:'1.1-1' }}%</mat-cell>
+                    <mat-cell *matCellDef="let row" class="error-rate" [ngClass]="getErrorRateClass(row.errorRatePercent)">{{ row.errorRatePercent | number:'1.1-1' }}%</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="volumeLastMinute">
@@ -51,10 +51,11 @@
                     <mat-cell *matCellDef="let row">{{ row.volumeLast5Minutes }}</mat-cell>
                 </ng-container>
 
-                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></mat-header-row>
                 <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
             </mat-table>
 
+            <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons />
         </div>
     </div>
 </div>
