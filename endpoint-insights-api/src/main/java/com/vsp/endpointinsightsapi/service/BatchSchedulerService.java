@@ -39,15 +39,13 @@ public class BatchSchedulerService {
 		}
 	}
 
-	private void scheduleBatch(TestBatch batch) {
+	public void scheduleBatch(TestBatch batch) {
 		ScheduledFuture<?> prevFuture = scheduledBatches.get(batch.getBatchId());
 		if (prevFuture != null) {
 			if (!prevFuture.cancel(false)) {
 				LOG.warn("Failed to cancel previous scheduled batch {}", batch.getBatchId());
-				return;
 			}
 		}
-
 
 		if (ObjectUtils.isEmpty(batch.getCronExpression())) {
 			LOG.info("Skipping batch {} as it has no schedule", batch.getBatchId());
@@ -56,11 +54,10 @@ public class BatchSchedulerService {
 		try {
 			CronExpression cronExpression = CronExpression.parse(batch.getCronExpression());
 			LocalDateTime next = cronExpression.next(LocalDateTime.now());
-			LOG.info("Scheduled batch {} for {} (cron='{}')", batch.getBatchId(), next, batch.getCronExpression());
 			ScheduledFuture<?> scheduled = taskScheduler.schedule(() -> startBatch(batch.getBatchId()),
 					new CronTrigger(batch.getCronExpression()));
 			scheduledBatches.put(batch.getBatchId(), scheduled);
-			LOG.info("Successfully scheduled batch {}", batch.getBatchId());
+			LOG.info("Scheduled batch {} for {} (cron='{}')", batch.getBatchId(), next, batch.getCronExpression());
 		} catch (IllegalArgumentException e) {
 			LOG.error("Invalid cron expression for batch {}: {}", batch.getBatchId(), batch.getCronExpression());
 		}
@@ -74,17 +71,16 @@ public class BatchSchedulerService {
 			return;
 		}
 
+		LOG.info("Starting batch {}", batch.getBatchId());
+
 		if (batch.getActive() != null && batch.getActive()) {
 			LOG.info("Batch {} is already active.", batchId);
-			scheduleBatch(batch);
 			return;
 		}
 
-		LOG.info("Starting batch {}", batch.getBatchId());
 		batchService.runBatch(batch);
 		LOG.info("Batch {} started successfully", batch.getBatchId());
 		LOG.info("Rescheduling next run for batch {}", batch.getBatchId());
-		scheduleBatch(batch);
 	}
 
 }

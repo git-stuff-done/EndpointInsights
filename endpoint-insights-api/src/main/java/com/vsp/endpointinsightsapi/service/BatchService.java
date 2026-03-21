@@ -51,6 +51,7 @@ public class BatchService {
     private final BatchRunPersistenceService batchRunPersistenceService;
     private final NotificationService notificationService;
     private final ThreadPoolTaskScheduler vspTaskScheduler;
+    private final BatchSchedulerService batchSchedulerService;
 
     //TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
@@ -98,6 +99,8 @@ public class BatchService {
             updateEmailsForBatch(saved.getBatchId(), request.getEmails());
         }
 
+        batchSchedulerService.scheduleBatch(saved);
+
         return saved;
     }
 
@@ -132,6 +135,8 @@ public class BatchService {
         if (request.getEmails() != null) {
             updateEmailsForBatch(id, request.getEmails());
         }
+
+        batchSchedulerService.scheduleBatch(batch);
 
         return batch;
     }
