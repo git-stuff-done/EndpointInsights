@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -172,6 +173,34 @@ class TestRunServiceTest {
 		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
 
 		assertEquals("PASS", testRunService.getRecentActivity(1).get(0).getStatus());
+	}
+
+	@Test
+	void getRecentActivity_mapsJobIdToString() {
+		UUID jobId = UUID.randomUUID();
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(buildRun(jobId, null, TestRunStatus.COMPLETED))));
+		when(jobRepository.findAllById(any())).thenReturn(List.of());
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+		assertEquals(jobId.toString(), testRunService.getRecentActivity(1).get(0).getJobId());
+	}
+
+	@Test
+	void getRecentActivity_nullJobId_mapsToNull() {
+		TestRun run = new TestRun();
+		run.setRunId(UUID.randomUUID());
+		run.setJobId(null);
+		run.setRunBy("tester");
+		run.setStatus(TestRunStatus.COMPLETED);
+		run.setStartedAt(Instant.now());
+		run.setFinishedAt(Instant.now());
+
+		when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(run)));
+		when(jobRepository.findAllById(any())).thenReturn(List.of());
+		when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+		assertNull(testRunService.getRecentActivity(1).get(0).getJobId());
 	}
 
 	@Test
