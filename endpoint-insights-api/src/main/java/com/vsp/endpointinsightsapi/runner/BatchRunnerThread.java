@@ -48,6 +48,7 @@ public class BatchRunnerThread implements Runnable {
 	@Override
 	public void run() {
 		batch.setActive(true);
+		batch.setLastTimeRun(LocalDateTime.now());
 		batch.setStartTime(LocalDateTime.now());
 		batch = testBatchRepository.save(batch);
 
