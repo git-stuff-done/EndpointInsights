@@ -89,7 +89,7 @@ export class TestsResultsPageComponent implements OnInit, OnDestroy {
     }
 
     viewResult(row: RecentActivity): void {
-        this.router.navigate(['/test-result-detail'], { state: { runId: row.runId } });
+        this.router.navigate(['/test-results/view'], { state: { runId: row.runId } });
     }
 
     statusClass(status: string): string {

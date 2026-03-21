@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler {
 		}
 
 		return ResponseEntity.status(e.getHttpStatus()).body(errorResponse);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+		CustomException ce = (new CustomExceptionBuilder(e.getMessage()))
+				.withStatus(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		return handleCustomException(ce);
 	}
 
 	// Map validation exceptions to a specific, reusable format for easy error parsing
