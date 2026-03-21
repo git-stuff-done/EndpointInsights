@@ -28,7 +28,7 @@ public class LogAspect {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpServletRequest httpRequest;
 
-    @AfterReturning(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..)) && !within(com.vsp.endpointinsightsapi.service.BatchRunPersistenceService)", returning = "result")
     public void logSuccess(JoinPoint joinPoint, Object result) {
         Log log = new Log();
         log.setEventType(httpRequest.getMethod());
@@ -62,7 +62,7 @@ public class LogAspect {
 
     }
 
-    @AfterThrowing(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..)) && !within(com.vsp.endpointinsightsapi.service.BatchRunPersistenceService)", throwing = "ex")
     public void logFailure(JoinPoint joinPoint, Exception ex) {
         Log log = new Log();
         log.setEventType(httpRequest.getMethod());

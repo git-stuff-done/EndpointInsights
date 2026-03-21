@@ -65,7 +65,7 @@ public class BatchesController {
 	@PublicAPI
 	@PostMapping("/{batchId}/run")
 	public ResponseEntity<TestRun> runBatch(@PathVariable UUID batchId) {
-		LOG.info("Running batch {}", batchId);
+		LOG.info("Request received to run batch {}", batchId);
 		var batchOptional = testBatchRepository.findById(batchId);
 		if (batchOptional.isEmpty()) {
 			return ResponseEntity.notFound().build();

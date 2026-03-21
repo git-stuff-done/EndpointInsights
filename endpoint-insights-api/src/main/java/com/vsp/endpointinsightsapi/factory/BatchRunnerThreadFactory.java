@@ -3,6 +3,7 @@ package com.vsp.endpointinsightsapi.factory;
 import com.vsp.endpointinsightsapi.model.BatchRunnerThreadStatus;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
 import com.vsp.endpointinsightsapi.service.NotificationService;
@@ -15,10 +16,12 @@ public class BatchRunnerThreadFactory {
 
 	private final TestRunRepository testRunRepository;
 	private final NotificationService notificationService;
+	private final TestBatchRepository testBatchRepository;
 
-	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, NotificationService notificationService) {
+	public BatchRunnerThreadFactory(TestRunRepository testRunRepository, NotificationService notificationService, TestBatchRepository testBatchRepository) {
 		this.testRunRepository = testRunRepository;
 		this.notificationService = notificationService;
+		this.testBatchRepository = testBatchRepository;
 	}
 
 	/**
@@ -36,7 +39,8 @@ public class BatchRunnerThreadFactory {
 				testRun,
 				onComplete,
 				testRunRepository,
-				notificationService));
+				notificationService,
+				testBatchRepository));
 	}
 
 }

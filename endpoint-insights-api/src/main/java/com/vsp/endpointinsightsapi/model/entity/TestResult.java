@@ -20,10 +20,8 @@ public class TestResult {
 	@Column(name = "job_type")
 	private Integer jobType;
 
-    @Column(name = "run_id", nullable = false)
-    private UUID runId;
-
 	@ManyToOne
+	@JoinColumn(name = "run_id", referencedColumnName = "run_id", nullable = false)
 	private TestRun testRun;
 
 }

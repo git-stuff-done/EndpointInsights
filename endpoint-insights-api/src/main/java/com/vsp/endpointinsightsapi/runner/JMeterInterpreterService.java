@@ -47,12 +47,12 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 	@Override
 	@Transactional
-	public TestRunResult processResults(File file, UUID testRunId) throws IOException {
+	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
 		// Create test result so we can get the UUID
 		TestResult testResult = new TestResult();
 		testResult.setId(UUID.randomUUID());
 		testResult.setJobType(TestType.PERF.toInteger());
-		testResult.setRunId(testRunId);
+		testResult.setTestRun(testRun);
 		testResult = testResultRepository.save(testResult);
 
 		// Maps groupKey -> List of SampleRecord

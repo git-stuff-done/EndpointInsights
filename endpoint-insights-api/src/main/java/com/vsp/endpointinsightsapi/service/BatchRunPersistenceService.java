@@ -20,8 +20,9 @@ public class BatchRunPersistenceService {
 
 	@Transactional
 	public void save(TestBatch batch, TestRun run) {
-		testBatchRepository.save(batch);
 		testRunRepository.save(run);
+		testBatchRepository.save(batch);
+
 	}
 
 }
