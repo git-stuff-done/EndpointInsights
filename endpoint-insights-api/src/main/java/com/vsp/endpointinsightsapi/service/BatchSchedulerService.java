@@ -56,8 +56,7 @@ public class BatchSchedulerService {
 			return;
 		}
 		try {
-			CronExpression cronExpression = CronExpression.parse(batch.getCronExpression());
-			LocalDateTime next = cronExpression.next(LocalDateTime.now());
+			LocalDateTime next = getNextRunTime(batch);
 			ScheduledFuture<?> scheduled = taskScheduler.schedule(() -> startBatch(batch.getBatchId()),
 					new CronTrigger(batch.getCronExpression()));
 			scheduledBatches.put(batch.getBatchId(), scheduled);
@@ -84,8 +83,12 @@ public class BatchSchedulerService {
 
 		// To avoid circular dependencies I'm using the event system
 		applicationEventPublisher.publishEvent(new RunBatchEvent(this, batch));
-		LOG.info("Batch {} started successfully", batch.getBatchId());
-		LOG.info("Rescheduling next run for batch {}", batch.getBatchId());
+		LOG.info("Next run for batch {} will be at {}", batch.getBatchId(), getNextRunTime(batch));
+	}
+
+	private LocalDateTime getNextRunTime(TestBatch batch) throws IllegalArgumentException {
+		CronExpression cronExpression = CronExpression.parse(batch.getCronExpression());
+		return cronExpression.next(LocalDateTime.now());
 	}
 
 }
