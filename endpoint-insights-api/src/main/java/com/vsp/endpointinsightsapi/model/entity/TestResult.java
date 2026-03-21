@@ -26,4 +26,7 @@ public class TestResult {
     @Column(name = "run_id", nullable = false)
     private UUID runId;
 
+    @Column(name = "test_result")
+    private String testResult;
+
 }

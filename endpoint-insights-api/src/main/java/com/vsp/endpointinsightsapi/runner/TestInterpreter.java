@@ -8,5 +8,5 @@ import java.io.IOException;
 import java.util.UUID;
 
 public interface TestInterpreter {
-	TestRunResult processResults(File file, UUID testRunId) throws IOException;
+	TestRunResult processResults(File file, UUID testRunId, UUID testRunJobId) throws IOException;
 }

@@ -79,7 +79,7 @@ public class JobRunnerThread implements Runnable {
             } else {
                 LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
-            TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId());
+                TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId(), testRun.getJobId());
 
                 testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
                 testRun.setResultId(pass.resultId());

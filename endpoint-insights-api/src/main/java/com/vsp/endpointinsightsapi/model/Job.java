@@ -96,7 +96,7 @@ public class Job  extends AuditingEntity {
     private Map<String, Object> config;
 
     @Column(name = "threshold")
-    private double threshold;
+    private Integer threshold;
 
 
 }
