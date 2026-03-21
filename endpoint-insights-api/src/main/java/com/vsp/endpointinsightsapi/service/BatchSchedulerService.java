@@ -6,10 +6,12 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -48,11 +50,17 @@ public class BatchSchedulerService {
 			LOG.info("Skipping batch {} as it has no schedule", batch.getBatchId());
 			return;
 		}
-		LOG.info("Scheduling batch {} with cron expression {}", batch.getBatchId(), batch.getCronExpression());
-		ScheduledFuture<?> scheduled = taskScheduler.schedule(() -> startBatch(batch.getBatchId()),
-				new CronTrigger(batch.getCronExpression()));
-		scheduledBatches.put(batch.getBatchId(), scheduled);
-		LOG.info("Successfully scheduled batch {}", batch.getBatchId());
+		try {
+			CronExpression cronExpression = CronExpression.parse(batch.getCronExpression());
+			LocalDateTime next = cronExpression.next(LocalDateTime.now());
+			LOG.info("Scheduled batch {} for {} (cron='{}')", batch.getBatchId(), next, batch.getCronExpression());
+			ScheduledFuture<?> scheduled = taskScheduler.schedule(() -> startBatch(batch.getBatchId()),
+					new CronTrigger(batch.getCronExpression()));
+			scheduledBatches.put(batch.getBatchId(), scheduled);
+			LOG.info("Successfully scheduled batch {}", batch.getBatchId());
+		} catch (IllegalArgumentException e) {
+			LOG.error("Invalid cron expression for batch {}: {}", batch.getBatchId(), batch.getCronExpression());
+		}
 	}
 
 	private void startBatch(UUID batchId) {
