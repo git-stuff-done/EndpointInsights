@@ -47,6 +47,7 @@ public class BatchService {
     private final BatchRunnerThreadFactory batchRunnerThreadFactory;
     private final TestRunRepository testRunRepository;
     private final BatchRunPersistenceService batchRunPersistenceService;
+    private final NotificationService notificationService;
 
     //TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
@@ -180,6 +181,9 @@ public class BatchService {
             // This call is in a separate service to ensure @Transactional works.
             // Spring's @Transactional only applies when method invocation occurs from outside the declaring class.
             batchRunPersistenceService.save(returnedBatch, run);
+
+            // Notify now that batch is completed
+            notificationService.sendTestCompletionNotifications(run.getBatchId(), run.getRunId(), null);
         });
         batchRunnerThread.start();
 

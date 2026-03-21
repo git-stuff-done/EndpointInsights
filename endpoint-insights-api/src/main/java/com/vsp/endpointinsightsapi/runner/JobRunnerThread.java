@@ -90,12 +90,6 @@ public class JobRunnerThread implements Runnable {
 
 				onComplete.accept(new JobRunnerThreadStatus(testRun, pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED));
             }
-
-			// todo: this should probably be moved to either batch runner or callback
-			if (testRun.getBatchId() != null) {
-				notificationService.sendTestCompletionNotifications(
-						testRun.getBatchId(), testRun.getRunId(), null);
-			}
 		} catch (IOException e) {
             LOG.error("Running job failed with exception: {}", e.getMessage());
 			onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
@@ -210,9 +204,7 @@ public class JobRunnerThread implements Runnable {
 					deleteRecursively(child);
 				}
 			}
-		}
-
-        if (!file.setWritable(true)) {
+		} else if (!file.setWritable(true)) {
             throw new IOException("Failed to delete file or directory: unable to set " + file.getAbsolutePath() + " as writable");
         }
 		if (!file.delete()) {
