@@ -3,8 +3,11 @@ package com.vsp.endpointinsightsapi.service;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.factory.BatchRunnerThreadFactory;
+import com.vsp.endpointinsightsapi.factory.TestRunFactory;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -16,9 +19,12 @@ import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -37,6 +43,10 @@ public class BatchService {
     private final BatchMapper batchMapper;
     private final JobRepository jobRepository;
     private final TestBatchEmailListsRepository testBatchEmailListsRepository;
+    private final TestRunFactory testRunFactory;
+    private final BatchRunnerThreadFactory batchRunnerThreadFactory;
+    private final TestRunRepository testRunRepository;
+    private final BatchRunPersistenceService batchRunPersistenceService;
 
     //TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
@@ -129,7 +139,7 @@ public class BatchService {
     }
 
     @Transactional
-    private void updateEmailsForBatch(UUID batchId, List<String> emails) {
+	protected void updateEmailsForBatch(UUID batchId, List<String> emails) {
         testBatchEmailListsRepository.deleteAllByBatchId(batchId);
 
         List<TestBatchEmailList> entities = emails.stream()
@@ -149,5 +159,30 @@ public class BatchService {
                 .toList();
 
         testBatchEmailListsRepository.saveAll(entities);
+    }
+
+
+    public TestRun runBatch(TestBatch batch) {
+        TestRun testRun = testRunFactory.createForBatch(batch);
+
+        Thread batchRunnerThread = batchRunnerThreadFactory.create(batch, testRun, (status) -> {
+            TestBatch returnedBatch = status.batch();
+            TestRun run = status.run();
+            TestRunStatus s = status.status();
+
+            LOG.info("Batch {} run {} completed with status {}", batch.getBatchId(), run.getRunId(), s);
+
+            returnedBatch.setActive(false);
+
+            run.setStatus(s);
+            run.setFinishedAt(Instant.now());
+
+            // This call is in a separate service to ensure @Transactional works.
+            // Spring's @Transactional only applies when method invocation occurs from outside the declaring class.
+            batchRunPersistenceService.save(returnedBatch, run);
+        });
+        batchRunnerThread.start();
+
+        return testRun;
     }
 }

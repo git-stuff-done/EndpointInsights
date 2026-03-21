@@ -12,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -26,7 +24,7 @@ public class JobRunnerThread implements Runnable {
     //TODO: add test-level logging to store as part of test results
 
 	private final Job job;
-	private final TestRun testRun;
+	private TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
 	private final NotificationService notificationService;
@@ -36,6 +34,8 @@ public class JobRunnerThread implements Runnable {
 	// Completed callback
 	private final Consumer<JobRunnerThreadStatus> onComplete;
 
+	private final boolean isBatchRun;
+
     private File jobProjectRepoDirectory = null;
 
 
@@ -43,7 +43,7 @@ public class JobRunnerThread implements Runnable {
 						   JMeterInterpreterService jMeterInterpreterService,
 						   NotificationService notificationService,
                            GitService gitService, JMeterCommandService jMeterCommandEnhancer,
-						   Consumer<JobRunnerThreadStatus> onComplete) {
+						   Consumer<JobRunnerThreadStatus> onComplete, boolean isBatchRun) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
@@ -51,6 +51,7 @@ public class JobRunnerThread implements Runnable {
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 		this.onComplete = onComplete;
+		this.isBatchRun = isBatchRun;
 
         // todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -67,8 +68,11 @@ public class JobRunnerThread implements Runnable {
             File workingDirectory = resolveWorkingDir();
 			compileTest(workingDirectory);
 
-			testRun.setStatus(TestRunStatus.RUNNING);
-			testRunRepository.save(testRun);
+			// Only concerned with updating test run status if it's a single-job run
+			if (isBatchRun) {
+				testRun.setStatus(TestRunStatus.RUNNING);
+				testRun = testRunRepository.save(testRun);
+			}
 
 			// step 3 - execute test
 			Optional<File> testResultFile = executeTest(workingDirectory);

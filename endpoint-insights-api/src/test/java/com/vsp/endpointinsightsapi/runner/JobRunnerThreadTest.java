@@ -75,7 +75,8 @@ class JobRunnerThreadTest {
                 notificationService,
                 gitService,
                 jMeterCommandEnhancer,
-                _ -> {}
+                _ -> {},
+                false
         );
     }
 

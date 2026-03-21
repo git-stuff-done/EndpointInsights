@@ -118,10 +118,11 @@ public class JobService {
         TestRun testRun = testRunFactory.createForJob(job);
 
         // ignoring returned thread
-        Thread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, (status) -> {
+        Thread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, false, (status) -> {
             // Only setting final status here because in a batch I'll need to wait for all jobs to finish
             TestRun run = status.run();
             TestRunStatus s = status.status();
+            LOG.info("Job {} run {} completed with status {}", job.getJobId(), run.getRunId(), s);
             run.setStatus(s);
             run.setFinishedAt(Instant.now());
             testRunRepository.save(run);

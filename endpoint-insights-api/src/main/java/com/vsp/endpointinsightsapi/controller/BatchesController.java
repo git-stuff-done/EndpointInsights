@@ -65,7 +65,7 @@ public class BatchesController {
 	@PublicAPI
 	@PostMapping("/{batchId}/run")
 	public ResponseEntity<TestRun> runBatch(@PathVariable UUID batchId) {
-		LOG.info("Running job {}", batchId);
+		LOG.info("Running batch {}", batchId);
 		var batchOptional = testBatchRepository.findById(batchId);
 		if (batchOptional.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -77,19 +77,7 @@ public class BatchesController {
 			throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
 		}
 
-		batch.setActive(true);
-		batch = testBatchRepository.save(batch);
-
-		TestRun testRun = new TestRun();
-//		testRun.setStartedAt(Instant.now());
-//		testRun.setStatus(TestRunStatus.PENDING);
-//		testRun.setBatchId(batchOptional.get().getBatchId());
-//		testRun.setRunBy(CurrentUser.getUserId());
-//		testRun = testRunRepository.save(testRun);
-
-		//todo: batch runner thread to spawn job runner threads?
-
-		return ResponseEntity.ok(testRun);
+		return ResponseEntity.ok(batchService.runBatch(batch));
 	}
 
 	// PUT /api/batches/{id}
