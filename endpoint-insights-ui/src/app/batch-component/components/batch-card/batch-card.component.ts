@@ -17,9 +17,14 @@ import {BatchConfigDialogComponent} from "../batch-config-dialog/batch-config-di
 export class BatchCardComponent {
     @Input() batch!: Batch;
     @Output() configure = new EventEmitter<Batch>();
+    @Output() delete = new EventEmitter<Batch>();
 
     onConfigure() {
        this.configure.emit(this.batch);
+    }
+
+    onDelete() {
+        this.delete.emit(this.batch);
     }
 
     formattedDate(): string {

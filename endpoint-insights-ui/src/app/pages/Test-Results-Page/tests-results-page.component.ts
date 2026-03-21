@@ -1,85 +1,103 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TestResultsCardComponent } from '../../components/test-results-card/test-results-card.component';
-import { TestRecord } from '../../models/test-record.model';
-import { TestRun } from '../../models/test-run.model';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { RecentActivity } from '../../models/test-run.model';
 import { TestRunService } from '../../services/test-run.service';
 
 @Component({
     selector: 'app-tests-results-page',
     standalone: true,
-    imports: [CommonModule, TestResultsCardComponent],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatTableModule,
+        MatSortModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+    ],
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
 })
-export class TestsResultsPageComponent implements OnInit {
-    recentRuns: TestRun[] = [];
-    isLoadingRuns = true;
-    runsError: string | null = null;
+export class TestsResultsPageComponent implements OnInit, OnDestroy {
+    @ViewChild(MatSort) sort!: MatSort;
 
-    constructor(private testRunService: TestRunService) {}
+    dataSource = new MatTableDataSource<RecentActivity>([]);
+    displayedColumns = ['testName', 'runId', 'jobId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
+    searchControl = new FormControl('');
+    isLoading = true;
+    loadError: string | null = null;
+
+    private destroy$ = new Subject<void>();
+
+    constructor(
+        private testRunService: TestRunService,
+        private route: ActivatedRoute,
+        private router: Router,
+    ) {}
 
     ngOnInit(): void {
-        this.testRunService.getRecentTestRuns(10).subscribe({
-            next: (runs: TestRun[]) => {
-                this.recentRuns = runs;
-                this.isLoadingRuns = false;
+        this.dataSource.filterPredicate = (row: RecentActivity, filter: string) => {
+            const term = filter.trim().toLowerCase();
+            return (
+                row.testName.toLowerCase().includes(term) ||
+                row.runId.toLowerCase().includes(term) ||
+                (row.jobId ?? '').toLowerCase().includes(term)
+            );
+        };
+
+        const params = this.route.snapshot.queryParamMap;
+        const preselected = params.get('runId') ?? params.get('uuid') ?? params.get('name') ?? '';
+        if (preselected) {
+            this.searchControl.setValue(preselected);
+            this.dataSource.filter = preselected.trim().toLowerCase();
+        }
+
+        this.searchControl.valueChanges
+            .pipe(debounceTime(200), takeUntil(this.destroy$))
+            .subscribe(value => {
+                this.dataSource.filter = (value ?? '').trim().toLowerCase();
+            });
+
+        this.testRunService.getRecentActivity(100).subscribe({
+            next: (activity: RecentActivity[]) => {
+                this.dataSource.data = activity;
+                this.dataSource.sort = this.sort;
+                this.isLoading = false;
             },
             error: () => {
-                this.runsError = 'Unable to load recent test runs.';
-                this.isLoadingRuns = false;
+                this.loadError = 'Unable to load test results.';
+                this.isLoading = false;
             },
         });
     }
-    tests: TestRecord[] = [
-        {
-            id: 'login-api',
-            name: 'Login API',
-            description: 'Auth flow correctness & responsiveness.',
-            status: 'PASS',
-            lastRunIso: new Date().toISOString(),
-            latencyMsP50: 42,
-            latencyMsP95: 120,
-            latencyMsP99: 210,
-            volume1m: 530,
-            volume5m: 2510,
-            httpBreakdown: [
-                { code: 200, count: 2478 },
-                { code: 401, count: 8 },
-                { code: 500, count: 1 },
-            ],
-            errorRatePct: 0.4,
-            thresholds: {
-                latencyMs: { warn: 200, fail: 400 },
-                errorRatePct: { warn: 1.0, fail: 2.5 },
-                volumePerMin: { warn: 100, fail: 20 },
-            },
-        },
-        {
-            id: 'payments',
-            name: 'Payments',
-            description: 'Card authorization and capture path.',
-            status: 'FAIL',
-            lastRunIso: new Date().toISOString(),
-            latencyMsP50: 320,
-            latencyMsP95: 900,
-            latencyMsP99: 1900,
-            volume1m: 75,
-            volume5m: 450,
-            httpBreakdown: [
-                { code: 200, count: 240 },
-                { code: 429, count: 22 },
-                { code: 500, count: 31 },
-            ],
-            errorRatePct: 9.8,
-            thresholds: {
-                latencyMs: { warn: 250, fail: 600 },
-                errorRatePct: { warn: 2.0, fail: 5.0 },
-                volumePerMin: { warn: 60, fail: 30 },
-            },
-        },
-    ];
 
-    trackById = (_: number, t: TestRecord) => t.id;
-    trackRunById = (_: number, r: TestRun) => r.runId;
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    viewResult(row: RecentActivity): void {
+        this.router.navigate(['/test-result-detail'], { state: { runId: row.runId } });
+    }
+
+    statusClass(status: string): string {
+        switch (status) {
+            case 'PASS': return 'status-pass';
+            case 'FAIL': return 'status-fail';
+            case 'WARN': return 'status-warn';
+            default: return 'status-unknown';
+        }
+    }
 }

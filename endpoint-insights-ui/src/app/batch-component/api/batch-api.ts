@@ -21,9 +21,18 @@ export class BatchApi {
         return this.http.get<Batch>(`${environment.apiUrl}/batches/${id}`)
     }
 
+    deleteBatch(id: string){
+        return this.httpInterceptService.delete<Batch>(`${environment.apiUrl}/batches/${id}`)
+    }
+
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
         if(batch.isNew){
-            return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, batch)
+            const createRequest = {
+                batchName: batch.batchName,
+                jobs: (batch.jobs ?? []).map((j: any) => j.id),
+                emails: batch.emails ?? []
+            };
+            return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)
                 .pipe(
                     tap(() => this.toast.onSuccess("Successfully saved batch item")),
                     catchError(err => {
@@ -33,7 +42,13 @@ export class BatchApi {
                 );
         }
         else{
-            return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, batch)
+            const updateRequest = {
+                batchName: batch.batchName,
+                cronExpression: batch.cronExpression,
+                jobs: (batch.jobs ?? []).map((j: any) => j.id),
+                emails: batch.emails ?? []
+            };
+            return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, updateRequest)
                 .pipe(
                     tap(() => this.toast.onSuccess("Successfully saved batch item")),
                     catchError(err => {
