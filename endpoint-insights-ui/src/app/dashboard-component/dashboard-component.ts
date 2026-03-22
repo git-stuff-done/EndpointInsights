@@ -60,8 +60,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     private chart?: Chart;
 
-    // hardcode for now, replace later with selected job id from UI/router
-//     jobId = '89bb3ff9-08f1-49e3-ab61-36b5cbb42dd7';
     jobId = '';
     loading = false;
     error = '';
