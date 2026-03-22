@@ -20,13 +20,15 @@ import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,7 +39,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@ConfigurationProperties("batch")
 public class BatchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchService.class);
@@ -53,7 +55,35 @@ public class BatchService {
     private final ThreadPoolTaskScheduler vspTaskScheduler;
     private final BatchSchedulerService batchSchedulerService;
 
-    //TODO fill with search criteria when filter implemented, change parameters as well
+    @Setter
+    private int staleBatchThresholdSeconds = 60;
+
+	public BatchService(TestBatchRepository testBatchRepository,
+                        BatchMapper batchMapper,
+                        JobRepository jobRepository,
+                        TestBatchEmailListsRepository testBatchEmailListsRepository,
+                        TestRunFactory testRunFactory,
+                        BatchRunnerThreadFactory batchRunnerThreadFactory,
+                        TestRunRepository testRunRepository,
+                        BatchRunPersistenceService batchRunPersistenceService,
+                        NotificationService notificationService,
+                        ThreadPoolTaskScheduler vspTaskScheduler,
+                        BatchSchedulerService batchSchedulerService) {
+		this.testBatchRepository = testBatchRepository;
+		this.batchMapper = batchMapper;
+		this.jobRepository = jobRepository;
+		this.testBatchEmailListsRepository = testBatchEmailListsRepository;
+		this.testRunFactory = testRunFactory;
+		this.batchRunnerThreadFactory = batchRunnerThreadFactory;
+		this.testRunRepository = testRunRepository;
+		this.batchRunPersistenceService = batchRunPersistenceService;
+		this.notificationService = notificationService;
+		this.vspTaskScheduler = vspTaskScheduler;
+		this.batchSchedulerService = batchSchedulerService;
+	}
+
+
+	//TODO fill with search criteria when filter implemented, change parameters as well
     public List<BatchResponseDTO> getAllBatchesByCriteria(String batchName, LocalDateTime runDate) {
         List<TestBatch> res = testBatchRepository.findAllByCriteria(batchName, runDate);
         return res.stream().map(batchMapper::toDto).toList();
@@ -171,9 +201,60 @@ public class BatchService {
     }
 
 
+    /**
+     * This is called when a TestBatch is already in an active state.
+     * This checks if the batch is in an error state and attempts to recover it in the db.
+     * */
+    private boolean isBatchStale(TestBatch batch) {
+        // try to see if last run is stale or in error state to try and recover
+        var batches = testRunRepository.findTop10ByBatchIdOrderByStartedAtDesc(batch.getBatchId());
+
+
+        // No recent test runs, definitely stale
+        if (batches.isEmpty()) {
+            return true;
+        }
+
+        var inProgressRuns = batches.stream()
+                .filter(run -> ObjectUtils.isEmpty(run.getFinishedAt()) || !List.of(TestRunStatus.COMPLETED, TestRunStatus.FAILED).contains(run.getStatus())).toList();
+
+        // All Test Runs must be in a valid state, so definitely stale
+        if (inProgressRuns.isEmpty()) {
+            return true;
+        }
+
+        if (inProgressRuns.size() > 1) {
+            // Mark all runs as failed
+            inProgressRuns.forEach(run -> {
+                run.setStatus(TestRunStatus.FAILED);
+                run.setFinishedAt(Instant.now());
+            });
+            testRunRepository.saveAll(inProgressRuns);
+
+
+            LOG.error("More than one in progress run found for batch {}", batch.getBatchId());
+            LOG.error("Marking {} in progress runs as FAILED", inProgressRuns.size());
+            LOG.error("This indicates a genuine error state, please investigate");
+
+            return false;
+        }
+
+        if (batch.getLastTimeRun().isBefore(LocalDateTime.now().minusSeconds(staleBatchThresholdSeconds))) {
+            LOG.error("Batch {} is in an error state and is stale. Recovering for next run.", batch.getBatchId());
+            return true;
+        }
+
+        // Run is currently in progress, do not recover
+        return false;
+    }
+
     public TestRun runBatch(TestBatch batch) {
         if (batch.getActive() != null && batch.getActive()) {
-            throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
+            if (isBatchStale(batch)) {
+                LOG.info("Batch {} is stale, proceeding anyways", batch.getBatchId());
+            } else {
+                throw new CustomExceptionBuilder(HttpStatus.CONFLICT, "Batch is already running").build();
+            }
         }
 
         TestRun testRun = testRunFactory.createForBatch(batch);
