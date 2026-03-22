@@ -89,6 +89,8 @@ export class TestOverview implements OnInit, OnDestroy {
                     createdAt: j.createdDate ?? '',
                     createdBy: j.createdBy ?? '',
                     status: this.mapStatus(statusMap.get(j.jobId)),
+                    threshold: 20,
+
                 }));
                 this.applyFilter();
             },
