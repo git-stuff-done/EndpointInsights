@@ -2,8 +2,12 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
-import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.service.BatchService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -23,10 +27,12 @@ public class BatchesController {
     private static final Logger LOG = LoggerFactory.getLogger(BatchesController.class);
 
     private final BatchService batchService;
+	private final TestBatchRepository testBatchRepository;
 
-    public BatchesController(BatchService batchService){
+	public BatchesController(BatchService batchService, TestBatchRepository testBatchRepository){
         this.batchService = batchService;
-    }
+    	this.testBatchRepository = testBatchRepository;
+	}
 
     // GET /api/batches
 	@GetMapping
@@ -48,6 +54,19 @@ public class BatchesController {
 	public ResponseEntity<TestBatch> createBatch(@RequestBody BatchRequestDTO request) {
 		TestBatch batch = batchService.createBatch(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
+	}
+
+	@PostMapping("/{batchId}/run")
+	public ResponseEntity<TestRun> runBatch(@PathVariable UUID batchId) {
+		LOG.info("Request received to run batch {}", batchId);
+		var batchOptional = testBatchRepository.findById(batchId);
+		if (batchOptional.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		var batch = batchOptional.get();
+
+		return ResponseEntity.ok(batchService.runBatch(batch));
 	}
 
 	// PUT /api/batches/{id}

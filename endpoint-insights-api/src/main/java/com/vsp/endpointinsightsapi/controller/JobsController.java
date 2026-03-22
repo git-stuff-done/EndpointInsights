@@ -1,19 +1,11 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.model.JobRun;
-import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
-import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
-import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.service.JobService;
-import com.vsp.endpointinsightsapi.service.NotificationService;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.*;
 
 @RestController
@@ -34,21 +25,9 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
-	private final JMeterInterpreterService jMeterInterpreterService;
-	private final TestRunRepository testRunRepository;
-	private final NotificationService notificationService;
-    private final GitService gitService;
-    private final JMeterCommandService jMeterCommandEnhancer;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
-						  TestRunRepository testRunRepository, NotificationService notificationService,
-                          GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+	public JobsController(JobService jobService) {
 		this.jobService = jobService;
-		this.jMeterInterpreterService = jMeterInterpreterService;
-		this.testRunRepository = testRunRepository;
-		this.notificationService = notificationService;
-        this.gitService = gitService;
-        this.jMeterCommandEnhancer = jMeterCommandEnhancer;
 	}
 
 	/**
@@ -78,23 +57,11 @@ public class JobsController {
 			return ResponseEntity.notFound().build();
 		}
 
-		 TestRun testRun = new TestRun();
-		 testRun.setStartedAt(Instant.now());
-		 testRun.setStatus(TestRunStatus.PENDING);
-		 testRun.setJobId(job.get().getJobId());
-		 testRun.setRunBy("system"); //todo: needs to be updated
-		 testRun = testRunRepository.save(testRun);
+		if (!TestType.PERF.equals(job.get().getJobType())) {
+			throw new CustomExceptionBuilder(HttpStatus.NOT_IMPLEMENTED, "Test type is not supported at this time").build();
+		}
 
-        Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, failedTestRuns, gitService, jMeterCommandEnhancer));
-		t.start();
-
-        // TODO, add check to make sure all threads finish before proceeding to email
-
-         if(!failedTestRuns.isEmpty()) {
-             //Send ids of failed jobs to email service.
-         }
-		return ResponseEntity.ok(testRun);
+		return ResponseEntity.ok(jobService.runJob(job.get()));
 	 }
 
 	/**

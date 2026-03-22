@@ -1,10 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
-import { TestRecord } from '../models/test-record.model';
-import { MatButtonModule } from '@angular/material/button';
-import { TestRunService } from '../services/test-run.service';
-//import { ModalService } from '../shared/modal/modal.service';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatButtonModule} from '@angular/material/button';
+import {TestRunService} from '../services/test-run.service';
+import {Router} from "@angular/router";
+import {MatIcon} from "@angular/material/icon";
 
 export interface DashboardTestActivity {
     id: string;
@@ -26,13 +25,11 @@ export interface DashboardAlert {
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, MatButtonModule],
+  imports: [CommonModule, MatButtonModule, MatIcon],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
 export class DashboardComponent implements OnInit {
-
-    private testRunService = inject(TestRunService);
 
     // KPI metrics
     activeJobsTotal = 12;
@@ -54,6 +51,9 @@ export class DashboardComponent implements OnInit {
     apiTrendData = [];         // same here
 
     tests: DashboardTestActivity[] = [];
+
+    constructor(private router: Router,
+                private testRunService: TestRunService) { }
 
     ngOnInit(): void {
         this.testRunService.getRecentActivity(10).subscribe({
@@ -96,4 +96,7 @@ export class DashboardComponent implements OnInit {
     ];
 
     // keep any other existing code you already had in here
+    viewResult(id: string) {
+        this.router.navigate(['/test-results/view'],  { state: { runId: id } });
+    }
 }
