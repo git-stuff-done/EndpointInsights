@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.service;
 
+import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.event.RunBatchEvent;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
@@ -7,18 +8,9 @@ import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.factory.BatchRunnerThreadFactory;
 import com.vsp.endpointinsightsapi.factory.TestRunFactory;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import java.util.*;
-
-import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
-import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
@@ -36,6 +28,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
