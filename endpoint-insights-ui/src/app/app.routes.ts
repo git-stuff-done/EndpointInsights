@@ -7,6 +7,7 @@ import {AuthCallback} from "./authentication/auth-callback/auth-callback";
 import {PageNotFoundComponent} from "./page-not-found-component/page-not-found-component";
 import {authGuard} from "./auth-guard";
 import {TestsResultsPageComponent} from "./pages/Test-Results-Page/tests-results-page.component";
+import {ViewResult} from "./view-result/view-result";
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -15,5 +16,6 @@ export const routes: Routes = [
     { path: 'batches', component: BatchComponent, canActivate: [authGuard] },
     { path: 'tests', component: TestOverview, canActivate: [authGuard] },
     { path: 'test-results', component: TestsResultsPageComponent, canActivate: [authGuard]},
+    { path: 'test-results/view', component: ViewResult, canActivate: [authGuard]},
     { path: '**', component: PageNotFoundComponent },
 ];

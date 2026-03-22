@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.mapstruct.factory.Mappers;
 import tools.jackson.databind.ObjectMapper;
@@ -40,6 +41,9 @@ class BatchesControllerUnitTest {
 
     @MockitoBean
     private BatchService batchService;
+
+    @MockitoBean
+    private TestBatchRepository testBatchRepository;
 
     @BeforeEach
     void setUp() {
