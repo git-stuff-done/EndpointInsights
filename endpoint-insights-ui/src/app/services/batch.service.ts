@@ -1,8 +1,9 @@
-import {inject, Inject, Injectable} from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
-import {HttpClient, HttpResponse} from "@angular/common/http";
+import {inject, Injectable} from '@angular/core';
+import {delay, Observable, of} from 'rxjs';
+import {HttpResponse} from "@angular/common/http";
 import {Batch} from "../models/batch.model";
 import {BatchApi} from "../batch-component/api/batch-api";
+import {TestRun} from "../models/test-run.model";
 
 export interface BatchMeta {
     id: string;
@@ -26,6 +27,10 @@ export class BatchService {
 
     deleteBatch(batch:Batch):Observable<HttpResponse<Batch>>{
         return this.batchApi.deleteBatch(batch.id)
+    }
+
+    runBatch(batch: Batch):Observable<HttpResponse<TestRun>> {
+        return this.batchApi.runBatch(batch.id);
     }
 
     /** Simulated PATCH/PUT: update name; return updated meta */

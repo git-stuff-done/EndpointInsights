@@ -83,6 +83,7 @@ public class TestRunService {
 
 			return RecentActivityDTO.builder()
 					.runId(run.getRunId().toString())
+					.jobId(run.getJobId() != null ? run.getJobId().toString() : null)
 					.testName(job != null ? job.getName() : "Unknown")
 					.group(deriveScheduleType(batch))
 					.dateRun(run.getStartedAt())

@@ -1,19 +1,15 @@
 package com.vsp.endpointinsightsapi.model.entity;
 
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -32,9 +28,6 @@ public class TestRun {
 	@Column(name = "job_id", nullable = false)
 	private UUID jobId;
 
-	@Column(name = "result_id", nullable = true)
-	private UUID resultId;
-
 	@Column(name = "run_by", nullable = false)
 	private String runBy;
 
@@ -50,5 +43,8 @@ public class TestRun {
 
     @Column(name = "batch_id")
     private UUID batchId;
+
+	@OneToMany(mappedBy = "testRun", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<TestResult> results = new ArrayList<>();
 
 }

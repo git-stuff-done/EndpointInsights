@@ -38,6 +38,9 @@ class BatchServiceTest {
     TestBatchEmailListsRepository testBatchEmailListsRepository;
 
     @Mock
+    BatchSchedulerService batchSchedulerService;
+
+    @Mock
     BatchMapper batchMapper;
 
     @InjectMocks
