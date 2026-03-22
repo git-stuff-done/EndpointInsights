@@ -19,9 +19,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +49,6 @@ class JobRunnerThreadTest {
 
     private Job job;
     private TestRun testRun;
-    private Collection<TestRun> failedTestRuns;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -63,7 +61,6 @@ class JobRunnerThreadTest {
         testRun.setRunId(UUID.randomUUID());
         testRun.setJobId(job.getJobId());
 
-        failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
         when(testRunRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         doReturn(null).when(gitService).cloneRepository(any(), any(), any());
     }
@@ -75,9 +72,13 @@ class JobRunnerThreadTest {
                 testRunRepository,
                 jMeterInterpreterService,
                 notificationService,
-                failedTestRuns,
                 gitService,
-                jMeterCommandEnhancer
+                jMeterCommandEnhancer,
+                s -> {
+                    testRun.setStatus(s.status());
+                    testRun.setFinishedAt(Instant.now());
+                },
+                false
         );
     }
 
@@ -109,18 +110,6 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_noJmeterTestName_setsFailedStatus() {
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        assertEquals(TestRunStatus.FAILED, testRun.getStatus());
-        assertNotNull(testRun.getFinishedAt());
-    }
-
-    @Test
     void run_noJmeterTestName_savesRunningThenFailed() {
         job.setGitUrl(null);
         job.setJmeterTestName(null);
@@ -134,7 +123,7 @@ class JobRunnerThreadTest {
         JobRunnerThread thread = newThread();
         thread.run();
 
-        assertEquals(List.of(TestRunStatus.RUNNING, TestRunStatus.FAILED), savedStatuses);
+        assertEquals(List.of(TestRunStatus.RUNNING), savedStatuses);
     }
 
     @Test
@@ -146,7 +135,8 @@ class JobRunnerThreadTest {
         thread.run();
 
         assertEquals(TestRunStatus.FAILED, testRun.getStatus());
-        verify(testRunRepository, times(2)).save(testRun);
+        // Failed status is sent to the callback which updates the testRun object, but does nto call the repo
+        verify(testRunRepository, times(1)).save(testRun);
     }
 
     @Test
@@ -166,50 +156,6 @@ class JobRunnerThreadTest {
     }
 
     @Test
-    void run_withBatchId_sendsNotification() {
-        UUID batchId = UUID.randomUUID();
-        testRun.setBatchId(batchId);
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verify(notificationService).sendTestCompletionNotifications(
-                eq(batchId), eq(testRun.getRunId()), any());
-    }
-
-    @Test
-    void run_withNullBatchId_doesNotSendNotification() {
-        testRun.setBatchId(null);
-        job.setGitUrl(null);
-        job.setJmeterTestName(null);
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    void run_nonExistentCommand_withBatchId_sendsNotification() {
-        UUID batchId = UUID.randomUUID();
-        testRun.setBatchId(batchId);
-        job.setGitUrl(null);
-        job.setCompileCommand(null);
-        job.setJmeterTestName("test.jmx");
-
-        when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
-                .thenReturn(new String[]{"this-command-does-not-exist-xyz123"});
-
-        JobRunnerThread thread = newThread();
-        thread.run();
-
-        verify(notificationService).sendTestCompletionNotifications(
-                eq(batchId), eq(testRun.getRunId()), any());
-    }
-
-    @Test
     void run_successfulProcess_callsProcessResultsAndSetsCompleted() throws IOException {
         job.setJobType(TestType.PERF);
         job.setGitUrl(null);
@@ -225,16 +171,15 @@ class JobRunnerThreadTest {
                 .thenReturn(new String[]{"true"});
 
         UUID resultId = UUID.randomUUID();
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
                 .thenReturn(new TestRunResult(true, resultId));
 
         JobRunnerThread thread = newThread();
         thread.run();
 
         assertEquals(TestRunStatus.COMPLETED, testRun.getStatus());
-        assertEquals(resultId, testRun.getResultId());
         assertNotNull(testRun.getFinishedAt());
-        verify(jMeterInterpreterService).processResults(nullable(File.class), any(UUID.class));
+        verify(jMeterInterpreterService).processResults(nullable(File.class), any(TestRun.class));
     }
 
     @Test
@@ -252,7 +197,7 @@ class JobRunnerThreadTest {
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
                 .thenReturn(new TestRunResult(false, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
@@ -275,7 +220,7 @@ class JobRunnerThreadTest {
         job.setJmeterTestName("test.jmx");
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(UUID.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
                 .thenReturn(new TestRunResult(true, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();

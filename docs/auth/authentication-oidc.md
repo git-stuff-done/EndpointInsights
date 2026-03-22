@@ -50,6 +50,7 @@ The system expects these claims in the ID token:
 - `preferred_username` - Display username
 - `email` - User email address
 - `groups` - User group memberships for authorization
+- `aud` - Audience claim (must match OIDC client ID or allowed audiences)
 
 ### A note on limitations
 Normally, ID tokens only optionally contain user details (username, email, groups, etc) and such information should normally be fetched from the Identity Provider's userinfo endpoint. However in this case, due to the requirement of deploying our application without an external session provider, such as Redis, we are required to expect that the ID token contains our required claims.
@@ -71,7 +72,8 @@ Handles successful OIDC authentication:
 Validates bearer tokens from authenticated users (see [JWT Authorization](authorization-jwt.md) for details):
 - Allows users to access public endpoints without authorization
 - Validates Authorization header and extracts Bearer token
-- Validates the Bearer token contains the proper claims
+- Validates the Bearer token contains the proper claims (sub, username, email, aud)
+- Validates audience claim matches OIDC client ID or allowed audiences
 - Determines if the Bearer token is authorized to access the requested resource
 - Validates that the Bearer token is signed by a trusted JSON Web Key
 - Populates the CurrentUser class for request context
@@ -147,6 +149,7 @@ Expected claims:
   "preferred_username": "testuser",
   "email": "test@example.com",
   "groups": ["ei:write"],
+  "aud": ["endpoint-insights"],
   "iss": "https://auth.example.com",
   "exp": 1234567890
 }
