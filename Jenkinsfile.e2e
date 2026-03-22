@@ -14,15 +14,15 @@ pipeline {
     }
     
     stages {
-        stage('Cleanup') {
-            steps {
-                sh "docker rm -f ${CONTAINER_NAME} || true"
-            }
-        }
-git s
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
             }
         }
 
@@ -38,6 +38,8 @@ git s
 
         stage('Start') {
             steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+
                 sh """
                     docker run -d \
                         --name ${CONTAINER_NAME} \
