@@ -157,53 +157,79 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 					.build();
 		}
 
-        try {
-            Jwt jwt = jwtDecoder.decode(token);
+		try {
+			Jwt jwt = jwtDecoder.decode(token);
+			LOG.debug("JWT decoded successfully. Claims: {}", jwt.getClaims().keySet());
 
-            validateRequiredClaims(jwt);
+			validateAudience(jwt);
+			LOG.debug("Audience validated");
 
-            List<UserRole> roles = extractRolesFromJwt(jwt);
+			boolean isClientCredentials = isClientCredentialsToken(jwt);
+			LOG.debug("Token type: {}", isClientCredentials ? "client_credentials" : "user");
 
-            // Test if the AUTHENTICATED user has read/write access to private endpoint.
-            if (roles.isEmpty()){
-                throw new CustomExceptionBuilder()
-                        .withStatus(HttpStatus.FORBIDDEN)  // 403 instead of 401 since they're authenticated but not authorized
-                        .build();
-            }
+			UserContext userContext;
+			List<UserRole> roles;
+			String issuer = jwt.getIssuer() != null ? jwt.getIssuer().toString() : "";
+
+			if (isClientCredentials) {
+				// Client credentials: use client_id as subject
+				roles = List.of(UserRole.WRITE, UserRole.READ);
+				String clientId = jwt.getClaimAsString("client_id");
+
+				userContext = UserContext.builder()
+						.issuer(issuer)
+						.subject(clientId)
+						.username(clientId)
+						.email(clientId + "@service-account")
+						.roles(roles)
+						.build();
+
+				LOG.debug("Client credentials token validated for client: {} from issuer: {}", clientId, issuer);
+			} else {
+				// Regular user: use sub claim as subject
+				validateRequiredClaims(jwt);
+				LOG.debug("Required claims validated");
+
+				roles = extractRolesFromJwt(jwt);
+				LOG.debug("Extracted roles: {}", roles);
+
+				// Test if the AUTHENTICATED user has read/write access to private endpoint.
+				if (roles.isEmpty()){
+					LOG.error("User has no roles - no matching groups found");
+					throw new CustomExceptionBuilder()
+							.withStatus(HttpStatus.FORBIDDEN)  // 403 instead of 401 since they're authenticated but not authorized
+							.build();
+				}
+
+				userContext = UserContext.builder()
+						.issuer(issuer)
+						.subject(jwt.getSubject())
+						.username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
+						.email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
+						.roles(roles)
+						.build();
+
+				LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
+			}
 
             if (!isValidRole(roles, handler)) {
                 return false;
             }
 
-            UserContext userContext = UserContext.builder()
-                    .subject(jwt.getSubject())
-                    .issuer(String.valueOf(jwt.getIssuer()))
-                    .username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
-                    .email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
-                    .roles(roles)
-                    .build();
+			CurrentUser.setUserContext(userContext);
 
-            CurrentUser.setUserContext(userContext);
+			try {
+				userService.createOrUpdateUser(userContext);
+			} catch (Exception e) {
+				LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
+			}
 
-            try {
-                userService.createOrUpdateUser(userContext);
-            } catch (Exception e) {
-                LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
-            }
+			request.setAttribute(jwtAttribute, jwt);
+			request.setAttribute(bearerTokenAttribute, token);
 
-            try {
-                userService.createOrUpdateUser(userContext);
-            } catch (Exception e) {
-                LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
-            }
+			return true;
 
-            request.setAttribute(jwtAttribute, jwt);
-            request.setAttribute(bearerTokenAttribute, token);
-
-            LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
-            return true;
-
-        } catch (JwtException e) {
+		} catch (JwtException e) {
 			LOG.error("JWT validation failed: {}", e.getMessage(), e);
 			throw new CustomExceptionBuilder()
 					.withStatus(HttpStatus.UNAUTHORIZED)
