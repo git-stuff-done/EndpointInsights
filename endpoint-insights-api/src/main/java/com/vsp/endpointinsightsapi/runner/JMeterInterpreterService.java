@@ -1,8 +1,11 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.*;
+import com.vsp.endpointinsightsapi.model.enums.JobStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
@@ -22,16 +25,19 @@ public class JMeterInterpreterService implements TestInterpreter {
 	private final PerfTestResultRepository perfTestResultRepository;
 	private final PerfTestResultCodeRepository perfTestResultCodeRepository;
 	private final TestResultRepository testResultRepository;
+    private final JobRepository jobRepository;
 
-	// Used for interpreting test results
+
+    // Used for interpreting test results
 	private record SampleRecord(long elapsed, int responseCodeInt, String responseCode, long timeStamp, boolean success) {}
 
 	@Autowired
-	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository) {
+	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository, JobRepository jobRepository) {
 		this.perfTestResultRepository = perfTestResultRepository;
 		this.perfTestResultCodeRepository = perfTestResultCodeRepository;
 		this.testResultRepository = testResultRepository;
-	}
+        this.jobRepository = jobRepository;
+    }
 
 	private int calculatePercentile(List<Long> sortedLatencies, double percentile) {
 		if (sortedLatencies == null || sortedLatencies.isEmpty()) {
@@ -53,9 +59,14 @@ public class JMeterInterpreterService implements TestInterpreter {
 		testResult.setId(UUID.randomUUID());
 		testResult.setJobType(TestType.PERF.toInteger());
 		testResult.setTestRun(testRun);
-		testResult = testResultRepository.save(testResult);
+		//testResult = testResultRepository.save(testResult);
 
-		// Maps groupKey -> List of SampleRecord
+        Job job = jobRepository.findById(testRun.getJobId()).orElse(null);
+        if(job == null) {
+            throw new RuntimeException("Job threshold not found");
+        }
+
+        // Maps groupKey -> List of SampleRecord
 		Map<String, List<SampleRecord>> grouped = new HashMap<>();
 		// Maps groupKey+code -> count
 		Map<String, Integer> errorCodeCount = new HashMap<>();
@@ -106,7 +117,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testResult, grouped, errorCodeCount);
+			boolean passed = createResults(testResult, grouped, errorCodeCount, job.getThreshold());
 
 			return new TestRunResult(passed, testResult.getId());
 		} catch (IOException e) {
@@ -114,7 +125,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 		}
 	}
 
-	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount) {
+	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
 		// Results will be made here
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
 		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
@@ -150,6 +161,17 @@ public class JMeterInterpreterService implements TestInterpreter {
 			int p50 = !latencies.isEmpty() ? calculatePercentile(latencies, 50) : 0;
 			int p95 = !latencies.isEmpty() ? calculatePercentile(latencies, 95) : 0;
 			int p99 = !latencies.isEmpty() ? calculatePercentile(latencies, 99) : 0;
+
+            String latencyPerformanceStatus = JobStatus.PASS.name();
+            int warning = (int) (threshold * 0.5) + threshold;
+            if(p50 > threshold ||  p95 > threshold || p99 > threshold) {
+                latencyPerformanceStatus = JobStatus.WARN.name();
+            }
+            if(p50 > warning ||  p95 > warning || p99 > warning) {
+                latencyPerformanceStatus = JobStatus.FAIL.name();
+            }
+            testResult.setTestResult(latencyPerformanceStatus);
+            testResultRepository.save(testResult);
 
 			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
 
@@ -190,7 +212,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 				perfTestResultCodes.add(prc);
 			}
 		}
-
 
 
 		boolean passed = perfTestResults.stream().noneMatch(r -> r.getErrorRatePercent() > 0.5);
