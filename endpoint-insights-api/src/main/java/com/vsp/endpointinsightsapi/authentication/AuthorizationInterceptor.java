@@ -5,6 +5,7 @@ import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.UserContext;
 import com.vsp.endpointinsightsapi.model.enums.UserRole;
+import com.vsp.endpointinsightsapi.service.UserService;
 import com.vsp.endpointinsightsapi.util.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,7 +44,7 @@ import java.util.Objects;
  * <ul>
  *   <li>Validates JWT signature against OIDC provider's JWKS</li>
  *   <li>Validates JWT audience claim against OIDC client ID and allowed audiences</li>
- *   <li>Extracts user context (userId, username, email, role) from token claims</li>
+ *   <li>Extracts user context (subject, username, email, role) from token claims</li>
  *   <li>Enforces role-based access control based on group membership</li>
  *   <li>Allows public endpoints to bypass authentication</li>
  *   <li>Sets up {@link UserContext} accessible via {@link CurrentUser} utility</li>
@@ -78,10 +79,12 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	private static final String bearerTokenAttribute = "bearer-token";
 
 	private final AuthenticationProperties authProperties;
+	private final UserService userService;
 	private JwtDecoder jwtDecoder;
 
-	public AuthorizationInterceptor(AuthenticationProperties authProperties) {
+	public AuthorizationInterceptor(AuthenticationProperties authProperties, UserService userService) {
 		this.authProperties = authProperties;
+		this.userService = userService;
 	}
 
 	/**
@@ -114,7 +117,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	 *   <li>Checks if endpoint is public (bypasses authentication if true)</li>
 	 *   <li>Extracts and validates Authorization header format</li>
 	 *   <li>Decodes and validates JWT signature against JWKS</li>
-	 *   <li>Validates required claims (sub, username, email)</li>
+	 *   <li>Validates required claims (subject, username, email)</li>
 	 *   <li>Validates audience claim matches client ID or allowed audiences</li>
 	 *   <li>Extracts user role from groups claim</li>
 	 *   <li>Verifies user has at least read access</li>
@@ -154,69 +157,53 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 					.build();
 		}
 
-		try {
-			Jwt jwt = jwtDecoder.decode(token);
-			LOG.debug("JWT decoded successfully. Claims: {}", jwt.getClaims().keySet());
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
 
-			validateAudience(jwt);
-			LOG.debug("Audience validated");
+            validateRequiredClaims(jwt);
 
-			boolean isClientCredentials = isClientCredentialsToken(jwt);
-			LOG.debug("Token type: {}", isClientCredentials ? "client_credentials" : "user");
+            List<UserRole> roles = extractRolesFromJwt(jwt);
 
-			UserContext userContext;
-			List<UserRole> roles;
+            // Test if the AUTHENTICATED user has read/write access to private endpoint.
+            if (roles.isEmpty()){
+                throw new CustomExceptionBuilder()
+                        .withStatus(HttpStatus.FORBIDDEN)  // 403 instead of 401 since they're authenticated but not authorized
+                        .build();
+            }
 
-			if (isClientCredentials) {
-				roles = List.of(UserRole.WRITE, UserRole.READ);
-				String clientId = jwt.getClaimAsString("client_id");
+            if (!isValidRole(roles, handler)) {
+                return false;
+            }
 
-				userContext = UserContext.builder()
-						.userId(clientId)
-						.username(clientId)
-						.email(clientId + "@service-account")
-						.roles(roles)
-						.build();
+            UserContext userContext = UserContext.builder()
+                    .subject(jwt.getSubject())
+                    .issuer(String.valueOf(jwt.getIssuer()))
+                    .username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
+                    .email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
+                    .roles(roles)
+                    .build();
 
-				LOG.debug("Client credentials token validated for client: {}", clientId);
-			} else {
-				validateRequiredClaims(jwt);
-				LOG.debug("Required claims validated");
+            CurrentUser.setUserContext(userContext);
 
-				roles = extractRolesFromJwt(jwt);
-				LOG.debug("Extracted roles: {}", roles);
+            try {
+                userService.createOrUpdateUser(userContext);
+            } catch (Exception e) {
+                LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
+            }
 
-				// Test if the AUTHENTICATED user has read/write access to private endpoint.
-				if (roles.isEmpty()){
-					LOG.error("User has no roles - no matching groups found");
-					throw new CustomExceptionBuilder()
-							.withStatus(HttpStatus.FORBIDDEN)  // 403 instead of 401 since they're authenticated but not authorized
-							.build();
-				}
+            try {
+                userService.createOrUpdateUser(userContext);
+            } catch (Exception e) {
+                LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
+            }
 
-				userContext = UserContext.builder()
-						.userId(jwt.getSubject())
-						.username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
-						.email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
-						.roles(roles)
-						.build();
+            request.setAttribute(jwtAttribute, jwt);
+            request.setAttribute(bearerTokenAttribute, token);
 
-				LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
-			}
+            LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
+            return true;
 
-			if (!isValidRole(roles, handler)) {
-				LOG.error("Roles {} do not match required roles for endpoint", roles);
-				return false;
-			}
-
-			CurrentUser.setUserContext(userContext);
-
-			request.setAttribute(jwtAttribute, jwt);
-			request.setAttribute(bearerTokenAttribute, token);
-
-			return true;
-
-		} catch (JwtException e) {
+        } catch (JwtException e) {
 			LOG.error("JWT validation failed: {}", e.getMessage(), e);
 			throw new CustomExceptionBuilder()
 					.withStatus(HttpStatus.UNAUTHORIZED)

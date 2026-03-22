@@ -16,7 +16,8 @@ import java.util.List;
  *
  * <h2>Fields:</h2>
  * <ul>
- *   <li><strong>userId</strong> - Unique user identifier from JWT 'sub' claim</li>
+ *   <li><strong>issuer</strong> - OIDC issuer URL from JWT 'iss' claim</li>
+ *   <li><strong>subject</strong> - Unique user identifier from JWT 'subject' claim</li>
  *   <li><strong>username</strong> - Display username from JWT 'preferred_username' claim</li>
  *   <li><strong>email</strong> - User email from JWT 'email' claim</li>
  *   <li><strong>role</strong> - User role determined from JWT 'groups' claim</li>
@@ -28,7 +29,8 @@ import java.util.List;
 @Data
 @Builder
 public class UserContext {
-    private final String userId;
+    private final String issuer;
+    private final String subject;
     private final String username;
     private final String email;
     private final List<UserRole> roles;
@@ -36,10 +38,19 @@ public class UserContext {
     /**
      * Returns a formatted identifier suitable for logging.
      *
-     * @return formatted string "username (userId)"
+     * @return formatted string "username (subject)"
      */
     public String getLogIdentifier() {
-        return String.format("%s (%s)", username, userId);
+        return String.format("%s (%s/%s)", username, subject, issuer);
+    }
+
+    /**
+     * Returns the OIDC identity in standard format: "iss/subject"
+     *
+     * @return formatted string "issuer/subject"
+     */
+    public String getOidcIdentity() {
+        return issuer + "/" + subject;
     }
 
     /**
