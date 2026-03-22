@@ -39,15 +39,10 @@
                 <h3>Start Time</h3>
                 <h3>Last Run</h3>
             </div>
-            <div class="filter-btn">
-                <button mat-icon-button class="elevated-btn mat-elev-2" color="basic" (click)="onFilter()">
-                    <mat-icon>filter_list</mat-icon>
-                </button>
-            </div>
         </div>
         <!-- List -->
         <div class="batch-list">
-            <div class="batch-row" *ngFor="let b of batch">
+            <div class="batch-row" *ngFor="let b of filteredBatches">
                 <div class="cell name">
                     <span class="title">{{ b.batchName }}</span>
                      <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>

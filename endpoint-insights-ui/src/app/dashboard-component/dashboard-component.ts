@@ -9,6 +9,7 @@ import { TestRunService } from '../services/test-run.service';
 export interface DashboardTestActivity {
     id: string;
     testName: string;
+    batchName: string | null;
     group: string;
     dateRun: Date;
     durationMs: number;
@@ -60,6 +61,7 @@ export class DashboardComponent implements OnInit {
                 this.tests = data.map(r => ({
                     id: r.runId,
                     testName: r.testName,
+                    batchName: r.batchName ?? null,
                     group: r.group,
                     dateRun: new Date(r.dateRun),
                     durationMs: r.durationMs,

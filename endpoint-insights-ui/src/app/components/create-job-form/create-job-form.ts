@@ -61,13 +61,14 @@ export class CreateJobForm {
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
-            jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
+            jmeterTestName: ["", [Validators.maxLength(64)]],
         });
 
         this.applyAuthValidators(this.createJobForm.get('gitAuthType')?.value);
         this.createJobForm.get('gitAuthType')?.valueChanges.subscribe((value) => {
             this.applyAuthValidators(value);
         });
+
     }
 
     ngOnChanges(changes: SimpleChanges) {

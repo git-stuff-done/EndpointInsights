@@ -1,203 +1,194 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TestOverview } from './test-overview';
 import { CreateJobModal } from '../../components/create-job-modal/create-job-modal';
 import { EditJobModal } from '../../components/edit-job-modal/edit-job-modal';
 import { TestItem } from '../../models/test.model';
+import { JobService } from '../../services/job-services';
+import { TestRunService } from '../../services/test-run.service';
+import { ToastService } from '../../services/toast.service';
+
+const mockBackendJob = {
+    jobId: 'abc-123',
+    name: 'Auth - Login',
+    testBatches: [{ batchName: 'Nightly-01' }],
+    createdDate: '2024-01-01T00:00:00Z',
+    createdBy: 'Alex',
+    jobType: 'E2E',
+    gitUrl: 'git.com/test',
+    description: 'test description',
+    runCommand: './run',
+    compileCommand: './compile',
+};
+
+const mappedTestItem: TestItem = {
+    id: 'abc-123',
+    name: 'Auth - Login',
+    batch: 'Nightly-01',
+    createdAt: '2024-01-01T00:00:00Z',
+    createdBy: 'Alex',
+    jobType: 'E2E',
+    gitUrl: 'git.com/test',
+    description: 'test description',
+    runCommand: './run',
+    compileCommand: './compile',
+    status: 'SUCCESS',
+};
 
 describe('TestOverview', () => {
-  let component: TestOverview;
-  let fixture: ComponentFixture<TestOverview>;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
+    let component: TestOverview;
+    let fixture: ComponentFixture<TestOverview>;
+    let dialogSpy: jasmine.SpyObj<MatDialog>;
+    let jobServiceSpy: jasmine.SpyObj<JobService>;
+    let testRunServiceSpy: jasmine.SpyObj<TestRunService>;
+    let toastServiceSpy: jasmine.SpyObj<ToastService>;
 
-  const mockTests: TestItem[] = [
-    {
-      id: '1', name: 'Auth Login', batch: 'Nightly-01', description: 'login test',
-      gitUrl: 'git.com/test', runCommand: 'npm test', compileCommand: 'npm build',
-      jobType: 'E2E', createdAt: new Date(), createdBy: 'Alex', status: 'RUNNING',
-    },
-    {
-      id: '2', name: 'Billing Refund', batch: 'Nightly-01', description: 'billing desc',
-      gitUrl: 'git.com/test', runCommand: 'npm test', compileCommand: 'npm build',
-      jobType: 'nightwatch', createdAt: new Date(), createdBy: 'Sam', status: 'STOPPED',
-    },
-    {
-      id: '3', name: 'Payment API', batch: 'Nightly-02', description: '',
-      gitUrl: 'git.com/test', runCommand: 'npm test', compileCommand: 'npm build',
-      jobType: 'jmeter', createdAt: new Date(), createdBy: 'Bob', status: 'FAILED',
-    },
-  ];
+    beforeEach(waitForAsync(() => {
+        dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+        jobServiceSpy = jasmine.createSpyObj('JobService', ['getAllJobs', 'createJob', 'updateJob', 'deleteJob', 'runJob']);
+        testRunServiceSpy = jasmine.createSpyObj('TestRunService', ['getRecentActivity']);
+        toastServiceSpy = jasmine.createSpyObj('ToastService', ['onSuccess', 'onError']);
 
-  beforeEach(async () => {
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+        jobServiceSpy.getAllJobs.and.returnValue(of([mockBackendJob]));
+        testRunServiceSpy.getRecentActivity.and.returnValue(of([{
+            runId: 'run-1', jobId: 'abc-123', testName: 'Auth - Login',
+            group: 'Daily', dateRun: '2024-01-01T01:00:00Z', durationMs: 500,
+            startedBy: 'system', status: 'PASS',
+        }]));
 
-    await TestBed.configureTestingModule({
-      imports: [TestOverview],
-      providers: [
-        provideNoopAnimations(),
-        { provide: MatDialog, useValue: dialogSpy },
-      ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(TestOverview);
-    component = fixture.componentInstance;
-    component.tests = [...mockTests];
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('filteredTests', () => {
-    it('should return all tests when search is empty and no status selected', () => {
-      expect(component.filteredTests.length).toBe(3);
-    });
-
-    it('should filter by name (case-insensitive)', () => {
-      component.searchControl.setValue('auth');
-      expect(component.filteredTests.length).toBe(1);
-      expect(component.filteredTests[0].name).toBe('Auth Login');
-    });
-
-    it('should filter by description', () => {
-      component.searchControl.setValue('billing desc');
-      expect(component.filteredTests.length).toBe(1);
-      expect(component.filteredTests[0].id).toBe('2');
-    });
-
-    it('should return empty when search matches nothing', () => {
-      component.searchControl.setValue('zzzzz');
-      expect(component.filteredTests.length).toBe(0);
-    });
-
-    it('should filter by selected status', () => {
-      component.toggleStatus('RUNNING');
-      expect(component.filteredTests.length).toBe(1);
-      expect(component.filteredTests[0].status).toBe('RUNNING');
-    });
-
-    it('should support multiple selected statuses', () => {
-      component.toggleStatus('RUNNING');
-      component.toggleStatus('STOPPED');
-      expect(component.filteredTests.length).toBe(2);
-    });
-
-    it('should apply both search and status filter together', () => {
-      component.searchControl.setValue('auth');
-      component.toggleStatus('STOPPED');
-      expect(component.filteredTests.length).toBe(0);
-    });
-  });
-
-  describe('toggleStatus', () => {
-    it('should add a status', () => {
-      component.toggleStatus('RUNNING');
-      expect(component.selectedStatuses.has('RUNNING')).toBeTrue();
-    });
-
-    it('should remove a status when toggled again', () => {
-      component.toggleStatus('RUNNING');
-      component.toggleStatus('RUNNING');
-      expect(component.selectedStatuses.has('RUNNING')).toBeFalse();
-    });
-  });
-
-  describe('hasActiveFilters', () => {
-    it('should return false when no statuses are selected', () => {
-      expect(component.hasActiveFilters).toBeFalse();
-    });
-
-    it('should return true when a status is selected', () => {
-      component.toggleStatus('RUNNING');
-      expect(component.hasActiveFilters).toBeTrue();
-    });
-  });
-
-  it('onOpen logs to console', () => {
-    const logSpy = spyOn(console, 'log');
-    component.onOpen(mockTests[0]);
-    expect(logSpy).toHaveBeenCalledWith('Open Clicked');
-  });
-
-  it('onRun logs to console', () => {
-    const logSpy = spyOn(console, 'log');
-    component.onRun(mockTests[0]);
-    expect(logSpy).toHaveBeenCalledWith('Run Clicked');
-  });
-
-  it('onDelete logs to console', () => {
-    const logSpy = spyOn(console, 'log');
-    component.onDelete(mockTests[0]);
-    expect(logSpy).toHaveBeenCalledWith('Delete Clicked');
-  });
-
-  it('onEdit calls openEditModal with the test', () => {
-    const openEditSpy = spyOn(component, 'openEditModal');
-    component.onEdit(mockTests[0]);
-    expect(openEditSpy).toHaveBeenCalledWith(mockTests[0]);
-  });
-
-  it('openCreateJobModal opens CreateJobModal with correct config', () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
-
-    component.openCreateJobModal();
-
-    expect(dialogSpy.open).toHaveBeenCalledWith(CreateJobModal, jasmine.objectContaining({
-      width: '600px',
-      maxWidth: '95vw',
+        TestBed.configureTestingModule({
+            imports: [TestOverview],
+            providers: [
+                provideNoopAnimations(),
+                { provide: MatDialog, useValue: dialogSpy },
+                { provide: JobService, useValue: jobServiceSpy },
+                { provide: TestRunService, useValue: testRunServiceSpy },
+                { provide: ToastService, useValue: toastServiceSpy },
+            ],
+        }).compileComponents();
     }));
-  });
 
-  it('openCreateJobModal logs when dialog returns a truthy result', () => {
-    const logSpy = spyOn(console, 'log');
-    const result = { id: 'abc' };
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(result) } as any);
+    beforeEach(() => {
+        fixture = TestBed.createComponent(TestOverview);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-    component.openCreateJobModal();
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-    expect(logSpy).toHaveBeenCalledWith('New job created:', result);
-  });
+    it('should call loadTests on init and populate tests with status from recent activity', () => {
+        expect(jobServiceSpy.getAllJobs).toHaveBeenCalled();
+        expect(testRunServiceSpy.getRecentActivity).toHaveBeenCalledWith(100);
+        expect(component.tests.length).toBe(1);
+        expect(component.tests[0]).toEqual(jasmine.objectContaining(mappedTestItem));
+    });
 
-  it('openCreateJobModal does not log when dialog returns a falsy result', () => {
-    const logSpy = spyOn(console, 'log');
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(undefined) } as any);
+    it('onFilter logs to console', () => {
+        const logSpy = spyOn(console, 'log');
+        component.onFilter();
+        expect(logSpy).toHaveBeenCalledWith('Filter Button clicked');
+    });
 
-    component.openCreateJobModal();
+    it('onOpen logs to console', () => {
+        const logSpy = spyOn(console, 'log');
+        const t = component.tests[0];
+        component.onOpen(t);
+        expect(logSpy).toHaveBeenCalledWith('Open Clicked');
+    });
 
-    expect(logSpy).not.toHaveBeenCalledWith('New job created:', jasmine.anything());
-  });
+    it('onRun calls jobService.runJob and shows success toast', () => {
+        jobServiceSpy.runJob.and.returnValue(of({}));
+        const t = component.tests[0];
+        component.onRun(t);
+        expect(jobServiceSpy.runJob).toHaveBeenCalledWith(t.id);
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Test run started!');
+    });
 
-  it('openEditModal opens EditJobModal with correct config and data', () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+    it('onRun shows error toast on failure', () => {
+        jobServiceSpy.runJob.and.returnValue(throwError(() => new Error('fail')));
+        const t = component.tests[0];
+        component.onRun(t);
+        expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to start test run.');
+    });
 
-    component.openEditModal(mockTests[0]);
+    it('onEdit calls openEditModal with the test', () => {
+        const t = component.tests[0];
+        const openEditSpy = spyOn(component, 'openEditModal');
+        component.onEdit(t);
+        expect(openEditSpy).toHaveBeenCalledWith(t);
+    });
 
-    expect(dialogSpy.open).toHaveBeenCalledWith(EditJobModal, jasmine.objectContaining({
-      width: '600px',
-      maxWidth: '95vw',
-      data: mockTests[0],
-    }));
-  });
+    it('onDelete calls jobService.deleteJob, removes item from tests, and shows success toast', () => {
+        jobServiceSpy.deleteJob.and.returnValue(of(null));
+        const t = component.tests[0];
+        component.onDelete(t);
+        expect(jobServiceSpy.deleteJob).toHaveBeenCalledWith(t.id);
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Test deleted.');
+        expect(component.tests.find(item => item.id === t.id)).toBeUndefined();
+    });
 
-  it('openEditModal logs when dialog returns a truthy result', () => {
-    const logSpy = spyOn(console, 'log');
-    const result = { updated: true };
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(result) } as any);
+    it('onDelete shows error toast on failure', () => {
+        jobServiceSpy.deleteJob.and.returnValue(throwError(() => new Error('fail')));
+        const t = component.tests[0];
+        component.onDelete(t);
+        expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to delete test.');
+    });
 
-    component.openEditModal(mockTests[0]);
+    it('openCreateJobModal opens CreateJobModal with correct config', () => {
+        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        component.openCreateJobModal();
+        expect(dialogSpy.open).toHaveBeenCalledWith(CreateJobModal, jasmine.objectContaining({
+            width: '600px',
+            maxWidth: '95vw',
+        }));
+    });
 
-    expect(logSpy).toHaveBeenCalledWith('New job created:', result);
-  });
+    it('openCreateJobModal calls loadTests when dialog returns truthy result', () => {
+        jobServiceSpy.getAllJobs.calls.reset();
+        testRunServiceSpy.getRecentActivity.calls.reset();
+        dialogSpy.open.and.returnValue({ afterClosed: () => of({ id: 'new' }) } as any);
+        component.openCreateJobModal();
+        expect(jobServiceSpy.getAllJobs).toHaveBeenCalled();
+        expect(testRunServiceSpy.getRecentActivity).toHaveBeenCalled();
+    });
 
-  it('openEditModal does not log when dialog returns a falsy result', () => {
-    const logSpy = spyOn(console, 'log');
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+    it('openCreateJobModal does not reload when dialog returns falsy result', () => {
+        jobServiceSpy.getAllJobs.calls.reset();
+        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        component.openCreateJobModal();
+        expect(jobServiceSpy.getAllJobs).not.toHaveBeenCalled();
+    });
 
-    component.openEditModal(mockTests[0]);
+    it('openEditModal opens EditJobModal with correct config and data', () => {
+        const t = component.tests[0];
+        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        component.openEditModal(t);
+        expect(dialogSpy.open).toHaveBeenCalledWith(EditJobModal, jasmine.objectContaining({
+            width: '600px',
+            maxWidth: '95vw',
+            data: t,
+        }));
+    });
 
-    expect(logSpy).not.toHaveBeenCalledWith('New job created:', jasmine.anything());
-  });
+    it('openEditModal calls loadTests when dialog returns truthy result', () => {
+        jobServiceSpy.getAllJobs.calls.reset();
+        testRunServiceSpy.getRecentActivity.calls.reset();
+        const t = component.tests[0];
+        dialogSpy.open.and.returnValue({ afterClosed: () => of({ updated: true }) } as any);
+        component.openEditModal(t);
+        expect(jobServiceSpy.getAllJobs).toHaveBeenCalled();
+        expect(testRunServiceSpy.getRecentActivity).toHaveBeenCalled();
+    });
+
+    it('openEditModal does not reload when dialog returns falsy result', () => {
+        jobServiceSpy.getAllJobs.calls.reset();
+        const t = component.tests[0];
+        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        component.openEditModal(t);
+        expect(jobServiceSpy.getAllJobs).not.toHaveBeenCalled();
+    });
 });
