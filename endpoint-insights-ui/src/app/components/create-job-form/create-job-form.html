@@ -42,11 +42,19 @@
     </div>
 
     <div class="form-row form-row-commands">
-        <mat-form-field>
-            <mat-label>Run Command</mat-label>
-            <input matInput formControlName="runCommand">
-            <mat-error>{{ getErrorMessage('runCommand') }}</mat-error>
-        </mat-form-field>
+        @if (createJobForm.get('jobType')?.value === 'PERF') {
+            <mat-form-field>
+                <mat-label>JMeter Test Name</mat-label>
+                <input matInput formControlName="jmeterTestName">
+                <mat-error>{{ getErrorMessage('jmeterTestName') }}</mat-error>
+            </mat-form-field>
+        } @else {
+            <mat-form-field>
+                <mat-label>Run Command</mat-label>
+                <input matInput formControlName="runCommand">
+                <mat-error>{{ getErrorMessage('runCommand') }}</mat-error>
+            </mat-form-field>
+        }
 
         <mat-form-field>
             <mat-label>Compile Command</mat-label>
