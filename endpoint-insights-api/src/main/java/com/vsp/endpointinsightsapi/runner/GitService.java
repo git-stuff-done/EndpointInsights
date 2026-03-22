@@ -14,7 +14,7 @@ public class GitService {
             throw new IllegalArgumentException("No git URL provided for job: " + jobName);
         }
 
-        File tmpRoot = new File("tmp");
+        File tmpRoot = new File("C:\\tmp");
         if (!tmpRoot.exists() && !tmpRoot.mkdirs()) {
                 throw new IOException("Could not create tmp root directory");
         }

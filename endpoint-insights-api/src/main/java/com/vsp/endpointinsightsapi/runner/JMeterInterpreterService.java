@@ -59,7 +59,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 		testResult.setId(UUID.randomUUID());
 		testResult.setJobType(TestType.PERF.toInteger());
 		testResult.setTestRun(testRun);
-		//testResult = testResultRepository.save(testResult);
+		testResult = testResultRepository.save(testResult);
 
         Job job = jobRepository.findById(testRun.getJobId()).orElse(null);
         if(job == null) {
@@ -170,8 +170,6 @@ public class JMeterInterpreterService implements TestInterpreter {
             if(p50 > warning ||  p95 > warning || p99 > warning) {
                 latencyPerformanceStatus = JobStatus.FAIL.name();
             }
-            testResult.setTestResult(latencyPerformanceStatus);
-            testResultRepository.save(testResult);
 
 			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
 
@@ -191,7 +189,8 @@ public class JMeterInterpreterService implements TestInterpreter {
 			res.setVolumeLastMinute(volumeLastMinute);
 			res.setVolumeLast5Minutes(volumeLast5Minutes);
 			res.setErrorRatePercent(errorRate);
-
+            res.setLatencyThresholdResult(latencyPerformanceStatus);
+            res.setLatencyThreshold(threshold);
 			perfTestResults.add(res);
 
 			// Now, PerfTestResultCode per error code
