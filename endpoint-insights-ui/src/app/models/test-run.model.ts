@@ -46,4 +46,5 @@ export interface RecentActivity {
   durationMs: number;
   startedBy: string;
   status: TestRunStatus;
+  batchName?: string;
 }

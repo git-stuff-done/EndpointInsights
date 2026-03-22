@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,6 @@ import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -37,6 +37,10 @@ public class Job  extends AuditingEntity {
 
     @Column(name = "git_url")
     private String gitUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private TestRunStatus status = TestRunStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "git_auth_type", length = 20)
@@ -70,14 +74,6 @@ public class Job  extends AuditingEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType jobType;
-
-	@ManyToMany
-	// @JoinTable(
-	// 		name = "test_batch_tests",
-	// 		joinColumns = @JoinColumn(name = "job_id", columnDefinition = "uuid"),
-	// 		inverseJoinColumns = @JoinColumn(name = "test_job_id", columnDefinition = "uuid")
-	// )
-	private Set<TestBatch> testBatches;
 
     // Uncomment when the TestTarget and User Entities are created
     /*

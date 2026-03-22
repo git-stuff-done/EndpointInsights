@@ -93,7 +93,7 @@ public class BatchService {
             batch.setJobs(jobs);
         }
 
-        TestBatch saved = testBatchRepository.save(batch);
+        TestBatch saved = testBatchRepository.saveAndFlush(batch);
 
         if (request.getEmails() != null && !request.getEmails().isEmpty()) {
             updateEmailsForBatch(saved.getBatchId(), request.getEmails());
@@ -148,9 +148,10 @@ public class BatchService {
     }
 
     @Transactional
-	protected void updateEmailsForBatch(UUID batchId, List<String> emails) {
+    public void updateEmailsForBatch(UUID batchId, List<String> emails) {
         testBatchEmailListsRepository.deleteAllByBatchId(batchId);
-
+        List<TestBatchEmailList> existingEmails = testBatchEmailListsRepository.findAllByBatchId(batchId);
+        System.out.println(existingEmails);
         List<TestBatchEmailList> entities = emails.stream()
                 .collect(Collectors.toMap(
                         String::toLowerCase,
