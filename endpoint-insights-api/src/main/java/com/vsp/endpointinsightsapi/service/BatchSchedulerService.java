@@ -78,7 +78,6 @@ public class BatchSchedulerService {
 
 		if (batch.getActive() != null && batch.getActive()) {
 			LOG.info("Batch {} is already active.", batchId);
-			return;
 		}
 
 		// To avoid circular dependencies I'm using the event system

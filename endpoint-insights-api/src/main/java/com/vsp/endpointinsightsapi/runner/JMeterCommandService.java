@@ -40,7 +40,7 @@ public class JMeterCommandService {
      * @param resultFileName
      * @return
      */
-    public String[] getRunCommand(File workingDirectory, String testName, String resultFileName) {
+    public String[] getRunCommand(File workingDirectory, String testName, String resultFileName) throws IllegalArgumentException {
         // 1. Get jmeter executable
         String jmeterHome = this.home;
         if (jmeterHome == null || jmeterHome.trim().isEmpty()) {
