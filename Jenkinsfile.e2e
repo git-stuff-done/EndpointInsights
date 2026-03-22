@@ -19,7 +19,7 @@ pipeline {
                 sh "docker rm -f ${CONTAINER_NAME} || true"
             }
         }
-
+git s
         stage('Checkout') {
             steps {
                 checkout scm
