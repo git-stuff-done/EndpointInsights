@@ -1,13 +1,12 @@
 package com.vsp.endpointinsightsapi.runner;
 
-import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.*;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 	private final PerfTestResultRepository perfTestResultRepository;
 	private final PerfTestResultCodeRepository perfTestResultCodeRepository;
 	private final TestResultRepository testResultRepository;
-    private JobRepository jobRepository;
 
 	// Used for interpreting test results
 	private record SampleRecord(long elapsed, int responseCodeInt, String responseCode, long timeStamp, boolean success) {}
@@ -48,12 +46,13 @@ public class JMeterInterpreterService implements TestInterpreter {
 	}
 
 	@Override
-	public TestRunResult processResults(File file, UUID testRunId, UUID jobRunId) throws IOException {
+	@Transactional
+	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
 		// Create test result so we can get the UUID
 		TestResult testResult = new TestResult();
 		testResult.setId(UUID.randomUUID());
 		testResult.setJobType(TestType.PERF.toInteger());
-		testResult.setRunId(testRunId);
+		testResult.setTestRun(testRun);
 		testResult = testResultRepository.save(testResult);
 
 		// Maps groupKey -> List of SampleRecord
@@ -107,7 +106,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testResult, grouped, errorCodeCount, jobRunId);
+			boolean passed = createResults(testResult, grouped, errorCodeCount);
 
 			return new TestRunResult(passed, testResult.getId());
 		} catch (IOException e) {
@@ -115,25 +114,12 @@ public class JMeterInterpreterService implements TestInterpreter {
 		}
 	}
 
-	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount,  UUID jobRunId) {
+	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount) {
 		// Results will be made here
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
 		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
 
-
-        //Get job to assess threshold
-        Job job = jobRepository.findById(jobRunId).orElse(null);
-        Integer passThreshold = 0;
-        Integer warnThreshold = 0;
-        Integer failThreshold = 0;
-
-        if (job != null) {
-            passThreshold = job.getThreshold();
-            warnThreshold = (int) (job.getThreshold() + ((double) job.getThreshold() * 0.5));
-            failThreshold = (int) (job.getThreshold() + ((double) job.getThreshold() * 1.5));
-        }
-
-        for (Map.Entry<String, List<SampleRecord>> groupEntry : grouped.entrySet()) {
+		for (Map.Entry<String, List<SampleRecord>> groupEntry : grouped.entrySet()) {
 			String groupKey = groupEntry.getKey();
 			String[] parts = groupKey.split("\\|");
 			String threadGroup = parts[0];
@@ -166,8 +152,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 			int p99 = !latencies.isEmpty() ? calculatePercentile(latencies, 99) : 0;
 
 			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
-
-
 
 			PerfTestResult res = new PerfTestResult();
 			PerfTestResultId resId = new PerfTestResultId();

@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.runner;
 
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobRunnerThreadStatus;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
@@ -11,13 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class JobRunnerThread implements Runnable {
 
@@ -25,28 +24,34 @@ public class JobRunnerThread implements Runnable {
     //TODO: add test-level logging to store as part of test results
 
 	private final Job job;
-	private final TestRun testRun;
+	private TestRun testRun;
 	private final TestRunRepository testRunRepository;
 	private final TestInterpreter testInterpreter;
-    private final Collection<TestRun> failedTests;
-	private File tempDir = null;
 	private final NotificationService notificationService;
     private final GitService gitService;
     private final JMeterCommandService jMeterCommandEnhancer;
 
+	// Completed callback
+	private final Consumer<JobRunnerThreadStatus> onComplete;
+
+	private final boolean isBatchRun;
+
     private File jobProjectRepoDirectory = null;
+
 
 	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
 						   JMeterInterpreterService jMeterInterpreterService,
-						   NotificationService notificationService, Collection<TestRun> failedTests,
-                           GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+						   NotificationService notificationService,
+                           GitService gitService, JMeterCommandService jMeterCommandEnhancer,
+						   Consumer<JobRunnerThreadStatus> onComplete, boolean isBatchRun) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
 		this.notificationService = notificationService;
-        this.failedTests = failedTests;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
+		this.onComplete = onComplete;
+		this.isBatchRun = isBatchRun;
 
         // todo: add new interpreters as needed
 		switch (job.getJobType()) {
@@ -63,8 +68,11 @@ public class JobRunnerThread implements Runnable {
             File workingDirectory = resolveWorkingDir();
 			compileTest(workingDirectory);
 
-			testRun.setStatus(TestRunStatus.RUNNING);
-			testRunRepository.save(testRun);
+			// Only concerned with updating test run status if it's a single-job run
+			if (!isBatchRun) {
+				testRun.setStatus(TestRunStatus.RUNNING);
+				testRun = testRunRepository.save(testRun);
+			}
 
 			// step 3 - execute test
 			Optional<File> testResultFile = executeTest(workingDirectory);
@@ -73,30 +81,18 @@ public class JobRunnerThread implements Runnable {
             if (testResultFile.isEmpty()) {
                 LOG.info("No test results file available for interpretation");
 
-                testRun.setStatus(TestRunStatus.FAILED);
-                testRun.setFinishedAt(Instant.now());
-                testRunRepository.save(testRun);
+
+				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
             } else {
                 LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
-                TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun.getRunId(), testRun.getJobId());
+            	TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun);
 
-                testRun.setStatus(pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED);
-                testRun.setResultId(pass.resultId());
-                testRun.setFinishedAt(Instant.now());
-                testRunRepository.save(testRun);
+				onComplete.accept(new JobRunnerThreadStatus(testRun, pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED));
             }
-
-			if (testRun.getBatchId() != null) {
-				notificationService.sendTestCompletionNotifications(
-						testRun.getBatchId(), testRun.getRunId(), testRun.getResultId());
-			}
 		} catch (IOException e) {
             LOG.error("Running job failed with exception: {}", e.getMessage());
-            testRun.setStatus(TestRunStatus.FAILED);
-            testRun.setFinishedAt(Instant.now());
-            this.failedTests.add(testRun);
-            testRunRepository.save(testRun);
+			onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
         } finally {
 			cleanupTempDir();
 		}
@@ -208,9 +204,7 @@ public class JobRunnerThread implements Runnable {
 					deleteRecursively(child);
 				}
 			}
-		}
-
-        if (!file.setWritable(true)) {
+		} else if (!file.setWritable(true)) {
             throw new IOException("Failed to delete file or directory: unable to set " + file.getAbsolutePath() + " as writable");
         }
 		if (!file.delete()) {
