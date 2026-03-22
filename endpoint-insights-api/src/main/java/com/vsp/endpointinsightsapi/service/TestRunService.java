@@ -121,4 +121,50 @@ public class TestRunService {
 		}
 		testRunRepository.deleteById(runId);
 	}
+
+    public List<RecentActivityDTO> getRecentActivityByJobId(UUID jobId, int limit) {
+        if (!jobRepository.existsById(jobId)) {
+            throw new JobNotFoundException(jobId.toString());
+        }
+
+        int safeLimit = Math.max(1, Math.min(limit, 100));
+
+        List<TestRun> runs = testRunRepository
+                .findByJobIdOrderByFinishedAtDesc(
+                        jobId,
+                        PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"))
+                )
+                .getContent();
+
+        Set<UUID> batchIds = runs.stream()
+                .map(TestRun::getBatchId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new JobNotFoundException(jobId.toString()));
+
+        Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
+                .collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
+
+        return runs.stream().map(run -> {
+            TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
+
+            long durationMs = 0;
+            if (run.getStartedAt() != null && run.getFinishedAt() != null) {
+                durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
+            }
+
+            return RecentActivityDTO.builder()
+                    .runId(run.getRunId().toString())
+                    .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
+                    .testName(job.getName())
+                    .group(deriveScheduleType(batch))
+                    .dateRun(run.getStartedAt())
+                    .durationMs(durationMs)
+                    .startedBy(run.getRunBy())
+                    .status(toDisplayStatus(run.getStatus()))
+                    .build();
+        }).collect(Collectors.toList());
+    }
 }

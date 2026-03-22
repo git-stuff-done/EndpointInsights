@@ -66,6 +66,60 @@ class TestRunsControllerUnitTest {
 				.andExpect(jsonPath("$[0].status").value("COMPLETED"));
 	}
 
+    @Test
+    void getRecentActivity_returnsList() throws Exception {
+        RecentActivityDTO activity = RecentActivityDTO.builder()
+                .runId(UUID.randomUUID().toString())
+                .jobId(UUID.randomUUID().toString())
+                .testName("Endpoint_Insight_Health")
+                .group("Daily")
+                .dateRun(Instant.parse("2025-07-10T10:15:30Z"))
+                .durationMs(6469)
+                .startedBy("tester")
+                .status("PASS")
+                .build();
+
+        when(testRunService.getRecentActivity(5)).thenReturn(List.of(activity));
+
+        mockMvc.perform(get("/api/test-runs/recent-activity").param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].runId").value(activity.getRunId()))
+                .andExpect(jsonPath("$[0].jobId").value(activity.getJobId()))
+                .andExpect(jsonPath("$[0].testName").value("Endpoint_Insight_Health"))
+                .andExpect(jsonPath("$[0].group").value("Daily"))
+                .andExpect(jsonPath("$[0].durationMs").value(6469))
+                .andExpect(jsonPath("$[0].startedBy").value("tester"))
+                .andExpect(jsonPath("$[0].status").value("PASS"));
+    }
+
+    @Test
+    void getRecentActivityByJobId_returnsList() throws Exception {
+        UUID jobId = UUID.randomUUID();
+
+        RecentActivityDTO activity = RecentActivityDTO.builder()
+                .runId(UUID.randomUUID().toString())
+                .jobId(jobId.toString())
+                .testName("Endpoint_Insight_Health")
+                .group("Daily")
+                .dateRun(Instant.parse("2025-07-10T10:15:30Z"))
+                .durationMs(6254)
+                .startedBy("tester")
+                .status("PASS")
+                .build();
+
+        when(testRunService.getRecentActivityByJobId(jobId, 5)).thenReturn(List.of(activity));
+
+        mockMvc.perform(get("/api/test-runs/recent-activity/{jobId}", jobId).param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].runId").value(activity.getRunId()))
+                .andExpect(jsonPath("$[0].jobId").value(jobId.toString()))
+                .andExpect(jsonPath("$[0].testName").value("Endpoint_Insight_Health"))
+                .andExpect(jsonPath("$[0].group").value("Daily"))
+                .andExpect(jsonPath("$[0].durationMs").value(6254))
+                .andExpect(jsonPath("$[0].startedBy").value("tester"))
+                .andExpect(jsonPath("$[0].status").value("PASS"));
+    }
+
 	@Test
 	void getTestRunById_returnsRun() throws Exception {
 		UUID runId = UUID.randomUUID();

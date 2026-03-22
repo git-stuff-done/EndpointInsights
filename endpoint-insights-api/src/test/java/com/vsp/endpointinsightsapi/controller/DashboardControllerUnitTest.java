@@ -1,7 +1,11 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.service.PerformanceChartService;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.DashboardTestActivityDTO;
+import com.vsp.endpointinsightsapi.dto.charts.ChartPointDTO;
+import com.vsp.endpointinsightsapi.dto.charts.ChartResponseDTO;
+import com.vsp.endpointinsightsapi.dto.charts.ChartSeriesDTO;
 import com.vsp.endpointinsightsapi.service.DashboardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +17,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.vsp.endpointinsightsapi.dto.DashboardTestActivityDTO.Status.PASS;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +38,9 @@ class DashboardControllerTest {
 
     @MockitoBean
     DashboardService dashboardService;
+
+    @MockitoBean
+    PerformanceChartService performanceChartService;
 
     @Test
     void summary_returnsComputedResponse() throws Exception {
@@ -65,5 +74,37 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.failedRuns").value(0))
                 .andExpect(jsonPath("$.passRate").value(1.0))
                 .andExpect(jsonPath("$.avgDurationMs").value(230.0));
+    }
+
+    @Test
+    void getApiPerformanceChart_returnsChartResponse() throws Exception {
+        UUID jobId = UUID.randomUUID();
+
+        var response = new ChartResponseDTO(
+                "Endpoint_Insight_Health API Performance",
+                "runNumber",
+                List.of(
+                        new ChartSeriesDTO(
+                                "Run Duration (ms)",
+                                List.of(
+                                        new ChartPointDTO("1", 6469),
+                                        new ChartPointDTO("2", 6254)
+                                )
+                        )
+                )
+        );
+
+        when(performanceChartService.getApiPerformanceChart(jobId, 5)).thenReturn(response);
+
+        mvc.perform(get("/api/dashboard/charts/performance/{jobId}", jobId)
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Endpoint_Insight_Health API Performance"))
+                .andExpect(jsonPath("$.xAxis").value("runNumber"))
+                .andExpect(jsonPath("$.series[0].name").value("Run Duration (ms)"))
+                .andExpect(jsonPath("$.series[0].data[0].label").value("1"))
+                .andExpect(jsonPath("$.series[0].data[0].value").value(6469))
+                .andExpect(jsonPath("$.series[0].data[1].label").value("2"))
+                .andExpect(jsonPath("$.series[0].data[1].value").value(6254));
     }
 }

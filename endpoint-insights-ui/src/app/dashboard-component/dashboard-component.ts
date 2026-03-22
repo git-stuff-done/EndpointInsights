@@ -1,10 +1,32 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../models/test-record.model';
 import { MatButtonModule } from '@angular/material/button';
 import { TestRunService } from '../services/test-run.service';
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip
+} from 'chart.js';
+import { PerformanceChartService } from '../services/performance-chart.service';
+import { ChartPoint, ChartResponse } from '../models/chart.model';
 //import { ModalService } from '../shared/modal/modal.service';
+
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip
+);
 
 export interface DashboardTestActivity {
     id: string;
@@ -29,9 +51,25 @@ export interface DashboardAlert {
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
+    @ViewChild('performanceCanvas')
+    performanceCanvas!: ElementRef<HTMLCanvasElement>;
 
     private testRunService = inject(TestRunService);
+    private performanceChartService = inject(PerformanceChartService);
+
+    private chart?: Chart;
+
+    // hardcode for now, replace later with selected job id from UI/router
+//     jobId = '89bb3ff9-08f1-49e3-ab61-36b5cbb42dd7';
+    jobId = '';
+    loading = false;
+    error = '';
+
+    chartResponse?: ChartResponse;
+
+    lineChartLabels: string[] = [];
+    lineChartData: { label: string; data: number[] }[] = [];
 
     // KPI metrics
     activeJobsTotal = 12;
@@ -59,6 +97,7 @@ export class DashboardComponent implements OnInit {
             next: (data) => {
                 this.tests = data.map(r => ({
                     id: r.runId,
+                    jobId: r.jobId,
                     testName: r.testName,
                     group: r.group,
                     dateRun: new Date(r.dateRun),
@@ -66,9 +105,122 @@ export class DashboardComponent implements OnInit {
                     startedBy: r.startedBy,
                     status: r.status as DashboardTestActivity['status'],
                 }));
-            },
-            error: (err) => console.error('Failed to load recent activity', err)
+                const mostRecentPassingRun = data.find(
+                        r => r.status === 'PASS' && r.jobId
+                      );
+
+                      if (mostRecentPassingRun && mostRecentPassingRun.jobId) {
+                        this.jobId = mostRecentPassingRun.jobId;
+                        this.loadChart();
+                      } else {
+                        this.error = 'No recent passing test found.';
+                      }
+                    },
+                    error: (err) => {
+                      console.error('Failed to load recent activity', err);
+                      this.error = 'Failed to load recent activity';
+                    }
         });
+    }
+
+    ngAfterViewInit(): void {
+//         this.loadChart();
+      }
+
+    loadChart(): void {
+        this.loading = true;
+        this.error = '';
+
+        this.performanceChartService.getApiPerformanceChart(this.jobId).subscribe({
+          next: (response) => {
+            this.chartResponse = response;
+            this.mapToChart(response);
+            this.renderChart();
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('Failed to load chart', err);
+            this.error = 'Failed to load chart';
+            this.loading = false;
+          }
+        });
+      }
+
+    private mapToChart(response: ChartResponse): void {
+        if (!response.series?.length) {
+          this.lineChartLabels = [];
+          this.lineChartData = [];
+          return;
+        }
+
+        this.lineChartLabels = response.series[0].data.map((p: ChartPoint) => p.label);
+        this.lineChartData = response.series.map(series => ({
+          label: series.name,
+          data: series.data.map((p: ChartPoint) => p.value)
+        }));
+      }
+
+    private renderChart(): void {
+      if (!this.performanceCanvas) return;
+
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart(this.performanceCanvas.nativeElement, {
+        type: 'line',
+        data: {
+          labels: this.lineChartLabels,
+          datasets: this.lineChartData.map(series => ({
+            label: series.label,
+            data: series.data,
+
+            borderColor: '#3b82f6', // blue
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+
+            tension: 0.4, // smooth curve
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: '#374151',
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+
+          scales: {
+            x: {
+              grid: {
+                display: true
+              },
+              ticks: {
+                color: '#6b7280'
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(0,0,0,0.05)'
+              },
+              ticks: {
+                color: '#6b7280'
+              }
+            }
+          }
+        }
+      });
     }
 
     // Alerts mock data

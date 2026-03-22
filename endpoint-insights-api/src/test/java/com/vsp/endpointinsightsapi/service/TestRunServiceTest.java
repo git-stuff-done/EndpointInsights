@@ -120,7 +120,7 @@ class TestRunServiceTest {
 		run.setRunBy("tester");
 		run.setStatus(status);
 		run.setStartedAt(Instant.now());
-		run.setFinishedAt(Instant.now());
+		run.setFinishedAt(Instant.now().plusMillis(3250));
 		return run;
 	}
 
@@ -268,4 +268,120 @@ class TestRunServiceTest {
 		assertThrows(TestRunNotFoundException.class, () -> testRunService.deleteTestRunById(runId));
 		verify(testRunRepository).existsById(runId);
 	}
+
+    @Test
+    void getRecentActivityByJobId_missingJob_throwsException() {
+        UUID jobId = UUID.randomUUID();
+
+        when(jobRepository.existsById(jobId)).thenReturn(false);
+
+        assertThrows(JobNotFoundException.class, () -> testRunService.getRecentActivityByJobId(jobId, 10));
+        verify(jobRepository).existsById(jobId);
+    }
+
+    @Test
+    void getRecentActivityByJobId_mapsFieldsCorrectly() {
+        UUID jobId = UUID.randomUUID();
+        UUID batchId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Endpoint Smoke");
+
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setCronExpression("0 0 8 * * *");
+
+        TestRun run = buildRun(jobId, batchId, TestRunStatus.COMPLETED);
+
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of(batch));
+
+        RecentActivityDTO result = testRunService.getRecentActivityByJobId(jobId, 10).get(0);
+
+        assertEquals(run.getRunId().toString(), result.getRunId());
+        assertEquals(jobId.toString(), result.getJobId());
+        assertEquals("Endpoint Smoke", result.getTestName());
+        assertEquals("Daily", result.getGroup());
+        assertEquals(run.getStartedAt(), result.getDateRun());
+        assertEquals(3250, result.getDurationMs());
+        assertEquals("tester", result.getStartedBy());
+        assertEquals("PASS", result.getStatus());
+    }
+
+    @Test
+    void getRecentActivityByJobId_naWhenNoBatch() {
+        UUID jobId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Endpoint Smoke");
+
+        TestRun run = buildRun(jobId, null, TestRunStatus.COMPLETED);
+
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+        RecentActivityDTO result = testRunService.getRecentActivityByJobId(jobId, 10).get(0);
+
+        assertEquals("N/A", result.getGroup());
+    }
+
+    @Test
+    void getRecentActivityByJobId_capsLimitAt100() {
+        UUID jobId = UUID.randomUUID();
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Endpoint Smoke");
+
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+        testRunService.getRecentActivityByJobId(jobId, 1000);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(testRunRepository).findByJobIdOrderByFinishedAtDesc(any(UUID.class), captor.capture());
+        assertEquals(100, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void getRecentActivityByJobId_raisesLimitToMinimumOf1() {
+        UUID jobId = UUID.randomUUID();
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Endpoint Smoke");
+
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+        testRunService.getRecentActivityByJobId(jobId, 0);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(testRunRepository).findByJobIdOrderByFinishedAtDesc(any(UUID.class), captor.capture());
+        assertEquals(1, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void getRecentActivityByJobId_whenJobMissingDuringFindById_throwsException() {
+        UUID jobId = UUID.randomUUID();
+
+        when(jobRepository.existsById(jobId)).thenReturn(true);
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        assertThrows(JobNotFoundException.class, () -> testRunService.getRecentActivityByJobId(jobId, 10));
+    }
 }

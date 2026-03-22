@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface TestRunRepository extends JpaRepository<TestRun, UUID> {
 	Page<TestRun> findAllByOrderByFinishedAtDesc(Pageable pageable);
+
+    Page<TestRun> findByJobIdOrderByFinishedAtDesc(UUID jobId, Pageable pageable);
 }

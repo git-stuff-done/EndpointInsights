@@ -1,11 +1,15 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
+import com.vsp.endpointinsightsapi.model.JobRun;
+import com.vsp.endpointinsightsapi.model.JobRunHistory;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.service.TestRunService;
 import com.vsp.endpointinsightsapi.exception.CustomException;
+import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -70,4 +74,11 @@ public class TestRunsController {
 		testRunService.deleteTestRunById(runId);
 		return ResponseEntity.ok(String.format("Test run %s deleted", runId));
 	}
+
+    @GetMapping("/recent-activity/{jobId}")
+    public ResponseEntity<List<RecentActivityDTO>> getRecentActivityByJobId(
+            @PathVariable UUID jobId,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(testRunService.getRecentActivityByJobId(jobId, limit));
+    }
 }
