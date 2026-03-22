@@ -18,4 +18,5 @@ public class RecentActivityDTO {
     private long durationMs;
     private String startedBy;
     private String status;
+    private String batchName;
 }

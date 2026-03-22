@@ -70,7 +70,7 @@ describe('CreateJobForm', () => {
                 gitAuthType: 'NONE',
                 runCommand: 'npm run test',
                 compileCommand: 'npm run build',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 createdAt: new Date(),
                 createdBy: 'user',
                 status: 'RUNNING'
@@ -372,7 +372,7 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
@@ -420,7 +420,7 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 jmeterTestName: 'text.jmx',
                 compileCommand: 'npm run build'
             });
@@ -434,7 +434,7 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 runCommand: 'npm run test',
                 compileCommand: ''
             });
