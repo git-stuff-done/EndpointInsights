@@ -5,6 +5,7 @@ import {catchError, Observable, tap, throwError} from "rxjs";
 import {ToastService} from "../../services/toast.service";
 import {environment} from "../../../environment";
 import {HttpInterceptorService} from "../../services/http-interceptor.service";
+import {TestRun} from "../../models/test-run.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,10 @@ export class BatchApi {
 
     deleteBatch(id: string){
         return this.httpInterceptService.delete<Batch>(`${environment.apiUrl}/batches/${id}`)
+    }
+
+    runBatch(id: string) {
+        return this.httpInterceptService.post<TestRun>(`${environment.apiUrl}/batches/${id}/run`, null);
     }
 
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{

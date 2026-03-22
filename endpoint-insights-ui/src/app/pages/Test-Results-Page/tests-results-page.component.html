@@ -1,53 +1,92 @@
-<main class="container-fluid py-3">
-    <section class="test-results-list">
-        @for (t of tests; track t.id) {
-            <app-test-results-card [test]="t"></app-test-results-card>
-        }
-    </section>
-
-    <section class="test-runs mt-4">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-            <h2 class="h5 mb-0">Recent Test Runs</h2>
-            <span class="text-muted small">Showing latest 10 runs</span>
+<main class="test-results-page">
+    <div class="page-header">
+        <h1 class="page-title">Test Results</h1>
+        <div class="search-wrapper">
+            <mat-icon class="search-icon">search</mat-icon>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+                <input matInput [formControl]="searchControl" placeholder="Search by name, test UUID, or run ID…" />
+            </mat-form-field>
         </div>
+    </div>
 
-        @if (isLoadingRuns) {
-            <div class="text-muted">Loading recent runs...</div>
-        } @else if (runsError) {
-            <div class="text-danger">{{ runsError }}</div>
-        } @else {
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Run ID</th>
-                            <th scope="col">Job ID</th>
-                            <th scope="col">Run By</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Finished At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (recentRuns.length === 0) {
-                            <tr>
-                                <td colspan="5" class="text-muted">No recent runs found.</td>
-                            </tr>
-                        } @else {
-                            @for (run of recentRuns; track run.runId) {
-                                <tr>
-                                    <td class="text-truncate" style="max-width: 180px;">{{ run.runId }}</td>
-                                    <td class="text-truncate" style="max-width: 180px;">{{ run.jobId }}</td>
-                                    <td>{{ run.runBy }}</td>
-                                    <td>
-                                        <span class="status-pill" [attr.data-status]="run.status">{{ run.status }}</span>
-                                    </td>
-                                    <td>{{ run.finishedAt ? (run.finishedAt | date: 'short') : '—' }}</td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </section>
+    @if (isLoading) {
+        <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Loading test results…</span>
+        </div>
+    } @else if (loadError) {
+        <div class="error-state">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ loadError }}</span>
+        </div>
+    } @else {
+        <div class="table-container mat-elevation-z2">
+            <table mat-table [dataSource]="dataSource" matSort class="results-table">
+
+                <!-- Test Name -->
+                <ng-container matColumnDef="testName">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Test Name</th>
+                    <td mat-cell *matCellDef="let row">{{ row.testName }}</td>
+                </ng-container>
+
+                <!-- Run ID -->
+                <ng-container matColumnDef="runId">
+                    <th mat-header-cell *matHeaderCellDef>Run ID</th>
+                    <td mat-cell *matCellDef="let row" class="mono truncate" [title]="row.runId">{{ row.runId }}</td>
+                </ng-container>
+
+                <!-- Test UUID (jobId) -->
+                <ng-container matColumnDef="jobId">
+                    <th mat-header-cell *matHeaderCellDef>Test UUID</th>
+                    <td mat-cell *matCellDef="let row" class="mono truncate" [title]="row.jobId ?? ''">{{ row.jobId ?? '—' }}</td>
+                </ng-container>
+
+                <!-- Time Ran -->
+                <ng-container matColumnDef="dateRun">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Time Ran</th>
+                    <td mat-cell *matCellDef="let row">{{ row.dateRun ? (row.dateRun | date:'short') : '—' }}</td>
+                </ng-container>
+
+                <!-- Duration -->
+                <ng-container matColumnDef="durationMs">
+                    <th mat-header-cell *matHeaderCellDef>Duration</th>
+                    <td mat-cell *matCellDef="let row">{{ row.durationMs | number }}ms</td>
+                </ng-container>
+
+                <!-- Started By -->
+                <ng-container matColumnDef="startedBy">
+                    <th mat-header-cell *matHeaderCellDef>Started By</th>
+                    <td mat-cell *matCellDef="let row">{{ row.startedBy }}</td>
+                </ng-container>
+
+                <!-- Status -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                    <td mat-cell *matCellDef="let row">
+                        <span class="status-pill" [ngClass]="statusClass(row.status)">{{ row.status }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Actions -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let row">
+                        <button mat-icon-button aria-label="View test result" title="View result" (click)="viewResult(row)">
+                            <mat-icon>open_in_new</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <!-- No results row -->
+                <tr class="mat-row no-data-row" *matNoDataRow>
+                    <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                        No results match <strong>{{ searchControl.value }}</strong>.
+                    </td>
+                </tr>
+            </table>
+        </div>
+    }
 </main>

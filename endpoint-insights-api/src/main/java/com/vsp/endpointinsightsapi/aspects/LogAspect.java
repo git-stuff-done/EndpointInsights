@@ -28,63 +28,65 @@ public class LogAspect {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpServletRequest httpRequest;
 
-    @AfterReturning(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..)) && !within(com.vsp.endpointinsightsapi.service.BatchRunPersistenceService) ", returning = "result")
     public void logSuccess(JoinPoint joinPoint, Object result) {
-        Log log = new Log();
-        log.setEventType(httpRequest.getMethod());
-        log.setStatus("SUCCESS");
+        try {
+            Log log = new Log();
+            log.setEventType(httpRequest.getMethod());
+            log.setStatus("SUCCESS");
 
-        if(!joinPoint.getSignature().getName().equals("GET")){
+            if (!joinPoint.getSignature().getName().equals("GET")) {
+                try {
+                    Map<String, Object> json = new HashMap<>();
+                    json.put("request", Map.of(
+                            "method", joinPoint.getSignature().getName(),
+                            "uri", httpRequest.getRequestURI(),
+                            "params", httpRequest.getParameterMap()
+                    ));
+
+                    if (result instanceof ResponseEntity<?> response) {
+                        json.put("response", Map.of(
+                                "status", response.getStatusCode().value()
+                        ));
+                    } else {
+                        json.put("response", result != null ? result.toString() : "null");
+                    }
+
+                    log.setDetails(objectMapper.writeValueAsString(json));
+                    LOG.info(log.toString());
+                } catch (JsonProcessingException e) {
+                    LOG.error(e.getMessage());
+                    log.setDetails("{\"error\": \"failed to serialize\"}");
+                }
+            }
+        } catch (IllegalStateException ignored) {
+            // this happens when job/batch threads are invoked. for now we can ignore
+        }
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..)) && !within(com.vsp.endpointinsightsapi.service.BatchRunPersistenceService)", throwing = "ex")
+    public void logFailure(JoinPoint joinPoint, Exception ex) {
+        try {
+            Log log = new Log();
+            log.setEventType(httpRequest.getMethod());
+
+            log.setStatus("FAILED");
+
             try {
                 Map<String, Object> json = new HashMap<>();
-                json.put("request", Map.of(
-                        "method", joinPoint.getSignature().getName(),
-                        "uri", httpRequest.getRequestURI(),
-                        "params", httpRequest.getParameterMap()
+                json.put("request", joinPoint.getArgs());
+                json.put("response", Map.of(
+                        "exception", ex.getClass().getSimpleName(),
+                        "message", ex.getMessage()
                 ));
-
-                if (result instanceof ResponseEntity<?> response) {
-                    json.put("response", Map.of(
-                            "status", response.getStatusCode().value()
-                    ));
-                } else {
-                    json.put("response", result != null ? result.toString() : "null");
-                }
-
                 log.setDetails(objectMapper.writeValueAsString(json));
-                LOG.info(log.toString());
-            }
-            catch (JsonProcessingException e) {
+                LOG.warn(log.toString());
+            } catch (JsonProcessingException e) {
                 LOG.error(e.getMessage());
                 log.setDetails("{\"error\": \"failed to serialize\"}");
             }
-        }
 
-    }
-
-    @AfterThrowing(pointcut = "execution(* com.vsp.endpointinsightsapi.service.*.*(..))", throwing = "ex")
-    public void logFailure(JoinPoint joinPoint, Exception ex) {
-        Log log = new Log();
-        log.setEventType(httpRequest.getMethod());
-
-        log.setStatus("FAILED");
-
-        try {
-            Map<String, Object> json = new HashMap<>();
-            json.put("request", joinPoint.getArgs());
-            json.put("response", Map.of(
-                    "exception", ex.getClass().getSimpleName(),
-                    "message", ex.getMessage()
-            ));
-            log.setDetails(objectMapper.writeValueAsString(json));
-            LOG.warn(log.toString());
-        }
-        catch (JsonProcessingException e) {
-            LOG.error(e.getMessage());
-            log.setDetails("{\"error\": \"failed to serialize\"}");
-        }
-
-
+        } catch (IllegalStateException ignored) {}
     }
 
 }
