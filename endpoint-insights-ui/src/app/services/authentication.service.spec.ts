@@ -95,6 +95,28 @@ describe('AuthenticationService', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
   }));
 
+  it('loadTokenFromCookie navigates to stored redirect URL on valid token', fakeAsync(() => {
+    service = TestBed.inject(AuthenticationService);
+    const token = buildToken({
+      preferred_username: 'user',
+      email: 'user@example.com',
+      groups: ['admin'],
+      exp: Math.floor(Date.now() / 1000) + 3600
+    });
+    //Store redirect URL before loading token
+    localStorage.setItem('redirectUrl', '/batches');
+    const mockCookieStore = {
+      get: jasmine.createSpy().and.returnValue(Promise.resolve({ value: token })),
+      delete: jasmine.createSpy().and.returnValue(Promise.resolve())
+    };
+    spyOnProperty(window, 'cookieStore', 'get').and.returnValue(mockCookieStore as any);
+    service.loadTokenFromCookie();
+    flush();
+    //Verify that user is redirected to stored URL and redirect URL is cleared from storage
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/batches']);
+    expect(localStorage.getItem('redirectUrl')).toBeNull();
+  }));
+
   it('loadTokenFromCookie navigates to login when missing', fakeAsync(() => {
     service = TestBed.inject(AuthenticationService);
     const mockCookieStore = {
@@ -108,4 +130,29 @@ describe('AuthenticationService', () => {
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
   }));
+
+  it('setRedirectUrl stores URL in localStorage', () => {
+    service = TestBed.inject(AuthenticationService);
+    spyOn(localStorage, 'setItem');
+    service.setRedirectUrl('/batches');
+    //Verify redirect URL is stored in localStorage under correct endpoint
+    expect(localStorage.setItem).toHaveBeenCalledWith('redirectUrl', '/batches');
+  });
+
+  it('getAndClearRedirectUrl retrieves and removes URL from localStorage', () => {
+    service = TestBed.inject(AuthenticationService);
+    localStorage.setItem('redirectUrl', '/batches');
+    spyOn(localStorage, 'removeItem');
+    const result = service.getAndClearRedirectUrl();
+    //Verify that the correct URL is returned and then removed from localStorage
+    expect(result).toBe('/batches');
+    expect(localStorage.removeItem).toHaveBeenCalledWith('redirectUrl');
+  });
+
+  it('getAndClearRedirectUrl returns null when no URL is stored', () => {
+    service = TestBed.inject(AuthenticationService);
+    const result = service.getAndClearRedirectUrl();
+    //Verify null is returned when no redirect URL is stored
+    expect(result).toBeNull();
+  });
 });

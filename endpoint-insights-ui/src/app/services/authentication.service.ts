@@ -21,6 +21,7 @@ export class AuthenticationService {
   private readonly apiUrl = environment.apiUrl;
   private readonly tokenKey = environment.tokenStorageKey;
   private readonly AUTH_TOKEN_COOKIE = "authToken";
+  private readonly REDIRECT_URL_KEY = "redirectUrl";
 
 
   private userInfo: UserInfo | null = null;
@@ -45,6 +46,26 @@ export class AuthenticationService {
    */
   public login(): void {
     this.redirectToAuth(this.authUrl);
+  }
+
+  /**
+   * Stores the URL the user attempted to visit before redirect
+   */
+  public setRedirectUrl(url: string): void {
+    localStorage.setItem(this.REDIRECT_URL_KEY, url);
+  }
+
+  /**
+   * Retrieves the redirect URL and THEN clears it from storage.
+   * Returns URL if stored
+   * Returns null if no URL is stored.
+   */
+  public getAndClearRedirectUrl(): string | null {
+    const url = localStorage.getItem(this.REDIRECT_URL_KEY);
+    if (url) {
+      localStorage.removeItem(this.REDIRECT_URL_KEY);
+    }
+    return url;
   }
 
   private redirectToAuth(url: string): void {
@@ -139,7 +160,9 @@ export class AuthenticationService {
           this.setToken(t.value);
           this.authStateSubject.next(true);
           this.loadUserInfo();
-          this.router.navigate(['/']);
+          //Redirect to the stored URL or root if no URL is stored
+          const redirectUrl = this.getAndClearRedirectUrl();
+          this.router.navigate([redirectUrl || '/']);
         } else {
           this.clearAuthData();
           this.router.navigate(['/login']);
