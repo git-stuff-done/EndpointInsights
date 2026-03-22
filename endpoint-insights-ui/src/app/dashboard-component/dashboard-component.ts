@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TestResultsCardComponent } from '../components/test-results-card/test-results-card.component';
 import { TestRecord } from '../models/test-record.model';
 import { MatButtonModule } from '@angular/material/button';
 import { TestRunService } from '../services/test-run.service';
@@ -16,7 +15,8 @@ import {
 } from 'chart.js';
 import { PerformanceChartService } from '../services/performance-chart.service';
 import { ChartPoint, ChartResponse } from '../models/chart.model';
-//import { ModalService } from '../shared/modal/modal.service';
+import {Router} from "@angular/router";
+import {MatIcon} from "@angular/material/icon";
 
 Chart.register(
   LineController,
@@ -47,16 +47,13 @@ export interface DashboardAlert {
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, MatButtonModule],
+  imports: [CommonModule, MatButtonModule, MatIcon],
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('performanceCanvas')
     performanceCanvas!: ElementRef<HTMLCanvasElement>;
-
-    private testRunService = inject(TestRunService);
-    private performanceChartService = inject(PerformanceChartService);
 
     private chart?: Chart;
 
@@ -89,6 +86,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     apiTrendData = [];         // same here
 
     tests: DashboardTestActivity[] = [];
+
+    constructor(private router: Router,
+                private testRunService: TestRunService,
+                private performanceChartService: PerformanceChartService
+                ) { }
 
     ngOnInit(): void {
         this.testRunService.getRecentActivity(10).subscribe({
@@ -244,4 +246,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     ];
 
     // keep any other existing code you already had in here
+    viewResult(id: string) {
+        this.router.navigate(['/test-results/view'],  { state: { runId: id } });
+    }
 }

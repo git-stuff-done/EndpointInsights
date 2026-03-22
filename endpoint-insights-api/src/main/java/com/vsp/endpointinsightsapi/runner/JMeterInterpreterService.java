@@ -6,6 +6,7 @@ import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,12 +46,13 @@ public class JMeterInterpreterService implements TestInterpreter {
 	}
 
 	@Override
-	public TestRunResult processResults(File file, UUID testRunId) throws IOException {
+	@Transactional
+	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
 		// Create test result so we can get the UUID
 		TestResult testResult = new TestResult();
 		testResult.setId(UUID.randomUUID());
 		testResult.setJobType(TestType.PERF.toInteger());
-		testResult.setRunId(testRunId);
+		testResult.setTestRun(testRun);
 		testResult = testResultRepository.save(testResult);
 
 		// Maps groupKey -> List of SampleRecord

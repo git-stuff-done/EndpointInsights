@@ -46,6 +46,10 @@ spring:
 jmeter:
   home: ${JMETER_HOME}
 
+scheduling:
+  pool-size: 10
+  thread-name-prefix: TestBatchScheduler-
+
 app:
   authentication:
     enabled: true

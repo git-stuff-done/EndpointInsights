@@ -1,17 +1,26 @@
 package com.vsp.endpointinsightsapi.service;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
+import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
+import com.vsp.endpointinsightsapi.factory.JobRunnerThreadFactory;
+import com.vsp.endpointinsightsapi.factory.TestRunFactory;
+import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.JobCreateRequest;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
+import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JobService {
@@ -19,10 +28,24 @@ public class JobService {
     private static final Logger LOG = LoggerFactory.getLogger(JobService.class);
     private final JobRepository jobRepository;
     private final GitRepositoryService gitRepositoryService;
+    private final TestRunRepository testRunRepository;
+    private final JobRunnerThreadFactory jobRunnerThreadFactory;
+    private final TestRunFactory testRunFactory;
+    private final ThreadPoolTaskScheduler vspTaskScheduler;
 
-    public JobService(JobRepository jobRepository, GitRepositoryService gitRepositoryService) {
+
+    public JobService(JobRepository jobRepository,
+                      GitRepositoryService gitRepositoryService,
+                      TestRunRepository testRunRepository,
+                      JobRunnerThreadFactory jobRunnerThreadFactory,
+                      TestRunFactory testRunFactory,
+                      ThreadPoolTaskScheduler vspTaskScheduler) {
         this.jobRepository = jobRepository;
         this.gitRepositoryService = gitRepositoryService;
+		this.testRunRepository = testRunRepository;
+        this.jobRunnerThreadFactory = jobRunnerThreadFactory;
+        this.testRunFactory = testRunFactory;
+        this.vspTaskScheduler = vspTaskScheduler;
     }
 
     public Job createJob(JobCreateRequest jobRequest) {
@@ -73,10 +96,36 @@ public class JobService {
         return jobRepository.save(existingJob);
     }
 
-    public java.nio.file.Path checkoutJobRepository(UUID jobId) {
+    public Path checkoutJobRepository(UUID jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException(jobId.toString()));
         return gitRepositoryService.checkoutJobRepository(job);
+    }
+
+    /**
+     * Initiates the execution of the specified job by creating a new test run, persisting its initial metadata,
+     * and starting a background process to execute the job. The method also ensures that the test run status and
+     * completion time are updated appropriately once the job completes through a callback.
+     *
+     * @param job the job to be executed
+     * @return the TestRun entity representing the initiated run
+     */
+    public TestRun runJob(Job job) {
+        TestRun testRun = testRunFactory.createForJob(job);
+
+        // ignoring returned thread
+		JobRunnerThread jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, false, (status) -> {
+            // Only setting final status here because in a batch I'll need to wait for all jobs to finish
+            TestRun run = status.run();
+            TestRunStatus s = status.status();
+            LOG.info("Job {} run {} completed with status {}", job.getJobId(), run.getRunId(), s);
+            run.setStatus(s);
+            run.setFinishedAt(Instant.now());
+            testRunRepository.save(run);
+        });
+        vspTaskScheduler.execute(jobRunnerThread);
+
+        return testRun;
     }
 
     @Transactional

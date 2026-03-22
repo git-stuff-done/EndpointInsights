@@ -1,0 +1,61 @@
+<div class="body-container">
+    <div class="result-container">
+        @if(testRun) {
+            <div class="run-meta">
+                <div class="meta-pill">Run <span>{{ testRun.runId | slice:0:8 }}…</span></div>
+                <div class="meta-pill">Started <span>{{ testRun.startedAt | date:'MMM d, h:mm:ss a z' }}</span></div>
+                <div class="meta-pill">Duration <span>{{ duration }}s</span></div>
+                <div class="meta-pill">By <span>{{ testRun.runBy }}</span></div>
+                <div class="status-badge" [ngClass]="'status-' + testRun.status.toLowerCase()">{{ testRun.status }}</div>
+            </div>
+        }
+        <div class="result-body">
+            <mat-table [dataSource]="testResultsDataSource">
+                <ng-container matColumnDef="threadGroup">
+                    <mat-header-cell *matHeaderCellDef>Thread Group</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.threadGroup }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="samplerName">
+                    <mat-header-cell *matHeaderCellDef>Sampler</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.samplerName }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="p50LatencyMs">
+                    <mat-header-cell *matHeaderCellDef>P50</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.p50LatencyMs }} ms</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="p95LatencyMs">
+                    <mat-header-cell *matHeaderCellDef>P95</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.p95LatencyMs }} ms</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="p99LatencyMs">
+                    <mat-header-cell *matHeaderCellDef>P99</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.p99LatencyMs }} ms</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="errorRatePercent">
+                    <mat-header-cell *matHeaderCellDef>Error Rate</mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="error-rate" [ngClass]="getErrorRateClass(row.errorRatePercent)">{{ row.errorRatePercent | number:'1.1-1' }}%</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="volumeLastMinute">
+                    <mat-header-cell *matHeaderCellDef>Vol / Min</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.volumeLastMinute }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="volumeLast5Minutes">
+                    <mat-header-cell *matHeaderCellDef>Vol / 5 Min</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{ row.volumeLast5Minutes }}</mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+            </mat-table>
+
+            <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons />
+        </div>
+    </div>
+</div>

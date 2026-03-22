@@ -89,6 +89,7 @@
                             <th>Duration</th>
                             <th>Started By</th>
                             <th>Status</th>
+                            <th>View</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -108,6 +109,11 @@
                     >
                       {{ t.status }}
                     </span>
+                                    </td>
+                                    <td>
+                                        <button mat-icon-button aria-label="View test result" title="View result" (click)="viewResult(t.id)">
+                                            <mat-icon>open_in_new</mat-icon>
+                                        </button>
                                     </td>
                                 </tr>
                             }
