@@ -44,6 +44,13 @@ public class AuthenticationProperties {
     private String callbackUri;
 
     /**
+     * List of additional allowed audiences for JWT validation.
+     * The OIDC client ID is always implicitly allowed.
+     */
+    @Getter
+    private List<String> allowedAudiences = List.of();
+
+    /**
      * Group name mappings for role-based access control.
      */
     @Data
