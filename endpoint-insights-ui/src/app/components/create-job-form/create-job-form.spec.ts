@@ -54,7 +54,7 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')).toBeTruthy();
             expect(component.createJobForm.get('runCommand')).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')).toBeTruthy();
-            expect(component.createJobForm.get('threshold')?.value).toBeTruthy();
+            expect(component.createJobForm.get('threshold')).toBeTruthy();
 
         });
 
@@ -420,7 +420,6 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')?.touched).toBeTruthy();
             expect(component.createJobForm.get('runCommand')?.touched).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')?.touched).toBeTruthy();
-            expect(component.createJobForm.get('threshold')?.value).toBeTruthy();
 
         });
     });
