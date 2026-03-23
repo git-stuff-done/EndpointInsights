@@ -96,8 +96,7 @@ public class JobControllerUnitTest {
 		UUID jobId = UUID.randomUUID();
 
 		mockMvc.perform(delete("/api/jobs/{id}", jobId.toString()))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").value("Job %s deleted".formatted(jobId.toString())));
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -114,14 +113,14 @@ public class JobControllerUnitTest {
 
 
 	@Test
-	public void deleteJob_runtimeException_returnsNotFound() throws Exception {
+	public void deleteJob_runtimeException_returnsInternalServerError() throws Exception {
 		UUID jobUuid = UUID.randomUUID();
 		doThrow(new RuntimeException("test error"))
 				.when(jobService)
 				.deleteJobById(jobUuid);
 
 		mockMvc.perform(delete("/api/jobs/{id}", jobUuid.toString()))
-				.andExpect(status().isNotFound());
+				.andExpect(status().isInternalServerError());
 	}
 
 	@Test
