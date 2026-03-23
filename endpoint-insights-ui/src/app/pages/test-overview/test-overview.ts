@@ -16,6 +16,7 @@ import { JOB_STATUSES, JobStatus } from '../../common/job.constants';
 import { JobService } from '../../services/job-services';
 import { TestRunService } from '../../services/test-run.service';
 import { ToastService } from '../../services/toast.service';
+import { BatchService } from '../../services/batch.service';
 
 @Component({
   selector: 'app-test-overview',
@@ -46,6 +47,7 @@ export class TestOverview implements OnInit, OnDestroy {
         private jobService: JobService,
         private testRunService: TestRunService,
         private toastService: ToastService,
+        private batchService: BatchService,
     ) {}
 
     ngOnInit(): void {
@@ -64,18 +66,27 @@ export class TestOverview implements OnInit, OnDestroy {
         forkJoin({
             jobs: this.jobService.getAllJobs(),
             activity: this.testRunService.getRecentActivity(100),
+            batches: this.batchService.getAllBatches(),
         }).subscribe({
-            next: ({ jobs, activity }) => {
+            next: ({ jobs, activity, batches }) => {
                 const statusMap = new Map<string, string>();
                 for (const run of activity) {
                     if (run.jobId && !statusMap.has(run.jobId)) {
                         statusMap.set(run.jobId, run.status);
                     }
                 }
+                const batchMap = new Map<string, string[]>();
+                for (const batch of (batches.body ?? [])) {
+                    for (const job of (batch.jobs ?? [])) {
+                        const jobId = (job as any).jobId ?? job.id;
+                        const existing = batchMap.get(jobId) ?? [];
+                        batchMap.set(jobId, [...existing, batch.batchName]);
+                    }
+                }
                 this.tests = jobs.map((j: any) => ({
                     id: j.jobId,
                     name: j.name,
-                    batch: j.testBatches?.[0]?.batchName ?? '',
+                    batch: (batchMap.get(j.jobId) ?? []).join(', '),
                     description: j.description ?? '',
                     gitUrl: j.gitUrl ?? '',
                     gitAuthType: j.gitAuthType,
@@ -85,6 +96,7 @@ export class TestOverview implements OnInit, OnDestroy {
                     gitSshPassphrase: j.gitSshPassphrase,
                     runCommand: j.runCommand ?? '',
                     compileCommand: j.compileCommand ?? '',
+                    jmeterTestName: j.jmeterTestName ?? '',
                     jobType: j.jobType ?? '',
                     createdAt: j.createdDate ?? '',
                     createdBy: j.createdBy ?? '',
