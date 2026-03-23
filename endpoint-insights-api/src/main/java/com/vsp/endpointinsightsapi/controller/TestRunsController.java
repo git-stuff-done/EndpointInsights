@@ -1,15 +1,11 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
-import com.vsp.endpointinsightsapi.model.JobRun;
-import com.vsp.endpointinsightsapi.model.JobRunHistory;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.service.TestRunService;
 import com.vsp.endpointinsightsapi.exception.CustomException;
-import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,8 +35,23 @@ public class TestRunsController {
 
 	@GetMapping("/recent-activity")
 	public ResponseEntity<List<RecentActivityDTO>> getRecentActivity(
+            @RequestParam(required = false) UUID jobId,
+            @RequestParam(required = false) UUID batchId,
 			@RequestParam(name = "limit", defaultValue = "10") int limit) {
-		return ResponseEntity.ok(testRunService.getRecentActivity(limit));
+        if (jobId != null && batchId != null) {
+            throw new IllegalArgumentException("Provide only one of jobId or batchId");
+        }
+
+        List<RecentActivityDTO> result;
+
+        if (jobId == null && batchId == null) {
+            // fallback → existing behavior
+            result = testRunService.getRecentActivity(limit);
+        } else {
+            result = testRunService.getRecentActivityById(jobId, batchId, limit);
+        }
+
+        return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/{id}")
@@ -74,11 +85,4 @@ public class TestRunsController {
 		testRunService.deleteTestRunById(runId);
 		return ResponseEntity.ok(String.format("Test run %s deleted", runId));
 	}
-
-    @GetMapping("/recent-activity/{jobId}")
-    public ResponseEntity<List<RecentActivityDTO>> getRecentActivityByJobId(
-            @PathVariable UUID jobId,
-            @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(testRunService.getRecentActivityByJobId(jobId, limit));
-    }
 }

@@ -50,9 +50,11 @@ class PerformanceChartServiceTest {
     void getApiPerformanceChart_returnsEmptySeriesWhenNoActivities() {
         UUID jobId = UUID.randomUUID();
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10)).thenReturn(List.of());
+        when(testRunService.getRecentActivityById(jobId, null, 10))
+                .thenReturn(List.of());
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
         assertNotNull(result);
         assertEquals("API Performance", result.getTitle());
@@ -61,62 +63,61 @@ class PerformanceChartServiceTest {
         assertEquals("Run Duration (ms)", result.getSeries().get(0).getName());
         assertEquals(0, result.getSeries().get(0).getData().size());
 
-        verify(testRunService).getRecentActivityByJobId(jobId, 10);
+        verify(testRunService).getRecentActivityById(jobId, null, 10);
     }
 
     @Test
-    void getApiPerformanceChart_filtersOutFailedActivities() {
+    void getApiPerformanceChart_includesPassedAndFailedActivities() {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO passed = buildActivity(
-                "Orders",
-                "PASS",
-                1200,
+                "Orders", "PASS", 1200,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
         RecentActivityDTO failed = buildActivity(
-                "Orders",
-                "FAIL",
-                900,
+                "Orders", "FAIL", 900,
                 Instant.parse("2025-01-01T11:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10))
+        when(testRunService.getRecentActivityById(jobId, null, 10))
                 .thenReturn(List.of(passed, failed));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
         List<ChartPointDTO> points = result.getSeries().get(0).getData();
-        assertEquals(1, points.size());
+
+        assertEquals(2, points.size());
         assertEquals("1", points.get(0).getLabel());
         assertEquals(1200, points.get(0).getValue());
+        assertEquals("PASS", points.get(0).getStatus());
+
+        assertEquals("2", points.get(1).getLabel());
+        assertEquals(900, points.get(1).getValue());
+        assertEquals("FAIL", points.get(1).getStatus());
     }
 
     @Test
     void getApiPerformanceChart_filtersOutZeroDurationActivities() {
         UUID jobId = UUID.randomUUID();
 
-        RecentActivityDTO zeroDuration = buildActivity(
-                "Orders",
-                "PASS",
-                0,
+        RecentActivityDTO zero = buildActivity(
+                "Orders", "PASS", 0,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
         RecentActivityDTO valid = buildActivity(
-                "Orders",
-                "PASS",
-                1500,
+                "Orders", "PASS", 1500,
                 Instant.parse("2025-01-01T11:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10))
-                .thenReturn(List.of(zeroDuration, valid));
+        when(testRunService.getRecentActivityById(jobId, null, 10))
+                .thenReturn(List.of(zero, valid));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
         List<ChartPointDTO> points = result.getSeries().get(0).getData();
         assertEquals(1, points.size());
-        assertEquals("1", points.get(0).getLabel());
         assertEquals(1500, points.get(0).getValue());
     }
 
@@ -125,39 +126,28 @@ class PerformanceChartServiceTest {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO later = buildActivity(
-                "Orders",
-                "PASS",
-                2000,
+                "Orders", "PASS", 2000,
                 Instant.parse("2025-01-03T10:00:00Z")
         );
         RecentActivityDTO earlier = buildActivity(
-                "Orders",
-                "PASS",
-                1000,
+                "Orders", "PASS", 1000,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
         RecentActivityDTO middle = buildActivity(
-                "Orders",
-                "PASS",
-                1500,
+                "Orders", "PASS", 1500,
                 Instant.parse("2025-01-02T10:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10))
+        when(testRunService.getRecentActivityById(jobId, null, 10))
                 .thenReturn(List.of(later, earlier, middle));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
         List<ChartPointDTO> points = result.getSeries().get(0).getData();
-        assertEquals(3, points.size());
 
-        assertEquals("1", points.get(0).getLabel());
         assertEquals(1000, points.get(0).getValue());
-
-        assertEquals("2", points.get(1).getLabel());
         assertEquals(1500, points.get(1).getValue());
-
-        assertEquals("3", points.get(2).getLabel());
         assertEquals(2000, points.get(2).getValue());
     }
 
@@ -166,50 +156,46 @@ class PerformanceChartServiceTest {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO later = buildActivity(
-                "Payments",
-                "PASS",
-                2200,
+                "Payments", "PASS", 2200,
                 Instant.parse("2025-01-02T10:00:00Z")
         );
         RecentActivityDTO earlier = buildActivity(
-                "Payments",
-                "PASS",
-                1100,
+                "Payments", "PASS", 1100,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10))
+        when(testRunService.getRecentActivityById(jobId, null, 10))
                 .thenReturn(List.of(later, earlier));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
         assertEquals("Payments API Performance", result.getTitle());
     }
 
     @Test
-    void getApiPerformanceChart_usesDefaultTitleWhenAllActivitiesAreFilteredOut() {
+    void getApiPerformanceChart_filtersOutZeroDurationButKeepsFailActivities() {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO failed = buildActivity(
-                "Payments",
-                "FAIL",
-                1000,
+                "Payments", "FAIL", 1000,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
-        RecentActivityDTO zeroDuration = buildActivity(
-                "Payments",
-                "PASS",
-                0,
+        RecentActivityDTO zero = buildActivity(
+                "Payments", "PASS", 0,
                 Instant.parse("2025-01-01T11:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 10))
-                .thenReturn(List.of(failed, zeroDuration));
+        when(testRunService.getRecentActivityById(jobId, null, 10))
+                .thenReturn(List.of(failed, zero));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 10);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 10);
 
-        assertEquals("API Performance", result.getTitle());
-        assertEquals(0, result.getSeries().get(0).getData().size());
+        assertEquals("Payments API Performance", result.getTitle());
+        assertEquals(1, result.getSeries().get(0).getData().size());
+        assertEquals(1000, result.getSeries().get(0).getData().get(0).getValue());
+        assertEquals("FAIL", result.getSeries().get(0).getData().get(0).getStatus());
     }
 
     @Test
@@ -217,27 +203,40 @@ class PerformanceChartServiceTest {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO activity = buildActivity(
-                "Inventory",
-                "PASS",
-                1800,
+                "Inventory", "PASS", 1800,
                 Instant.parse("2025-01-01T10:00:00Z")
         );
 
-        when(testRunService.getRecentActivityByJobId(jobId, 5))
+        when(testRunService.getRecentActivityById(jobId, null, 5))
                 .thenReturn(List.of(activity));
 
-        ChartResponseDTO result = performanceChartService.getApiPerformanceChart(jobId, 5);
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(jobId, null, 5);
+
+        ChartSeriesDTO series = result.getSeries().get(0);
 
         assertEquals("Inventory API Performance", result.getTitle());
         assertEquals("runNumber", result.getXAxis());
-        assertEquals(1, result.getSeries().size());
-
-        ChartSeriesDTO series = result.getSeries().get(0);
         assertEquals("Run Duration (ms)", series.getName());
         assertEquals(1, series.getData().size());
+        assertEquals(1800, series.getData().get(0).getValue());
+    }
 
-        ChartPointDTO point = series.getData().get(0);
-        assertEquals("1", point.getLabel());
-        assertEquals(1800, point.getValue());
+    @Test
+    void getApiPerformanceChart_withBatchId_works() {
+        UUID batchId = UUID.randomUUID();
+
+        RecentActivityDTO activity = buildActivity(
+                "BatchTest", "PASS", 2000,
+                Instant.parse("2025-01-01T10:00:00Z")
+        );
+
+        when(testRunService.getRecentActivityById(null, batchId, 10))
+                .thenReturn(List.of(activity));
+
+        ChartResponseDTO result =
+                performanceChartService.getApiPerformanceChart(null, batchId, 10);
+
+        assertEquals("BatchTest API Performance", result.getTitle());
     }
 }

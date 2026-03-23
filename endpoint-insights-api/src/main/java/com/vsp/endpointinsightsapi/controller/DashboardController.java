@@ -30,12 +30,18 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/charts/performance/{jobId}")
+    @GetMapping("/charts/performance")
     public ResponseEntity<ChartResponseDTO> getApiPerformanceChart(
-            @PathVariable
-            @NotNull
-            UUID jobId,
+            @RequestParam(required = false) UUID jobId,
+            @RequestParam(required = false) UUID batchId,
             @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(performanceChartService.getApiPerformanceChart(jobId, limit));
+
+        if (jobId != null && batchId != null) {
+            throw new IllegalArgumentException("Provide only one of jobId or batchId");
+        }
+
+        return ResponseEntity.ok(
+                performanceChartService.getApiPerformanceChart(jobId, batchId, limit)
+        );
     }
 }

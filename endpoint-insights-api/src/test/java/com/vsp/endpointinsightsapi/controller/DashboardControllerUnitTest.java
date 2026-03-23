@@ -77,7 +77,7 @@ class DashboardControllerTest {
     }
 
     @Test
-    void getApiPerformanceChart_returnsChartResponse() throws Exception {
+    void getApiPerformanceChart_withJobId_returnsChartResponse() throws Exception {
         UUID jobId = UUID.randomUUID();
 
         var response = new ChartResponseDTO(
@@ -87,16 +87,18 @@ class DashboardControllerTest {
                         new ChartSeriesDTO(
                                 "Run Duration (ms)",
                                 List.of(
-                                        new ChartPointDTO("1", 6469),
-                                        new ChartPointDTO("2", 6254)
+                                        new ChartPointDTO("1", 6469, "PASS"),
+                                        new ChartPointDTO("2", 6254, "PASS")
                                 )
                         )
                 )
         );
 
-        when(performanceChartService.getApiPerformanceChart(jobId, 5)).thenReturn(response);
+        when(performanceChartService.getApiPerformanceChart(jobId, null, 5))
+                .thenReturn(response);
 
-        mvc.perform(get("/api/dashboard/charts/performance/{jobId}", jobId)
+        mvc.perform(get("/api/dashboard/charts/performance")
+                        .param("jobId", jobId.toString())
                         .param("limit", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Endpoint_Insight_Health API Performance"))
@@ -106,5 +108,39 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.series[0].data[0].value").value(6469))
                 .andExpect(jsonPath("$.series[0].data[1].label").value("2"))
                 .andExpect(jsonPath("$.series[0].data[1].value").value(6254));
+    }
+
+    @Test
+    void getApiPerformanceChart_withBatchId_returnsChartResponse() throws Exception {
+        UUID batchId = UUID.randomUUID();
+
+        var response = new ChartResponseDTO(
+                "Batch API Performance",
+                "runNumber",
+                List.of(
+                        new ChartSeriesDTO(
+                                "Run Duration (ms)",
+                                List.of(
+                                        new ChartPointDTO("1", 5000, "PASS"),
+                                        new ChartPointDTO("2", 4800, "PASS")
+                                )
+                        )
+                )
+        );
+
+        when(performanceChartService.getApiPerformanceChart(null, batchId, 5))
+                .thenReturn(response);
+
+        mvc.perform(get("/api/dashboard/charts/performance")
+                        .param("batchId", batchId.toString())
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Batch API Performance"))
+                .andExpect(jsonPath("$.xAxis").value("runNumber"))
+                .andExpect(jsonPath("$.series[0].name").value("Run Duration (ms)"))
+                .andExpect(jsonPath("$.series[0].data[0].label").value("1"))
+                .andExpect(jsonPath("$.series[0].data[0].value").value(5000))
+                .andExpect(jsonPath("$.series[0].data[1].label").value("2"))
+                .andExpect(jsonPath("$.series[0].data[1].value").value(4800));
     }
 }

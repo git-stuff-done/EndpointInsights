@@ -15,13 +15,25 @@ export class PerformanceChartService {
 
   constructor(private http: HttpInterceptorService) {}
 
-  getApiPerformanceChart(jobId: string, limit = 10): Observable<ChartResponse> {
-    const params = new HttpParams().set('limit', limit.toString());
+  getApiPerformanceChart(
+    jobId?: string,
+    batchId?: string,
+    limit = 10
+  ): Observable<ChartResponse> {
+    if (jobId && batchId) {
+      throw new Error('Provide only one of jobId or batchId');
+    }
+
+    let params = new HttpParams().set('limit', limit.toString());
+
+    if (jobId) {
+      params = params.set('jobId', jobId);
+    } else if (batchId) {
+      params = params.set('batchId', batchId);
+    }
 
     return this.http
-      .get<ChartResponse>(
-        `${this.apiUrl}/${jobId}`
-      )
+      .get<ChartResponse>(`${this.apiUrl}?${params.toString()}`)
       .pipe(
         map(response => response.body ?? {
           title: '',

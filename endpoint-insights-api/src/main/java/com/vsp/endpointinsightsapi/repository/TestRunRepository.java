@@ -11,4 +11,6 @@ public interface TestRunRepository extends JpaRepository<TestRun, UUID> {
 	Page<TestRun> findAllByOrderByFinishedAtDesc(Pageable pageable);
 
     Page<TestRun> findByJobIdOrderByFinishedAtDesc(UUID jobId, Pageable pageable);
+
+    Page<TestRun> findByBatchIdOrderByFinishedAtDesc(UUID batchId, Pageable pageable);
 }

@@ -93,7 +93,7 @@ class TestRunsControllerUnitTest {
     }
 
     @Test
-    void getRecentActivityByJobId_returnsList() throws Exception {
+    void getRecentActivity_withJobId_returnsList() throws Exception {
         UUID jobId = UUID.randomUUID();
 
         RecentActivityDTO activity = RecentActivityDTO.builder()
@@ -107,9 +107,12 @@ class TestRunsControllerUnitTest {
                 .status("PASS")
                 .build();
 
-        when(testRunService.getRecentActivityByJobId(jobId, 5)).thenReturn(List.of(activity));
+        when(testRunService.getRecentActivityById(jobId, null, 5))
+                .thenReturn(List.of(activity));
 
-        mockMvc.perform(get("/api/test-runs/recent-activity/{jobId}", jobId).param("limit", "5"))
+        mockMvc.perform(get("/api/test-runs/recent-activity")
+                        .param("jobId", jobId.toString())
+                        .param("limit", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].runId").value(activity.getRunId()))
                 .andExpect(jsonPath("$[0].jobId").value(jobId.toString()))
@@ -118,6 +121,43 @@ class TestRunsControllerUnitTest {
                 .andExpect(jsonPath("$[0].durationMs").value(6254))
                 .andExpect(jsonPath("$[0].startedBy").value("tester"))
                 .andExpect(jsonPath("$[0].status").value("PASS"));
+    }
+
+    @Test
+    void getRecentActivity_withBatchId_returnsList() throws Exception {
+        UUID batchId = UUID.randomUUID();
+
+        RecentActivityDTO activity = RecentActivityDTO.builder()
+                .runId(UUID.randomUUID().toString())
+                .jobId(UUID.randomUUID().toString())
+                .testName("Batch_Test")
+                .group("Weekly")
+                .dateRun(Instant.parse("2025-07-10T10:15:30Z"))
+                .durationMs(5000)
+                .startedBy("tester")
+                .status("PASS")
+                .build();
+
+        when(testRunService.getRecentActivityById(null, batchId, 5))
+                .thenReturn(List.of(activity));
+
+        mockMvc.perform(get("/api/test-runs/recent-activity")
+                        .param("batchId", batchId.toString())
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].runId").value(activity.getRunId()))
+                .andExpect(jsonPath("$[0].testName").value("Batch_Test"))
+                .andExpect(jsonPath("$[0].group").value("Weekly"))
+                .andExpect(jsonPath("$[0].durationMs").value(5000))
+                .andExpect(jsonPath("$[0].status").value("PASS"));
+    }
+
+    @Test
+    void getRecentActivity_withBothParams_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/test-runs/recent-activity")
+                        .param("jobId", UUID.randomUUID().toString())
+                        .param("batchId", UUID.randomUUID().toString()))
+                .andExpect(status().isBadRequest());
     }
 
 	@Test

@@ -22,9 +22,13 @@ public class PerformanceChartService {
         this.testRunService = testRunService;
     }
 
-    public ChartResponseDTO getApiPerformanceChart(UUID jobId, int limit) {
-        List<RecentActivityDTO> activities = testRunService.getRecentActivityByJobId(jobId, limit).stream()
-                .filter(activity -> "PASS".equalsIgnoreCase(activity.getStatus()))
+    public ChartResponseDTO getApiPerformanceChart(UUID jobId, UUID batchId, int limit) {
+
+        if (jobId != null && batchId != null) {
+            throw new IllegalArgumentException("Provide only one of jobId or batchId");
+        }
+
+        List<RecentActivityDTO> activities = testRunService.getRecentActivityById(jobId, batchId, limit).stream()
                 .filter(activity -> activity.getDurationMs() > 0)
                 .sorted(Comparator.comparing(RecentActivityDTO::getDateRun))
                 .toList();
@@ -35,7 +39,8 @@ public class PerformanceChartService {
         for (RecentActivityDTO activity : activities) {
             durationPoints.add(new ChartPointDTO(
                     String.valueOf(runNumber),
-                    activity.getDurationMs()
+                    activity.getDurationMs(),
+                    activity.getStatus()
             ));
             runNumber++;
         }

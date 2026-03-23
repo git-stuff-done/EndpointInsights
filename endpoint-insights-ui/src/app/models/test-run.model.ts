@@ -37,7 +37,8 @@ export interface TestRun {
 
 export interface RecentActivity {
   runId: string;
-  jobId?: string;
+  jobId?: string | null;
+  batchId?: string | null;
   testName: string;
   group: string;
   dateRun: string;

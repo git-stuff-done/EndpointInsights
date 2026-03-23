@@ -1,6 +1,7 @@
 export interface ChartPoint {
   label: string;
   value: number;
+  status: string;
 }
 
 export interface ChartSeries {

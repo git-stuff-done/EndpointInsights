@@ -12,6 +12,7 @@ import java.time.Instant;
 public class RecentActivityDTO {
     private String runId;
     private String jobId;
+    private String batchId;
     private String testName;
     private String group;
     private Instant dateRun;

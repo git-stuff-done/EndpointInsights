@@ -30,6 +30,8 @@ Chart.register(
 
 export interface DashboardTestActivity {
     id: string;
+    jobId?: string | null;
+    batchId?: string | null;
     testName: string;
     group: string;
     dateRun: Date;
@@ -58,13 +60,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private chart?: Chart;
 
     jobId = '';
+    batchId = '';
     loading = false;
     error = '';
 
     chartResponse?: ChartResponse;
 
     lineChartLabels: string[] = [];
-    lineChartData: { label: string; data: number[] }[] = [];
+    lineChartData: { label: string; data: ChartPoint[] }[] = [];
 
     // KPI metrics
     activeJobsTotal = 12;
@@ -98,6 +101,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 this.tests = data.map(r => ({
                     id: r.runId,
                     jobId: r.jobId,
+                    batchId: r.batchId,
                     testName: r.testName,
                     group: r.group,
                     dateRun: new Date(r.dateRun),
@@ -106,20 +110,21 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                     status: r.status as DashboardTestActivity['status'],
                 }));
                 const mostRecentPassingRun = data.find(
-                        r => r.status === 'PASS' && r.jobId
-                      );
+                  r => (r.status === 'PASS' || r.status === 'FAIL') && (r.jobId || r.batchId)
+                );
 
-                      if (mostRecentPassingRun && mostRecentPassingRun.jobId) {
-                        this.jobId = mostRecentPassingRun.jobId;
-                        this.loadChart();
-                      } else {
-                        this.error = 'No recent passing test found.';
-                      }
-                    },
-                    error: (err) => {
-                      console.error('Failed to load recent activity', err);
-                      this.error = 'Failed to load recent activity';
-                    }
+                if (mostRecentPassingRun) {
+                  this.jobId = mostRecentPassingRun.jobId ?? '';
+                  this.batchId = mostRecentPassingRun.batchId ?? '';
+                  this.loadChart();
+                } else {
+                  this.error = 'No recent passing test found.';
+                }
+            },
+        error: (err) => {
+            console.error('Failed to load recent activity', err);
+                this.error = 'Failed to load recent activity';
+            }
         });
     }
 
@@ -131,12 +136,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.loading = true;
         this.error = '';
 
-        this.performanceChartService.getApiPerformanceChart(this.jobId).subscribe({
+        this.performanceChartService.getApiPerformanceChart(
+          this.jobId || undefined,
+          this.batchId || undefined
+        ).subscribe({
           next: (response) => {
             this.chartResponse = response;
             this.mapToChart(response);
-            this.renderChart();
             this.loading = false;
+            setTimeout(() => {
+                    this.renderChart();
+                  });
           },
           error: (err) => {
             console.error('Failed to load chart', err);
@@ -156,7 +166,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.lineChartLabels = response.series[0].data.map((p: ChartPoint) => p.label);
         this.lineChartData = response.series.map(series => ({
           label: series.name,
-          data: series.data.map((p: ChartPoint) => p.value)
+          data: series.data
         }));
       }
 
@@ -171,17 +181,25 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         type: 'line',
         data: {
           labels: this.lineChartLabels,
-          datasets: this.lineChartData.map(series => ({
-            label: series.label,
-            data: series.data,
+          datasets: this.chartResponse!.series.map(series => ({
+            label: series.name,
+            data: series.data.map(p => p.value),
 
-            borderColor: '#3b82f6', // blue
+            borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true,
 
-            tension: 0.4, // smooth curve
             pointRadius: 4,
             pointHoverRadius: 6,
-            fill: true
+
+            pointBackgroundColor: series.data.map(p =>
+              p.status === 'PASS' ? '#22c55e' : '#ef4444'
+            ),
+
+            pointBorderColor: series.data.map(p =>
+              p.status === 'PASS' ? '#16a34a' : '#dc2626'
+            ),
           }))
         },
         options: {
