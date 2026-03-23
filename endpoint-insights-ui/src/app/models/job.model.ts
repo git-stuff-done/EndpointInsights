@@ -1,6 +1,6 @@
 
 export interface Job {
-    id: string;
+    jobId: string;
     name: string;
     batch?: string[];
     status?: string;
