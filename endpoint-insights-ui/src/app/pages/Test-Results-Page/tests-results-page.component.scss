@@ -54,6 +54,37 @@
 
 .results-table {
   width: 100%;
+  
+  &.mat-mdc-table {
+    display: table;
+    table-layout: auto;
+  }
+  
+  .mat-mdc-header-row {
+    display: table-row;
+  }
+  
+  .mat-mdc-row {
+    display: table-row;
+  }
+  
+  .mat-mdc-header-cell {
+    display: table-cell;
+    white-space: nowrap;
+  }
+  
+  .mat-mdc-cell {
+    display: table-cell;
+  }
+}
+
+.mat-column-runId,
+.mat-column-jobId {
+  min-width: 120px;
+}
+
+.mat-column-actions {
+  width: 60px;
 }
 
 .mono {
@@ -62,11 +93,12 @@
 }
 
 .truncate {
-  max-width: 180px;
+  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: block;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Status pills */

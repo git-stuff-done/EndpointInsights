@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -30,7 +30,7 @@ import { TestRunService } from '../../services/test-run.service';
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
 })
-export class TestsResultsPageComponent implements OnInit, OnDestroy {
+export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<RecentActivity>([]);
@@ -72,15 +72,41 @@ export class TestsResultsPageComponent implements OnInit, OnDestroy {
 
         this.testRunService.getRecentActivity(100).subscribe({
             next: (activity: RecentActivity[]) => {
-                this.dataSource.data = activity;
-                this.dataSource.sort = this.sort;
+                this.dataSource.data = activity.sort((a, b) => {
+                    const dateA = a.dateRun ? new Date(a.dateRun).getTime() : 0;
+                    const dateB = b.dateRun ? new Date(b.dateRun).getTime() : 0;
+                    return dateB - dateA;
+                });
                 this.isLoading = false;
+
+                setTimeout(() => {
+                    if (this.sort) {
+                        this.dataSource.sort = this.sort;
+                        this.sort.active = 'dateRun';
+                        this.sort.direction = 'desc';
+                    }
+                });
             },
             error: () => {
                 this.loadError = 'Unable to load test results.';
                 this.isLoading = false;
             },
         });
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort;
+
+        this.dataSource.sortingDataAccessor = (item: RecentActivity, property: string) => {
+            switch (property) {
+                case 'dateRun':
+                    return item.dateRun ? new Date(item.dateRun).getTime() : 0;
+                case 'durationMs':
+                    return item.durationMs || 0;
+                default:
+                    return (item as any)[property];
+            }
+        };
     }
 
     ngOnDestroy(): void {
