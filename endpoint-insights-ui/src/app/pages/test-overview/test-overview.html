@@ -28,7 +28,6 @@
         <div class="test-header-row">
             <div class="test-headers">
                 <h3>Test Name</h3>
-                <h3>Test Batch</h3>
                 <h3>Date Created</h3>
                 <h3>Created By</h3>
             </div>
@@ -40,7 +39,6 @@
                     <span class="title">{{ t.name }}</span>
                     <span class="status" [ngClass]="t.status">{{ t.status }}</span>
                 </div>
-                <div class="cell batch">{{ t.batch }}</div>
                 <div class="cell date">{{ t.createdAt | date:'MMM d, y, h:mm a' }}</div>
                 <div class="cell author">{{ t.createdBy }}</div>
 
