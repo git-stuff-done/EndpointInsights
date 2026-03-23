@@ -91,6 +91,7 @@ public class TestRunService {
 					.durationMs(durationMs)
 					.startedBy(run.getRunBy())
 					.status(toDisplayStatus(run.getStatus()))
+					.batchName(batch != null ? batch.getBatchName() : null)
 					.build();
 		}).collect(Collectors.toList());
 	}

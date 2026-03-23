@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.dto;
 
 import com.vsp.endpointinsightsapi.model.Job;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class BatchResponseDTO {
     private LocalDateTime lastTimeRun;
     private Boolean active;
     private String cronExpression;
-    private List<UUID> notificationList;
+    private List<String> notificationList;
     private List<Job> jobs;
 
 }

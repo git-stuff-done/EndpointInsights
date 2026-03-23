@@ -58,41 +58,7 @@
 
         <mat-divider></mat-divider>
 
-        <!-- Notifications -->
-        <section class="form-section">
-            <h3>Notifications</h3>
-            <div class="form-row">
-                <mat-form-field appearance="outline" class="flex-grow">
-                    <mat-label>Search Participants</mat-label>
-                    <input matInput
-                           #participantInput
-                           [matAutocomplete]="auto"
-                           [formControl]="searchControl" />
-                    <mat-autocomplete #auto="matAutocomplete"
-                                      [displayWith]="displayParticipant"
-                                      (optionSelected)="onParticipantSelected($event)">
-                        <mat-option *ngFor="let option of searchParticipants"
-                                    [value]="option">
-                            <span>{{ option.name }} — {{ option.email }}</span>
-                        </mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-                <button mat-raised-button (click)="addParticipant()">Add</button>
-            </div>
-
-            <div class="participants-header">
-                <label class="field-label">Active Participants</label>
-                <button mat-button color="warn" (click)="removeParticipant()">Remove Selected</button>
-            </div>
-            <mat-selection-list #participantList>
-                @for (participant of activeParticipants(); track participant.id) {
-                    <mat-list-option [value]="participant">
-                        {{ participant.name }} — {{ participant.email }} — {{ participant.role }}
-                    </mat-list-option>
-                }
-            </mat-selection-list>
-
-
+        <section>
             <h4>Email Recipients</h4>
             <div class="form-row">
                 <mat-form-field appearance="outline" class="flex-grow">

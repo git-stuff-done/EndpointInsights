@@ -77,7 +77,7 @@ public class LogAspect {
                 json.put("request", joinPoint.getArgs());
                 json.put("response", Map.of(
                         "exception", ex.getClass().getSimpleName(),
-                        "message", ex.getMessage()
+                        "message", ex.getMessage() != null ? ex.getMessage() : "No message provided"
                 ));
                 log.setDetails(objectMapper.writeValueAsString(json));
                 LOG.warn(log.toString());

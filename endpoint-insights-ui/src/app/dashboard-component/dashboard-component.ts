@@ -33,6 +33,7 @@ export interface DashboardTestActivity {
     jobId?: string | null;
     batchId?: string | null;
     testName: string;
+    batchName: string | null;
     group: string;
     dateRun: Date;
     durationMs: number;
@@ -103,6 +104,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                     jobId: r.jobId,
                     batchId: r.batchId,
                     testName: r.testName,
+                    batchName: r.batchName ?? null,
                     group: r.group,
                     dateRun: new Date(r.dateRun),
                     durationMs: r.durationMs,

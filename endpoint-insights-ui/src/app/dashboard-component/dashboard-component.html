@@ -84,6 +84,7 @@
                         <thead>
                         <tr>
                             <th>Test Name</th>
+                            <th>Batch</th>
                             <th>Group</th>
                             <th>Date Run</th>
                             <th>Duration</th>
@@ -96,6 +97,7 @@
                             @for (t of tests; track t.id) {
                                 <tr>
                                     <td>{{ t.testName }}</td>
+                                    <td>{{ t.batchName ?? '—' }}</td>
                                     <td>{{ t.group }}</td>
                                     <td>{{ t.dateRun | date: 'M/d/yy' }}</td>
                                     <td>{{ t.durationMs }} ms</td>
@@ -106,6 +108,7 @@
                             [class.status-pass]="t.status === 'PASS'"
                             [class.status-fail]="t.status === 'FAIL'"
                             [class.status-running]="t.status === 'RUNNING'"
+                            [class.status-pending]="t.status === 'PENDING'"
                     >
                       {{ t.status }}
                     </span>
