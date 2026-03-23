@@ -131,28 +131,241 @@ describe('AuthenticationService', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
   }));
 
-  it('setRedirectUrl stores URL in localStorage', () => {
-    service = TestBed.inject(AuthenticationService);
-    spyOn(localStorage, 'setItem');
-    service.setRedirectUrl('/batches');
-    //Verify redirect URL is stored in localStorage under correct endpoint
-    expect(localStorage.setItem).toHaveBeenCalledWith('redirectUrl', '/batches');
+  describe('Redirect URL Security', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthenticationService);
+    });
+
+    it('setRedirectUrl stores valid safe URL in localStorage', () => {
+      spyOn(localStorage, 'setItem');
+      service.setRedirectUrl('/batches');
+      expect(localStorage.setItem).toHaveBeenCalledWith('redirectUrl', '/batches');
+    });
+
+    it('setRedirectUrl rejects invalid redirect URLs and logs warning', () => {
+      spyOn(console, 'warn');
+      spyOn(localStorage, 'setItem');
+      
+      service.setRedirectUrl('https://evil.com/phishing');
+      
+      expect(localStorage.setItem).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+    it('setRedirectUrl rejects data: protocol URLs', () => {
+      spyOn(console, 'warn');
+      spyOn(localStorage, 'setItem');
+      
+      service.setRedirectUrl('data:text/html,<script>alert("xss")</script>');
+      
+      expect(localStorage.setItem).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+    it('getAndClearRedirectUrl retrieves and removes valid URL from localStorage', () => {
+      localStorage.setItem('redirectUrl', '/batches');
+      spyOn(localStorage, 'removeItem');
+      
+      const result = service.getAndClearRedirectUrl();
+      
+      expect(result).toBe('/batches');
+      expect(localStorage.removeItem).toHaveBeenCalledWith('redirectUrl');
+    });
+
+    it('getAndClearRedirectUrl returns null when no URL is stored', () => {
+      const result = service.getAndClearRedirectUrl();
+      expect(result).toBeNull();
+    });
+
+    it('getAndClearRedirectUrl validates stored URL and logs warning if invalid', () => {
+      spyOn(console, 'warn');
+      // Manually inject an invalid URL to simulate tampering
+      localStorage.setItem('redirectUrl', 'https://evil.com/phishing');
+      
+      const result = service.getAndClearRedirectUrl();
+      
+      expect(result).toBeNull();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+    it('loadTokenFromCookie does not redirect to invalid stored URL', fakeAsync(() => {
+      const token = buildToken({
+        preferred_username: 'user',
+        email: 'user@example.com',
+        groups: ['admin'],
+        exp: Math.floor(Date.now() / 1000) + 3600
+      });
+      // Manually inject invalid URL
+      localStorage.setItem('redirectUrl', 'https://evil.com/phishing');
+      const mockCookieStore = {
+        get: jasmine.createSpy().and.returnValue(Promise.resolve({ value: token })),
+        delete: jasmine.createSpy().and.returnValue(Promise.resolve())
+      };
+      spyOnProperty(window, 'cookieStore', 'get').and.returnValue(mockCookieStore as any);
+      
+      service.loadTokenFromCookie();
+      flush();
+      
+      // Should navigate to default '/' instead of evil.com
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+      expect(localStorage.getItem('redirectUrl')).toBeNull();
+    }));
   });
 
-  it('getAndClearRedirectUrl retrieves and removes URL from localStorage', () => {
-    service = TestBed.inject(AuthenticationService);
-    localStorage.setItem('redirectUrl', '/batches');
-    spyOn(localStorage, 'removeItem');
-    const result = service.getAndClearRedirectUrl();
-    //Verify that the correct URL is returned and then removed from localStorage
-    expect(result).toBe('/batches');
-    expect(localStorage.removeItem).toHaveBeenCalledWith('redirectUrl');
-  });
+  describe('URL Validation (isValidRedirectUrl)', () => {
+    beforeEach(() => {
+      service = TestBed.inject(AuthenticationService);
+    });
 
-  it('getAndClearRedirectUrl returns null when no URL is stored', () => {
-    service = TestBed.inject(AuthenticationService);
-    const result = service.getAndClearRedirectUrl();
-    //Verify null is returned when no redirect URL is stored
-    expect(result).toBeNull();
+    describe('Safe URLs', () => {
+      it('should allow absolute path /dashboard', () => {
+        // Using the service to validate via its redirect methods
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/dashboard');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/dashboard');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow nested absolute path /profile/settings', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/profile/settings');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/profile/settings');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow relative path ./relative/path', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('./relative/path');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('./relative/path');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow parent relative path ../parent/path', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('../parent/path');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('../parent/path');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow URL with query parameters /page?param=value&other=123', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/page?param=value&other=123');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/page?param=value&other=123');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow URL with fragment /page#section', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/page#section');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/page#section');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Special Characters in Paths', () => {
+      it('should allow URLs with special characters in query', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/search?q=hello%20world');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/search?q=hello%20world');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow URLs with multiple query params', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('/page?a=1&b=2&c=3');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe('/page?a=1&b=2&c=3');
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Unsafe URLs - Dangerous Protocols', () => {
+      it('should reject javascript: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('javascript:alert("xss")');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject data: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('data:text/html,<script>alert("xss")</script>');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject vbscript: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('vbscript:alert("xss")');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject mailto: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('mailto:attacker@evil.com');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject tel: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('tel:123');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject file: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('file:///etc/passwordd');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject ftp: protocol', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('ftp://evil.com/file');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject javascript: with mixed case', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('JavaScript:alert("xss")');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('Edge Cases', () => {
+      it('should reject empty string', () => {
+        service.setRedirectUrl('');
+        const stored = localStorage.getItem('redirectUrl');
+        // Empty string should not be stored
+        expect(stored).toBeNull();
+      });
+
+      it('should reject whitespace-only string', () => {
+        service.setRedirectUrl('   ');
+        const stored = localStorage.getItem('redirectUrl');
+        // Whitespace-only should not be stored
+        expect(stored).toBeNull();
+      });
+    });
   });
 });
