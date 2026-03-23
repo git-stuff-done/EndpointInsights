@@ -4,5 +4,6 @@ public enum JobStatus {
 	PASS,
 	WARN,
 	FAIL,
+    PENDING,
 	UNKNOWN
 }

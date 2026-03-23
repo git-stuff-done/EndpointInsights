@@ -44,20 +44,35 @@
             <article class="panel panel-chart">
                 <header class="panel-header">API Performance</header>
                 <div class="panel-body">
-                    <div class="chart-placeholder">
-                        API Performance chart placeholder
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>{{ chartResponse?.title }}</h3>
+                            <span class="chart-subtitle">Recent Passed and Failed Runs</span>
+                        </div>
+
+                        <div *ngIf="loading" class="chart-loading">
+                            Loading chart...
+                        </div>
+
+                        <div *ngIf="error" class="chart-error">
+                            {{ error }}
+                        </div>
+
+                        <div *ngIf="!loading && !error" class="chart-container">
+                            <canvas #performanceCanvas></canvas>
+                        </div>
                     </div>
                 </div>
             </article>
 
-            <article class="panel panel-chart">
-                <header class="panel-header">API Trend</header>
-                <div class="panel-body">
-                    <div class="chart-placeholder">
-                        API Trend chart placeholder
-                    </div>
-                </div>
-            </article>
+<!--            <article class="panel panel-chart">-->
+<!--                <header class="panel-header">API Trend</header>-->
+<!--                <div class="panel-body">-->
+<!--                    <div class="chart-placeholder">-->
+<!--                        API Trend Chart Placeholder-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </article>-->
         </section>
 
         <!-- Recent Activity -->
@@ -69,6 +84,7 @@
                         <thead>
                         <tr>
                             <th>Test Name</th>
+                            <th>Batch</th>
                             <th>Group</th>
                             <th>Date Run</th>
                             <th>Duration</th>
@@ -81,6 +97,7 @@
                             @for (t of tests; track t.id) {
                                 <tr>
                                     <td>{{ t.testName }}</td>
+                                    <td>{{ t.batchName ?? '—' }}</td>
                                     <td>{{ t.group }}</td>
                                     <td>{{ t.dateRun | date: 'M/d/yy' }}</td>
                                     <td>{{ t.durationMs }} ms</td>
@@ -91,6 +108,7 @@
                             [class.status-pass]="t.status === 'PASS'"
                             [class.status-fail]="t.status === 'FAIL'"
                             [class.status-running]="t.status === 'RUNNING'"
+                            [class.status-pending]="t.status === 'PENDING'"
                     >
                       {{ t.status }}
                     </span>

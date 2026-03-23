@@ -69,7 +69,6 @@ main.container-fluid {
 /* Charts row */
 .charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   width: 100%;
   max-width: 100%;
@@ -162,6 +161,10 @@ main.container-fluid {
   background-color: #1976d2;
 }
 
+.status-pending {
+  background-color: #e6930a;
+}
+
 /* Alerts */
 .alerts-row {
   width: 100%;
@@ -201,6 +204,51 @@ main.container-fluid {
 
 .alert-message {
   flex: 1;
+}
+
+/* Charts */
+.chart-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-top: 20px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937; // dark gray
+  }
+
+  .chart-subtitle {
+    font-size: 13px;
+    color: #6b7280; // muted gray
+  }
+}
+
+.chart-container {
+  position: relative;
+  height: 320px;
+}
+
+.chart-loading,
+.chart-error {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.chart-error {
+  color: #ef4444; // red
 }
 
 /* Responsive tweaks */

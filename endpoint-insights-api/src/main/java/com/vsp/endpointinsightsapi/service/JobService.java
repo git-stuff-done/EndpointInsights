@@ -83,9 +83,10 @@ public class JobService {
                 .orElseThrow(()  -> new JobNotFoundException(job.getJobId().toString()));
         existingJob.setName(job.getName());
         existingJob.setDescription(job.getDescription());
-        existingJob.setTestBatches(job.getTestBatches());
         existingJob.setJobType(job.getJobType());
         existingJob.setJmeterTestName(job.getJmeterTestName());
+        existingJob.setRunCommand(job.getRunCommand());
+        existingJob.setCompileCommand(job.getCompileCommand());
         existingJob.setConfig(job.getConfig());
         existingJob.setGitUrl(job.getGitUrl());
         existingJob.setGitAuthType(job.getGitAuthType());
@@ -93,6 +94,7 @@ public class JobService {
         existingJob.setGitPassword(job.getGitPassword());
         existingJob.setGitSshPrivateKey(job.getGitSshPrivateKey());
         existingJob.setGitSshPassphrase(job.getGitSshPassphrase());
+        existingJob.setThreshold(job.getThreshold());
         return jobRepository.save(existingJob);
     }
 

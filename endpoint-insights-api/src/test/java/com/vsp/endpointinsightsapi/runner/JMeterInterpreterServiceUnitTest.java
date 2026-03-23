@@ -1,8 +1,10 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
@@ -17,6 +19,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +33,8 @@ class JMeterInterpreterServiceUnitTest {
     @Mock PerfTestResultRepository perfTestResultRepository;
     @Mock PerfTestResultCodeRepository perfTestResultCodeRepository;
     @Mock TestResultRepository testResultRepository;
-
+    @Mock
+    JobRepository jobRepository;
     @InjectMocks
     JMeterInterpreterService service;
 
@@ -37,6 +42,13 @@ class JMeterInterpreterServiceUnitTest {
     void setUp() {
         when(testResultRepository.save(any(TestResult.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        Job job = new Job();
+        // set any needed fields on job, e.g. threshold
+        job.setThreshold(50);
+
+        TestRun testRun = new TestRun();
+        testRun.setJobId(UUID.fromString("c3d0c0d4-2424-451e-806e-d1c8b2393ded"));
+        when(jobRepository.findById(any())).thenReturn(Optional.of(job));
     }
 
     @Test

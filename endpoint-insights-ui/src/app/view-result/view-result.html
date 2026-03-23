@@ -36,6 +36,11 @@
                     <mat-cell *matCellDef="let row">{{ row.p99LatencyMs }} ms</mat-cell>
                 </ng-container>
 
+                <ng-container matColumnDef="latencyThreshold">
+                    <mat-header-cell *matHeaderCellDef>Latency Threshold</mat-header-cell>
+                    <mat-cell *matCellDef="let row" class="error-rate" [ngClass]="getLatencyThresholdClass(row.latencyThresholdResult)" >{{ row.latencyThreshold }} ms</mat-cell>
+                </ng-container>
+
                 <ng-container matColumnDef="errorRatePercent">
                     <mat-header-cell *matHeaderCellDef>Error Rate</mat-header-cell>
                     <mat-cell *matCellDef="let row" class="error-rate" [ngClass]="getErrorRateClass(row.errorRatePercent)">{{ row.errorRatePercent | number:'1.1-1' }}%</mat-cell>

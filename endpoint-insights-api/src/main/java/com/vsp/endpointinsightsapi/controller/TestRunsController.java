@@ -35,8 +35,23 @@ public class TestRunsController {
 
 	@GetMapping("/recent-activity")
 	public ResponseEntity<List<RecentActivityDTO>> getRecentActivity(
+            @RequestParam(required = false) UUID jobId,
+            @RequestParam(required = false) UUID batchId,
 			@RequestParam(name = "limit", defaultValue = "10") int limit) {
-		return ResponseEntity.ok(testRunService.getRecentActivity(limit));
+        if (jobId != null && batchId != null) {
+            throw new IllegalArgumentException("Provide only one of jobId or batchId");
+        }
+
+        List<RecentActivityDTO> result;
+
+        if (jobId == null && batchId == null) {
+            // fallback → existing behavior
+            result = testRunService.getRecentActivity(limit);
+        } else {
+            result = testRunService.getRecentActivityById(jobId, batchId, limit);
+        }
+
+        return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/{id}")

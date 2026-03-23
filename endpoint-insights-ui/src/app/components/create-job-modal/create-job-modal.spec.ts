@@ -5,20 +5,29 @@ import {CreateJobModal} from './create-job-modal';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { of, throwError } from 'rxjs';
+import { JobService } from '../../services/job-services';
+import { ToastService } from '../../services/toast.service';
 
 describe('CreateJobModal', () => {
     let component: CreateJobModal;
     let fixture: ComponentFixture<CreateJobModal>;
     let mockDialogRef: jasmine.SpyObj<MatDialogRef<CreateJobModal>>;
+    let jobServiceSpy: jasmine.SpyObj<JobService>;
+    let toastServiceSpy: jasmine.SpyObj<ToastService>;
     let compiled: DebugElement;
 
     beforeEach(async () => {
         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+        jobServiceSpy = jasmine.createSpyObj('JobService', ['createJob']);
+        toastServiceSpy = jasmine.createSpyObj('ToastService', ['onSuccess', 'onError']);
 
         await TestBed.configureTestingModule({
             imports: [CreateJobModal, HttpClientTestingModule],
             providers: [
                 {provide: MatDialogRef, useValue: mockDialogRef},
+                {provide: JobService, useValue: jobServiceSpy},
+                {provide: ToastService, useValue: toastServiceSpy},
                 provideNoopAnimations()
             ]
         })
@@ -64,15 +73,6 @@ describe('CreateJobModal', () => {
     });
 
     describe('onSubmit', () => {
-        it('should call submitForm on the CreateJobForm when onSubmit is called', () => {
-            const mockCreateJobForm = jasmine.createSpyObj('CreateJobForm', ['submitForm']);
-            component.createJobForm = mockCreateJobForm;
-
-            component.onSubmit(mockCreateJobForm);
-
-            expect(mockCreateJobForm.submitForm).toHaveBeenCalledTimes(1);
-        });
-
         it('should call submitForm when Create Job button is clicked', () => {
             const mockCreateJobForm = jasmine.createSpyObj('CreateJobForm', ['submitForm']);
             component.createJobForm = mockCreateJobForm;
@@ -82,34 +82,32 @@ describe('CreateJobModal', () => {
 
             expect(mockCreateJobForm.submitForm).toHaveBeenCalledTimes(1);
         });
-    });
 
-    describe('onJobCreated', () => {
-        it('should close the dialog with job data when onJobCreated is called', () => {
-            const mockJobData = {
-                id: '123',
-                name: 'Test Job',
-                description: 'Test Description'
-            };
-
-            component.onJobCreated(mockJobData);
-
-            expect(mockDialogRef.close).toHaveBeenCalledWith(mockJobData);
-            expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
+        it('should call jobService.createJob with remapped payload', () => {
+            jobServiceSpy.createJob.and.returnValue(of({} as any));
+            component.onSubmit({ jobType: 'PERF', name: 'Test' });
+            expect(jobServiceSpy.createJob).toHaveBeenCalledWith(
+                jasmine.objectContaining({ testType: 'PERF', name: 'Test' })
+            );
         });
 
-        it('should handle null job data', () => {
-            component.onJobCreated(null);
-
-            expect(mockDialogRef.close).toHaveBeenCalledWith(null);
-            expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
+        it('should close the dialog with the response on success', () => {
+            const response = { jobId: 'abc' };
+            jobServiceSpy.createJob.and.returnValue(of(response as any));
+            component.onSubmit({ jobType: 'E2E', name: 'Test' });
+            expect(mockDialogRef.close).toHaveBeenCalledWith(response);
         });
 
-        it('should handle undefined job data', () => {
-            component.onJobCreated(undefined);
+        it('should show success toast on success', () => {
+            jobServiceSpy.createJob.and.returnValue(of({} as any));
+            component.onSubmit({ jobType: 'E2E', name: 'Test' });
+            expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Job created successfully!');
+        });
 
-            expect(mockDialogRef.close).toHaveBeenCalledWith(undefined);
-            expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
+        it('should show error toast on failure', () => {
+            jobServiceSpy.createJob.and.returnValue(throwError(() => new Error('fail')));
+            component.onSubmit({ jobType: 'E2E', name: 'Test' });
+            expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to create job. Please try again.');
         });
     });
 
@@ -130,14 +128,14 @@ describe('CreateJobModal', () => {
     });
 
     describe('Template Integration', () => {
-        it('should bind jobSubmitted event from CreateJobForm to onJobCreated method', () => {
-            spyOn(component, 'onJobCreated');
+        it('should bind jobSubmitted event from CreateJobForm to onSubmit method', () => {
+            spyOn(component, 'onSubmit');
             const mockJobData = {id: '456', name: 'New Job'};
 
             const jobFormElement = compiled.query(By.css('app-job-form'));
             jobFormElement.triggerEventHandler('jobSubmitted', mockJobData);
 
-            expect(component.onJobCreated).toHaveBeenCalledWith(mockJobData);
+            expect(component.onSubmit).toHaveBeenCalledWith(mockJobData);
         });
 
         it('should have mat-dialog-content element', () => {
