@@ -44,4 +44,10 @@ public class PerfTestResult {
 	@Column(name = "error_rate_percent")
 	private Double errorRatePercent;
 
+    @Column(name = "latency_threshold_result")
+    private String latencyThresholdResult;
+
+    @Column(name = "latency_threshold")
+    private Integer latencyThreshold;
+
 }

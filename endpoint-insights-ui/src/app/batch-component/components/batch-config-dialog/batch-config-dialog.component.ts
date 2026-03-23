@@ -202,8 +202,8 @@ export class BatchConfigDialogComponent implements OnInit {
         });
 
         this.jobsApi.getAllJobs().subscribe({
-            next: (jobs) => {
-                this.availableTests.set(jobs.map(j => ({id: j.id, name: j.name})));
+            next: (response) => {
+                this.availableTests.set(response.body?.map(j => ({id: j.id, name: j.name})) ?? []);
                 this.loading.set(false);
             },
             error: () => {

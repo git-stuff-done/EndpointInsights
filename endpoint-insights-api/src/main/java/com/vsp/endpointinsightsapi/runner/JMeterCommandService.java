@@ -60,12 +60,12 @@ public class JMeterCommandService {
             throw new IllegalArgumentException("Working directory does not exist or is not a directory: " + (workingDirectory != null ? workingDirectory.getAbsolutePath() : "null"));
         }
 
-        // Recursively search for a file that matches the given test pattern
+        // Recursively search for a .jmx file that matches the given test pattern
         Pattern testPattern = Pattern.compile(testName);
-        File foundTestFile = findFileMatchingPattern(workingDirectory, testPattern);
+        File foundTestFile = findJmxFileMatchingPattern(workingDirectory, testPattern);
 
         if (foundTestFile == null) {
-            throw new IllegalArgumentException("No test file matching pattern '" + testName + "' was found under directory: " + workingDirectory.getAbsolutePath());
+            throw new IllegalArgumentException("No JMeter test file (.jmx) matching pattern '" + testName + "' was found under directory: " + workingDirectory.getAbsolutePath());
         }
 
         LOG.info("test file found={}", foundTestFile.getAbsolutePath());
@@ -98,19 +98,19 @@ public class JMeterCommandService {
     }
 
     /**
-     * Recursively searches for a file in the given directory whose name matches the pattern.
+     * Recursively searches for a .jmx file in the given directory whose name matches the pattern.
      * Returns the first match found, or null if none.
      */
-    private static File findFileMatchingPattern(File dir, Pattern pattern) {
+    private static File findJmxFileMatchingPattern(File dir, Pattern pattern) {
         File[] files = dir.listFiles();
         if (files == null) return null;
 
         for (File f : files) {
             if (f.isDirectory()) {
-                File found = findFileMatchingPattern(f, pattern);
+                File found = findJmxFileMatchingPattern(f, pattern);
                 if (found != null) return found;
             } else {
-                if (pattern.matcher(f.getName()).find()) {
+                if (f.getName().endsWith(".jmx") && pattern.matcher(f.getName()).find()) {
                     return f;
                 }
             }

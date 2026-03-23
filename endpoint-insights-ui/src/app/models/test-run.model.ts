@@ -12,6 +12,8 @@ export interface PerfTestResult {
   p50LatencyMs: number;
   p95LatencyMs: number;
   p99LatencyMs: number;
+  latencyThresholdResult: string;
+  latency_threshold: number;
   samplerName: string;
   threadGroup: string;
   volumeLast5Minutes: number;
@@ -37,7 +39,8 @@ export interface TestRun {
 
 export interface RecentActivity {
   runId: string;
-  jobId?: string;
+  jobId?: string | null;
+  batchId?: string | null;
   testName: string;
   group: string;
   dateRun: string;

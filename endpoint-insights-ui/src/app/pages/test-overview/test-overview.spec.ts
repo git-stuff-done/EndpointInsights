@@ -21,12 +21,14 @@ const mockBackendJob = {
     description: 'test description',
     runCommand: './run',
     compileCommand: './compile',
+    threshold: 20,
+
 };
 
 const mappedTestItem: TestItem = {
     id: 'abc-123',
     name: 'Auth - Login',
-    batch: 'Nightly-01',
+    batch: '',
     createdAt: '2024-01-01T00:00:00Z',
     createdBy: 'Alex',
     jobType: 'E2E',
@@ -35,6 +37,8 @@ const mappedTestItem: TestItem = {
     runCommand: './run',
     compileCommand: './compile',
     status: 'SUCCESS',
+    threshold: 20,
+
 };
 
 describe('TestOverview', () => {

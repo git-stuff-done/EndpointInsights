@@ -18,33 +18,36 @@ export interface TestItem {
     createdAt: Date | string;
     createdBy: string;
     status: JobStatus;
+    threshold: number;
 }
 
 export const MOCK_TESTS: TestItem[] = [
     {
-        id: '7c601a1b-9c98-45f6-a8e6-786c0d797fe4',
-        name: 'Auth - Login OK',
+        id: '0b00f357-a21f-45b0-b753-b791b4f83b8d',
+        name: 'Auth',
         batch: 'Nightly-01',
         createdAt: new Date(),
         createdBy: 'Alex',
         status: 'RUNNING',
-        gitUrl: 'git.com/test',
+        gitUrl: 'https://git.com/test',
         description: 'this is a test',
         jobType: 'E2E',
         compileCommand: './ep-compile <testname>',
-        runCommand: './ep-run <testname> -<type>'
+        runCommand: './ep-run <testname> -<type>',
+        threshold: 99,
     },
     {
-        id: '2',
-        name: 'Billing - Refund',
+        id: '89bb3ff9-08f1-49e3-ab61-36b5cbb42dd7',
+        name: 'Billing',
         batch: 'Nightly-01',
         createdAt: new Date(),
         createdBy: 'Sam',
         status: 'STOPPED',
-        gitUrl: 'git.com/test',
+        gitUrl: 'https://git.com/test',
         description: '',
         jobType: 'nightwatch',
         compileCommand: '',
-        runCommand: './ep-run <testname> -<type>'
+        runCommand: './ep-run <testname> -<type>',
+        threshold: 199,
     }
 ];
