@@ -41,7 +41,7 @@ export class ViewResult implements OnInit, AfterViewInit {
 
   public testRun?: TestRun;
   public testResultsDataSource: MatTableDataSource<PerfTestResult> = new MatTableDataSource<PerfTestResult>();
-  public displayedColumns: string[] = ['threadGroup', 'samplerName', 'p50LatencyMs', 'p95LatencyMs', 'p99LatencyMs', 'errorRatePercent', 'volumeLastMinute', 'volumeLast5Minutes']
+  public displayedColumns: string[] = ['threadGroup', 'samplerName', 'p50LatencyMs', 'p95LatencyMs', 'p99LatencyMs', 'latencyThreshold', 'errorRatePercent', 'volumeLastMinute', 'volumeLast5Minutes']
 
   @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
 
@@ -97,5 +97,15 @@ export class ViewResult implements OnInit, AfterViewInit {
       return 'error-rate-low';
     }
   }
+
+    public getLatencyThresholdClass(results: string): string {
+        if (results === 'FAIL') {
+            return 'error-rate-high';
+        } else if (results === 'WARN') {
+            return 'error-rate-medium';
+        } else {
+            return 'error-rate-low';
+        }
+    }
 
 }

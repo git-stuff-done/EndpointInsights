@@ -49,13 +49,14 @@ export class EditJobModal{
         }
     }
 
-
-    onUpdate(jobData?: any){
-        this.jobService.updateJob(this.data.id,jobData).subscribe({
+    onUpdate(jobData?: any){ // still used by (jobSubmitted) output if needed
+        this.jobService.updateJob(this.data.id, jobData).subscribe({
             next: (response) => {
                 console.log('Job updated:', response);
                 this.toastService.onSuccess('Job updated successfully!');
-                this.dialogRef.close(jobData);
+                this.data = { ...this.data, ...jobData };
+                this.state.update(s => ({ ...s, inEditMode: false }));
+                this.dialogRef.close(this.data);
             },
             error: (error) => {
                 console.error('Error updating job:', error);

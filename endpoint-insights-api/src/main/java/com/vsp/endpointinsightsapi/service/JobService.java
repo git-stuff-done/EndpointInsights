@@ -94,6 +94,7 @@ public class JobService {
         existingJob.setGitPassword(job.getGitPassword());
         existingJob.setGitSshPrivateKey(job.getGitSshPrivateKey());
         existingJob.setGitSshPassphrase(job.getGitSshPassphrase());
+        existingJob.setThreshold(job.getThreshold());
         return jobRepository.save(existingJob);
     }
 

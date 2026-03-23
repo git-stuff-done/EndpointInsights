@@ -29,5 +29,4 @@ public class TestResult {
 	@OneToOne(mappedBy = "testResult")
 	private PerfTestResult perfTestResult;
 
-
 }
