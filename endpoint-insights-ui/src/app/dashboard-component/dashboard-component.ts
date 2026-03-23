@@ -1,12 +1,37 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MatButtonModule} from '@angular/material/button';
-import {TestRunService} from '../services/test-run.service';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TestRecord } from '../models/test-record.model';
+import { MatButtonModule } from '@angular/material/button';
+import { TestRunService } from '../services/test-run.service';
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip
+} from 'chart.js';
+import { PerformanceChartService } from '../services/performance-chart.service';
+import { ChartPoint, ChartResponse } from '../models/chart.model';
 import {Router} from "@angular/router";
 import {MatIcon} from "@angular/material/icon";
 
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Tooltip
+);
+
 export interface DashboardTestActivity {
     id: string;
+    jobId?: string | null;
+    batchId?: string | null;
     testName: string;
     batchName: string | null;
     group: string;
@@ -29,7 +54,21 @@ export interface DashboardAlert {
     templateUrl: './dashboard-component.html',
     styleUrls: ['./dashboard-component.scss'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
+    @ViewChild('performanceCanvas')
+    performanceCanvas!: ElementRef<HTMLCanvasElement>;
+
+    private chart?: Chart;
+
+    jobId = '';
+    batchId = '';
+    loading = false;
+    error = '';
+
+    chartResponse?: ChartResponse;
+
+    lineChartLabels: string[] = [];
+    lineChartData: { label: string; data: ChartPoint[] }[] = [];
 
     // KPI metrics
     activeJobsTotal = 12;
@@ -53,13 +92,17 @@ export class DashboardComponent implements OnInit {
     tests: DashboardTestActivity[] = [];
 
     constructor(private router: Router,
-                private testRunService: TestRunService) { }
+                private testRunService: TestRunService,
+                private performanceChartService: PerformanceChartService
+                ) { }
 
     ngOnInit(): void {
         this.testRunService.getRecentActivity(10).subscribe({
             next: (data) => {
                 this.tests = data.map(r => ({
                     id: r.runId,
+                    jobId: r.jobId,
+                    batchId: r.batchId,
                     testName: r.testName,
                     batchName: r.batchName ?? null,
                     group: r.group,
@@ -68,9 +111,136 @@ export class DashboardComponent implements OnInit {
                     startedBy: r.startedBy,
                     status: r.status as DashboardTestActivity['status'],
                 }));
+                const mostRecentPassingRun = data.find(
+                  r => (r.status === 'PASS' || r.status === 'FAIL') && (r.jobId || r.batchId)
+                );
+
+                if (mostRecentPassingRun) {
+                  this.jobId = mostRecentPassingRun.jobId ?? '';
+                  this.batchId = mostRecentPassingRun.batchId ?? '';
+                  this.loadChart();
+                } else {
+                  this.error = 'No recent passing test found.';
+                }
             },
-            error: (err) => console.error('Failed to load recent activity', err)
+        error: (err) => {
+            console.error('Failed to load recent activity', err);
+                this.error = 'Failed to load recent activity';
+            }
         });
+    }
+
+    ngAfterViewInit(): void {
+//         this.loadChart();
+      }
+
+    loadChart(): void {
+        this.loading = true;
+        this.error = '';
+
+        this.performanceChartService.getApiPerformanceChart(
+          this.jobId || undefined,
+          this.batchId || undefined
+        ).subscribe({
+          next: (response) => {
+            this.chartResponse = response;
+            this.mapToChart(response);
+            this.loading = false;
+            setTimeout(() => {
+                    this.renderChart();
+                  });
+          },
+          error: (err) => {
+            console.error('Failed to load chart', err);
+            this.error = 'Failed to load chart';
+            this.loading = false;
+          }
+        });
+      }
+
+    private mapToChart(response: ChartResponse): void {
+        if (!response.series?.length) {
+          this.lineChartLabels = [];
+          this.lineChartData = [];
+          return;
+        }
+
+        this.lineChartLabels = response.series[0].data.map((p: ChartPoint) => p.label);
+        this.lineChartData = response.series.map(series => ({
+          label: series.name,
+          data: series.data
+        }));
+      }
+
+    private renderChart(): void {
+      if (!this.performanceCanvas) return;
+
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart(this.performanceCanvas.nativeElement, {
+        type: 'line',
+        data: {
+          labels: this.lineChartLabels,
+          datasets: this.chartResponse!.series.map(series => ({
+            label: series.name,
+            data: series.data.map(p => p.value),
+
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true,
+
+            pointRadius: 4,
+            pointHoverRadius: 6,
+
+            pointBackgroundColor: series.data.map(p =>
+              p.status === 'PASS' ? '#22c55e' : '#ef4444'
+            ),
+
+            pointBorderColor: series.data.map(p =>
+              p.status === 'PASS' ? '#16a34a' : '#dc2626'
+            ),
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: '#374151',
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+
+          scales: {
+            x: {
+              grid: {
+                display: true
+              },
+              ticks: {
+                color: '#6b7280'
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(0,0,0,0.05)'
+              },
+              ticks: {
+                color: '#6b7280'
+              }
+            }
+          }
+        }
+      });
     }
 
     // Alerts mock data
