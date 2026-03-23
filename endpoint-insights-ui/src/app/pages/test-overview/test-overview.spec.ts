@@ -21,6 +21,8 @@ const mockBackendJob = {
     description: 'test description',
     runCommand: './run',
     compileCommand: './compile',
+    threshold: 20,
+
 };
 
 const mappedTestItem: TestItem = {
@@ -35,6 +37,8 @@ const mappedTestItem: TestItem = {
     runCommand: './run',
     compileCommand: './compile',
     status: 'SUCCESS',
+    threshold: 20,
+
 };
 
 describe('TestOverview', () => {

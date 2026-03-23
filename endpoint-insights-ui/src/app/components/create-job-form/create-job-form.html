@@ -92,4 +92,13 @@
             <mat-error>{{ getErrorMessage('gitSshPassphrase') }}</mat-error>
         </mat-form-field>
     </div>
+
+    <div class="form-row">
+        <mat-form-field>
+            <mat-label>Passing Threshold</mat-label>
+            <input matInput formControlName="threshold" type="number">
+            <span matTextSuffix>ms</span>
+            <mat-error>{{ getErrorMessage('threshold') }}</mat-error>
+        </mat-form-field>
+    </div>
 </form>

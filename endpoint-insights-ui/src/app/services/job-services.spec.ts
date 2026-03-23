@@ -28,7 +28,9 @@ describe('JobService', () => {
         jobType: 'jmeter',
         createdAt: new Date(),
         createdBy: 'user',
-        status: 'RUNNING'
+        status: 'RUNNING',
+        threshold: 20,
+
     };
 
     beforeEach(() => {

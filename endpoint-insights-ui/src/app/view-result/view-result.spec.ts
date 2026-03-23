@@ -35,7 +35,9 @@ describe('ViewResult', () => {
           samplerName: 'GET /api/health',
           threadGroup: '100 User Load 1',
           volumeLast5Minutes: 100,
-          volumeLastMinute: 100
+          volumeLastMinute: 100,
+        latencyThresholdResult: 'PASS',
+        latency_threshold: 500,
         }
       }
     ]

@@ -100,4 +100,6 @@ export class TestsResultsPageComponent implements OnInit, OnDestroy {
             default: return 'status-unknown';
         }
     }
+
+    protected readonly console = console;
 }
