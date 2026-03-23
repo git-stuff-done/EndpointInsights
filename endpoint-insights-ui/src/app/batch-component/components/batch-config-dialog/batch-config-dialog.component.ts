@@ -20,7 +20,7 @@ import {JobsApi} from "../../../jobsApi/jobsApi";
 
 
 export interface ApiTest {
-    id: string;
+    jobId: string;
     name: string;
 }
 
@@ -77,9 +77,9 @@ export class BatchConfigDialogComponent implements OnInit {
     // Filtered list: excludes tests already in batch, filters by search term
     filteredAvailableTests = computed(() => {
         const search = this.searchTerm().toLowerCase();
-        const currentIds = new Set(this.currentBatchTests().map(t => t.id));
+        const currentIds = new Set(this.currentBatchTests().map(t => t.jobId));
         return this.availableTests()
-            .filter(t => !currentIds.has(t.id))
+            .filter(t => !currentIds.has(t.jobId))
             .filter(t => t.name.toLowerCase().includes(search));
     });
 
@@ -186,7 +186,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
         // Populate existing jobs and emails from batch data
         this.currentBatchTests.set(
-            (this.data.jobs ?? []).map(j => ({id: j.id, name: j.name}))
+            (this.data.jobs ?? []).map(j => ({jobId: j.id, name: j.name}))
         );
         this.emailList.set(this.data.notificationList ?? []);
 
@@ -203,13 +203,15 @@ export class BatchConfigDialogComponent implements OnInit {
 
         this.jobsApi.getAllJobs().subscribe({
             next: (response) => {
-                this.availableTests.set(response.body?.map(j => ({id: j.id, name: j.name})) ?? []);
+                this.availableTests.set(response.body?.map(j => ({jobId: j.jobId, name: j.name})) ?? []);
                 this.loading.set(false);
             },
             error: () => {
                 this.loading.set(false);
             }
         });
+        console.log(this.currentBatchTests())
+
     }
 
 
@@ -231,7 +233,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
     // Remove a single test from the batch
     removeTest(test: ApiTest): void {
-        this.currentBatchTests.update(tests => tests.filter(t => t.id !== test.id));
+        this.currentBatchTests.update(tests => tests.filter(t => t.jobId !== test.jobId));
     }
 
     // Remove all tests from the batch
@@ -241,7 +243,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
     // Add a test to the batch
     addTest(test: ApiTest): void {
-        if (!this.currentBatchTests().some(t => t.id === test.id)) {
+        if (!this.currentBatchTests().some(t => t.jobId === test.jobId)) {
             this.currentBatchTests.update(tests => [...tests, test]);
         }
     }

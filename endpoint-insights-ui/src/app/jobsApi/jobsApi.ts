@@ -5,6 +5,7 @@ import {Job} from "../models/job.model";
 import {TestItem} from "../models/test.model";
 import {environment} from "../../environment";
 import {HttpInterceptorService} from "../services/http-interceptor.service";
+import {ApiTest} from "../batch-component/components/batch-config-dialog/batch-config-dialog.component";
 
 
 @Injectable({ providedIn: 'root' })
@@ -13,8 +14,8 @@ export class JobsApi {
     private baseUrl = '/jobs';
     private httpInterceptService = inject(HttpInterceptorService);
 
-    getAllJobs(): Observable<HttpResponse<Job[]>>{
-        return this.httpInterceptService.get<Job[]>(`${environment.apiUrl}${this.baseUrl}`);
+    getAllJobs(): Observable<HttpResponse<ApiTest[]>>{
+        return this.httpInterceptService.get<ApiTest[]>(`${environment.apiUrl}${this.baseUrl}`);
     }
 
     createJob(test:TestItem): Observable<HttpResponse<TestItem>>{
