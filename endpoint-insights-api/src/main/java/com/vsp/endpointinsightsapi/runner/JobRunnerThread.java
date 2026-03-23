@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import com.vsp.endpointinsightsapi.exception.JobSetupException;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobRunnerThreadStatus;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
@@ -75,7 +76,15 @@ public class JobRunnerThread implements Runnable {
 			}
 
 			// step 3 - execute test
-			Optional<File> testResultFile = executeTest(workingDirectory);
+			Optional<File> testResultFile;
+
+			try {
+				testResultFile = executeTest(workingDirectory);
+			} catch (JobSetupException e) {
+				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
+				return;
+			}
+
 
 			// step 4 - interpret results
             if (testResultFile.isEmpty()) {
@@ -145,7 +154,7 @@ public class JobRunnerThread implements Runnable {
         return subDirs[0];
     }
 
-	private Optional<File> executeTest(File workingDirectory) {
+	private Optional<File> executeTest(File workingDirectory) throws JobSetupException {
 		try {
             String jmeterTestName = job.getJmeterTestName();
             if (jmeterTestName == null || jmeterTestName.trim().isEmpty()) {
@@ -156,7 +165,13 @@ public class JobRunnerThread implements Runnable {
             String resultFileName = generateResultFileName();
 
             File resultFile = new File(workingDirectory, resultFileName);
-            String[] command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
+            String[] command;
+
+			try {
+				command = jMeterCommandEnhancer.getRunCommand(workingDirectory, jmeterTestName, resultFileName);
+			} catch (IllegalArgumentException e) {
+				throw new JobSetupException("Could not create run command!", e);
+			}
 
             ProcessBuilder processBuilder;
             processBuilder = new ProcessBuilder(command);

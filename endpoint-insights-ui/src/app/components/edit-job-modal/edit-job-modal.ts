@@ -42,14 +42,10 @@ export class EditJobModal{
     }
 
     toggleEditMode(){
-        this.state.update(s => ({
-            ...s,
-            inEditMode: !s.inEditMode
-        }))
-
-        // Check for sav3e
-        if (!this.state().inEditMode) {
-            this.onUpdate();
+        if (this.state().inEditMode) {
+            this.createJobForm.submitForm();
+        } else {
+            this.state.update(s => ({ ...s, inEditMode: true }));
         }
     }
 

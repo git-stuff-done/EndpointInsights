@@ -61,12 +61,17 @@ export class CreateJobForm {
                 Validators.maxLength(500),
                 this.noWhitespaceValidator
             ]],
-            jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
+            jmeterTestName: ["", [Validators.maxLength(64)]],
         });
 
         this.applyAuthValidators(this.createJobForm.get('gitAuthType')?.value);
         this.createJobForm.get('gitAuthType')?.valueChanges.subscribe((value) => {
             this.applyAuthValidators(value);
+        });
+
+        this.applyJmeterValidators(this.createJobForm.get('jobType')?.value);
+        this.createJobForm.get('jobType')?.valueChanges.subscribe((value) => {
+            this.applyJmeterValidators(value);
         });
     }
 
@@ -82,6 +87,7 @@ export class CreateJobForm {
                 gitSshPrivateKey: this.job.gitSshPrivateKey,
                 gitSshPassphrase: this.job.gitSshPassphrase,
                 jobType: this.job.jobType,
+                jmeterTestName: this.job.jmeterTestName,
                 runCommand: this.job.runCommand,
                 compileCommand: this.job.compileCommand,
             });
@@ -185,6 +191,16 @@ export class CreateJobForm {
         }
 
         return {invalidGitUrl: true};
+    }
+
+    private applyJmeterValidators(jobType: string | null) {
+        const jmeterControl = this.createJobForm.get('jmeterTestName');
+        if (jobType === 'PERF') {
+            jmeterControl?.setValidators([Validators.required, Validators.minLength(1), Validators.maxLength(64)]);
+        } else {
+            jmeterControl?.clearValidators();
+        }
+        jmeterControl?.updateValueAndValidity({ emitEvent: false });
     }
 
     private applyAuthValidators(authType: string | null) {
