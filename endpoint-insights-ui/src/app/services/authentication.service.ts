@@ -12,6 +12,48 @@ interface UserInfo {
   roles: string[];
 }
 
+/**
+ * Validates if redirect URL is safe (same origin or relative path)
+ * Prevents open redirect vulnerabilities by ensuring redirect URL doesn't send user to an external malicious site.
+ * returns true if the redirect URL is safe
+ * throws Error if redirect URL is invalid/malformed
+ */
+function isValidRedirectUrl(url: string): boolean {
+  if (!url) {
+    return false;
+  }
+  //Trim whitespace
+  url = url.trim();
+  if (!url) {
+    return false;
+  }
+  //Check for dangerous protocols
+  const dangerousProtocols = [ 'javascript:', 'vbscript:', 'ftp:', 'data:', 'file:', 'tel:', 'mailto:' ];
+  const lowerUrl = url.toLowerCase();
+  for (const protocol of dangerousProtocols) {
+    if (lowerUrl.startsWith(protocol)) {
+      return false;
+    }
+  }
+  //Relative URLs starting with /, ./, ../, or no protocol are safe
+  if ((url.startsWith('/')) || (url.startsWith('./')) || (url.startsWith('../'))) {
+    return true;
+  }
+  //For absolute URLs, validate it has the same origin
+  try {
+    const urlObj = new URL(url, window.location.origin);
+    const currentOrigin = new URL(window.location.href).origin;
+    //Check if URL origin matches current origin
+    if (urlObj.origin !== currentOrigin) {
+      return false;
+    }
+    return true;
+  } catch {
+    //Invalid URL throws error
+    throw new Error(`Invalid URL format: ${url}`);
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,6 +63,7 @@ export class AuthenticationService {
   private readonly apiUrl = environment.apiUrl;
   private readonly tokenKey = environment.tokenStorageKey;
   private readonly AUTH_TOKEN_COOKIE = "authToken";
+  private readonly REDIRECT_URL_KEY = "redirectUrl";
 
 
   private userInfo: UserInfo | null = null;
@@ -45,6 +88,49 @@ export class AuthenticationService {
    */
   public login(): void {
     this.redirectToAuth(this.authUrl);
+  }
+
+  /**
+   * Stores the URL the user attempted to visit before redirect
+   * Only stores URLs that are safe to redirect to (same origin or relative paths)
+   * Rejects open redirect attempts and logs security warnings
+   */
+  public setRedirectUrl(url: string): void {
+    try {
+      if (isValidRedirectUrl(url)) {
+        localStorage.setItem(this.REDIRECT_URL_KEY, url);
+      } else {
+        console.warn(`[SECURITY] Blocked attempt to store invalid redirect URL: ${url}`);
+      }
+    } catch (error) {
+      console.error(`[SECURITY] Error validating redirect URL: ${error}`);
+    }
+  }
+
+  /**
+   * Retrieves the redirect URL and THEN clears it from storage.
+   * Validates stored URL is safe before returning.
+   * Returns URL if stored and valid
+   * Returns null if no URL is stored or if stored URL is invalid
+   */
+  public getAndClearRedirectUrl(): string | null {
+    const url = localStorage.getItem(this.REDIRECT_URL_KEY);
+    if (url) {
+      localStorage.removeItem(this.REDIRECT_URL_KEY);
+      //Check stored URL is still valid before returning
+      try {
+        if (isValidRedirectUrl(url)) {
+          return url;
+        } else {
+          console.warn(`[SECURITY] Stored redirect URL is invalid: ${url}`);
+          return null;
+        }
+      } catch (error) {
+        console.error(`[SECURITY] Error validating stored redirect URL: ${error}`);
+        return null;
+      }
+    }
+    return null;
   }
 
   private redirectToAuth(url: string): void {
@@ -139,7 +225,9 @@ export class AuthenticationService {
           this.setToken(t.value);
           this.authStateSubject.next(true);
           this.loadUserInfo();
-          this.router.navigate(['/']);
+          //Redirect to the stored URL or root if no URL is stored
+          const redirectUrl = this.getAndClearRedirectUrl();
+          this.router.navigate([redirectUrl || '/']);
         } else {
           this.clearAuthData();
           this.router.navigate(['/login']);
