@@ -5,6 +5,7 @@ import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.UserContext;
 import com.vsp.endpointinsightsapi.model.enums.UserRole;
+import com.vsp.endpointinsightsapi.service.UserService;
 import com.vsp.endpointinsightsapi.util.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,7 +44,7 @@ import java.util.Objects;
  * <ul>
  *   <li>Validates JWT signature against OIDC provider's JWKS</li>
  *   <li>Validates JWT audience claim against OIDC client ID and allowed audiences</li>
- *   <li>Extracts user context (userId, username, email, role) from token claims</li>
+ *   <li>Extracts user context (subject, username, email, role) from token claims</li>
  *   <li>Enforces role-based access control based on group membership</li>
  *   <li>Allows public endpoints to bypass authentication</li>
  *   <li>Sets up {@link UserContext} accessible via {@link CurrentUser} utility</li>
@@ -78,10 +79,12 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	private static final String bearerTokenAttribute = "bearer-token";
 
 	private final AuthenticationProperties authProperties;
+	private final UserService userService;
 	private JwtDecoder jwtDecoder;
 
-	public AuthorizationInterceptor(AuthenticationProperties authProperties) {
+	public AuthorizationInterceptor(AuthenticationProperties authProperties, UserService userService) {
 		this.authProperties = authProperties;
+		this.userService = userService;
 	}
 
 	/**
@@ -114,7 +117,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	 *   <li>Checks if endpoint is public (bypasses authentication if true)</li>
 	 *   <li>Extracts and validates Authorization header format</li>
 	 *   <li>Decodes and validates JWT signature against JWKS</li>
-	 *   <li>Validates required claims (sub, username, email)</li>
+	 *   <li>Validates required claims (subject, username, email)</li>
 	 *   <li>Validates audience claim matches client ID or allowed audiences</li>
 	 *   <li>Extracts user role from groups claim</li>
 	 *   <li>Verifies user has at least read access</li>
@@ -166,20 +169,24 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 			UserContext userContext;
 			List<UserRole> roles;
+			String issuer = jwt.getIssuer() != null ? jwt.getIssuer().toString() : "";
 
 			if (isClientCredentials) {
+				// Client credentials: use client_id as subject
 				roles = List.of(UserRole.WRITE, UserRole.READ);
 				String clientId = jwt.getClaimAsString("client_id");
 
 				userContext = UserContext.builder()
-						.userId(clientId)
+						.issuer(issuer)
+						.subject(clientId)
 						.username(clientId)
 						.email(clientId + "@service-account")
 						.roles(roles)
 						.build();
 
-				LOG.debug("Client credentials token validated for client: {}", clientId);
+				LOG.debug("Client credentials token validated for client: {} from issuer: {}", clientId, issuer);
 			} else {
+				// Regular user: use sub claim as subject
 				validateRequiredClaims(jwt);
 				LOG.debug("Required claims validated");
 
@@ -195,7 +202,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 				}
 
 				userContext = UserContext.builder()
-						.userId(jwt.getSubject())
+						.issuer(issuer)
+						.subject(jwt.getSubject())
 						.username(jwt.getClaimAsString(authProperties.getClaims().getUsername()))
 						.email(jwt.getClaimAsString(authProperties.getClaims().getEmail()))
 						.roles(roles)
@@ -204,12 +212,17 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 				LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
 			}
 
-			if (!isValidRole(roles, handler)) {
-				LOG.error("Roles {} do not match required roles for endpoint", roles);
-				return false;
-			}
+            if (!isValidRole(roles, handler)) {
+                return false;
+            }
 
 			CurrentUser.setUserContext(userContext);
+
+			try {
+				userService.createOrUpdateUser(userContext);
+			} catch (Exception e) {
+				LOG.error("Failed to persist user to database: {}", e.getMessage(), e);
+			}
 
 			request.setAttribute(jwtAttribute, jwt);
 			request.setAttribute(bearerTokenAttribute, token);

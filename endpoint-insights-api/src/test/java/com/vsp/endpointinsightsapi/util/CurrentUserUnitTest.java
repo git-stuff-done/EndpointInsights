@@ -97,12 +97,12 @@ public class CurrentUserUnitTest {
         when(RequestContextHolder.currentRequestAttributes()).thenReturn(servletRequestAttributes);
         when(servletRequestAttributes.getRequest()).thenReturn(httpServletRequest);
         when(httpServletRequest.getAttribute("userContext")).thenReturn(userContext);
-        when(userContext.getUserId()).thenReturn(expectedUserId);
+        when(userContext.getSubject()).thenReturn(expectedUserId);
 
         String result = CurrentUser.getUserId();
 
         assertEquals(expectedUserId, result);
-        verify(userContext).getUserId();
+        verify(userContext).getSubject();
     }
 
     @Test
@@ -345,7 +345,7 @@ public class CurrentUserUnitTest {
         when(RequestContextHolder.currentRequestAttributes()).thenReturn(servletRequestAttributes);
         when(servletRequestAttributes.getRequest()).thenReturn(httpServletRequest);
         when(httpServletRequest.getAttribute("userContext")).thenReturn(userContext);
-        when(userContext.getUserId()).thenReturn(userId);
+        when(userContext.getSubject()).thenReturn(userId);
         when(userContext.getUsername()).thenReturn(username);
         when(userContext.hasWriteAccess()).thenReturn(true);
         when(userContext.hasReadAccess()).thenReturn(true);
@@ -358,7 +358,7 @@ public class CurrentUserUnitTest {
         assertTrue(CurrentUser.get().isPresent());
 
         // Verify the mocks were called appropriately
-        verify(userContext, times(1)).getUserId();
+        verify(userContext, times(1)).getSubject();
         verify(userContext, times(1)).getUsername();
         verify(userContext, times(1)).hasWriteAccess();
         verify(userContext, times(1)).hasReadAccess();
@@ -371,7 +371,7 @@ public class CurrentUserUnitTest {
         when(RequestContextHolder.currentRequestAttributes()).thenReturn(servletRequestAttributes);
         when(servletRequestAttributes.getRequest()).thenReturn(httpServletRequest);
         when(httpServletRequest.getAttribute("userContext")).thenReturn(userContext);
-        when(userContext.getUserId()).thenReturn("test-user");
+        when(userContext.getSubject()).thenReturn("test-user");
 
         assertEquals("test-user", CurrentUser.getUserId());
 

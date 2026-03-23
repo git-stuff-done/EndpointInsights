@@ -3,6 +3,7 @@ package com.vsp.endpointinsightsapi.authentication;
 import com.vsp.endpointinsightsapi.config.AuthenticationProperties;
 import com.vsp.endpointinsightsapi.controller.HealthController;
 import com.vsp.endpointinsightsapi.exception.CustomException;
+import com.vsp.endpointinsightsapi.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,9 @@ public class AuthorizationInterceptorUnitTest {
     @Mock
     private AuthenticationProperties authProperties;
 
+    @Mock
+    private UserService userService;
+
     private AuthorizationInterceptor interceptor;
 
     private MockHttpServletRequest request;
@@ -54,7 +58,7 @@ public class AuthorizationInterceptorUnitTest {
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
 
-        interceptor = new AuthorizationInterceptor(authProperties);
+        interceptor = new AuthorizationInterceptor(authProperties, userService);
     }
 
     @Test

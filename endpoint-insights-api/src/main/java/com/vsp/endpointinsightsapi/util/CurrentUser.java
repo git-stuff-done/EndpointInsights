@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.util;
 
 import com.vsp.endpointinsightsapi.model.UserContext;
+import com.vsp.endpointinsightsapi.model.UserIdentity;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -21,7 +22,7 @@ import java.util.Optional;
  * Optional<UserContext> context = CurrentUser.get();
  *
  * // Get specific user properties (returns "system" if no user)
- * String userId = CurrentUser.getUserId();
+ * String subject = CurrentUser.getSubject();
  * String username = CurrentUser.getUsername();
  * String logIdentifier = CurrentUser.getLogIdentifier();
  *
@@ -67,7 +68,7 @@ public class CurrentUser {
      * @return the user ID, or "system" if no user context is available
      */
     public static String getUserId() {
-        return get().map(UserContext::getUserId).orElse("system");
+        return get().map(UserContext::getSubject).orElse("system");
     }
 
     /**
@@ -82,10 +83,28 @@ public class CurrentUser {
     /**
      * Gets a user identifier suitable for logging (username + ID).
      *
-     * @return formatted log identifier "username (userId)", or "system" if unavailable
+     * @return formatted log identifier "username (subject)", or "system" if unavailable
      */
     public static String getLogIdentifier() {
         return get().map(UserContext::getLogIdentifier).orElse("system");
+    }
+
+    /**
+     * Gets the OIDC identity in format "issuer/subject" for audit tracking.
+     *
+     * @return formatted OIDC identity "issuer/subject", or "system" if unavailable
+     */
+    public static String getOidcIdentity() {
+        return get().map(UserContext::getOidcIdentity).orElse("system");
+    }
+
+    /**
+     * Gets the user's identity as a UserIdentity object for audit tracking.
+     *
+     * @return Optional containing UserIdentity if available, empty otherwise
+     */
+    public static Optional<UserIdentity> getUserIdentity() {
+        return get().map(ctx -> new UserIdentity(ctx.getIssuer(), ctx.getSubject()));
     }
 
     /**
