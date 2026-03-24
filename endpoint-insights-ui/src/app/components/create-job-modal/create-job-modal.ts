@@ -41,6 +41,7 @@ export class CreateJobModal {
             error: (error) => {
                 console.error('Error creating job:', error);
                 this.toastService.onError('Failed to create job. Please try again.');
+                this.dialogRef.close();
             }
         });
     }
