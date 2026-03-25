@@ -50,7 +50,7 @@ export class EditJobModal{
     }
 
     onUpdate(jobData?: any){ // still used by (jobSubmitted) output if needed
-        this.jobService.updateJob(this.data.id, jobData).subscribe({
+        this.jobService.updateJob(this.data.jobId, jobData).subscribe({
             next: (response) => {
                 console.log('Job updated:', response);
                 this.toastService.onSuccess('Job updated successfully!');

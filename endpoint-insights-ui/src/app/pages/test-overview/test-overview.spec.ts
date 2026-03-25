@@ -26,7 +26,7 @@ const mockBackendJob = {
 };
 
 const mappedTestItem: TestItem = {
-    id: 'abc-123',
+    jobId: 'abc-123',
     name: 'Auth - Login',
     batch: 'Nightly-01',
     createdAt: '2024-01-01T00:00:00Z',
@@ -108,7 +108,7 @@ describe('TestOverview', () => {
         jobServiceSpy.runJob.and.returnValue(of({}));
         const t = component.tests[0];
         component.onRun(t);
-        expect(jobServiceSpy.runJob).toHaveBeenCalledWith(t.id);
+        expect(jobServiceSpy.runJob).toHaveBeenCalledWith(t.jobId);
         expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Test run started!');
     });
 
@@ -130,9 +130,9 @@ describe('TestOverview', () => {
         jobServiceSpy.deleteJob.and.returnValue(of(null));
         const t = component.tests[0];
         component.onDelete(t);
-        expect(jobServiceSpy.deleteJob).toHaveBeenCalledWith(t.id);
+        expect(jobServiceSpy.deleteJob).toHaveBeenCalledWith(t.jobId);
         expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Test deleted.');
-        expect(component.tests.find(item => item.id === t.id)).toBeUndefined();
+        expect(component.tests.find(item => item.jobId === t.jobId)).toBeUndefined();
     });
 
     it('onDelete shows error toast on failure', () => {

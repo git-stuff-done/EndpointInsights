@@ -1,4 +1,5 @@
 import {Job} from "./job.model";
+import {TestItem} from "./test.model";
 
 /** Represents a single batch entry shown on the Dashboard. */
 export interface Batch {
@@ -15,7 +16,7 @@ export interface Batch {
     notificationList?: string[];
     description?: string;
     active: boolean;
-    jobs: Job[];
+    jobs: TestItem[];
     emails?: string[];
     isNew?: boolean;
 }

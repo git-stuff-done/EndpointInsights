@@ -1,7 +1,7 @@
 import { JobStatus } from '../common/job.constants';
 
 export interface TestItem {
-    id: string;
+    jobId: string;
     name: string;
     batch: string;
     description: string;
@@ -23,7 +23,7 @@ export interface TestItem {
 
 export const MOCK_TESTS: TestItem[] = [
     {
-        id: '0b00f357-a21f-45b0-b753-b791b4f83b8d',
+        jobId: '0b00f357-a21f-45b0-b753-b791b4f83b8d',
         name: 'Auth',
         batch: 'Nightly-01',
         createdAt: new Date(),
@@ -37,7 +37,7 @@ export const MOCK_TESTS: TestItem[] = [
         threshold: 99,
     },
     {
-        id: '89bb3ff9-08f1-49e3-ab61-36b5cbb42dd7',
+        jobId: '89bb3ff9-08f1-49e3-ab61-36b5cbb42dd7',
         name: 'Billing',
         batch: 'Nightly-01',
         createdAt: new Date(),

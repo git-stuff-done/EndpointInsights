@@ -60,7 +60,7 @@ describe('EditJobModal', () => {
             const payload = MOCK_TESTS[0];
             spyOn(component['jobService'], 'updateJob').and.returnValue(of(payload));
             component.onUpdate(MOCK_TESTS[0]);
-            expect(component['jobService'].updateJob).toHaveBeenCalledWith(component.data.id, MOCK_TESTS[0]);
+            expect(component['jobService'].updateJob).toHaveBeenCalledWith(component.data.jobId, MOCK_TESTS[0]);
         });
         it("Should show invalid form toast if form is invalid", () => {
             spyOn(component['jobService'], 'updateJob').and.returnValue(throwError(() => new Error("Invalid form")));

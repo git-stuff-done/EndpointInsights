@@ -131,7 +131,7 @@ public class BatchService {
             batch.setJobs(new ArrayList<>(jobs));
         }
 
-        testBatchRepository.save(batch);
+        testBatchRepository.saveAndFlush(batch);
 
         if (request.getEmails() != null) {
             updateEmailsForBatch(id, request.getEmails());
