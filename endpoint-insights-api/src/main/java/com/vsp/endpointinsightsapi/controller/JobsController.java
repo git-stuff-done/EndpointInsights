@@ -125,13 +125,9 @@ public class JobsController {
 	 * @return A status message indicating the job was deleted
 	 * */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteJob(@PathVariable("id") UUID jobId) {
-		try {
-			jobService.deleteJobById(jobId);
-			return ResponseEntity.ok(String.format("Job %s deleted", jobId));
-		} catch (RuntimeException e) {
-			return ResponseEntity.notFound().build();
-		}
+	public ResponseEntity<Void> deleteJob(@PathVariable("id") UUID jobId) {
+		jobService.deleteJobById(jobId);
+		return ResponseEntity.noContent().build();
 	}
 
 	/**

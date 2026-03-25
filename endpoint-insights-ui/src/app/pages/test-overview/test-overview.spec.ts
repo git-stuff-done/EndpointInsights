@@ -28,7 +28,7 @@ const mockBackendJob = {
 const mappedTestItem: TestItem = {
     jobId: 'abc-123',
     name: 'Auth - Login',
-    batch: 'Nightly-01',
+    batch: '',
     createdAt: '2024-01-01T00:00:00Z',
     createdBy: 'Alex',
     jobType: 'E2E',

@@ -75,7 +75,7 @@ export class TestOverview implements OnInit, OnDestroy {
                 this.tests = jobs.map((j: any) => ({
                     jobId: j.jobId,
                     name: j.name,
-                    batch: j.testBatches?.[0]?.batchName ?? '',
+                    batch: '',
                     description: j.description ?? '',
                     gitUrl: j.gitUrl ?? '',
                     gitAuthType: j.gitAuthType,
@@ -85,9 +85,10 @@ export class TestOverview implements OnInit, OnDestroy {
                     gitSshPassphrase: j.gitSshPassphrase,
                     runCommand: j.runCommand ?? '',
                     compileCommand: j.compileCommand ?? '',
+                    jmeterTestName: j.jmeterTestName ?? '',
                     jobType: j.jobType ?? '',
                     createdAt: j.createdDate ?? '',
-                    createdBy: j.createdBy ?? '',
+                    createdBy: j.createdBy?.subject ?? j.createdBy ?? '',
                     status: this.mapStatus(statusMap.get(j.jobId)),
                     threshold: 20,
 

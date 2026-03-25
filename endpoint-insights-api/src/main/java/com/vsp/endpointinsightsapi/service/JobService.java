@@ -85,6 +85,8 @@ public class JobService {
         existingJob.setDescription(job.getDescription());
         existingJob.setJobType(job.getJobType());
         existingJob.setJmeterTestName(job.getJmeterTestName());
+        existingJob.setRunCommand(job.getRunCommand());
+        existingJob.setCompileCommand(job.getCompileCommand());
         existingJob.setConfig(job.getConfig());
         existingJob.setGitUrl(job.getGitUrl());
         existingJob.setGitAuthType(job.getGitAuthType());
