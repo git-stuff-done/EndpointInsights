@@ -251,6 +251,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
     save() {
         if (this.form.invalid) {
+            console.log('herer')
             return;
         }
         const newBatch = {
@@ -259,6 +260,7 @@ export class BatchConfigDialogComponent implements OnInit {
             emails: this.emailList(),
             isNew: this.isNew
         };
+        console.log(newBatch)
 
         return this.batchService.saveBatch(newBatch).subscribe({
             next: (response) => {
@@ -270,6 +272,7 @@ export class BatchConfigDialogComponent implements OnInit {
                     lastRunTime: response.body?.lastRunTime,
                     cronExpression: response.body?.cronExpression ?? '',
                     notificationList: response.body?.notificationList || [],
+                    jobs: response.body?.jobs
                 });
                 this.dialogRef.close(response.body);
             },

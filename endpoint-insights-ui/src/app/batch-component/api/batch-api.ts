@@ -31,6 +31,7 @@ export class BatchApi {
     }
 
     saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
+        console.log(batch)
         if(batch.isNew){
             const createRequest = {
                 batchName: batch.batchName,
