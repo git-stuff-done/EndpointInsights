@@ -59,6 +59,7 @@ public class JMeterCommandService {
         if (workingDirectory == null || !workingDirectory.exists() || !workingDirectory.isDirectory()) {
             throw new IllegalArgumentException("Working directory does not exist or is not a directory: " + (workingDirectory != null ? workingDirectory.getAbsolutePath() : "null"));
         }
+        // Recursively search for a file that matches the given test pattern
 
         // Recursively search for a .jmx file that matches the given test pattern
         Pattern testPattern = Pattern.compile(testName);

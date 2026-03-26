@@ -1,4 +1,5 @@
 package com.vsp.endpointinsightsapi.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -74,6 +77,10 @@ public class Job  extends AuditingEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "test_type", nullable = false, length = 20)
     private TestType jobType;
+
+    @JsonBackReference
+    @ManyToMany(mappedBy = "jobs", fetch = FetchType.LAZY)
+    private List<TestBatch> batches = new ArrayList<>();
 
     // Uncomment when the TestTarget and User Entities are created
     /*

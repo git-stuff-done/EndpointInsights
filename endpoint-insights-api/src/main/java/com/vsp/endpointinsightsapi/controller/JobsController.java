@@ -92,7 +92,8 @@ public class JobsController {
 	 * */
 	@GetMapping
 	public ResponseEntity<List<Job>> getJobs() {
-		return jobService.getAllJobs().map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+		List<Job> j = jobService.getAllJobs().orElse(new ArrayList<>());
+        return ResponseEntity.ok(j);
 	}
 
 	/**

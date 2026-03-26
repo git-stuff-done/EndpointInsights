@@ -73,7 +73,7 @@ export class TestOverview implements OnInit, OnDestroy {
                     }
                 }
                 this.tests = jobs.map((j: any) => ({
-                    id: j.jobId,
+                    jobId: j.jobId,
                     name: j.name,
                     batch: '',
                     description: j.description ?? '',
@@ -146,7 +146,7 @@ export class TestOverview implements OnInit, OnDestroy {
     onOpen(t: TestItem) { console.log('Open Clicked') }
 
     onRun(t: TestItem) {
-        this.jobService.runJob(t.id).subscribe({
+        this.jobService.runJob(t.jobId).subscribe({
             next: () => this.toastService.onSuccess('Test run started!'),
             error: () => this.toastService.onError('Failed to start test run.'),
         });
@@ -155,10 +155,10 @@ export class TestOverview implements OnInit, OnDestroy {
     onEdit(t: TestItem) { this.openEditModal(t) }
 
     onDelete(t: TestItem) {
-        this.jobService.deleteJob(t.id).subscribe({
+        this.jobService.deleteJob(t.jobId).subscribe({
             next: () => {
                 this.toastService.onSuccess('Test deleted.');
-                this.tests = this.tests.filter(item => item.id !== t.id);
+                this.tests = this.tests.filter(item => item.jobId !== t.jobId);
                 this.applyFilter();
             },
             error: () => this.toastService.onError('Failed to delete test.'),

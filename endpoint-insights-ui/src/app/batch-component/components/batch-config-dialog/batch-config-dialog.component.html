@@ -87,7 +87,7 @@
         <section class="form-section">
             <h3>Current Jobs</h3>
             <div class="job-list">
-                @for (test of currentBatchTests(); track test.id) {
+                @for (test of currentBatchTests(); track test.jobId) {
                     <div class="job-row">
                         <span>{{ test.name }}</span>
                         <button mat-icon-button (click)="removeTest(test)">
@@ -109,7 +109,7 @@
                        (input)="searchTerm.set($any($event.target).value)" />
             </mat-form-field>
             <div class="job-list">
-                @for (test of filteredAvailableTests(); track test.id) {
+                @for (test of filteredAvailableTests(); track test.jobId) {
                     <div class="job-row">
                         <span>{{ test.name }}</span>
                         <button mat-icon-button (click)="addTest(test)">

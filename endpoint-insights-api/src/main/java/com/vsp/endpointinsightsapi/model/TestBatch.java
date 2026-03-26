@@ -24,6 +24,7 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "id", nullable = false)
     private UUID batchId;
 
+   @JsonManagedReference
    @ManyToMany(fetch = FetchType.EAGER)
    @JoinTable(
            name = "batch_jobs",

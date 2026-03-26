@@ -126,14 +126,14 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of(jobId1, jobId2))).thenReturn(List.of(job1, job2));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertEquals(2, result.getJobs().size());
         assertTrue(result.getJobs().contains(job1));
         assertTrue(result.getJobs().contains(job2));
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
     }
 
     @Test
@@ -156,14 +156,14 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of(newJobId))).thenReturn(List.of(newJob));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertEquals(1, result.getJobs().size());
         assertTrue(result.getJobs().contains(newJob));
         assertFalse(result.getJobs().contains(oldJob));
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
     }
 
     @Test
@@ -183,12 +183,12 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of())).thenReturn(List.of());
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertTrue(result.getJobs().isEmpty());
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
     }
 
     @Test
@@ -237,12 +237,12 @@ class BatchServiceTest {
         request.setCronExpression("0 30 14 * * MON,WED,FRI");
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertEquals("0 30 14 * * MON,WED,FRI", result.getCronExpression());
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
     }
 
     @Test
@@ -258,12 +258,12 @@ class BatchServiceTest {
         request.setCronExpression(null);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertEquals("0 0 12 * * *", result.getCronExpression());
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
     }
 
     @Test
@@ -278,7 +278,7 @@ class BatchServiceTest {
         request.setEmails(List.of("a@example.com", "b@example.com"));
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         testBatchService.updateBatch(batchId, request);
 
@@ -302,7 +302,7 @@ class BatchServiceTest {
         request.setEmails(List.of("dup@example.com", "DUP@example.com", "dup@example.com"));
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         testBatchService.updateBatch(batchId, request);
 
@@ -324,7 +324,7 @@ class BatchServiceTest {
         request.setEmails(null);
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         testBatchService.updateBatch(batchId, request);
 
@@ -343,12 +343,12 @@ class BatchServiceTest {
         BatchUpdateRequest request = new BatchUpdateRequest();
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
-        when(testBatchRepository.save(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
         assertEquals(0, result.getJobs().size());
-        verify(testBatchRepository).save(existingBatch);
+        verify(testBatchRepository).saveAndFlush(existingBatch);
         verify(testBatchEmailListsRepository, never()).deleteAllByBatchId(any());
     }
 

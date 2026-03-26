@@ -18,7 +18,7 @@ describe('JobService', () => {
     let httpMock: HttpTestingController;
 
     const testItem: TestItem = {
-        id: '1',
+        jobId: '1',
         name: 'Test Job',
         batch: 'Batch A',
         description: 'desc',

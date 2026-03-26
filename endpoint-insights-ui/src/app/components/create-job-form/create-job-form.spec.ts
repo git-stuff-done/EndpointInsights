@@ -66,7 +66,7 @@ describe('CreateJobForm', () => {
     describe('ngOnChanges', () => {
         it('should patch form values when job input changes', () => {
             const job: TestItem = {
-                id: '1',
+                jobId: '1',
                 name: 'Updated Job',
                 batch: 'Batch A',
                 description: 'Updated description',

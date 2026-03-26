@@ -153,6 +153,7 @@ public class BatchService {
         }
 
         if (request.getJobs() != null) {
+
             List<Job> jobs = jobRepository.findAllById(request.getJobs());
             if (jobs.size() != request.getJobs().size()) {
                 throw new CustomExceptionBuilder(HttpStatus.BAD_REQUEST, "One or more job IDs not found").build();
@@ -160,7 +161,7 @@ public class BatchService {
             batch.setJobs(new ArrayList<>(jobs));
         }
 
-        testBatchRepository.save(batch);
+        testBatchRepository.saveAndFlush(batch);
 
         if (request.getEmails() != null) {
             updateEmailsForBatch(id, request.getEmails());
