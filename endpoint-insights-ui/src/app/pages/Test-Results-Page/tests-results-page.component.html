@@ -22,10 +22,27 @@
     } @else {
         <div class="table-container mat-elevation-z2">
             <table mat-table [dataSource]="dataSource" matSort class="results-table">
+                <ng-container matColumnDef="batchName">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Batch Name</th>
+                    <td mat-cell *matCellDef="let row">
+                        @if (row?.batchName) {
+                            <span class="batch-name">{{ row.batchName }}</span>
+                        } @else {
+                            <span class="batch-name">-</span>
+                        }
+                    </td>
+                </ng-container>
+
                 <!-- Test Name -->
                 <ng-container matColumnDef="testName">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Test Name</th>
-                    <td mat-cell *matCellDef="let row">{{ row.testName }}</td>
+                    <td mat-cell *matCellDef="let row">
+                        @if (row?.testName) {
+                            <span class="test-name">{{ row.testName }}</span>
+                        } @else {
+                            <span class="test-name">-</span>
+                        }
+                    </td>
                 </ng-container>
 
                 <!-- Run ID -->

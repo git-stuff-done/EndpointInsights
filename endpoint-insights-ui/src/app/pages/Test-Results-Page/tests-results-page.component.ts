@@ -34,7 +34,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
     @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<RecentActivity>([]);
-    displayedColumns = ['testName', 'runId', 'jobId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
+    displayedColumns = ['batchName', 'testName', 'runId', 'jobId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
     searchControl = new FormControl('');
     isLoading = true;
     loadError: string | null = null;
