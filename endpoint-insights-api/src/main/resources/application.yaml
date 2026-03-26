@@ -50,6 +50,9 @@ scheduling:
   pool-size: 10
   thread-name-prefix: TestBatchScheduler-
 
+batches:
+  stale-batch-threshold-seconds: 60
+
 app:
   authentication:
     enabled: true
