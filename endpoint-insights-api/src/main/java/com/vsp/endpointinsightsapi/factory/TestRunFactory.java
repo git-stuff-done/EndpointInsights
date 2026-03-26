@@ -31,7 +31,7 @@ public class TestRunFactory {
 		testRun.setStartedAt(Instant.now());
 		testRun.setStatus(TestRunStatus.PENDING);
 		testRun.setJobId(job.getJobId());
-		testRun.setRunBy(CurrentUser.getUserId());
+		testRun.setRunBy(CurrentUser.getUsername());
 		testRun = testRunRepository.save(testRun);
 
 		return testRun;
@@ -49,7 +49,7 @@ public class TestRunFactory {
 		testRun.setStartedAt(Instant.now());
 		testRun.setStatus(TestRunStatus.PENDING);
 		testRun.setBatchId(batch.getBatchId());
-		testRun.setRunBy(CurrentUser.getUserId());
+		testRun.setRunBy(CurrentUser.getUsername());
 		testRun = testRunRepository.save(testRun);
 
 		return testRun;

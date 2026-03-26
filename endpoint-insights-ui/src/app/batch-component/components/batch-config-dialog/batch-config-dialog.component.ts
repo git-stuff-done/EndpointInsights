@@ -186,7 +186,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
         // Populate existing jobs and emails from batch data
         this.currentBatchTests.set(
-            (this.data.jobs ?? []).map(j => ({id: j.id, name: j.name}))
+            (this.data.jobs ?? []).map(j => ({id: j.jobId, name: j.name}))
         );
         this.emailList.set(this.data.notificationList ?? []);
 
@@ -203,7 +203,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
         this.jobsApi.getAllJobs().subscribe({
             next: (response) => {
-                this.availableTests.set(response.body?.map(j => ({id: j.id, name: j.name})) ?? []);
+                this.availableTests.set(response.body?.map(j => ({id: j.jobId, name: j.name})) ?? []);
                 this.loading.set(false);
             },
             error: () => {
