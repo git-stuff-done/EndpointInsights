@@ -12,7 +12,7 @@ import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/c
 import {Batch} from "../../../models/batch.model";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
-import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/list";
+import {MatDivider, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
@@ -55,7 +55,6 @@ export class BatchConfigDialogComponent implements OnInit {
     searchControl = new FormControl('');
 
 
-    selectedParticipant: any = null;
     searchParticipants: User[] = [];
     activeParticipants = signal<User[]>([]);
 
@@ -84,12 +83,18 @@ export class BatchConfigDialogComponent implements OnInit {
 
     form = this.fb.group({
         id: [this.data.id],
-        batchName: [this.data.batchName ?? '', [Validators.required, Validators.maxLength(120)]],
+        batchName: [this.data.batchName ?? '', [
+            Validators.required,
+            Validators.minLength(3),
+            Validators.maxLength(50),
+            Validators.pattern(/^[a-zA-Z0-9_-]+$/),
+        ]],
         startTime: [this.data.startTime ?? ''],
         lastRunTime: [this.data.lastRunTime ?? ''],
         cronExpression: [this.data.cronExpression ?? ''],
         notificationList: [this.data.notificationList ?? []],
-        jobs: [this.data.jobs ?? []]
+        jobs: [this.data.jobs ?? []],
+        active:[this.data.active]
     });
 
     // Schedule editor state
@@ -141,6 +146,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
         this.form.patchValue({cronExpression: cron});
     }
+
 
     /** Parse a cron string and update the editor state to match */
     private parseCronToEditor(cron: string): void {
@@ -244,6 +250,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
 
     save() {
+        this.form.markAllAsTouched();
         if (this.form.invalid) {
             return;
         }
@@ -251,6 +258,7 @@ export class BatchConfigDialogComponent implements OnInit {
             ...this.form.value,
             jobs: this.currentBatchTests(),
             emails: this.emailList(),
+            active: false,
             isNew: this.isNew
         };
         return this.batchService.saveBatch(newBatch).subscribe({
@@ -263,7 +271,8 @@ export class BatchConfigDialogComponent implements OnInit {
                     lastRunTime: response.body?.lastRunTime,
                     cronExpression: response.body?.cronExpression ?? '',
                     notificationList: response.body?.notificationList || [],
-                    jobs: response.body?.jobs
+                    jobs: response.body?.jobs,
+                    active: response.body?.active
                 });
                 this.dialogRef.close(response.body);
             },
@@ -271,14 +280,38 @@ export class BatchConfigDialogComponent implements OnInit {
         });
     }
 
-
-    close(): void {
-        this.dialogRef.close({
-            title: this.form.controls.batchName.value?.trim() || this.data.batchName || '',
-            //nextRunIso: this.composeIso(this.form.controls.nextRunDate.value, this.form.controls.nextRunTime.value),
-            batchTests: this.currentBatchTests(),
-        });
+    private getFieldLabel(fieldName: string): string {
+        const labels: { [key: string]: string } = {
+            'batchName': 'Batch name',
+        };
+        return labels[fieldName] || fieldName;
     }
+
+    getErrorMessage(fieldName: string): string {
+        const control = this.form.get(fieldName);
+        if (!control?.errors || !control.touched) {
+            return '';
+        }
+
+        if (control.errors['required']) {
+            return `${this.getFieldLabel(fieldName)} is required`;
+        }
+
+        if (control.errors['minlength']) {
+            return `Minimum length is ${control.errors['minlength'].requiredLength}`;
+        }
+
+        if (control.errors['maxlength']) {
+            return `Maximum length is ${control.errors['maxlength'].requiredLength} characters`;
+        }
+
+        if (control.errors['pattern']) {
+            return 'Only letters, numbers, hyphens, and underscores are allowed';
+        }
+
+        return 'Invalid input';
+    }
+
 
 
 }

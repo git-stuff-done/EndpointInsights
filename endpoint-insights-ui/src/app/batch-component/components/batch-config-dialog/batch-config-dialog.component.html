@@ -5,10 +5,11 @@
 
         <!-- Overview -->
         <section class="form-section">
-            <h3>Overview</h3>
+            <h3>Name</h3>
             <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Application Name</mat-label>
-                <input matInput placeholder="e.g. Payments Service" formControlName="batchName" />
+                <mat-label>Test Batch Name</mat-label>
+                <input matInput placeholder="e.g. Payments Service" formControlName="batchName"  />
+                <mat-error>{{ getErrorMessage('batchName') }}</mat-error>
             </mat-form-field>
         </section>
 

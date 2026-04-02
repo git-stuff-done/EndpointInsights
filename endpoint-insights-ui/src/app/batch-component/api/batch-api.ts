@@ -35,7 +35,8 @@ export class BatchApi {
             const createRequest = {
                 batchName: batch.batchName,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
-                emails: batch.emails ?? []
+                emails: batch.emails ?? [],
+                active: batch.active
             };
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)
                 .pipe(
