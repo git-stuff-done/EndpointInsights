@@ -105,7 +105,6 @@ describe('CreateJobModal', () => {
         });
 
         it('should show error toast on failure', () => {
-            spyOn(console, 'error');
             jobServiceSpy.createJob.and.returnValue(throwError(() => new Error('fail')));
             component.onSubmit({ jobType: 'E2E', name: 'Test' });
             expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to create job. Please try again.');

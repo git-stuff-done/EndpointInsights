@@ -107,7 +107,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.put).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches/123`,
-            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [] }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], active: false }
         );
     });
 
