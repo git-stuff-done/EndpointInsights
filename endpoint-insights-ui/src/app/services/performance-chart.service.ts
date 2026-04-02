@@ -21,7 +21,8 @@ export class PerformanceChartService {
     limit = 10
   ): Observable<ChartResponse> {
     if (jobId && batchId) {
-      throw new Error('Provide only one of jobId or batchId');
+      batchId = undefined;
+      // throw new Error('Provide only one of jobId or batchId');
     }
 
     let params = new HttpParams().set('limit', limit.toString());
