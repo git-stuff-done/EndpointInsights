@@ -21,7 +21,7 @@ describe('BatchApi', () => {
         lastRunTime: '',
         notificationList: [],
         jobs: [],
-        isNew: false
+        isNew: false,
     };
 
     beforeEach(() => {
@@ -107,7 +107,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.put).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches/123`,
-            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], active: false }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: []}
         );
     });
 
