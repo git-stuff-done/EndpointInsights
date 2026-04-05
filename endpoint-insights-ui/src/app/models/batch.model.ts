@@ -11,7 +11,7 @@ export interface Batch {
 
     /** ISO string or timestamp representing when the batch was created or run */
     startTime: string | Date;
-    lastRunTime?: string | Date;
+    lastTimeRun?: string | Date;
     cronExpression?: string;
     notificationList?: string[];
     description?: string;

@@ -18,9 +18,9 @@ describe('BatchComponent', () => {
   let mockStore: jasmine.SpyObj<BatchStore>;
 
   const mockBatches: Batch[] = [
-    { id: '1', batchName: 'Nightly Build', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
-    { id: '2', batchName: 'Weekly Report', startTime: new Date().toISOString(), active: false, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
-    { id: '3', batchName: 'Auth Tests', startTime: new Date().toISOString(), active: true, lastRunTime: '', notificationList: [], jobs: [], isNew: false },
+    { id: '1', batchName: 'Nightly Build', startTime: new Date().toISOString(), active: true, lastTimeRun: '', notificationList: [], jobs: [], isNew: false },
+    { id: '2', batchName: 'Weekly Report', startTime: new Date().toISOString(), active: false, lastTimeRun: '', notificationList: [], jobs: [], isNew: false },
+    { id: '3', batchName: 'Auth Tests', startTime: new Date().toISOString(), active: true, lastTimeRun: '', notificationList: [], jobs: [], isNew: false },
   ];
 
   beforeEach(async () => {
@@ -104,7 +104,7 @@ describe('BatchComponent', () => {
 
   it('loadBatches should set batch from service response', () => {
     const other: Batch[] = [
-      { id: '4', batchName: 'Batch 4', startTime: '', active: false, lastRunTime: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
+      { id: '4', batchName: 'Batch 4', startTime: '', active: false, lastTimeRun: '', nextRunTime: '', nextRunDate: '', notificationList: [], jobs: [], isNew: false } as Batch,
     ];
     mockBatchService.getAllBatches.and.returnValue(of(new HttpResponse<Batch[]>({ body: other })));
 

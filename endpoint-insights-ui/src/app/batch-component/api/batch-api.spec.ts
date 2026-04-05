@@ -18,7 +18,7 @@ describe('BatchApi', () => {
         batchName: 'Test Batch',
         active: false,
         startTime: '',
-        lastRunTime: '',
+        lastTimeRun: '',
         notificationList: [],
         jobs: [],
         isNew: false,
