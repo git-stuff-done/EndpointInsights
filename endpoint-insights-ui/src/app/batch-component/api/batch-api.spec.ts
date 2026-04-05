@@ -74,7 +74,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [] }
+            { batchName: 'Test Batch', jobs: [], emails: [], active: false }
         );
     });
 
