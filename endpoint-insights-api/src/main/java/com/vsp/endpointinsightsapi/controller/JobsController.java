@@ -41,11 +41,12 @@ public class JobsController {
 	 * @return the created Job
 	 * */
 	@PostMapping
-	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
+	 public ResponseEntity<JobDTO> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
 	 		Job job = jobService.createJob(jobRequest);
              //TODO: Sanitize user input `job`
-	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
+	 		JobDTO dto = jobMapper.toDTO(job);
+	 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
@@ -76,7 +77,7 @@ public class JobsController {
 	 * @return the updated Job
 	 * */
 	@PutMapping("/{id}")
-	public ResponseEntity<Job> updateJob(
+	public ResponseEntity<JobDTO> updateJob(
 			@RequestBody
 			@Valid
 			Job request,
@@ -86,8 +87,9 @@ public class JobsController {
 		LOG.info("Updating job");
 
         Job savedJob = jobService.updateJob(jobId, request);
+        JobDTO dto = jobMapper.toDTO(savedJob);
 
-		return ResponseEntity.ok(savedJob);
+		return ResponseEntity.ok(dto);
 	}
 
 	/**

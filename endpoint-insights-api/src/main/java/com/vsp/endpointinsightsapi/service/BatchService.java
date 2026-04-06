@@ -133,7 +133,9 @@ public class BatchService {
 
         batchSchedulerService.scheduleBatch(saved);
 
-        return saved;
+        // Reload with user relationships for DTO mapping
+        return testBatchRepository.findByIdWithJobsAndUsers(saved.getBatchId())
+                .orElseThrow(() -> new CustomExceptionBuilder(HttpStatus.NOT_FOUND, "Batch not found after creation").build());
     }
 
     //Update Batch — used by PUT /api/batches/{id}
@@ -171,7 +173,9 @@ public class BatchService {
 
         batchSchedulerService.scheduleBatch(batch);
 
-        return batch;
+        // Reload with user relationships for DTO mapping
+        return testBatchRepository.findByIdWithJobsAndUsers(id)
+                .orElseThrow(() -> new CustomExceptionBuilder(HttpStatus.NOT_FOUND, "Batch not found after update").build());
     }
 
     private List<String> getEmailsForBatch(UUID batchId) {
