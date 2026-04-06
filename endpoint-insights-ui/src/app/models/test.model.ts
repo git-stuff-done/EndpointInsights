@@ -1,4 +1,5 @@
-import { JobStatus } from '../common/job.constants';
+import {JobStatus} from '../common/job.constants';
+import {UserInfo} from './user.model';
 
 export interface TestItem {
     jobId: string;
@@ -16,7 +17,7 @@ export interface TestItem {
     jmeterTestName?: string;
     jobType: string;
     createdAt: Date | string;
-    createdBy: string;
+    createdBy: UserInfo;
     status: JobStatus;
     threshold: number;
 }
