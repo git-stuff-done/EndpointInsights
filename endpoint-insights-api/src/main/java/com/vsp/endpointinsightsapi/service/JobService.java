@@ -66,7 +66,7 @@ public class JobService {
             LOG.debug("No jobs found in the repository");
             throw new JobNotFoundException("No jobs available");
         }
-        return Optional.of(jobRepository.findAll());
+        return Optional.of(jobRepository.findAllWithUsers());
     }
 
     public Optional<Job> getJobById(UUID jobId) {
@@ -74,7 +74,7 @@ public class JobService {
             LOG.debug("Job {} not found", jobId);
             throw new JobNotFoundException(jobId.toString());
         }
-        return jobRepository.findById(jobId);
+        return jobRepository.findByIdWithUsers(jobId);
 
     }
 

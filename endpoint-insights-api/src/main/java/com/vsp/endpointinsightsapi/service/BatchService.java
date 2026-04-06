@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,7 @@ public class BatchService {
     @Setter
     private int staleBatchThresholdSeconds = 60;
 
+	@Autowired
 	public BatchService(TestBatchRepository testBatchRepository,
                         BatchMapper batchMapper,
                         JobRepository jobRepository,
@@ -91,7 +93,7 @@ public class BatchService {
 
     //Get Batch — used by GET /api/batches/{id}
     public BatchResponseDTO getBatchById(UUID batchId) {
-        TestBatch b = testBatchRepository.findById(batchId)
+        TestBatch b = testBatchRepository.findByIdWithJobsAndUsers(batchId)
                 .orElseThrow(() -> {
                     LOG.debug("Batch {} not found", batchId);
                     return new BatchNotFoundException(batchId.toString());

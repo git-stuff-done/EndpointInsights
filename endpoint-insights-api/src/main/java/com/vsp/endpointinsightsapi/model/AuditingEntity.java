@@ -48,4 +48,25 @@ public abstract class AuditingEntity {
     @Column(name = "updated_date", nullable = false)
     private Instant updatedDate;
 
+    /**
+     * Relationship to the User who created this entity.
+     * Joins on the composite key (issuer, subject).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "created_by_issuer", referencedColumnName = "issuer", insertable = false, updatable = false),
+            @JoinColumn(name = "created_by_subject", referencedColumnName = "subject", insertable = false, updatable = false)
+    })
+    private User creator;
+
+    /**
+     * Relationship to the User who last modified this entity.
+     * Joins on the composite key (issuer, subject).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "updated_by_issuer", referencedColumnName = "issuer", insertable = false, updatable = false),
+            @JoinColumn(name = "updated_by_subject", referencedColumnName = "subject", insertable = false, updatable = false)
+    })
+    private User updater;
 }

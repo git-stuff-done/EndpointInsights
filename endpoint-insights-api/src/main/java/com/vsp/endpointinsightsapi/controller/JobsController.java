@@ -1,7 +1,9 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
+import com.vsp.endpointinsightsapi.dto.JobDTO;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.mapper.JobMapper;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
@@ -25,9 +27,11 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
+    private final JobMapper jobMapper;
 
-	public JobsController(JobService jobService) {
+	public JobsController(JobService jobService,  JobMapper jobMapper) {
 		this.jobService = jobService;
+        this.jobMapper = jobMapper;
 	}
 
 	/**
@@ -90,11 +94,15 @@ public class JobsController {
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping
-	public ResponseEntity<List<Job>> getJobs() {
-		List<Job> j = jobService.getAllJobs().orElse(new ArrayList<>());
-        return ResponseEntity.ok(j);
-	}
+    @GetMapping
+    public ResponseEntity<List<JobDTO>> getJobs() {
+        List<JobDTO> jobs = jobService.getAllJobs()
+                .orElse(new ArrayList<>())
+                .stream()
+                .map(jobMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(jobs);
+    }
 
 	/**
 	 * Endpoint to retrieve a job
@@ -102,21 +110,23 @@ public class JobsController {
 	 * @param jobId the id of the job to be retrieved
 	 * @return the Job with the given jobId
 	 * */
-	@GetMapping("/{id}")
-	public ResponseEntity<Job> getJob(
-			@PathVariable("id")
-			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			String jobId) {
-		
-		try{
-			UUID jobUuid = UUID.fromString(jobId);
-			return jobService.getJobById(jobUuid).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}")
+    public ResponseEntity<JobDTO> getJob(
+            @PathVariable("id")
+            @NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
+            String jobId) {
 
-		} catch(IllegalArgumentException e){
-			LOG.error("Invalid UUID format for jobId: {}", jobId);
-			return ResponseEntity.badRequest().build();
-		}
-	}
+        try {
+            UUID jobUuid = UUID.fromString(jobId);
+            return jobService.getJobById(jobUuid)
+                    .map(jobMapper::toDTO)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            LOG.error("Invalid UUID format for jobId: {}", jobId);
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 	/**
 	 * Endpoint to delete a job
