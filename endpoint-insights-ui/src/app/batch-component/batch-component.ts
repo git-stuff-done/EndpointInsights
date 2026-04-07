@@ -15,11 +15,12 @@ import {BatchConfigDialogComponent} from './components/batch-config-dialog/batch
 import {BatchService} from "../services/batch.service";
 import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 import {NotificationService} from "../services/notification.service";
+import {UserDisplayComponent} from "../components/user-display/user-display.component";
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule,MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, UserDisplayComponent],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })

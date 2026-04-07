@@ -28,7 +28,7 @@ public class JavaMailEmailSender implements EmailSender {
         message.setTo(recipientEmail);
         message.setSubject("Test Run Completed - " + runId);
         message.setText(buildEmailBody(runId, resultId));
-       // mailSender.send(message);                         //TODO uncomment when mailer credentials ready
+       mailSender.send(message);
     }
 
     private String buildEmailBody(UUID runId, UUID resultId) {

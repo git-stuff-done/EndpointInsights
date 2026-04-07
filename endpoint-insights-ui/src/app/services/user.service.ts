@@ -1,19 +1,22 @@
 import {inject, Injectable} from "@angular/core";
 import {Observable, of} from "rxjs";
 import {UserApi} from "../userApi/userApi";
+import {User} from "../models/user.model";
 
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class UserService {
-    constructor() {}
+    constructor() {
+    }
+
     private userApi = inject(UserApi);
 
-    searchUsers(query: string | null):Observable<User[]>{
-        if(query === null || query === "") return of([]);
+    searchUsers(query: string | null): Observable<User[]> {
+        if (query === null || query === "") return of([]);
         return this.userApi.getAllUsersByQuery(query);
     }
 
-    findUsersById(list: string[]){
+    findUsersById(list: string[]) {
         return this.userApi.getAllUsersByIds(list);
     }
 }
