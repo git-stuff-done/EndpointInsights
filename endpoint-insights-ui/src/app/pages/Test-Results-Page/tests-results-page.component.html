@@ -26,7 +26,7 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Batch Name</th>
                     <td mat-cell *matCellDef="let row">
                         @if (row?.batchName) {
-                            <span class="batch-name">{{ row.batchName }}</span>
+                            <span class="batch-name with-dotted-underline" [matTooltip]="row.batchId || ''" matTooltipPosition="above" matTooltipClass="id-tooltip">{{ row.batchName }}</span>
                         } @else {
                             <span class="batch-name">-</span>
                         }
@@ -38,7 +38,7 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Test Name</th>
                     <td mat-cell *matCellDef="let row">
                         @if (row?.testName) {
-                            <span class="test-name">{{ row.testName }}</span>
+                            <span class="test-name with-dotted-underline" [matTooltip]="row.jobId || ''" matTooltipPosition="above" matTooltipClass="id-tooltip">{{ row.testName }}</span>
                         } @else {
                             <span class="test-name">-</span>
                         }
@@ -49,12 +49,6 @@
                 <ng-container matColumnDef="runId">
                     <th mat-header-cell *matHeaderCellDef>Run ID</th>
                     <td mat-cell *matCellDef="let row" class="mono truncate" [title]="row.runId">{{ row.runId }}</td>
-                </ng-container>
-
-                <!-- Test UUID (jobId) -->
-                <ng-container matColumnDef="jobId">
-                    <th mat-header-cell *matHeaderCellDef>Test UUID</th>
-                    <td mat-cell *matCellDef="let row" class="mono truncate" [title]="row.jobId">{{ row.jobId }}</td>
                 </ng-container>
 
                 <!-- Time Ran -->
@@ -72,7 +66,7 @@
                 <!-- Started By -->
                 <ng-container matColumnDef="startedBy">
                     <th mat-header-cell *matHeaderCellDef>Started By</th>
-                    <td mat-cell *matCellDef="let row" class="mono truncate">{{ row.startedBy }}</td>
+                    <td mat-cell *matCellDef="let row" class="mono truncate">{{ row.startedBy || 'System' }}</td>
                 </ng-container>
 
                 <!-- Status -->

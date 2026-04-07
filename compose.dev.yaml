@@ -1,0 +1,63 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: endpoint-insights-api/Dockerfile.dev
+    env_file:
+      - .env.dev
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    volumes:
+      - ./endpoint-insights-api/src:/app/src
+      - ./endpoint-insights-api/pom.xml:/app/pom.xml
+      - maven-cache:/root/.m2
+    networks:
+      - dev-network
+    depends_on:
+      - mailpit
+    environment:
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: "noreply@localhost"
+      MAIL_SMTP_AUTH: "false"
+      MAIL_SMTP_STARTTLS: "false"
+
+  ui:
+    build:
+      context: ./endpoint-insights-ui
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./endpoint-insights-ui/src:/app/src
+      - ./endpoint-insights-ui/angular.json:/app/angular.json
+      - ./endpoint-insights-ui/tsconfig.json:/app/tsconfig.json
+      - ./endpoint-insights-ui/tsconfig.app.json:/app/tsconfig.app.json
+      - node-modules:/app/node_modules
+    networks:
+      - dev-network
+    environment:
+      - NODE_ENV=development
+
+  mailpit:
+    image: axllent/mailpit:latest
+    networks:
+      - dev-network
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  maven-cache:
+  node-modules:
