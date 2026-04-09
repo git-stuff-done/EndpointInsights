@@ -47,7 +47,7 @@
                 <div class="batch-row" >
                     <div class="cell name">
                         <span class="title">{{ b.batchName }}</span>
-                         <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>
+                         <span class="active" [class.true]="b.active === true" [class.false]="b.active !== true">{{ b.active ? 'Active' : 'Inactive' }}</span>
                     </div>
                     <div class="cell id">{{ b.id }}</div>
                     <div class="cell created-by">

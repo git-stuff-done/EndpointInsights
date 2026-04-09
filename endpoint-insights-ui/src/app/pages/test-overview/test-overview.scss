@@ -137,8 +137,11 @@
     text-transform: capitalize;
     border: 1px solid #ddd;
 }
-.status.stopped { background: #fdecea; color: #b3261e; border-color: #f6c7c2; }
-.status.running { background: #eef3ff; color: #2a5bd7; border-color: #d8e2ff; }
+.status.SUCCESS { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+.status.FAILED  { background: #fdecea; color: #b3261e; border-color: #f6c7c2; }
+.status.RUNNING { background: #eef3ff; color: #2a5bd7; border-color: #d8e2ff; }
+.status.PENDING { background: #fff8e1; color: #b26a00; border-color: #ffe082; }
+.status.STOPPED { background: #f3f4f6; color: #6b7280; border-color: #d1d5db; }
 
 .actions { display: inline-flex; gap: 4px; justify-self: end; }
 .actions button{
