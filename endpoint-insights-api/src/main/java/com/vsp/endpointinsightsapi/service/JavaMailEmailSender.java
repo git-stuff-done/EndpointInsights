@@ -5,6 +5,7 @@ import com.vsp.endpointinsightsapi.model.entity.PerfTestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.JobStatus;
+import com.vsp.endpointinsightsapi.model.enums.TestFailureTypes;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import jakarta.mail.MessagingException;
@@ -38,13 +39,11 @@ public class JavaMailEmailSender implements EmailSender {
 
     private final ResourceLoader resourceLoader;
     private final JobRepository jobRepository;
-    private final PerfTestResultRepository perfTestResultRepository;
 
-    public JavaMailEmailSender(JavaMailSender mailSender, ResourceLoader resourceLoader, JobRepository jobRepository, PerfTestResultRepository perfTestResultRepository) {
+    public JavaMailEmailSender(JavaMailSender mailSender, ResourceLoader resourceLoader, JobRepository jobRepository) {
         this.mailSender = mailSender;
         this.resourceLoader = resourceLoader;
         this.jobRepository = jobRepository;
-        this.perfTestResultRepository = perfTestResultRepository;
     }
 
     @Override
@@ -55,14 +54,13 @@ public class JavaMailEmailSender implements EmailSender {
         Resource resource = resourceLoader.getResource("classpath:email_templates/failed_test_email_template.html");
         Map<String, String> variablesMap = new HashMap<>();
         PerfTestResult perf = new PerfTestResult();
-        String reasonForFailure = "Other";
+        String reasonForFailure = TestFailureTypes.OTHER.toString();
         for(TestResult testResult : results){
             List<PerfTestResult> perfTestResults = testResult.getPerfTestResult();
             for(PerfTestResult perfTestResult : perfTestResults){
                 if(perfTestResult.getTestResult().getId().equals(testResult.getId()) && perfTestResult.getJobId().equals(testRun.getJobId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
                     perf = perfTestResult;
-
-                    reasonForFailure = "Latency exceeded threshold";
+                    reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
                 }
             }
         }
