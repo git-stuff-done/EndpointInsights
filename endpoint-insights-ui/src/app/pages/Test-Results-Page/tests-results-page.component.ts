@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { RecentActivity } from '../../models/test-run.model';
 import { TestRunService } from '../../services/test-run.service';
@@ -27,6 +28,7 @@ import { TestRunService } from '../../services/test-run.service';
         MatIconModule,
         MatButtonModule,
         MatProgressSpinnerModule,
+        MatTooltipModule,
         MatPaginatorModule,
     ],
     templateUrl: './tests-results-page.component.html',
@@ -37,7 +39,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
     @ViewChild(MatPaginator) paginator!: MatPaginator;
 
     dataSource = new MatTableDataSource<RecentActivity>([]);
-    displayedColumns = ['batchName', 'testName', 'runId', 'jobId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
+    displayedColumns = ['batchName', 'testName', 'runId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
     searchControl = new FormControl('');
     isLoading = true;
     loadError: string | null = null;

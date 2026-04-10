@@ -1,22 +1,21 @@
 package com.vsp.endpointinsightsapi.dto;
 
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BatchResponseDTO {
+@EqualsAndHashCode(callSuper = true)
+public class BatchResponseDTO extends AuditedDTO {
     private UUID id;
     private String batchName;
     private Long scheduleId;
@@ -25,6 +24,6 @@ public class BatchResponseDTO {
     private Boolean active;
     private String cronExpression;
     private List<String> notificationList;
-    private List<Job> jobs;
+    private List<JobDTO> jobs;
 
 }

@@ -101,7 +101,7 @@
                                     <td>{{ t.group }}</td>
                                     <td>{{ t.dateRun | date: 'M/d/yy' }}</td>
                                     <td>{{ t.durationMs }} ms</td>
-                                    <td>{{ t.startedBy }}</td>
+                                    <td>{{ t.startedBy || 'System' }}</td>
                                     <td>
                     <span
                             class="status-pill"

@@ -60,7 +60,7 @@ class BatchServiceTest {
         entity.setLastTimeRun(LocalDate.parse("2025-11-09").atStartOfDay());
         entity.setActive(true);
 
-        when(testBatchRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(testBatchRepository.findByIdWithJobsAndUsers(id)).thenReturn(Optional.of(entity));
 
         BatchResponseDTO dto = BatchResponseDTO.builder()
                 .id(id)
@@ -76,14 +76,13 @@ class BatchServiceTest {
 
         assertEquals(id, out.getId());
         assertEquals("Example", out.getBatchName());
-        verify(testBatchRepository).findById(id);
+        verify(testBatchRepository).findByIdWithJobsAndUsers(id);
         verify(batchMapper).toDto(entity);
     }
 
     @Test
     void getBatchById_notFound_throws() {
         UUID id = UUID.randomUUID();
-        when(testBatchRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(BatchNotFoundException.class, () -> testBatchService.getBatchById(id));
     }
@@ -127,6 +126,7 @@ class BatchServiceTest {
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of(jobId1, jobId2))).thenReturn(List.of(job1, job2));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
@@ -157,6 +157,7 @@ class BatchServiceTest {
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of(newJobId))).thenReturn(List.of(newJob));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
@@ -184,6 +185,7 @@ class BatchServiceTest {
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(jobRepository.findAllById(List.of())).thenReturn(List.of());
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
@@ -238,6 +240,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
@@ -259,6 +262,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
@@ -279,6 +283,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         testBatchService.updateBatch(batchId, request);
 
@@ -303,6 +308,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         testBatchService.updateBatch(batchId, request);
 
@@ -325,6 +331,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         testBatchService.updateBatch(batchId, request);
 
@@ -344,6 +351,7 @@ class BatchServiceTest {
 
         when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
         when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
 
         TestBatch result = testBatchService.updateBatch(batchId, request);
 
