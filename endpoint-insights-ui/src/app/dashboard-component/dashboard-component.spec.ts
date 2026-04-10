@@ -156,4 +156,31 @@ describe('DashboardComponent', () => {
     expect(component.failuresLast24h).toBe(2);
     expect(component.passingPercentage).toBe(80);
   });
+
+  it('calculates averageLatencyMs from summary', () => {
+    fixture.detectChanges();
+    expect(component.averageLatencyMs).toBe(6469);
+  });
+
+  it('returns 0 for failureEndpointsCount when summary has no recentActivity', () => {
+    fixture.detectChanges();
+    expect(component.failureEndpointsCount).toBe(0);
+  });
+
+  it('counts distinct failing endpoints from recentActivity', () => {
+    component.summary = {
+        totalRuns: 2,
+        passedRuns: 0,
+        failedRuns: 2,
+        passRate: 0,
+        avgDurationMs: 100,
+        byStatus: { PASS: 0, FAIL: 2, RUNNING: 0, PENDING: 0 },
+        recentActivity: [
+        { testName: 'API-A', status: 'FAIL' } as any,
+        { testName: 'API-A', status: 'FAIL' } as any,  // same endpoint, should count once
+        { testName: 'API-B', status: 'FAIL' } as any,
+        ]
+    };
+    expect(component.failureEndpointsCount).toBe(2);
+  });
 });
