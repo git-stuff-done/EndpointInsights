@@ -5,7 +5,7 @@ import { TestRunService } from '../services/test-run.service';
 import { PerformanceChartService } from '../services/performance-chart.service';
 import { DashboardSummaryService } from '../services/dashboard-summary.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { JobService } from '../services/job.service';
+import { JobService } from '../services/job-services';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -209,17 +209,6 @@ describe('DashboardComponent', () => {
     expect(component.activeJobsTotal).toBe(0);
   });
 
-  it('calculates activeJobsScheduled from jobs with SCHEDULED type', () => {
-    (component as any).jobs = [
-      { jobId: '1', name: 'Job A', type: 'SCHEDULED' },
-      { jobId: '2', name: 'Job B', type: 'MANUAL' },
-      { jobId: '3', name: 'Job C', type: 'SCHEDULED' },
-    ];
-    expect(component.activeJobsScheduled).toBe(2);
-    expect(component.activeJobsManual).toBe(1);
-    expect(component.activeJobsTotal).toBe(3);
-  });
-
   it('returns 0 for passingPercentage when summary is undefined', () => {
     component.summary = undefined;
     expect(component.passingPercentage).toBe(0);
@@ -233,4 +222,11 @@ describe('DashboardComponent', () => {
     expect(component.failuresLast24h).toBe(0);
     expect(component.failureEndpointsCount).toBe(0);
   });
+
+  it('loads jobs on init and sets activeJobsTotal', () => {
+      fixture.detectChanges();
+
+      expect(mockJobService.getAllJobs).toHaveBeenCalled();
+      expect(component.activeJobsTotal).toBe(2);
+    });
 });
