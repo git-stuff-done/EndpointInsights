@@ -5,6 +5,7 @@ import { TestRunService } from '../services/test-run.service';
 import { PerformanceChartService } from '../services/performance-chart.service';
 import { DashboardSummaryService } from '../services/dashboard-summary.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { JobService } from '../services/job.service';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -26,6 +27,13 @@ describe('DashboardComponent', () => {
         }
       ])
     )
+  };
+
+  const mockJobService = {
+    getAllJobs: jasmine.createSpy('getAllJobs').and.returnValue(of([
+      { jobId: '1', name: 'Job A', type: 'SCHEDULED' },
+      { jobId: '2', name: 'Job B', type: 'MANUAL' },
+    ]))
   };
 
   const mockPerformanceChartService = {
@@ -77,7 +85,8 @@ describe('DashboardComponent', () => {
       providers: [
         { provide: TestRunService, useValue: mockTestRunService },
         { provide: PerformanceChartService, useValue: mockPerformanceChartService },
-         { provide: DashboardSummaryService, useValue: mockDashboardSummaryService }
+        { provide: DashboardSummaryService, useValue: mockDashboardSummaryService },
+        { provide: JobService, useValue: mockJobService }
       ]
     }).compileComponents();
 
@@ -92,6 +101,7 @@ describe('DashboardComponent', () => {
     mockPerformanceChartService.getApiPerformanceChart.calls.reset();
     mockDashboardSummaryService.getSummary.calls.reset();
     mockDashboardSummaryService.loadDashboardSummary.calls.reset();
+    mockJobService.getAllJobs.calls.reset();
   });
 
   it('should create', () => {
@@ -182,5 +192,45 @@ describe('DashboardComponent', () => {
         ]
     };
     expect(component.failureEndpointsCount).toBe(2);
+  });
+
+  it('calls loadDashboardSummary with limit 100 on init', () => {
+    fixture.detectChanges();
+    expect(mockDashboardSummaryService.loadDashboardSummary).toHaveBeenCalledWith(100);
+  });
+
+  it('sets summary from loadDashboardSummary response', () => {
+    fixture.detectChanges();
+    expect(component.summary).toBeTruthy();
+    expect(component.summary?.totalRuns).toBe(10);
+  });
+
+  it('returns 0 for activeJobsTotal when no jobs loaded', () => {
+    expect(component.activeJobsTotal).toBe(0);
+  });
+
+  it('calculates activeJobsScheduled from jobs with SCHEDULED type', () => {
+    (component as any).jobs = [
+      { jobId: '1', name: 'Job A', type: 'SCHEDULED' },
+      { jobId: '2', name: 'Job B', type: 'MANUAL' },
+      { jobId: '3', name: 'Job C', type: 'SCHEDULED' },
+    ];
+    expect(component.activeJobsScheduled).toBe(2);
+    expect(component.activeJobsManual).toBe(1);
+    expect(component.activeJobsTotal).toBe(3);
+  });
+
+  it('returns 0 for passingPercentage when summary is undefined', () => {
+    component.summary = undefined;
+    expect(component.passingPercentage).toBe(0);
+    expect(component.averageLatencyMs).toBe(0);
+  });
+
+  it('returns 0 for all KPIs when summary is undefined', () => {
+    component.summary = undefined;
+    expect(component.totalRuns).toBe(0);
+    expect(component.passingRuns).toBe(0);
+    expect(component.failuresLast24h).toBe(0);
+    expect(component.failureEndpointsCount).toBe(0);
   });
 });
