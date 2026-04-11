@@ -1,19 +1,13 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
-import com.vsp.endpointinsightsapi.model.Job;
-import com.vsp.endpointinsightsapi.model.JobCreateRequest;
-import com.vsp.endpointinsightsapi.model.JobRun;
-import com.vsp.endpointinsightsapi.model.JobRunHistory;
+import com.vsp.endpointinsightsapi.dto.JobDTO;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.mapper.JobMapper;
+import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.runner.GitService;
-import com.vsp.endpointinsightsapi.runner.JMeterCommandService;
-import com.vsp.endpointinsightsapi.runner.JMeterInterpreterService;
-import com.vsp.endpointinsightsapi.runner.JobRunnerThread;
+import com.vsp.endpointinsightsapi.model.enums.TestType;
 import com.vsp.endpointinsightsapi.service.JobService;
-import com.vsp.endpointinsightsapi.service.NotificationService;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.*;
 
 @RestController
@@ -34,21 +27,11 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
-	private final JMeterInterpreterService jMeterInterpreterService;
-	private final TestRunRepository testRunRepository;
-	private final NotificationService notificationService;
-    private final GitService gitService;
-    private final JMeterCommandService jMeterCommandEnhancer;
+    private final JobMapper jobMapper;
 
-	public JobsController(JobService jobService, JMeterInterpreterService jMeterInterpreterService,
-						  TestRunRepository testRunRepository, NotificationService notificationService,
-                          GitService gitService, JMeterCommandService jMeterCommandEnhancer) {
+	public JobsController(JobService jobService,  JobMapper jobMapper) {
 		this.jobService = jobService;
-		this.jMeterInterpreterService = jMeterInterpreterService;
-		this.testRunRepository = testRunRepository;
-		this.notificationService = notificationService;
-        this.gitService = gitService;
-        this.jMeterCommandEnhancer = jMeterCommandEnhancer;
+        this.jobMapper = jobMapper;
 	}
 
 	/**
@@ -58,11 +41,12 @@ public class JobsController {
 	 * @return the created Job
 	 * */
 	@PostMapping
-	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
+	 public ResponseEntity<JobDTO> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
 	 		Job job = jobService.createJob(jobRequest);
              //TODO: Sanitize user input `job`
-	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
+	 		JobDTO dto = jobMapper.toDTO(job);
+	 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
@@ -78,23 +62,11 @@ public class JobsController {
 			return ResponseEntity.notFound().build();
 		}
 
-		 TestRun testRun = new TestRun();
-		 testRun.setStartedAt(Instant.now());
-		 testRun.setStatus(TestRunStatus.PENDING);
-		 testRun.setJobId(job.get().getJobId());
-		 testRun.setRunBy("system"); //todo: needs to be updated
-		 testRun = testRunRepository.save(testRun);
+		if (!TestType.PERF.equals(job.get().getJobType())) {
+			throw new CustomExceptionBuilder(HttpStatus.NOT_IMPLEMENTED, "Test type is not supported at this time").build();
+		}
 
-        Collection<TestRun> failedTestRuns = Collections.synchronizedCollection(new ArrayList<>());
-		Thread t = new Thread(new JobRunnerThread(job.get(), testRun, testRunRepository, jMeterInterpreterService, notificationService, failedTestRuns, gitService, jMeterCommandEnhancer));
-		t.start();
-
-        // TODO, add check to make sure all threads finish before proceeding to email
-
-         if(!failedTestRuns.isEmpty()) {
-             //Send ids of failed jobs to email service.
-         }
-		return ResponseEntity.ok(testRun);
+		return ResponseEntity.ok(jobService.runJob(job.get()));
 	 }
 
 	/**
@@ -105,7 +77,7 @@ public class JobsController {
 	 * @return the updated Job
 	 * */
 	@PutMapping("/{id}")
-	public ResponseEntity<Job> updateJob(
+	public ResponseEntity<JobDTO> updateJob(
 			@RequestBody
 			@Valid
 			Job request,
@@ -115,18 +87,24 @@ public class JobsController {
 		LOG.info("Updating job");
 
         Job savedJob = jobService.updateJob(jobId, request);
+        JobDTO dto = jobMapper.toDTO(savedJob);
 
-		return ResponseEntity.ok(savedJob);
+		return ResponseEntity.ok(dto);
 	}
 
 	/**
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping
-	public ResponseEntity<List<Job>> getJobs() {
-		return jobService.getAllJobs().map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-	}
+    @GetMapping
+    public ResponseEntity<List<JobDTO>> getJobs() {
+        List<JobDTO> jobs = jobService.getAllJobs()
+                .orElse(new ArrayList<>())
+                .stream()
+                .map(jobMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(jobs);
+    }
 
 	/**
 	 * Endpoint to retrieve a job
@@ -134,21 +112,23 @@ public class JobsController {
 	 * @param jobId the id of the job to be retrieved
 	 * @return the Job with the given jobId
 	 * */
-	@GetMapping("/{id}")
-	public ResponseEntity<Job> getJob(
-			@PathVariable("id")
-			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			String jobId) {
-		
-		try{
-			UUID jobUuid = UUID.fromString(jobId);
-			return jobService.getJobById(jobUuid).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/{id}")
+    public ResponseEntity<JobDTO> getJob(
+            @PathVariable("id")
+            @NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
+            String jobId) {
 
-		} catch(IllegalArgumentException e){
-			LOG.error("Invalid UUID format for jobId: {}", jobId);
-			return ResponseEntity.badRequest().build();
-		}
-	}
+        try {
+            UUID jobUuid = UUID.fromString(jobId);
+            return jobService.getJobById(jobUuid)
+                    .map(jobMapper::toDTO)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            LOG.error("Invalid UUID format for jobId: {}", jobId);
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 	/**
 	 * Endpoint to delete a job
@@ -157,13 +137,9 @@ public class JobsController {
 	 * @return A status message indicating the job was deleted
 	 * */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteJob(@PathVariable("id") UUID jobId) {
-		try {
-			jobService.deleteJobById(jobId);
-			return ResponseEntity.ok(String.format("Job %s deleted", jobId));
-		} catch (RuntimeException e) {
-			return ResponseEntity.notFound().build();
-		}
+	public ResponseEntity<Void> deleteJob(@PathVariable("id") UUID jobId) {
+		jobService.deleteJobById(jobId);
+		return ResponseEntity.noContent().build();
 	}
 
 	/**

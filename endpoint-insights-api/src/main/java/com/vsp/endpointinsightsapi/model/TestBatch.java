@@ -1,10 +1,9 @@
 package com.vsp.endpointinsightsapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 
@@ -25,6 +24,7 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "id", nullable = false)
     private UUID batchId;
 
+   @JsonManagedReference
    @ManyToMany(fetch = FetchType.EAGER)
    @JoinTable(
            name = "batch_jobs",
@@ -51,6 +51,8 @@ public class TestBatch extends AuditingEntity{
     @Column(name = "cron_expression")
     String cronExpression;
 
-    @Transient
-    List<UUID> notificationList;
+    @JsonManagedReference
+    @ToString.Exclude
+    @OneToMany(mappedBy = "testBatch", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<TestBatchEmailList> notificationList;
 }

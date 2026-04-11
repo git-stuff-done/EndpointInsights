@@ -1,9 +1,8 @@
 package com.vsp.endpointinsightsapi.config;
 
 
-import com.vsp.endpointinsightsapi.model.UserContext;
+import com.vsp.endpointinsightsapi.model.UserIdentity;
 import com.vsp.endpointinsightsapi.util.CurrentUser;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -11,18 +10,25 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.util.Optional;
 
+/**
+ * Configuration for JPA auditing using OIDC user identity.
+ *
+ * <p>Automatically populates createdBy and updatedBy fields with the current
+ * user's OIDC identity (issuer/subject) from the JWT token.
+ */
 @Configuration
 @EnableJpaAuditing
 public class EntityAuditConfig {
 
     @Bean
-    public AuditorAware<String> auditorProvider() {
+    public AuditorAware<UserIdentity> auditorProvider() {
 
         return () -> {
-            if(!CurrentUser.getUsername().equals("system")) {
-                return Optional.of(CurrentUser.getUsername());
+            Optional<UserIdentity> userIdentity = CurrentUser.getUserIdentity();
+            if (userIdentity.isPresent()) {
+                return userIdentity;
             }
-            return Optional.of("system");
+            return Optional.of(new UserIdentity("system", "system"));
         };
     }
 

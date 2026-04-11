@@ -4,10 +4,19 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {CreateJobForm} from './create-job-form';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {TestItem} from '../../models/test.model';
+import {UserInfo} from '../../models/user.model';
 
 describe('CreateJobForm', () => {
     let component: CreateJobForm;
     let fixture: ComponentFixture<CreateJobForm>;
+
+    const mockUserInfo: UserInfo = {
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'EDITOR',
+        issuer: 'https://auth.example.com',
+        subject: 'test-user-123'
+    };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -38,6 +47,8 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')?.value).toBe('');
             expect(component.createJobForm.get('runCommand')?.value).toBe('');
             expect(component.createJobForm.get('compileCommand')?.value).toBe('');
+            expect(component.createJobForm.get('threshold')?.value).toBe('');
+
         });
 
         it('should have all required form controls', () => {
@@ -52,6 +63,8 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')).toBeTruthy();
             expect(component.createJobForm.get('runCommand')).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')).toBeTruthy();
+            expect(component.createJobForm.get('threshold')).toBeTruthy();
+
         });
 
         it('should be invalid when empty', () => {
@@ -62,7 +75,7 @@ describe('CreateJobForm', () => {
     describe('ngOnChanges', () => {
         it('should patch form values when job input changes', () => {
             const job: TestItem = {
-                id: '1',
+                jobId: '1',
                 name: 'Updated Job',
                 batch: 'Batch A',
                 description: 'Updated description',
@@ -70,9 +83,10 @@ describe('CreateJobForm', () => {
                 gitAuthType: 'NONE',
                 runCommand: 'npm run test',
                 compileCommand: 'npm run build',
-                jobType: 'jmeter',
+                threshold: 20,
+                jobType: 'PERF',
                 createdAt: new Date(),
-                createdBy: 'user',
+                createdBy: mockUserInfo,
                 status: 'RUNNING'
             };
 
@@ -85,6 +99,8 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')?.value).toBe(job.jobType);
             expect(component.createJobForm.get('runCommand')?.value).toBe(job.runCommand);
             expect(component.createJobForm.get('compileCommand')?.value).toBe(job.compileCommand);
+            expect(component.createJobForm.get('threshold')?.value).toBe(job.threshold);
+
         });
     });
 
@@ -372,8 +388,9 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 jmeterTestName: 'text.jmx',
+                threshold: 20,
                 compileCommand: 'npm run build'
             });
 
@@ -392,7 +409,9 @@ describe('CreateJobForm', () => {
                 gitAuthType: 'NONE',
                 jobType: '',
                 runCommand: '',
-                compileCommand: ''
+                compileCommand: '',
+                threshold: 20,
+
             });
 
             component.submitForm();
@@ -410,6 +429,7 @@ describe('CreateJobForm', () => {
             expect(component.createJobForm.get('jobType')?.touched).toBeTruthy();
             expect(component.createJobForm.get('runCommand')?.touched).toBeTruthy();
             expect(component.createJobForm.get('compileCommand')?.touched).toBeTruthy();
+
         });
     });
 
@@ -420,9 +440,11 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 jmeterTestName: 'text.jmx',
-                compileCommand: 'npm run build'
+                compileCommand: 'npm run build',
+                threshold: 20,
+
             });
 
             expect(component.createJobForm.valid).toBeTruthy();
@@ -434,9 +456,11 @@ describe('CreateJobForm', () => {
                 description: 'Test description',
                 gitUrl: 'https://github.com/user/repo.git',
                 gitAuthType: 'NONE',
-                jobType: 'jmeter',
+                jobType: 'PERF',
                 runCommand: 'npm run test',
-                compileCommand: ''
+                compileCommand: '',
+                threshold: 20,
+
             });
 
             expect(component.createJobForm.valid).toBeFalsy();

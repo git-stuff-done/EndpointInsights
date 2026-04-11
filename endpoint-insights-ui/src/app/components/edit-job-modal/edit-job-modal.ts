@@ -42,24 +42,21 @@ export class EditJobModal{
     }
 
     toggleEditMode(){
-        this.state.update(s => ({
-            ...s,
-            inEditMode: !s.inEditMode
-        }))
-
-        // Check for sav3e
-        if (!this.state().inEditMode) {
-            this.onUpdate();
+        if (this.state().inEditMode) {
+            this.createJobForm.submitForm();
+        } else {
+            this.state.update(s => ({ ...s, inEditMode: true }));
         }
     }
 
-
-    onUpdate(jobData?: any){
-        this.jobService.updateJob(this.data.id,jobData).subscribe({
+    onUpdate(jobData?: any){ // still used by (jobSubmitted) output if needed
+        this.jobService.updateJob(this.data.jobId, jobData).subscribe({
             next: (response) => {
                 console.log('Job updated:', response);
                 this.toastService.onSuccess('Job updated successfully!');
-                this.dialogRef.close(jobData);
+                this.data = { ...this.data, ...jobData };
+                this.state.update(s => ({ ...s, inEditMode: false }));
+                this.dialogRef.close(this.data);
             },
             error: (error) => {
                 console.error('Error updating job:', error);

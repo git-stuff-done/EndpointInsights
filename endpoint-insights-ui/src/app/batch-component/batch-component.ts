@@ -1,36 +1,40 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatBadgeModule } from '@angular/material/badge';
-import { BatchCardComponent } from './components/batch-card/batch-card.component';
-import { Batch } from '../models/batch.model';
-import { BatchStore } from '../services/batch-store.service';
-import { BatchConfigDialogComponent } from './components/batch-config-dialog/batch-config-dialog.component';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {Subscription} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatBadgeModule} from '@angular/material/badge';
+import {Batch} from '../models/batch.model';
+import {BatchStore} from '../services/batch-store.service';
+import {BatchConfigDialogComponent} from './components/batch-config-dialog/batch-config-dialog.component';
 import {BatchService} from "../services/batch.service";
 import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
+import {NotificationService} from "../services/notification.service";
+import {UserDisplayComponent} from "../components/user-display/user-display.component";
 
 @Component({
     selector: 'app-batches',
     standalone: true,
-    imports: [CommonModule,MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatBadgeModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, UserDisplayComponent],
     templateUrl: './batch-component.html',
     styleUrls: ['./batch-component.scss'],
 })
 export class BatchComponent implements OnInit, OnDestroy {
-    private readonly store = inject(BatchStore);
-    private readonly dialog = inject(MatDialog);
-    private batchService = inject(BatchService);
     private sub?: Subscription;
     batch: Batch[] = [];
     searchControl = new FormControl('');
     statusFilter: 'all' | 'active' | 'inactive' = 'all';
+
+    constructor(private batchService: BatchService,
+                private notificationService: NotificationService,
+                private dialog: MatDialog) {
+
+    }
 
     get hasActiveFilter(): boolean {
         return this.statusFilter !== 'all';
@@ -76,6 +80,15 @@ export class BatchComponent implements OnInit, OnDestroy {
 
             this.loadBatches();
         });
+    }
+
+    runBatch(batch: Batch) {
+        this.batchService.runBatch(batch).subscribe({
+            next: (data) => {
+                this.notificationService.showToast(`Run started with id: ${data.body?.runId}`, 'success');
+            },
+            error: (err) => this.notificationService.showToast(`Failed to run batch: ${err.error.details[0]}`, 'error')
+        })
     }
 
     onDelete(batch: Batch){

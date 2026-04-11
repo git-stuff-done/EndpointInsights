@@ -31,22 +31,19 @@ export class CreateJobModal {
     }
 
     onSubmit(jobData: any) {
-        this.jobService.createJob(jobData).subscribe({
-                next: (response) => {
-                    console.log('Job created:', response);
-                    this.toastService.onSuccess('Job created successfully!');
-                    this.onJobCreated(response);
-                },
-                error: (error) => {
-                    console.error('Error creating job:', error);
-                    this.toastService.onError('Failed to create job. Please try again.');
-                }
-            });
-        this.createJobForm.submitForm();
-    }
-
-    onJobCreated(jobData: any) {
-        this.dialogRef.close(jobData);
+        const { jobType, ...rest } = jobData;
+        const payload = { ...rest, testType: jobType?.toUpperCase() };
+        this.jobService.createJob(payload).subscribe({
+            next: (response) => {
+                this.toastService.onSuccess('Job created successfully!');
+                this.dialogRef.close(response);
+            },
+            error: (error) => {
+                console.error('Error creating job:', error);
+                this.toastService.onError('Failed to create job. Please try again.');
+                this.dialogRef.close();
+            }
+        });
     }
 
     onCancel() {

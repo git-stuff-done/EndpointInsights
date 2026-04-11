@@ -16,12 +16,10 @@ import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/lis
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
+import {JobsApi} from "../../../jobsApi/jobsApi";
+import {TestItem} from "../../../models/test.model";
+import {User} from "../../../models/user.model";
 
-
-export interface ApiTest {
-    id: string;
-    name: string;
-}
 
 @Component({
     selector: 'app-batch-config-dialog',
@@ -38,8 +36,6 @@ export interface ApiTest {
         MatDatepickerModule,
         MatNativeDateModule,
         MatAutocompleteModule,
-        MatSelectionList,
-        MatListOption,
         MatSelectModule,
         MatDivider,
     ],
@@ -51,7 +47,8 @@ export class BatchConfigDialogComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly data = inject<Batch>(MAT_DIALOG_DATA);
     private readonly batchService = inject(BatchService);
-    private readonly userService = inject(UserService)
+    private readonly userService = inject(UserService);
+    private readonly jobsApi = inject(JobsApi);
     private readonly dialogRef = inject(MatDialogRef<BatchConfigDialogComponent>);
     isNew = !this.data.id;
 
@@ -63,24 +60,13 @@ export class BatchConfigDialogComponent implements OnInit {
     searchParticipants: User[] = [];
     activeParticipants = signal<User[]>([]);
 
-    currentBatchTests = signal<ApiTest[]>([]);
+    currentBatchTests = signal<TestItem[]>([]);
     emailList = signal<string[]>([]);
     emailInputControl = new FormControl('');
 
 
-    currentJobs = [
-        {id: "d10e18c5-13f8-45b6-91fd-74baa0fe6834", name: 'Vision API', type: "E2E"}
-    ]
-
     // All available tests that can be added (bottom list in Settings tab)
-    availableTests = signal<ApiTest[]>([
-        {id: '1', name: 'Vision API'},
-        {id: '2', name: 'Open API'},
-        {id: '3', name: 'Records API'},
-        {id: '4', name: 'Vision Express API'},
-        {id: '5', name: 'Auth API'},
-        {id: '6', name: 'Payment API'},
-    ]);
+    availableTests = signal<TestItem[]>([]);
 
     // Search term for filtering available tests
     searchTerm = signal('');
@@ -88,9 +74,9 @@ export class BatchConfigDialogComponent implements OnInit {
     // Filtered list: excludes tests already in batch, filters by search term
     filteredAvailableTests = computed(() => {
         const search = this.searchTerm().toLowerCase();
-        const currentIds = new Set(this.currentBatchTests().map(t => t.id));
+        const currentIds = new Set(this.currentBatchTests().map(t => t.jobId));
         return this.availableTests()
-            .filter(t => !currentIds.has(t.id))
+            .filter(t => !currentIds.has(t.jobId))
             .filter(t => t.name.toLowerCase().includes(search));
     });
 
@@ -113,13 +99,13 @@ export class BatchConfigDialogComponent implements OnInit {
     scheduleDays = signal<string[]>([]);
 
     readonly dayOptions = [
-        { value: 'MON', label: 'Monday' },
-        { value: 'TUE', label: 'Tuesday' },
-        { value: 'WED', label: 'Wednesday' },
-        { value: 'THU', label: 'Thursday' },
-        { value: 'FRI', label: 'Friday' },
-        { value: 'SAT', label: 'Saturday' },
-        { value: 'SUN', label: 'Sunday' },
+        {value: 'MON', label: 'Monday'},
+        {value: 'TUE', label: 'Tuesday'},
+        {value: 'WED', label: 'Wednesday'},
+        {value: 'THU', label: 'Thursday'},
+        {value: 'FRI', label: 'Friday'},
+        {value: 'SAT', label: 'Saturday'},
+        {value: 'SUN', label: 'Sunday'},
     ];
 
     onFrequencyChange(value: 'daily' | 'weekly'): void {
@@ -154,7 +140,7 @@ export class BatchConfigDialogComponent implements OnInit {
             }
         }
 
-        this.form.patchValue({ cronExpression: cron });
+        this.form.patchValue({cronExpression: cron});
     }
 
     /** Parse a cron string and update the editor state to match */
@@ -197,9 +183,9 @@ export class BatchConfigDialogComponent implements OnInit {
 
         // Populate existing jobs and emails from batch data
         this.currentBatchTests.set(
-            (this.data.jobs ?? []).map(j => ({ id: j.id, name: j.name }))
+            this.data.jobs
         );
-        this.emailList.set(this.data.emails ?? []);
+        this.emailList.set(this.data.notificationList ?? []);
 
         this.searchControl.valueChanges.pipe(
             debounceTime(200),
@@ -212,74 +198,17 @@ export class BatchConfigDialogComponent implements OnInit {
             this.searchParticipants = results || [];
         });
 
-        this.populateActiveParticipants();
-    }
-
-
-    /* Notification methods */
-    displayParticipant(participant: any): string {
-        return participant ? participant.name : '';
-    }
-
-    onParticipantSelected(event: any) {
-        this.selectedParticipant = event.option.value;
-    }
-
-    populateActiveParticipants() {
-        this.loading.set(true);
-
-        const notificationIds = this.form.get('notificationList')?.value || [];
-        if (!notificationIds || notificationIds.length === 0) {
-            this.activeParticipants.set([]);
-            this.loading.set(false);
-            return;
-        }
-        this.userService.findUsersById(notificationIds).subscribe({
-            next: (users) => {
-                this.activeParticipants.set(users);
+        this.jobsApi.getAllJobs().subscribe({
+            next: (response) => {
+                this.availableTests.set(response.body ?? []);
                 this.loading.set(false);
-
             },
-            error: (err) => {
-                this.activeParticipants.set([]);
+            error: () => {
                 this.loading.set(false);
             }
         });
     }
 
-    addParticipant() {
-        if (this.selectedParticipant) {
-            const currentList = this.form.get('notificationList')?.value || [];
-
-            if (currentList.includes(this.selectedParticipant.id)) {
-                this.selectedParticipant = null;
-                this.searchControl.setValue('');
-                return;
-            }
-
-            const updatedList = [...currentList, this.selectedParticipant.id];
-            this.form.patchValue({
-                notificationList: updatedList
-            });
-
-            this.populateActiveParticipants();
-
-            this.selectedParticipant = null;
-            this.searchControl.setValue('');
-        }
-    }
-
-    removeParticipant() {
-        const selectedIds = this.participantList.selectedOptions.selected.map(o => o.value.id);
-        const currentList = this.form.get('notificationList')?.value || [];
-        const updatedList = currentList.filter((id: string) => !selectedIds.includes(id));
-
-        this.form.patchValue({
-            notificationList: updatedList
-        });
-
-        this.populateActiveParticipants();
-    }
 
     addEmail(): void {
         const email = this.emailInputControl.value?.trim() ?? '';
@@ -298,8 +227,8 @@ export class BatchConfigDialogComponent implements OnInit {
     /* Jobs */
 
     // Remove a single test from the batch
-    removeTest(test: ApiTest): void {
-        this.currentBatchTests.update(tests => tests.filter(t => t.id !== test.id));
+    removeTest(test: TestItem): void {
+        this.currentBatchTests.update(tests => tests.filter(t => t.jobId !== test.jobId));
     }
 
     // Remove all tests from the batch
@@ -308,8 +237,8 @@ export class BatchConfigDialogComponent implements OnInit {
     }
 
     // Add a test to the batch
-    addTest(test: ApiTest): void {
-        if (!this.currentBatchTests().some(t => t.id === test.id)) {
+    addTest(test: TestItem): void {
+        if (!this.currentBatchTests().some(t => t.jobId === test.jobId)) {
             this.currentBatchTests.update(tests => [...tests, test]);
         }
     }
@@ -325,7 +254,6 @@ export class BatchConfigDialogComponent implements OnInit {
             emails: this.emailList(),
             isNew: this.isNew
         };
-
         return this.batchService.saveBatch(newBatch).subscribe({
             next: (response) => {
                 this.isNew = false;
@@ -336,9 +264,9 @@ export class BatchConfigDialogComponent implements OnInit {
                     lastRunTime: response.body?.lastRunTime,
                     cronExpression: response.body?.cronExpression ?? '',
                     notificationList: response.body?.notificationList || [],
+                    jobs: response.body?.jobs
                 });
                 this.dialogRef.close(response.body);
-                this.populateActiveParticipants();
             },
             error: (error) => console.error('Error:', error)
         });

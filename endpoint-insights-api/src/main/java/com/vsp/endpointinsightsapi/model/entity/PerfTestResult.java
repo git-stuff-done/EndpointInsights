@@ -1,10 +1,10 @@
 package com.vsp.endpointinsightsapi.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,6 +14,7 @@ public class PerfTestResult {
 	@EmbeddedId
 	private PerfTestResultId id;
 
+	@JsonIgnore
 	@MapsId("resultId")
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "result_id", nullable = false, insertable = false, updatable = false)
@@ -42,5 +43,11 @@ public class PerfTestResult {
 
 	@Column(name = "error_rate_percent")
 	private Double errorRatePercent;
+
+    @Column(name = "latency_threshold_result")
+    private String latencyThresholdResult;
+
+    @Column(name = "latency_threshold")
+    private Integer latencyThreshold;
 
 }

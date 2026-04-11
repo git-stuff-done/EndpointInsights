@@ -1,6 +1,7 @@
+import {UserInfo} from "./user.model";
 
 export interface Job {
-    id: string;
+    jobId: string;
     name: string;
     batch?: string[];
     status?: string;
@@ -11,4 +12,9 @@ export interface Job {
     description?: string;
     config?: string;
 
+    /** Audit fields */
+    createdBy?: UserInfo;
+    createdDate?: string;
+    updatedBy?: UserInfo;
+    updatedDate?: string;
 }

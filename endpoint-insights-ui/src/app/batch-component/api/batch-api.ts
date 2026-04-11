@@ -5,6 +5,7 @@ import {catchError, Observable, tap, throwError} from "rxjs";
 import {ToastService} from "../../services/toast.service";
 import {environment} from "../../../environment";
 import {HttpInterceptorService} from "../../services/http-interceptor.service";
+import {TestRun} from "../../models/test-run.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -25,11 +26,15 @@ export class BatchApi {
         return this.httpInterceptService.delete<Batch>(`${environment.apiUrl}/batches/${id}`)
     }
 
-    saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
+    runBatch(id: string) {
+        return this.httpInterceptService.post<TestRun>(`${environment.apiUrl}/batches/${id}/run`, null);
+    }
+
+    saveBatch(batch: any):Observable<HttpResponse<Batch>>{
         if(batch.isNew){
             const createRequest = {
                 batchName: batch.batchName,
-                jobs: (batch.jobs ?? []).map((j: any) => j.id),
+                jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
                 emails: batch.emails ?? []
             };
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)
@@ -45,7 +50,7 @@ export class BatchApi {
             const updateRequest = {
                 batchName: batch.batchName,
                 cronExpression: batch.cronExpression,
-                jobs: (batch.jobs ?? []).map((j: any) => j.id),
+                jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
                 emails: batch.emails ?? []
             };
             return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, updateRequest)

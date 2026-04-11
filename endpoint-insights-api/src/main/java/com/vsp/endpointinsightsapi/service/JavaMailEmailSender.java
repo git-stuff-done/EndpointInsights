@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@Profile("!EMAIL-NOOP")
 public class JavaMailEmailSender implements EmailSender {
 
     private final JavaMailSender mailSender;
@@ -26,7 +28,7 @@ public class JavaMailEmailSender implements EmailSender {
         message.setTo(recipientEmail);
         message.setSubject("Test Run Completed - " + runId);
         message.setText(buildEmailBody(runId, resultId));
-        mailSender.send(message);
+       mailSender.send(message);
     }
 
     private String buildEmailBody(UUID runId, UUID resultId) {

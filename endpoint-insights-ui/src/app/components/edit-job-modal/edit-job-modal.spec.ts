@@ -40,14 +40,18 @@ describe('EditJobModal', () => {
     });
 
     describe("Edit Mode Toggle", () => {
-        it("should toggle edit mode and call onUpdate when toggling off edit mode", () => {
-            spyOn(component, 'onUpdate');
+        it("should set inEditMode to true on first call", () => {
             expect(component.state().inEditMode).toBeFalse();
             component.toggleEditMode();
             expect(component.state().inEditMode).toBeTrue();
+        });
+
+        it("should call createJobForm.submitForm on second call", () => {
+            const mockForm = jasmine.createSpyObj('CreateJobForm', ['submitForm']);
+            component.createJobForm = mockForm;
             component.toggleEditMode();
-            expect(component.state().inEditMode).toBeFalse();
-            expect(component.onUpdate).toHaveBeenCalled();
+            component.toggleEditMode();
+            expect(mockForm.submitForm).toHaveBeenCalled();
         });
     });
 
@@ -56,7 +60,7 @@ describe('EditJobModal', () => {
             const payload = MOCK_TESTS[0];
             spyOn(component['jobService'], 'updateJob').and.returnValue(of(payload));
             component.onUpdate(MOCK_TESTS[0]);
-            expect(component['jobService'].updateJob).toHaveBeenCalledWith(component.data.id, MOCK_TESTS[0]);
+            expect(component['jobService'].updateJob).toHaveBeenCalledWith(component.data.jobId, MOCK_TESTS[0]);
         });
         it("Should show invalid form toast if form is invalid", () => {
             spyOn(component['jobService'], 'updateJob').and.returnValue(throwError(() => new Error("Invalid form")));

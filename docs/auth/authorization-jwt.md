@@ -17,6 +17,7 @@ The system uses stateless JWT-based authorization for API requests. After [OIDC 
 ### [AuthorizationInterceptor](../../endpoint-insights-api/src/main/java/com/vsp/endpointinsightsapi/authentication/AuthorizationInterceptor.java)
 Validates JWT tokens on API requests:
 - Decodes and validates JWT signature against OIDC provider's JWKS
+- Validates audience claim against OIDC client ID and allowed audiences
 - Extracts user context from token claims
 - Enforces role-based access control
 - Sets up UserContext for request processing
@@ -53,6 +54,7 @@ Registers the authorization interceptor:
 ### Access Control
 ```yaml
 app.authentication:
+  allowed-audiences: ${OIDC_ALLOWED_AUDIENCES:}  # Optional: comma-separated list of additional allowed audiences
   groups:
     write: "ei:write"  # Full access to all endpoints
     read: "ei:read"    # Read-only access
@@ -62,11 +64,14 @@ app.authentication:
     groups: groups
 ```
 
+The `allowed-audiences` property accepts a comma-separated list of audience values that are permitted in addition to the OIDC client ID. This allows tokens issued for different audiences (e.g., partner APIs, external services) to be accepted while maintaining security.
+
 ## Security Features
 
 ### Token Validation
 - JWT signature verified against OIDC provider's JWKS
-- Required claims validated (subject, username, email)
+- Required claims validated (subject, username, email, audience)
+- Audience claim must match OIDC client ID or one of the allowed audiences
 - Token expiration enforced
 - Malformed tokens rejected with 401
 

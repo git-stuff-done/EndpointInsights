@@ -120,7 +120,7 @@ class TestRunServiceTest {
 		run.setRunBy("tester");
 		run.setStatus(status);
 		run.setStartedAt(Instant.now());
-		run.setFinishedAt(Instant.now());
+		run.setFinishedAt(Instant.now().plusMillis(3250));
 		return run;
 	}
 
@@ -268,4 +268,141 @@ class TestRunServiceTest {
 		assertThrows(TestRunNotFoundException.class, () -> testRunService.deleteTestRunById(runId));
 		verify(testRunRepository).existsById(runId);
 	}
+
+    @Test
+    void getRecentActivityById_withNoParams_throwsException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testRunService.getRecentActivityById(null, null, 10));
+    }
+
+    @Test
+    void getRecentActivityById_withJobId_mapsCorrectly() {
+        UUID jobId = UUID.randomUUID();
+        UUID batchId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Endpoint Smoke");
+
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setCronExpression("0 0 8 * * *");
+
+        TestRun run = buildRun(jobId, batchId, TestRunStatus.COMPLETED);
+
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findAllById(any())).thenReturn(List.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of(batch));
+
+        RecentActivityDTO result =
+                testRunService.getRecentActivityById(jobId, null, 10).get(0);
+
+        assertEquals("Endpoint Smoke", result.getTestName());
+        assertEquals("Daily", result.getGroup());
+        assertEquals("PASS", result.getStatus());
+    }
+
+    @Test
+    void getRecentActivityById_withBatchId_mapsCorrectly() {
+        UUID jobId = UUID.randomUUID();
+        UUID batchId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Batch Job");
+
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setCronExpression("0 0 8 * * *");
+
+        TestRun run = buildRun(jobId, batchId, TestRunStatus.COMPLETED);
+
+        when(testRunRepository.findByBatchIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findAllById(any())).thenReturn(List.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of(batch));
+
+        RecentActivityDTO result =
+                testRunService.getRecentActivityById(null, batchId, 10).get(0);
+
+        assertEquals("Batch Job", result.getTestName());
+        assertEquals("Daily", result.getGroup());
+    }
+
+    @Test
+    void getRecentActivityById_capsLimitAt100_withJobId() {
+        UUID jobId = UUID.randomUUID();
+
+        when(testRunRepository.findByJobIdOrderByFinishedAtDesc(any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        testRunService.getRecentActivityById(jobId, null, 1000);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(testRunRepository).findByJobIdOrderByFinishedAtDesc(any(), captor.capture());
+
+        assertEquals(100, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void getRecentActivityById_capsLimitAt100_withBatchId() {
+        UUID batchId = UUID.randomUUID();
+
+        when(testRunRepository.findByBatchIdOrderByFinishedAtDesc(any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        testRunService.getRecentActivityById(null, batchId, 1000);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(testRunRepository).findByBatchIdOrderByFinishedAtDesc(any(), captor.capture());
+
+        assertEquals(100, captor.getValue().getPageSize());
+    }
+
+    @Test
+    void getRecentActivity_mapsBatchIdToString() {
+        UUID batchId = UUID.randomUUID();
+
+        TestRun run = new TestRun();
+        run.setRunId(UUID.randomUUID());
+        run.setJobId(null);
+        run.setBatchId(batchId);
+        run.setRunBy("tester");
+        run.setStatus(TestRunStatus.COMPLETED);
+        run.setStartedAt(Instant.now());
+        run.setFinishedAt(Instant.now().plusMillis(1000));
+
+        when(testRunRepository.findAllByOrderByFinishedAtDesc(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findAllById(any())).thenReturn(List.of());
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of());
+
+        assertEquals(batchId.toString(), testRunService.getRecentActivity(1).get(0).getBatchId());
+    }
+
+    @Test
+    void getRecentActivityById_withBatchId_mapsBatchIdToString() {
+        UUID jobId = UUID.randomUUID();
+        UUID batchId = UUID.randomUUID();
+
+        Job job = new Job();
+        job.setJobId(jobId);
+        job.setName("Batch Job");
+
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setCronExpression("0 0 8 * * *");
+
+        TestRun run = buildRun(jobId, batchId, TestRunStatus.COMPLETED);
+
+        when(testRunRepository.findByBatchIdOrderByFinishedAtDesc(any(UUID.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(run)));
+        when(jobRepository.findAllById(any())).thenReturn(List.of(job));
+        when(testBatchRepository.findAllById(any())).thenReturn(List.of(batch));
+
+        RecentActivityDTO result = testRunService.getRecentActivityById(null, batchId, 10).get(0);
+
+        assertEquals(batchId.toString(), result.getBatchId());
+    }
 }

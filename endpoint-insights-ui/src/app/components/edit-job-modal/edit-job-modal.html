@@ -1,7 +1,7 @@
 <div class="modal-header">
     <div class="header">
         <h2 mat-dialog-title class="truncate-id">
-            {{data.name}}: <span class="id-text">{{data.id}}</span>
+            {{data.name}}: <span class="id-text">{{data.jobId}}</span>
         </h2>
     </div>
 
@@ -34,20 +34,29 @@
                 </div>
 
                 <div class="form-row">
-                    @if (data.jobType !== 'jmeter') {
-                        <div class="form-field">
-                            <label>Run Command</label>
-                            <p>{{ data.runCommand }}</p>
-                        </div>
-                    } @else {
+                    @if (data.jobType === 'PERF') {
                         <div class="form-field">
                             <label>JMeter Test Name</label>
                             <p>{{ data.jmeterTestName }}</p>
+                        </div>
+                    } @else {
+                        <div class="form-field">
+                            <label>Run Command</label>
+                            <p>{{ data.runCommand }}</p>
                         </div>
                     }
                     <div class="form-field">
                         <label>Compile Command</label>
                         <p>{{ data.compileCommand }}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Passing Threshold</label>
+                        <p>
+                            0 - {{ data.threshold }} ms
+                        </p>
                     </div>
                 </div>
             </div>

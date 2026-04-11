@@ -1,7 +1,10 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
 import com.vsp.endpointinsightsapi.model.entity.TestResult;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.repository.JobRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultCodeRepository;
 import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
@@ -16,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +33,8 @@ class JMeterInterpreterServiceUnitTest {
     @Mock PerfTestResultRepository perfTestResultRepository;
     @Mock PerfTestResultCodeRepository perfTestResultCodeRepository;
     @Mock TestResultRepository testResultRepository;
-
+    @Mock
+    JobRepository jobRepository;
     @InjectMocks
     JMeterInterpreterService service;
 
@@ -37,19 +42,26 @@ class JMeterInterpreterServiceUnitTest {
     void setUp() {
         when(testResultRepository.save(any(TestResult.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        Job job = new Job();
+        // set any needed fields on job, e.g. threshold
+        job.setThreshold(50);
+
+        TestRun testRun = new TestRun();
+        testRun.setJobId(UUID.fromString("c3d0c0d4-2424-451e-806e-d1c8b2393ded"));
+        when(jobRepository.findById(any())).thenReturn(Optional.of(job));
     }
 
     @Test
     void TEST_HighErrorRate_ShouldFail() throws IOException {
         File file = generateJtlFile(100, 51);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertFalse(result.passed());
     }
 
     @Test
     void TEST_NoErrors_ShouldPass() throws IOException {
         File file = generateJtlFile(100, 0);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertTrue(result.passed());
     }
 
@@ -57,7 +69,7 @@ class JMeterInterpreterServiceUnitTest {
     void TEST_BoundaryErrorRate_ShouldFail() throws IOException {
         // 1000 requests, 6 failures = 0.6%
         File file = generateJtlFile(1000, 6);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertFalse(result.passed());
     }
 
@@ -65,14 +77,14 @@ class JMeterInterpreterServiceUnitTest {
     void TEST_ExactBoundaryErrorRate_ShouldPass() throws IOException {
         // 1000 requests, 5 failures = exactly 0.5%
         File file = generateJtlFile(1000, 5);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertTrue(result.passed());
     }
 
     @Test
     void TEST_EmptyFileWithHeader_ShouldPass() throws IOException {
         File file = generateJtlFile(0, 0);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertTrue(result.passed());
     }
 
@@ -81,13 +93,13 @@ class JMeterInterpreterServiceUnitTest {
         File tempFile = File.createTempFile("jmeter-empty", ".jtl");
         tempFile.deleteOnExit();
 
-        assertThrows(IOException.class, () -> service.processResults(tempFile, UUID.randomUUID()));
+        assertThrows(IOException.class, () -> service.processResults(tempFile, new TestRun()));
     }
 
     @Test
     void TEST_ResultId_IsAlwaysPopulated() throws IOException {
         File file = generateJtlFile(10, 0);
-        TestRunResult result = service.processResults(file, UUID.randomUUID());
+        TestRunResult result = service.processResults(file, new TestRun());
         assertNotNull(result.resultId());
     }
 
@@ -114,14 +126,14 @@ class JMeterInterpreterServiceUnitTest {
             }
         }
 
-        TestRunResult result = service.processResults(tempFile, UUID.randomUUID());
+        TestRunResult result = service.processResults(tempFile, new TestRun());
         assertFalse(result.passed());
     }
 
     @Test
     void TEST_Repositories_AreCalled() throws IOException {
         File file = generateJtlFile(10, 0);
-        service.processResults(file, UUID.randomUUID());
+        service.processResults(file, new TestRun());
 
         verify(testResultRepository).save(any(TestResult.class));
         verify(perfTestResultRepository).saveAll(anyList());

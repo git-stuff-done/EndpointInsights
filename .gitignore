@@ -21,4 +21,6 @@ target/
 endpoint-insights-ui/lcov-report
 endpoint-insights-ui/coverage
 .env
+.env.dev
 endpoint-insights-api/src/main/resources/static/
+*.log

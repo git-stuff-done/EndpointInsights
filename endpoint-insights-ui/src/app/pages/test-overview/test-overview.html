@@ -28,7 +28,6 @@
         <div class="test-header-row">
             <div class="test-headers">
                 <h3>Test Name</h3>
-                <h3>Test Batch</h3>
                 <h3>Date Created</h3>
                 <h3>Created By</h3>
             </div>
@@ -40,9 +39,18 @@
                     <span class="title">{{ t.name }}</span>
                     <span class="status" [ngClass]="t.status">{{ t.status }}</span>
                 </div>
-                <div class="cell batch">{{ t.batch }}</div>
                 <div class="cell date">{{ t.createdAt | date:'MMM d, y, h:mm a' }}</div>
-                <div class="cell author">{{ t.createdBy }}</div>
+                <div class="cell author">
+                    @if (t.createdBy) {
+                        <app-user-display
+                            [name]="t.createdBy.name"
+                            [subject]="t.createdBy.subject"
+                            [issuer]="t.createdBy.issuer"
+                        />
+                    } @else {
+                        <span>-</span>
+                    }
+                </div>
 
                 <div class="cell actions" (click)="$event.stopPropagation()">
                     <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onRun(t)"><mat-icon>play_arrow</mat-icon></button>
