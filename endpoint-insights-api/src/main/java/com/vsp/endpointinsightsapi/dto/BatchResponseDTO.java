@@ -25,5 +25,6 @@ public class BatchResponseDTO extends AuditedDTO {
     private String cronExpression;
     private List<String> notificationList;
     private List<JobDTO> jobs;
+    private List<NotificationGroupDTO> groups;
 
 }

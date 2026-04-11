@@ -24,4 +24,5 @@ public class BatchRequestDTO {
     private List<UUID> notificationList;
     private List<UUID> jobs;
     private List<String> emails;
+    private List<UUID> groupIds;
 }
