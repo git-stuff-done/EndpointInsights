@@ -13,6 +13,9 @@
         </div>
         <div class="purge-container">
             <span class="purge-field">
+                <mat-label class="purge-label">Delete tests older than</mat-label>
+            </span>
+            <span class="purge-field">
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Purge before date</mat-label>
                     <input matInput [matDatepicker]="purgePicker" [max]="maxDate" [formControl]="purgeBeforeDate" placeholder="MM/DD/YYYY" />
