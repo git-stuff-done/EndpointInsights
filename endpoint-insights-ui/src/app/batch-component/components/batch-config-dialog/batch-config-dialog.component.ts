@@ -18,6 +18,7 @@ import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
 import {JobsApi} from "../../../jobsApi/jobsApi";
 import {TestItem} from "../../../models/test.model";
+import {User} from "../../../models/user.model";
 
 
 @Component({

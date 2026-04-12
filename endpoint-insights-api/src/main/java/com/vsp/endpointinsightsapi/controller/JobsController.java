@@ -1,7 +1,9 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
+import com.vsp.endpointinsightsapi.dto.JobDTO;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.mapper.JobMapper;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
@@ -31,9 +33,11 @@ public class JobsController {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JobsController.class);
 	private final JobService jobService;
+    private final JobMapper jobMapper;
 
-	public JobsController(JobService jobService) {
+	public JobsController(JobService jobService,  JobMapper jobMapper) {
 		this.jobService = jobService;
+        this.jobMapper = jobMapper;
 	}
 
 	/**
@@ -49,11 +53,12 @@ public class JobsController {
 			@ApiResponse(responseCode = "400", description = "Invalid input - validation failed"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
-	 public ResponseEntity<Job> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
+	 public ResponseEntity<JobDTO> createJob(@RequestBody @Valid JobCreateRequest jobRequest) {
 	 	try {
 	 		Job job = jobService.createJob(jobRequest);
              //TODO: Sanitize user input `job`
-	 		return new ResponseEntity<>(job, HttpStatus.CREATED);
+	 		JobDTO dto = jobMapper.toDTO(job);
+	 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	 	} catch (RuntimeException e) {
 	 		LOG.error("Error creating job: {}", e.getMessage());
 	 		return new ResponseEntity<>(null);
@@ -100,7 +105,7 @@ public class JobsController {
 			@ApiResponse(responseCode = "404", description = "Job not found"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
-	public ResponseEntity<Job> updateJob(
+	public ResponseEntity<JobDTO> updateJob(
 			@RequestBody
 			@Valid
 			Job request,
@@ -111,24 +116,29 @@ public class JobsController {
 		LOG.info("Updating job");
 
         Job savedJob = jobService.updateJob(jobId, request);
+        JobDTO dto = jobMapper.toDTO(savedJob);
 
-		return ResponseEntity.ok(savedJob);
+		return ResponseEntity.ok(dto);
 	}
 
 	/**
 	 * Endpoint to get job list
 	 * @return all job ids as a List of Strings
 	 * */
-	@GetMapping
-	@Operation(summary = "List all jobs", description = "Retrieves a list of all performance test jobs")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Jobs retrieved successfully"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized")
-	})
-	public ResponseEntity<List<Job>> getJobs() {
-		List<Job> j = jobService.getAllJobs().orElse(new ArrayList<>());
-        return ResponseEntity.ok(j);
-	}
+    @GetMapping
+  	@Operation(summary = "List all jobs", description = "Retrieves a list of all performance test jobs")
+	  @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Jobs retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+	  })
+    public ResponseEntity<List<JobDTO>> getJobs() {
+        List<JobDTO> jobs = jobService.getAllJobs()
+                .orElse(new ArrayList<>())
+                .stream()
+                .map(jobMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(jobs);
+    }
 
 	/**
 	 * Endpoint to retrieve a job
@@ -136,29 +146,30 @@ public class JobsController {
 	 * @param jobId the id of the job to be retrieved
 	 * @return the Job with the given jobId
 	 * */
-	@GetMapping("/{id}")
-	@Operation(summary = "Get job by ID", description = "Retrieves a specific job by its unique identifier")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Job found"),
-			@ApiResponse(responseCode = "400", description = "Invalid job ID format"),
-			@ApiResponse(responseCode = "404", description = "Job not found"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized")
+    @GetMapping("/{id}")
+    @Operation(summary = "Get job by ID", description = "Retrieves a specific job by its unique identifier")
+	  @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Job found"),
+        @ApiResponse(responseCode = "400", description = "Invalid job ID format"),
+        @ApiResponse(responseCode = "404", description = "Job not found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
-	public ResponseEntity<Job> getJob(
-			@Parameter(description = "Job ID", required = true)
-			@PathVariable("id")
-			@NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
-			String jobId) {
-		
-		try{
-			UUID jobUuid = UUID.fromString(jobId);
-			return jobService.getJobById(jobUuid).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<JobDTO> getJob(
+            @PathVariable("id")
+            @NotNull(message = ErrorMessages.JOB_ID_REQUIRED)
+            String jobId) {
 
-		} catch(IllegalArgumentException e){
-			LOG.error("Invalid UUID format for jobId: {}", jobId);
-			return ResponseEntity.badRequest().build();
-		}
-	}
+        try {
+            UUID jobUuid = UUID.fromString(jobId);
+            return jobService.getJobById(jobUuid)
+                    .map(jobMapper::toDTO)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            LOG.error("Invalid UUID format for jobId: {}", jobId);
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 	/**
 	 * Endpoint to delete a job

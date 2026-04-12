@@ -3,6 +3,8 @@ package com.vsp.endpointinsightsapi.controller;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
@@ -34,10 +36,12 @@ public class BatchesController {
 
     private final BatchService batchService;
 	private final TestBatchRepository testBatchRepository;
+	private final BatchMapper batchMapper;
 
-	public BatchesController(BatchService batchService, TestBatchRepository testBatchRepository){
+	public BatchesController(BatchService batchService, TestBatchRepository testBatchRepository, BatchMapper batchMapper){
         this.batchService = batchService;
     	this.testBatchRepository = testBatchRepository;
+    	this.batchMapper = batchMapper;
 	}
 
     // GET /api/batches
@@ -79,9 +83,10 @@ public class BatchesController {
 			@ApiResponse(responseCode = "400", description = "Invalid input"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
-	public ResponseEntity<TestBatch> createBatch(@RequestBody BatchRequestDTO request) {
+	public ResponseEntity<BatchResponseDTO> createBatch(@RequestBody BatchRequestDTO request) {
 		TestBatch batch = batchService.createBatch(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(batch);
+		BatchResponseDTO dto = batchMapper.toDto(batch);
+		return ResponseEntity.status(HttpStatus.CREATED).body(dto);
 	}
 
 	@PostMapping("/{batchId}/run")
@@ -114,12 +119,13 @@ public class BatchesController {
             @ApiResponse(responseCode = "404", description = "Batch not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    public ResponseEntity<TestBatch> updateBatch(
+    public ResponseEntity<BatchResponseDTO> updateBatch(
             @Parameter(description = "Batch ID", required = true)
             @PathVariable @NotNull UUID id,
             @RequestBody BatchUpdateRequest request) {
         TestBatch batch = batchService.updateBatch(id, request);
-        return ResponseEntity.ok(batch);
+        BatchResponseDTO dto = batchMapper.toDto(batch);
+        return ResponseEntity.ok(dto);
     }
 
 	// DELETE /api/batches/{id}
