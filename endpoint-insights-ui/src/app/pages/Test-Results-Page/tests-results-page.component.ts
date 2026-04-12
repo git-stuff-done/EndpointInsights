@@ -16,6 +16,7 @@ import { TestRunService } from '../../services/test-run.service';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
 import {provideNativeDateAdapter} from "@angular/material/core";
 import {MatPaginator} from "@angular/material/paginator";
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
     selector: 'app-tests-results-page',
@@ -63,6 +64,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
         private testRunService: TestRunService,
         private route: ActivatedRoute,
         private router: Router,
+        private notificationService: NotificationService
     ) {}
 
     ngOnInit(): void {
@@ -88,6 +90,31 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
                 this.dataSource.filter = (value ?? '').trim().toLowerCase();
             });
 
+        this.loadResults();
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort;
+
+        this.dataSource.sortingDataAccessor = (item: RecentActivity, property: string) => {
+            switch (property) {
+                case 'dateRun':
+                    return item.dateRun ? new Date(item.dateRun).getTime() : 0;
+                case 'durationMs':
+                    return item.durationMs || 0;
+                default:
+                    return (item as any)[property];
+            }
+        };
+
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    loadResults(): void {
         this.testRunService.getRecentActivity(100).subscribe({
             next: (activity: RecentActivity[]) => {
                 this.dataSource.data = activity.sort((a, b) => {
@@ -113,27 +140,6 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
         });
     }
 
-    ngAfterViewInit(): void {
-        this.dataSource.sort = this.sort;
-
-        this.dataSource.sortingDataAccessor = (item: RecentActivity, property: string) => {
-            switch (property) {
-                case 'dateRun':
-                    return item.dateRun ? new Date(item.dateRun).getTime() : 0;
-                case 'durationMs':
-                    return item.durationMs || 0;
-                default:
-                    return (item as any)[property];
-            }
-        };
-
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
     viewResult(row: RecentActivity): void {
         this.router.navigate(['/test-results/view'], { state: { runId: row.runId } });
     }
@@ -147,11 +153,12 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
 
         this.testRunService.deleteBefore(datetime).subscribe({
             next: res => {
-
-                console.log('Test runs purged successfully');
+                const deletedRuns = res.body.deletedRuns;
+                this.notificationService.showToast(`Successfully purged ${deletedRuns} test run${deletedRuns !== 1 ? 's' : ''}`, 'success');
+                this.loadResults();
             },
             error: err => {
-                console.error('Error purging test runs:', err);
+                this.notificationService.showToast('Error purging test runs', 'error');
             }
         });
     }
