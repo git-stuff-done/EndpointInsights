@@ -1,5 +1,6 @@
 import {TestItem} from "./test.model";
 import {UserInfo} from "./user.model";
+import {NotificationGroup} from "./notification-group.model";
 
 /** Represents a single batch entry shown on the Dashboard. */
 export interface Batch {
@@ -18,6 +19,8 @@ export interface Batch {
     active: boolean;
     jobs: TestItem[];
     emails?: string[];
+    groups?: NotificationGroup[];
+    groupIds?: string[];
     isNew?: boolean;
 
     /** Audit fields */

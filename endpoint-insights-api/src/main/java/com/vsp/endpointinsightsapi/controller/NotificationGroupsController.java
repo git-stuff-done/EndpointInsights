@@ -24,20 +24,14 @@ public class NotificationGroupsController {
         this.notificationGroupService = notificationGroupService;
     }
 
-    /**
-     * GET /api/notification-groups
-     * List all notification groups
-     */
+    // GET /api/notification-groups - List all groups
     @GetMapping
     public ResponseEntity<List<NotificationGroup>> getAllGroups() {
         List<NotificationGroup> groups = notificationGroupService.getAllGroups();
         return ResponseEntity.ok(groups);
     }
 
-    /**
-     * GET /api/notification-groups/{id}
-     * Get a specific notification group with its members
-     */
+    // GET /api/notification-groups/{id} - Get specific group with members
     @GetMapping("/{id}")
     public ResponseEntity<NotificationGroup> getGroup(@PathVariable UUID id) {
         return notificationGroupService.getGroupById(id)
@@ -45,10 +39,7 @@ public class NotificationGroupsController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * POST /api/notification-groups
-     * Create a new notification group
-     */
+    // POST /api/notification-groups - Create new group
     @PostMapping
     public ResponseEntity<NotificationGroup> createGroup(@RequestBody CreateGroupRequest request) {
         LOG.info("Creating new notification group: {}", request.getName());
@@ -60,10 +51,7 @@ public class NotificationGroupsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(group);
     }
 
-    /**
-     * PUT /api/notification-groups/{id}
-     * Update an existing notification group
-     */
+    // PUT /api/notification-groups/{id} - Update existing group
     @PutMapping("/{id}")
     public ResponseEntity<NotificationGroup> updateGroup(
             @PathVariable @NotNull UUID id,
@@ -77,10 +65,7 @@ public class NotificationGroupsController {
         return ResponseEntity.ok(group);
     }
 
-    /**
-     * DELETE /api/notification-groups/{id}
-     * Delete a notification group
-     */
+    // DELETE /api/notification-groups/{id} - Delete group
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable UUID id) {
         LOG.info("Deleting notification group: {}", id);
@@ -88,10 +73,7 @@ public class NotificationGroupsController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * POST /api/notification-groups/{id}/members
-     * Add members to a group
-     */
+    // POST /api/notification-groups/{id}/members - Add members to group
     @PostMapping("/{id}/members")
     public ResponseEntity<Void> addMembers(
             @PathVariable @NotNull UUID id,
@@ -101,10 +83,7 @@ public class NotificationGroupsController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * DELETE /api/notification-groups/{id}/members/{email}
-     * Remove a member from a group
-     */
+    // DELETE /api/notification-groups/{id}/members/{email} - Remove member from group
     @DeleteMapping("/{id}/members/{email}")
     public ResponseEntity<Void> removeMember(
             @PathVariable @NotNull UUID id,

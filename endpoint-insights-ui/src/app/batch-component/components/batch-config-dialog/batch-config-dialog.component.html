@@ -59,7 +59,47 @@
         <mat-divider></mat-divider>
 
         <section>
-            <h4>Email Recipients</h4>
+            <h4>Notification Groups & Recipients</h4>
+            <div class="notification-settings">
+                <!-- Manage Groups Button -->
+                <button mat-stroked-button (click)="openGroupsDialog()" class="full-width">
+                    <mat-icon>settings</mat-icon>
+                    Manage Notification Groups
+                </button>
+
+                <!-- Selected Groups -->
+                @if (selectedGroups().length > 0) {
+                    <div class="selected-groups">
+                        <h5>Selected Groups</h5>
+                        @for (group of selectedGroups(); track group.id) {
+                            <div class="group-chip">
+                                <span>{{ group.name }} ({{ group.members.length }} members)</span>
+                                <button mat-icon-button (click)="removeGroup(group.id)" class="remove-btn">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Add Group Dropdown -->
+                @if (getUnselectedGroups().length > 0) {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Add Group</mat-label>
+                        <mat-select>
+                            @for (group of getUnselectedGroups(); track group.id) {
+                                <mat-option (click)="addGroup(group)">
+                                    {{ group.name }} ({{ group.members.length }} members)
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                }
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h4>Individual Email Recipients</h4>
             <div class="form-row">
                 <mat-form-field appearance="outline" class="flex-grow">
                     <mat-label>Add Email Address</mat-label>

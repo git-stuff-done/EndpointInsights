@@ -223,9 +223,7 @@ public class BatchService {
         testBatchEmailListsRepository.saveAll(entities);
     }
 
-    /**
-     * Backward compatibility overload for updateEmailsForBatch
-     */
+    // Backward compatibility overload for updateEmailsForBatch
     public void updateEmailsForBatch(UUID batchId, List<String> emails) {
         updateEmailsForBatch(batchId, emails, null);
     }

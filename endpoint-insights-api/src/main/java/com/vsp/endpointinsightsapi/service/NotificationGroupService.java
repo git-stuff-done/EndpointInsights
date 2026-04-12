@@ -29,23 +29,17 @@ public class NotificationGroupService {
         this.memberRepository = memberRepository;
     }
 
-    /**
-     * Get all notification groups
-     */
+    // Get all notification groups
     public List<NotificationGroup> getAllGroups() {
         return groupRepository.findAll();
     }
 
-    /**
-     * Get a specific group by ID
-     */
+    // Get a specific group by ID
     public Optional<NotificationGroup> getGroupById(UUID id) {
         return groupRepository.findById(id);
     }
 
-    /**
-     * Create a new notification group
-     */
+    // Create a new notification group
     @Transactional
     public NotificationGroup createGroup(String name, String description, List<String> memberEmails) {
         NotificationGroup group = new NotificationGroup();
@@ -62,9 +56,7 @@ public class NotificationGroupService {
         return groupRepository.findById(savedGroup.getId()).orElseThrow();
     }
 
-    /**
-     * Update an existing group
-     */
+    // Update an existing group
     @Transactional
     public NotificationGroup updateGroup(UUID id, String name, String description) {
         NotificationGroup group = groupRepository.findById(id)
@@ -76,9 +68,7 @@ public class NotificationGroupService {
         return groupRepository.save(group);
     }
 
-    /**
-     * Delete a group (cascades to delete members)
-     */
+    // Delete a group (cascades to delete members)
     @Transactional
     public void deleteGroup(UUID id) {
         if (!groupRepository.existsById(id)) {
@@ -89,9 +79,7 @@ public class NotificationGroupService {
         LOG.info("Deleted notification group: {}", id);
     }
 
-    /**
-     * Add members to a group
-     */
+    // Add members to a group
     @Transactional
     public void addMembersToGroup(UUID groupId, List<String> emails) {
         NotificationGroup group = groupRepository.findById(groupId)
@@ -108,9 +96,7 @@ public class NotificationGroupService {
         }
     }
 
-    /**
-     * Remove a member from a group
-     */
+    // Remove a member from a group
     @Transactional
     public void removeMemberFromGroup(UUID groupId, String email) {
         memberRepository.findByGroupIdAndEmail(groupId, email)
@@ -120,9 +106,7 @@ public class NotificationGroupService {
                 );
     }
 
-    /**
-     * Get all email addresses for a group
-     */
+    // Get all email addresses for a group
     public List<String> getGroupMemberEmails(UUID groupId) {
         List<NotificationGroupMember> members = memberRepository.findAllByGroupId(groupId);
         return members.stream()
@@ -130,9 +114,7 @@ public class NotificationGroupService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get all member emails for a list of group IDs (used for batch notifications)
-     */
+    // Get all member emails for a list of group IDs (used for batch notifications)
     public List<String> resolveGroupsToEmails(List<UUID> groupIds) {
         if (groupIds == null || groupIds.isEmpty()) {
             return new ArrayList<>();

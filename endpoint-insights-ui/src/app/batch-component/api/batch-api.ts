@@ -35,7 +35,8 @@ export class BatchApi {
             const createRequest = {
                 batchName: batch.batchName,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
-                emails: batch.emails ?? []
+                emails: batch.emails ?? [],
+                groupIds: batch.groupIds ?? []
             };
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)
                 .pipe(
@@ -51,7 +52,8 @@ export class BatchApi {
                 batchName: batch.batchName,
                 cronExpression: batch.cronExpression,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
-                emails: batch.emails ?? []
+                emails: batch.emails ?? [],
+                groupIds: batch.groupIds ?? []
             };
             return this.httpInterceptService.put<Batch>(`${environment.apiUrl}/batches/${batch.id}`, updateRequest)
                 .pipe(
