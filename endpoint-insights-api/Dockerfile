@@ -45,3 +45,15 @@ HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=5 \
   CMD curl -f http://localhost:8080/api/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+FROM public.ecr.aws/docker/library/amazoncorretto:21
+
+# Add the Lambda Web Adapter
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
+
+# Copy your Spring Boot jar
+COPY target/endpoint-insights-api-0.0.1-SNAPSHOT.jar /app/app.jar
+
+ENV PORT=8080
+
+CMD ["java", "-jar", "/app/app.jar"]
