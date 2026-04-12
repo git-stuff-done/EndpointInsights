@@ -66,6 +66,7 @@
 
                      <div class="cell actions" (click)="$event.stopPropagation()">
                          <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="runBatch(b)"><mat-icon>play_arrow</mat-icon></button>
+                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onView(b)"><mat-icon>open_in_new</mat-icon></button>
                          <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Edit" (click)="onConfigure(b)"><mat-icon>edit</mat-icon></button>
                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Delete" (click)="onDelete(b)"><mat-icon>delete</mat-icon></button>
                     </div>

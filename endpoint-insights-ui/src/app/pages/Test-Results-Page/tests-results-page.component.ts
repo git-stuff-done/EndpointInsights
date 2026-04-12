@@ -54,7 +54,9 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
             const term = filter.trim().toLowerCase();
             return (
                 row.testName.toLowerCase().includes(term) ||
+                row.batchName?.toLowerCase().includes(term) ||
                 row.runId.toLowerCase().includes(term) ||
+                row.batchId?.toLowerCase().includes(term) ||
                 (row.jobId ?? '').toLowerCase().includes(term)
             );
         };

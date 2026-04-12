@@ -16,6 +16,7 @@ import {BatchService} from "../services/batch.service";
 import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 import {NotificationService} from "../services/notification.service";
 import {UserDisplayComponent} from "../components/user-display/user-display.component";
+import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-batches',
@@ -32,7 +33,8 @@ export class BatchComponent implements OnInit, OnDestroy {
 
     constructor(private batchService: BatchService,
                 private notificationService: NotificationService,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private router: Router) {
 
     }
 
@@ -128,5 +130,9 @@ export class BatchComponent implements OnInit, OnDestroy {
                 this.loadBatches();
             }
         });
+    }
+
+    protected onView(b: Batch) {
+        this.router.navigate(['/test-results'], { queryParams: { name: b.batchName }, state: { displayGraph: true } });
     }
 }
