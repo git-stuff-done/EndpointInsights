@@ -1,6 +1,7 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.service.TestRunService;
@@ -12,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -81,8 +84,16 @@ public class TestRunsController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteTestRun(@PathVariable("id") UUID runId) {
-		testRunService.deleteTestRunById(runId);
-		return ResponseEntity.ok(String.format("Test run %s deleted", runId));
+	public ResponseEntity<Map<String, Object>> deleteTestRun(@PathVariable("id") UUID runId) {
+		return testRunService.deleteTestRunById(runId);
+	}
+
+	@DeleteMapping
+	public ResponseEntity<Map<String, Object>> deleteBefore(@RequestParam("purgeDate") LocalDateTime purgeDate) {
+		if (purgeDate.isAfter(LocalDateTime.now())) {
+			throw new CustomExceptionBuilder(HttpStatus.BAD_REQUEST, "purgeDate cannot be in the future").build();
+		}
+
+		return testRunService.deleteBefore(purgeDate);
 	}
 }

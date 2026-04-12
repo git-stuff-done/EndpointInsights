@@ -33,4 +33,8 @@ export class TestRunService {
       map(response => response.body ?? [])
     );
   }
+
+  deleteRun(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }

@@ -14,9 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,17 +120,19 @@ public class TestRunService {
 				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
 	}
 
-	public void deleteTestRunById(UUID runId) {
+	public ResponseEntity<Map<String, Object>> deleteTestRunById(UUID runId) {
 		if (!testRunRepository.existsById(runId)) {
 			throw new TestRunNotFoundException(runId.toString());
 		}
 		testRunRepository.deleteById(runId);
+
+		return ResponseEntity.ok(Map.of("status", String.format("Test run %s deleted successfully", runId)));
 	}
 
     // jobId takes precedence over batchId
     public List<RecentActivityDTO> getRecentActivityById(UUID jobId, UUID batchId, int limit) {
 
-        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeLimit = Math.clamp(limit, 1, 100);
 
         List<TestRun> runs;
 
@@ -188,5 +193,14 @@ public class TestRunService {
                     .status(toDisplayStatus(run.getStatus()))
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public ResponseEntity<Map<String, Object>> deleteBefore(LocalDateTime purgeDate) {
+        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate.toInstant(ZoneOffset.UTC));
+
+		testRunRepository.deleteAll(oldRuns);
+		testRunRepository.flush();
+
+		return ResponseEntity.ok(Map.of("deletedRuns", oldRuns.size()));
     }
 }
