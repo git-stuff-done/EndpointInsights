@@ -1,27 +1,30 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environment";
+import {User} from "../models/user.model";
 
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class UserApi {
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) {
+    }
+
     private baseUrl = '/api/users';
 
-    getAllUsersByQuery(query: string): Observable<User[]>{
+    getAllUsersByQuery(query: string): Observable<User[]> {
         const params = {
             query: query
         }
-        return this.http.get<User[]>(`${environment.apiUrl}/${this.baseUrl}/matching-query`, { params });
+        return this.http.get<User[]>(`${environment.apiUrl}/${this.baseUrl}/matching-query`, {params});
     }
 
-    getAllUsersByIds(idList: string[]){
+    getAllUsersByIds(idList: string[]) {
         const params = {
             idList: idList
         }
 
-        return this.http.get<User[]>(`${environment.apiUrl}/${this.baseUrl}/find-by-ids`, { params });
+        return this.http.get<User[]>(`${environment.apiUrl}/${this.baseUrl}/find-by-ids`, {params});
     }
 
 }

@@ -1,0 +1,36 @@
+FROM node:24 AS frontend-build
+WORKDIR /app
+
+COPY endpoint-insights-ui/package*.json ./
+RUN npm ci
+COPY endpoint-insights-ui/ ./
+RUN npm run build
+
+FROM maven:3.9-eclipse-temurin-25
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN curl -L https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz \
+    | tar -xz -C /opt && \
+    ln -s /opt/apache-jmeter-5.6.3 /opt/jmeter
+
+ENV JMETER_HOME=/opt/jmeter
+ENV PATH="${JMETER_HOME}/bin:${PATH}"
+
+COPY endpoint-insights-api/pom.xml .
+RUN mvn dependency:go-offline -B
+
+COPY endpoint-insights-api/src ./src
+
+COPY --from=frontend-build /app/dist/endpoint-insights-ui/browser/ ./src/main/resources/static/
+
+EXPOSE 8080 5005
+
+RUN curl -L https://github.com/cespare/reflex/releases/download/v0.3.1/reflex_linux_amd64.tar.gz -o /tmp/reflex.tar.gz && \
+    tar -xzf /tmp/reflex.tar.gz -C /tmp && \
+    mv /tmp/reflex_linux_amd64/reflex /usr/local/bin/reflex && \
+    chmod +x /usr/local/bin/reflex && \
+    rm -rf /tmp/reflex*
+
+CMD ["sh", "-c", "cd /app/src && reflex -r '\\.java$' -s -- sh -c 'cd /app && mvn spring-boot:run'"]

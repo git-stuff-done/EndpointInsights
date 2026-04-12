@@ -1,4 +1,5 @@
-import { JobStatus } from '../common/job.constants';
+import {JobStatus} from '../common/job.constants';
+import {UserInfo} from './user.model';
 
 export interface TestItem {
     jobId: string;
@@ -16,10 +17,18 @@ export interface TestItem {
     jmeterTestName?: string;
     jobType: string;
     createdAt: Date | string;
-    createdBy: string;
+    createdBy: UserInfo;
     status: JobStatus;
     threshold: number;
 }
+
+const mockUserInfo: UserInfo = {
+    name: 'Test User',
+    email: 'test@example.com',
+    role: 'EDITOR',
+    issuer: 'https://auth.example.com',
+    subject: 'test-user-123'
+};
 
 export const MOCK_TESTS: TestItem[] = [
     {
@@ -27,7 +36,7 @@ export const MOCK_TESTS: TestItem[] = [
         name: 'Auth',
         batch: 'Nightly-01',
         createdAt: new Date(),
-        createdBy: 'Alex',
+        createdBy: mockUserInfo,
         status: 'RUNNING',
         gitUrl: 'https://git.com/test',
         description: 'this is a test',
@@ -41,7 +50,7 @@ export const MOCK_TESTS: TestItem[] = [
         name: 'Billing',
         batch: 'Nightly-01',
         createdAt: new Date(),
-        createdBy: 'Sam',
+        createdBy: mockUserInfo,
         status: 'STOPPED',
         gitUrl: 'https://git.com/test',
         description: '',

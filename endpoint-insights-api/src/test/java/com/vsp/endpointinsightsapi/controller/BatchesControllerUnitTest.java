@@ -2,8 +2,6 @@ package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.mapstruct.factory.Mappers;
 import tools.jackson.databind.ObjectMapper;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
@@ -37,7 +35,6 @@ class BatchesControllerUnitTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-    private BatchMapper batchMapper;
 
     @MockitoBean
     private BatchService batchService;
@@ -45,20 +42,17 @@ class BatchesControllerUnitTest {
     @MockitoBean
     private TestBatchRepository testBatchRepository;
 
-    @BeforeEach
-    void setUp() {
-        batchMapper = Mappers.getMapper(BatchMapper.class);
-    }
+    @MockitoBean
+    private BatchMapper batchMapper;
 
 
     @Test
     void shouldReturnListOfBatches() throws Exception {
-        TestBatch batch = new TestBatch();
-        batch.setBatchId(UUID.randomUUID());
-        batch.setBatchName("Test Batch");
-        batch.setActive(true);
+        BatchResponseDTO batchDTO = new BatchResponseDTO();
+        batchDTO.setId(UUID.randomUUID());
+        batchDTO.setBatchName("Test Batch");
+        batchDTO.setActive(true);
 
-        BatchResponseDTO batchDTO = batchMapper.toDto(batch);
         when(batchService.getAllBatchesByCriteria("", null)).thenReturn(List.of(batchDTO));
 
         mockMvc.perform(get("/api/batches"))
@@ -104,8 +98,12 @@ class BatchesControllerUnitTest {
         TestBatch batch = new TestBatch();
         batch.setBatchName("New Batch");
 
+        BatchResponseDTO dto = new BatchResponseDTO();
+        dto.setBatchName("New Batch");
+
         Mockito.when(batchService.createBatch(Mockito.any(BatchRequestDTO.class)))
                 .thenReturn(batch);
+        Mockito.when(batchMapper.toDto(batch)).thenReturn(dto);
 
         mockMvc.perform(post("/api/batches")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,6 +152,12 @@ class BatchesControllerUnitTest {
         BatchUpdateRequest request = new BatchUpdateRequest();
         TestBatch updatedBatch = new TestBatch();
         updatedBatch.setBatchId(batchId);
+
+        BatchResponseDTO dto = new BatchResponseDTO();
+        dto.setId(batchId);
+
+        when(batchService.updateBatch(batchId, request)).thenReturn(updatedBatch);
+        when(batchMapper.toDto(updatedBatch)).thenReturn(dto);
 
         mockMvc.perform(put("/api/batches/{id}", batchId)
                         .contentType(MediaType.APPLICATION_JSON)

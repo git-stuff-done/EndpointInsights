@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,7 @@ public class BatchService {
     @Setter
     private int staleBatchThresholdSeconds = 60;
 
+	@Autowired
 	public BatchService(TestBatchRepository testBatchRepository,
                         BatchMapper batchMapper,
                         JobRepository jobRepository,
@@ -91,7 +93,7 @@ public class BatchService {
 
     //Get Batch — used by GET /api/batches/{id}
     public BatchResponseDTO getBatchById(UUID batchId) {
-        TestBatch b = testBatchRepository.findById(batchId)
+        TestBatch b = testBatchRepository.findByIdWithJobsAndUsers(batchId)
                 .orElseThrow(() -> {
                     LOG.debug("Batch {} not found", batchId);
                     return new BatchNotFoundException(batchId.toString());
@@ -131,7 +133,9 @@ public class BatchService {
 
         batchSchedulerService.scheduleBatch(saved);
 
-        return saved;
+        // Reload with user relationships for DTO mapping
+        return testBatchRepository.findByIdWithJobsAndUsers(saved.getBatchId())
+                .orElseThrow(() -> new CustomExceptionBuilder(HttpStatus.NOT_FOUND, "Batch not found after creation").build());
     }
 
     //Update Batch — used by PUT /api/batches/{id}
@@ -169,7 +173,9 @@ public class BatchService {
 
         batchSchedulerService.scheduleBatch(batch);
 
-        return batch;
+        // Reload with user relationships for DTO mapping
+        return testBatchRepository.findByIdWithJobsAndUsers(id)
+                .orElseThrow(() -> new CustomExceptionBuilder(HttpStatus.NOT_FOUND, "Batch not found after update").build());
     }
 
     private List<String> getEmailsForBatch(UUID batchId) {
