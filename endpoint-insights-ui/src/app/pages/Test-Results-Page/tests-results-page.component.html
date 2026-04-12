@@ -12,19 +12,25 @@
             </mat-form-field>
         </div>
         <div class="purge-container">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Purge before date</mat-label>
-                <input matInput [matDatepicker]="purgePicker" [max]="maxDate" [formControl]="purgeBeforeDate" placeholder="MM/DD/YYYY" />
-                <mat-datepicker-toggle matIconSuffix [for]="purgePicker"></mat-datepicker-toggle>
-                <mat-datepicker #purgePicker ></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Time</mat-label>
-                <input matInput type="time" [formControl]="purgeBeforeTime" />
-            </mat-form-field>
-            <button mat-icon-button color="warn" aria-label="Purge results before selected datetime" title="Purge" [disabled]="!purgeBeforeDate.value" (click)="purge()">
-                <mat-icon [ngStyle]="{ color: purgeBeforeDate.value ? 'darkred' : 'gray' }">delete</mat-icon>
-            </button>
+            <span class="purge-field">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Purge before date</mat-label>
+                    <input matInput [matDatepicker]="purgePicker" [max]="maxDate" [formControl]="purgeBeforeDate" placeholder="MM/DD/YYYY" />
+                    <mat-datepicker-toggle matIconSuffix [for]="purgePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #purgePicker ></mat-datepicker>
+                </mat-form-field>
+            </span>
+            <span class="purge-field">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Time</mat-label>
+                    <input matInput type="time" [formControl]="purgeBeforeTime" />
+                </mat-form-field>
+            </span>
+            <span class="purge-field">
+                <button mat-icon-button color="warn" aria-label="Purge results before selected datetime" title="Purge" [disabled]="!purgeBeforeDate.value" (click)="purge()">
+                    <mat-icon [ngStyle]="{ color: purgeBeforeDate.value ? 'darkred' : 'gray' }">delete</mat-icon>
+                </button>
+            </span>
         </div>
     </div>
 
@@ -106,8 +112,8 @@
                     </td>
                 </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 
                 <!-- No results row -->
                 <tr class="mat-row no-data-row" *matNoDataRow>
