@@ -15,13 +15,15 @@ class NotificationServiceUnitTest {
 
     private TestBatchEmailListsRepository emailListsRepository;
     private EmailSender emailSender;
+    private NotificationGroupService notificationGroupService;
     private NotificationService notificationService;
 
     @BeforeEach
     void setUp() {
         emailListsRepository = mock(TestBatchEmailListsRepository.class);
         emailSender = mock(EmailSender.class);
-        notificationService = new NotificationService(emailListsRepository, emailSender);
+        notificationGroupService = mock(NotificationGroupService.class);
+        notificationService = new NotificationService(emailListsRepository, emailSender, notificationGroupService);
     }
 
     @Test
