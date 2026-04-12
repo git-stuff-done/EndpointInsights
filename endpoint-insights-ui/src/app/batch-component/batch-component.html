@@ -36,6 +36,7 @@
             <div class="batch-headers">
                 <h3>Batch Name</h3>
                 <h3>Batch ID</h3>
+                <h3>Created By</h3>
                 <h3>Start Time</h3>
                 <h3>Last Run</h3>
             </div>
@@ -49,6 +50,17 @@
                          <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>
                     </div>
                     <div class="cell id">{{ b.id }}</div>
+                    <div class="cell created-by">
+                        @if (b.createdBy) {
+                            <app-user-display
+                                [name]="b.createdBy.name"
+                                [subject]="b.createdBy.subject"
+                                [issuer]="b.createdBy.issuer"
+                            />
+                        } @else {
+                            <span>-</span>
+                        }
+                    </div>
                     <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
                     <div class="cell lastRun">{{ b.lastTimeRun ? (b.lastTimeRun | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
 

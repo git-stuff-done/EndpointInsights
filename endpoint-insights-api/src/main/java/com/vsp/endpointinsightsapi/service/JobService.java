@@ -58,7 +58,11 @@ public class JobService {
         job.setJmeterTestName(jobRequest.getJmeterTestName());
         job.setJobType(jobRequest.getTestType());
         job.setConfig(jobRequest.getConfig());
-        return jobRepository.save(job);
+        Job saved = jobRepository.save(job);
+
+        // Reload with user relationships for DTO mapping
+        return jobRepository.findByIdWithUsers(saved.getJobId())
+                .orElseThrow(() -> new JobNotFoundException(saved.getJobId().toString()));
     }
 
     public Optional<List<Job>> getAllJobs() {
@@ -66,7 +70,7 @@ public class JobService {
             LOG.debug("No jobs found in the repository");
             throw new JobNotFoundException("No jobs available");
         }
-        return Optional.of(jobRepository.findAll());
+        return Optional.of(jobRepository.findAllWithUsers());
     }
 
     public Optional<Job> getJobById(UUID jobId) {
@@ -74,7 +78,7 @@ public class JobService {
             LOG.debug("Job {} not found", jobId);
             throw new JobNotFoundException(jobId.toString());
         }
-        return jobRepository.findById(jobId);
+        return jobRepository.findByIdWithUsers(jobId);
 
     }
 
@@ -95,7 +99,11 @@ public class JobService {
         existingJob.setGitSshPrivateKey(job.getGitSshPrivateKey());
         existingJob.setGitSshPassphrase(job.getGitSshPassphrase());
         existingJob.setThreshold(job.getThreshold());
-        return jobRepository.save(existingJob);
+        jobRepository.save(existingJob);
+
+        // Reload with user relationships for DTO mapping
+        return jobRepository.findByIdWithUsers(id)
+                .orElseThrow(() -> new JobNotFoundException(id.toString()));
     }
 
     public Path checkoutJobRepository(UUID jobId) {

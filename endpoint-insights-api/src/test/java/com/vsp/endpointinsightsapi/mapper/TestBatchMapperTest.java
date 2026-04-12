@@ -3,16 +3,28 @@ package com.vsp.endpointinsightsapi.mapper;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@ExtendWith(MockitoExtension.class)
 public class TestBatchMapperTest {
 
-    private BatchMapper batchMapper = Mappers.getMapper(BatchMapper.class);
+    @Mock
+    private JobMapper jobMapper;
+
+    private BatchMapper batchMapper;
+
+    @BeforeEach
+    void setUp() {
+        batchMapper = new BatchMapper(jobMapper);
+    }
 
     private TestBatch buildTestBatch() {
         TestBatchEmailList email1 = new TestBatchEmailList();

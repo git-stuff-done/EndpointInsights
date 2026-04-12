@@ -56,9 +56,7 @@ export class BatchComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.batchService.getAllBatches().subscribe({
-            next: (data) => {
-                this.batch = data.body ?? []
-            },
+            next: (data) => this.batch = data.body ?? [],
             error: (err) => console.error('Error:', err)
         });
     }

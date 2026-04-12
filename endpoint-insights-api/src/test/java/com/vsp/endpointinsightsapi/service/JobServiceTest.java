@@ -44,17 +44,20 @@ class JobServiceTest {
         jobRequest.setName("Test Job");
         jobRequest.setDescription("Test Description");
         jobRequest.setTestType(TestType.INTEGRATION);
-        
+
         Job savedJob = new Job();
         savedJob.setJobId(UUID.randomUUID());
         savedJob.setName(jobRequest.getName());
-        
+
         when(jobRepository.save(any(Job.class))).thenReturn(savedJob);
+        when(jobRepository.findByIdWithUsers(savedJob.getJobId())).thenReturn(Optional.of(savedJob));
+
         Job testResult = jobService.createJob(jobRequest);
         assertNotNull(testResult);
         assertNotNull(testResult.getJobId());
         assertEquals("Test Job", testResult.getName());
         verify(jobRepository, times(1)).save(any(Job.class));
+        verify(jobRepository, times(1)).findByIdWithUsers(savedJob.getJobId());
     }
     
     @Test
@@ -62,16 +65,17 @@ class JobServiceTest {
         Job job1 = new Job();
         UUID job1Id = UUID.randomUUID();
         job1.setJobId(job1Id);
-        jobRepository.save(job1);
         Job job2 = new Job();
         UUID job2Id = UUID.randomUUID();
         job2.setJobId(job2Id);
-        jobRepository.save(job2);
 
         when(jobRepository.findAll()).thenReturn(Arrays.asList(job1, job2));
+        when(jobRepository.findAllWithUsers()).thenReturn(Arrays.asList(job1, job2));
+
         Optional<List<Job>> testResult = jobService.getAllJobs();
         assertEquals(2, testResult.get().size());
-        verify(jobRepository, times(2)).findAll();
+        verify(jobRepository, times(1)).findAll();
+        verify(jobRepository, times(1)).findAllWithUsers();
     }
     //test if job does not exist throws exception
 
@@ -81,12 +85,12 @@ class JobServiceTest {
         Job job = new Job();
         job.setJobId(jobId);
         when(jobRepository.existsById(jobId)).thenReturn(true);
-        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(jobRepository.findByIdWithUsers(jobId)).thenReturn(Optional.of(job));
         Optional<Job> testResult = jobService.getJobById(jobId);
         assertNotNull(testResult);
         assertTrue(testResult.isPresent());
         assertEquals(jobId, testResult.get().getJobId());
-        verify(jobRepository, times(1)).findById(jobId);
+        verify(jobRepository, times(1)).findByIdWithUsers(jobId);
         verify(jobRepository, times(1)).existsById(jobId);
     }
 
@@ -182,6 +186,7 @@ class JobServiceTest {
 
         when(jobRepository.findById(jobId)).thenReturn(Optional.of(existingJob));
         when(jobRepository.save(any(Job.class))).thenReturn(existingJob);
+        when(jobRepository.findByIdWithUsers(jobId)).thenReturn(Optional.of(existingJob));
 
         Job result = jobService.updateJob(jobId, updateData);
 
@@ -196,6 +201,7 @@ class JobServiceTest {
         assertEquals("passphrase", existingJob.getGitSshPassphrase());
         verify(jobRepository, times(1)).findById(jobId);
         verify(jobRepository, times(1)).save(existingJob);
+        verify(jobRepository, times(1)).findByIdWithUsers(jobId);
     }
 
     @Test

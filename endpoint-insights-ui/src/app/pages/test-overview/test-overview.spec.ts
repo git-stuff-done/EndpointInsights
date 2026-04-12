@@ -1,21 +1,30 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TestOverview } from './test-overview';
-import { CreateJobModal } from '../../components/create-job-modal/create-job-modal';
-import { EditJobModal } from '../../components/edit-job-modal/edit-job-modal';
-import { TestItem } from '../../models/test.model';
-import { JobService } from '../../services/job-services';
-import { TestRunService } from '../../services/test-run.service';
-import { ToastService } from '../../services/toast.service';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {of, throwError} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {provideNoopAnimations} from '@angular/platform-browser/animations';
+import {TestOverview} from './test-overview';
+import {CreateJobModal} from '../../components/create-job-modal/create-job-modal';
+import {EditJobModal} from '../../components/edit-job-modal/edit-job-modal';
+import {TestItem} from '../../models/test.model';
+import {JobService} from '../../services/job-services';
+import {TestRunService} from '../../services/test-run.service';
+import {ToastService} from '../../services/toast.service';
+import {UserInfo} from '../../models/user.model';
+
+const mockUserInfo: UserInfo = {
+    name: 'Alex Smith',
+    email: 'alex@example.com',
+    role: 'EDITOR',
+    issuer: 'https://auth.example.com',
+    subject: 'user-123'
+};
 
 const mockBackendJob = {
     jobId: 'abc-123',
     name: 'Auth - Login',
-    testBatches: [{ batchName: 'Nightly-01' }],
+    testBatches: [{batchName: 'Nightly-01'}],
     createdDate: '2024-01-01T00:00:00Z',
-    createdBy: 'Alex',
+    createdBy: mockUserInfo,
     jobType: 'E2E',
     gitUrl: 'git.com/test',
     description: 'test description',
@@ -30,7 +39,7 @@ const mappedTestItem: TestItem = {
     name: 'Auth - Login',
     batch: '',
     createdAt: '2024-01-01T00:00:00Z',
-    createdBy: 'Alex',
+    createdBy: mockUserInfo,
     jobType: 'E2E',
     gitUrl: 'git.com/test',
     description: 'test description',
@@ -66,10 +75,10 @@ describe('TestOverview', () => {
             imports: [TestOverview],
             providers: [
                 provideNoopAnimations(),
-                { provide: MatDialog, useValue: dialogSpy },
-                { provide: JobService, useValue: jobServiceSpy },
-                { provide: TestRunService, useValue: testRunServiceSpy },
-                { provide: ToastService, useValue: toastServiceSpy },
+                {provide: MatDialog, useValue: dialogSpy},
+                {provide: JobService, useValue: jobServiceSpy},
+                {provide: TestRunService, useValue: testRunServiceSpy},
+                {provide: ToastService, useValue: toastServiceSpy},
             ],
         }).compileComponents();
     }));
@@ -143,7 +152,7 @@ describe('TestOverview', () => {
     });
 
     it('openCreateJobModal opens CreateJobModal with correct config', () => {
-        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
         component.openCreateJobModal();
         expect(dialogSpy.open).toHaveBeenCalledWith(CreateJobModal, jasmine.objectContaining({
             width: '600px',
@@ -154,7 +163,7 @@ describe('TestOverview', () => {
     it('openCreateJobModal calls loadTests when dialog returns truthy result', () => {
         jobServiceSpy.getAllJobs.calls.reset();
         testRunServiceSpy.getRecentActivity.calls.reset();
-        dialogSpy.open.and.returnValue({ afterClosed: () => of({ id: 'new' }) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of({id: 'new'})} as any);
         component.openCreateJobModal();
         expect(jobServiceSpy.getAllJobs).toHaveBeenCalled();
         expect(testRunServiceSpy.getRecentActivity).toHaveBeenCalled();
@@ -162,14 +171,14 @@ describe('TestOverview', () => {
 
     it('openCreateJobModal does not reload when dialog returns falsy result', () => {
         jobServiceSpy.getAllJobs.calls.reset();
-        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
         component.openCreateJobModal();
         expect(jobServiceSpy.getAllJobs).not.toHaveBeenCalled();
     });
 
     it('openEditModal opens EditJobModal with correct config and data', () => {
         const t = component.tests[0];
-        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
         component.openEditModal(t);
         expect(dialogSpy.open).toHaveBeenCalledWith(EditJobModal, jasmine.objectContaining({
             width: '600px',
@@ -182,7 +191,7 @@ describe('TestOverview', () => {
         jobServiceSpy.getAllJobs.calls.reset();
         testRunServiceSpy.getRecentActivity.calls.reset();
         const t = component.tests[0];
-        dialogSpy.open.and.returnValue({ afterClosed: () => of({ updated: true }) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of({updated: true})} as any);
         component.openEditModal(t);
         expect(jobServiceSpy.getAllJobs).toHaveBeenCalled();
         expect(testRunServiceSpy.getRecentActivity).toHaveBeenCalled();
@@ -191,7 +200,7 @@ describe('TestOverview', () => {
     it('openEditModal does not reload when dialog returns falsy result', () => {
         jobServiceSpy.getAllJobs.calls.reset();
         const t = component.tests[0];
-        dialogSpy.open.and.returnValue({ afterClosed: () => of(null) } as any);
+        dialogSpy.open.and.returnValue({afterClosed: () => of(null)} as any);
         component.openEditModal(t);
         expect(jobServiceSpy.getAllJobs).not.toHaveBeenCalled();
     });

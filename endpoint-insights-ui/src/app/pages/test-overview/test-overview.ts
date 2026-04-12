@@ -16,6 +16,7 @@ import { JOB_STATUSES, JobStatus } from '../../common/job.constants';
 import { JobService } from '../../services/job-services';
 import { TestRunService } from '../../services/test-run.service';
 import { ToastService } from '../../services/toast.service';
+import { UserDisplayComponent } from '../../components/user-display/user-display.component';
 
 @Component({
   selector: 'app-test-overview',
@@ -31,6 +32,7 @@ import { ToastService } from '../../services/toast.service';
       ReactiveFormsModule,
       MatFormFieldModule,
       MatInputModule,
+      UserDisplayComponent,
   ],
 })
 export class TestOverview implements OnInit, OnDestroy {
@@ -88,7 +90,7 @@ export class TestOverview implements OnInit, OnDestroy {
                     jmeterTestName: j.jmeterTestName ?? '',
                     jobType: j.jobType ?? '',
                     createdAt: j.createdDate ?? '',
-                    createdBy: j.createdBy?.subject ?? j.createdBy ?? '',
+                    createdBy: j.createdBy ?? '',
                     status: this.mapStatus(statusMap.get(j.jobId)),
                     threshold: 20,
 
