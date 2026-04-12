@@ -40,7 +40,17 @@
                     <span class="status" [ngClass]="t.status">{{ t.status }}</span>
                 </div>
                 <div class="cell date">{{ t.createdAt | date:'MMM d, y, h:mm a' }}</div>
-                <div class="cell author">{{ t.createdBy }}</div>
+                <div class="cell author">
+                    @if (t.createdBy) {
+                        <app-user-display
+                            [name]="t.createdBy.name"
+                            [subject]="t.createdBy.subject"
+                            [issuer]="t.createdBy.issuer"
+                        />
+                    } @else {
+                        <span>-</span>
+                    }
+                </div>
 
                 <div class="cell actions" (click)="$event.stopPropagation()">
                     <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onRun(t)"><mat-icon>play_arrow</mat-icon></button>

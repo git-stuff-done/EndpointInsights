@@ -3,6 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { of } from 'rxjs';
 import { JobService } from './job-services';
 import { TestItem } from '../models/test.model';
+import { UserInfo } from '../models/user.model';
 import { environment } from '../../environment';
 import { AuthenticationService } from './authentication.service';
 
@@ -11,6 +12,14 @@ const BASE = `${environment.apiUrl}/jobs`;
 const mockAuthService = {
     authState$: of(null),
     getToken: () => null,
+};
+
+const mockUserInfo: UserInfo = {
+    name: 'Test User',
+    email: 'test@example.com',
+    role: 'DEVELOPER',
+    issuer: 'https://auth.example.com',
+    subject: 'test-user-123'
 };
 
 describe('JobService', () => {
@@ -27,7 +36,7 @@ describe('JobService', () => {
         compileCommand: 'npm run build',
         jobType: 'jmeter',
         createdAt: new Date(),
-        createdBy: 'user',
+        createdBy: mockUserInfo,
         status: 'RUNNING',
         threshold: 20,
 

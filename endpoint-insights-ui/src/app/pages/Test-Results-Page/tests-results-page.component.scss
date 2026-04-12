@@ -137,3 +137,11 @@
   text-align: center;
   color: rgba(0, 0, 0, 0.54);
 }
+
+/* Tooltip indicators */
+.with-dotted-underline {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}

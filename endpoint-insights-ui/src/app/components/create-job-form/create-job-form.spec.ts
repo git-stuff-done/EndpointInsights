@@ -4,10 +4,19 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {CreateJobForm} from './create-job-form';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {TestItem} from '../../models/test.model';
+import {UserInfo} from '../../models/user.model';
 
 describe('CreateJobForm', () => {
     let component: CreateJobForm;
     let fixture: ComponentFixture<CreateJobForm>;
+
+    const mockUserInfo: UserInfo = {
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'EDITOR',
+        issuer: 'https://auth.example.com',
+        subject: 'test-user-123'
+    };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -77,7 +86,7 @@ describe('CreateJobForm', () => {
                 threshold: 20,
                 jobType: 'PERF',
                 createdAt: new Date(),
-                createdBy: 'user',
+                createdBy: mockUserInfo,
                 status: 'RUNNING'
             };
 
