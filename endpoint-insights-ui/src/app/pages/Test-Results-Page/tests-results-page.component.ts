@@ -13,6 +13,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { RecentActivity } from '../../models/test-run.model';
 import { TestRunService } from '../../services/test-run.service';
+import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
+import {provideNativeDateAdapter} from "@angular/material/core";
+import {MatPaginator} from "@angular/material/paginator";
 
 @Component({
     selector: 'app-tests-results-page',
@@ -28,6 +31,13 @@ import { TestRunService } from '../../services/test-run.service';
         MatButtonModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        MatDatepicker,
+        MatDatepickerToggle,
+        MatDatepickerInput,
+        MatPaginator,
+    ],
+    providers: [
+        provideNativeDateAdapter()
     ],
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
@@ -35,11 +45,17 @@ import { TestRunService } from '../../services/test-run.service';
 export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
 
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+
     dataSource = new MatTableDataSource<RecentActivity>([]);
     displayedColumns = ['batchName', 'testName', 'runId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
     searchControl = new FormControl('');
+    purgeBeforeDate = new FormControl<Date | null>(null);
+    purgeBeforeTime = new FormControl<string>('00:00');
     isLoading = true;
     loadError: string | null = null;
+
+    public maxDate = new Date();
 
     private destroy$ = new Subject<void>();
 
@@ -87,6 +103,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
                         this.sort.active = 'dateRun';
                         this.sort.direction = 'desc';
                     }
+                    this.dataSource.paginator = this.paginator;
                 });
             },
             error: () => {
@@ -109,6 +126,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
                     return (item as any)[property];
             }
         };
+
     }
 
     ngOnDestroy(): void {
@@ -118,6 +136,24 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
 
     viewResult(row: RecentActivity): void {
         this.router.navigate(['/test-results/view'], { state: { runId: row.runId } });
+    }
+
+    purge(): void {
+        const date = this.purgeBeforeDate.value;
+        if (!date) return;
+        const [hours, minutes] = (this.purgeBeforeTime.value ?? '00:00').split(':').map(Number);
+        const datetime = new Date(date);
+        datetime.setHours(hours, minutes, 0, 0);
+
+        this.testRunService.deleteBefore(datetime).subscribe({
+            next: res => {
+
+                console.log('Test runs purged successfully');
+            },
+            error: err => {
+                console.error('Error purging test runs:', err);
+            }
+        });
     }
 
     statusClass(status: string): string {

@@ -1,11 +1,30 @@
 <main class="test-results-page">
     <div class="page-header">
-        <h1 class="page-title">Test Results</h1>
+        <div class="title-wrapper">
+            <h1 class="page-title">Test Results</h1>
+        </div>
+    </div>
+    <div class="action-wrapper">
         <div class="search-wrapper">
             <mat-icon class="search-icon">search</mat-icon>
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
                 <input matInput [formControl]="searchControl" placeholder="Search by name, test UUID, or run ID…" />
             </mat-form-field>
+        </div>
+        <div class="purge-container">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Purge before date</mat-label>
+                <input matInput [matDatepicker]="purgePicker" [max]="maxDate" [formControl]="purgeBeforeDate" placeholder="MM/DD/YYYY" />
+                <mat-datepicker-toggle matIconSuffix [for]="purgePicker"></mat-datepicker-toggle>
+                <mat-datepicker #purgePicker ></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Time</mat-label>
+                <input matInput type="time" [formControl]="purgeBeforeTime" />
+            </mat-form-field>
+            <button mat-icon-button color="warn" aria-label="Purge results before selected datetime" title="Purge" [disabled]="!purgeBeforeDate.value" (click)="purge()">
+                <mat-icon [ngStyle]="{ color: purgeBeforeDate.value ? 'darkred' : 'gray' }">delete</mat-icon>
+            </button>
         </div>
     </div>
 
@@ -21,7 +40,7 @@
         </div>
     } @else {
         <div class="table-container mat-elevation-z2">
-            <table mat-table [dataSource]="dataSource" matSort class="results-table">
+            <mat-table [dataSource]="dataSource" matSort class="results-table">
                 <ng-container matColumnDef="batchName">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Batch Name</th>
                     <td mat-cell *matCellDef="let row">
@@ -96,7 +115,9 @@
                         No results match <strong>{{ searchControl.value }}</strong>.
                     </td>
                 </tr>
-            </table>
+            </mat-table>
+
+            <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons/>
         </div>
     }
 </main>

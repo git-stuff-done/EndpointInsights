@@ -29,6 +29,17 @@
   align-items: center;
 }
 
+
+.action-wrapper {
+  display: flex;
+  margin-bottom: 1.5rem;
+}
+
+.purge-container {
+  margin-left: auto;
+}
+
+
 .search-icon {
   position: absolute;
   left: 12px;

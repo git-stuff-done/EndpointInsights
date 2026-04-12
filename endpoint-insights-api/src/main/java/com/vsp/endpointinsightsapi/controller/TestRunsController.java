@@ -1,11 +1,11 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
-import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
-import com.vsp.endpointinsightsapi.model.entity.TestRun;
-import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
-import com.vsp.endpointinsightsapi.service.TestRunService;
 import com.vsp.endpointinsightsapi.exception.CustomException;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
+import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.service.TestRunService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -89,11 +89,12 @@ public class TestRunsController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> deleteBefore(@RequestParam("purgeDate") LocalDateTime purgeDate) {
-		if (purgeDate.isAfter(LocalDateTime.now())) {
+	public ResponseEntity<Map<String, Object>> deleteBefore(@RequestParam("purgeDate") Instant purgeDate) {
+		if (purgeDate.isAfter(Instant.now())) {
 			throw new CustomExceptionBuilder(HttpStatus.BAD_REQUEST, "purgeDate cannot be in the future").build();
 		}
 
+//		return ResponseEntity.ok(Map.of("status", "Test runs deleted successfully"));
 		return testRunService.deleteBefore(purgeDate);
 	}
 }

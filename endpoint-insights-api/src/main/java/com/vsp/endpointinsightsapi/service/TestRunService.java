@@ -18,13 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -195,8 +190,8 @@ public class TestRunService {
         }).collect(Collectors.toList());
     }
 
-    public ResponseEntity<Map<String, Object>> deleteBefore(LocalDateTime purgeDate) {
-        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate.toInstant(ZoneOffset.UTC));
+    public ResponseEntity<Map<String, Object>> deleteBefore(Instant purgeDate) {
+        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate);
 
 		testRunRepository.deleteAll(oldRuns);
 		testRunRepository.flush();

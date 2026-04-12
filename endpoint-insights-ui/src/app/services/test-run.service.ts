@@ -37,4 +37,8 @@ export class TestRunService {
   deleteRun(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  deleteBefore(date: Date): Observable<any> {
+    return this.http.delete(`${this.apiUrl}?purgeDate=${date.toISOString()}`);
+  }
 }
