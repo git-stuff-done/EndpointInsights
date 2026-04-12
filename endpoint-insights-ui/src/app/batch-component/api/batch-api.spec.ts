@@ -74,7 +74,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [] }
+            { batchName: 'Test Batch', jobs: [], emails: [], groupIds: [] }
         );
     });
 
@@ -107,7 +107,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.put).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches/123`,
-            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [] }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], groupIds: [] }
         );
     });
 
@@ -127,5 +127,31 @@ describe('BatchApi', () => {
                 expect(toastSpy.onError).toHaveBeenCalledWith('Unable to save batch item');
             }
         });
+    });
+
+    it('should include groupIds when batch is new', () => {
+        const batchWithGroups = { ...mockBatch, isNew: true, groupIds: ['group-1', 'group-2'] };
+        const mockResponse = new HttpResponse({ body: batchWithGroups });
+        httpInterceptSpy.post.and.returnValue(of(mockResponse));
+
+        service.saveBatch(batchWithGroups).subscribe();
+
+        expect(httpInterceptSpy.post).toHaveBeenCalledWith(
+            `${environment.apiUrl}/batches`,
+            { batchName: 'Test Batch', jobs: [], emails: [], groupIds: ['group-1', 'group-2'] }
+        );
+    });
+
+    it('should include groupIds when batch is updated', () => {
+        const batchWithGroups = { ...mockBatch, groupIds: ['group-1'] };
+        const mockResponse = new HttpResponse({ body: batchWithGroups });
+        httpInterceptSpy.put.and.returnValue(of(mockResponse));
+
+        service.saveBatch(batchWithGroups).subscribe();
+
+        expect(httpInterceptSpy.put).toHaveBeenCalledWith(
+            `${environment.apiUrl}/batches/123`,
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], groupIds: ['group-1'] }
+        );
     });
 });
