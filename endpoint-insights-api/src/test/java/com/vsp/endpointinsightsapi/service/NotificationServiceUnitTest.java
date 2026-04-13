@@ -6,8 +6,6 @@ import com.vsp.endpointinsightsapi.repository.TestResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.mail.MessagingException;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,7 +83,7 @@ class NotificationServiceUnitTest {
     }
 
     @Test
-    void sendTestCompletionNotifications_resolveGroupsToEmails() throws MessagingException, IOException {
+    void sendTestCompletionNotifications_resolveGroupsToEmails() {
         UUID batchId = UUID.randomUUID();
         UUID runId = UUID.randomUUID();
         UUID resultId = UUID.randomUUID();
@@ -108,7 +106,7 @@ class NotificationServiceUnitTest {
     }
 
     @Test
-    void sendTestCompletionNotifications_mixedEmailsAndGroups() throws MessagingException, IOException {
+    void sendTestCompletionNotifications_mixedEmailsAndGroups() {
         UUID batchId = UUID.randomUUID();
         UUID runId = UUID.randomUUID();
         UUID resultId = UUID.randomUUID();
@@ -132,7 +130,7 @@ class NotificationServiceUnitTest {
     }
 
     @Test
-    void sendTestCompletionNotifications_invalidGroupIdFormat_logsWarning() throws MessagingException, IOException {
+    void sendTestCompletionNotifications_invalidGroupIdFormat_logsWarning() {
         UUID batchId = UUID.randomUUID();
         UUID runId = UUID.randomUUID();
         UUID resultId = UUID.randomUUID();
@@ -151,7 +149,7 @@ class NotificationServiceUnitTest {
     }
 
     @Test
-    void sendTestCompletionNotifications_deduplicatesEmails() throws MessagingException, IOException {
+    void sendTestCompletionNotifications_deduplicatesEmails() {
         UUID batchId = UUID.randomUUID();
         UUID runId = UUID.randomUUID();
         UUID resultId = UUID.randomUUID();
