@@ -124,27 +124,5 @@
                 </div>
             </article>
         </section>
-
-        <!-- Alerts -->
-        <section class="alerts-row">
-            <article class="panel panel-alerts">
-                <header class="panel-header">Alerts / Notifications</header>
-                <div class="panel-body">
-                    <ul class="alerts-list">
-                        @for (a of alerts; track a.id) {
-                            <li
-                                    class="alert-item"
-                                    [class.alert-warning]="a.severity === 'warning'"
-                                    [class.alert-error]="a.severity === 'error'"
-                            >
-                                <span class="alert-icon">⚠</span>
-                                <span class="alert-message">{{ a.message }}</span>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </article>
-        </section>
-
     </section>
 </main>
