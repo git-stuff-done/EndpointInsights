@@ -36,7 +36,7 @@ export class BatchApi {
                 batchName: batch.batchName,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
                 emails: batch.emails ?? [],
-                groupIds: batch.groupIds ?? []
+                groupIds: batch.groupIds ?? [],
                 active: batch.active,
             };
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)

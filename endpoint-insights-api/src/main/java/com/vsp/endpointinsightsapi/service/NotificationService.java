@@ -23,18 +23,15 @@ public class NotificationService {
     private final TestBatchEmailListsRepository emailListsRepository;
     private final EmailSender emailSender;
     private final NotificationGroupService notificationGroupService;
+    private final TestResultRepository testResultRepository;
 
     public NotificationService(TestBatchEmailListsRepository emailListsRepository,
                               EmailSender emailSender,
-                              NotificationGroupService notificationGroupService) {
+                              NotificationGroupService notificationGroupService,
+                              TestResultRepository testResultRepository) {
         this.emailListsRepository = emailListsRepository;
         this.emailSender = emailSender;
         this.notificationGroupService = notificationGroupService;
-    private final TestResultRepository testResultRepository;
-
-    public NotificationService(TestBatchEmailListsRepository emailListsRepository, EmailSender emailSender, TestResultRepository testResultRepository) {
-        this.emailListsRepository = emailListsRepository;
-        this.emailSender = emailSender;
         this.testResultRepository = testResultRepository;
     }
 
@@ -68,7 +65,7 @@ public class NotificationService {
             }
         }
 
-        LOG.info("Resolved to {} unique email recipients for run {}", allEmails.size(), runId);
+        LOG.info("Resolved to {} unique email recipients for run {}", allEmails.size(), testRun.getRunId());
 
         // Send emails to all resolved recipients
         for (String email : allEmails) {
