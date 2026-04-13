@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { RecentActivity } from '../../models/test-run.model';
 import { TestRunService } from '../../services/test-run.service';
+import {PerformanceChart} from "../../performance-chart/performance-chart";
 
 @Component({
     selector: 'app-tests-results-page',
@@ -28,6 +29,7 @@ import { TestRunService } from '../../services/test-run.service';
         MatButtonModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        PerformanceChart,
     ],
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
@@ -41,15 +43,27 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
     isLoading = true;
     loadError: string | null = null;
 
+    protected chartBatchId: string = '';
+    protected chartJobId: string = '';
+    protected displayChart: boolean = false;
+
     private destroy$ = new Subject<void>();
 
     constructor(
         private testRunService: TestRunService,
         private route: ActivatedRoute,
-        private router: Router,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
+        const state = window.history.state;
+        if (state) {
+            this.displayChart = state.displayGraph ?? false;
+
+            this.chartBatchId = state.batchId ?? null;
+            this.chartJobId = state.jobId ?? null;
+        }
+
         this.dataSource.filterPredicate = (row: RecentActivity, filter: string) => {
             const term = filter.trim().toLowerCase();
             return (
@@ -71,6 +85,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
         this.searchControl.valueChanges
             .pipe(debounceTime(200), takeUntil(this.destroy$))
             .subscribe(value => {
+                this.displayChart = false;
                 this.dataSource.filter = (value ?? '').trim().toLowerCase();
             });
 

@@ -196,6 +196,6 @@ export class TestOverview implements OnInit, OnDestroy {
     }
 
     protected onView(t: TestItem) {
-        this.router.navigate(['/test-results'], { queryParams: { name: t.name }, state: { displayGraph: true } });
+        this.router.navigate(['/test-results'], { queryParams: { name: t.name }, state: { displayGraph: true, jobId: t.jobId } });
     }
 }

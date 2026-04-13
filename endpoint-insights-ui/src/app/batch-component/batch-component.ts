@@ -133,6 +133,6 @@ export class BatchComponent implements OnInit, OnDestroy {
     }
 
     protected onView(b: Batch) {
-        this.router.navigate(['/test-results'], { queryParams: { name: b.batchName }, state: { displayGraph: true } });
+        this.router.navigate(['/test-results'], { queryParams: { name: b.batchName }, state: { displayGraph: true, batchId: b.id } });
     }
 }

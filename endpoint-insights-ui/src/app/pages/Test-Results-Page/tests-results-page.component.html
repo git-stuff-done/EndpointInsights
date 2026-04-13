@@ -9,6 +9,12 @@
         </div>
     </div>
 
+    @if (displayChart) {
+        <section class="charts-row">
+            <app-performance-chart [batchId]="chartBatchId" [jobId]="chartJobId"></app-performance-chart>
+        </section>
+    }
+
     @if (isLoading) {
         <div class="loading-state">
             <mat-spinner diameter="40"></mat-spinner>
