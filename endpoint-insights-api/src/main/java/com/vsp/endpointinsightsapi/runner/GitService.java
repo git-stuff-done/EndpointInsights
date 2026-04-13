@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.runner;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -9,12 +10,19 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 public class GitService {
+
+    private final String tempDirectory;
+
+    public GitService(@Value("${temp.dir}") String tempDirectory) {
+        this.tempDirectory = tempDirectory;
+    }
+
     public File cloneRepository(String gitUrl, String jobId, String jobName) throws IOException {
         if (gitUrl == null || gitUrl.trim().isEmpty()) {
             throw new IllegalArgumentException("No git URL provided for job: " + jobName);
         }
 
-        File tmpRoot = new File("C:\\tmp");
+        File tmpRoot = new File(tempDirectory);
         if (!tmpRoot.exists() && !tmpRoot.mkdirs()) {
                 throw new IOException("Could not create tmp root directory");
         }
