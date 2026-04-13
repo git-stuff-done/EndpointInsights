@@ -1,25 +1,67 @@
 .batch-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   padding: 16px 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.form-section {
+/* Panel card — matches dashboard panel style */
+.form-panel {
+  border-radius: var(--card-radius);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.form-panel .panel-header {
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.form-panel .panel-body {
+  background: var(--color-white);
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
 
-  h3 {
-    margin: 8px 0 0;
-    font-weight: 500;
+/* Schedule fields — lay out inline when space allows */
+.schedule-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+
+  mat-form-field {
+    flex: 1 1 140px;
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
 .form-row {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
+
+  button {
+    margin-top: 4px; /* align with outlined field input area */
+    flex-shrink: 0;
+  }
 }
 
 .full-width {
@@ -30,48 +72,104 @@
   flex: 1;
 }
 
-.field-label {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.6);
-  margin-bottom: 4px;
-}
-
 .run-info {
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.54);
-  display: flex;
-  gap: 24px;
+  color: var(--status-stopped);
 }
 
-.participants-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
+/* Job / email list */
 .job-list {
   display: flex;
   flex-direction: column;
+  border: var(--card-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .job-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.1s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:nth-child(even) {
+    background: var(--color-bg);
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-white));
+  }
+}
+
+.job-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.row-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--status-stopped);
+  flex-shrink: 0;
+}
+
+.job-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Job-type color pills — mirrors dashboard status-pill */
+.job-type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.type-perf {
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+}
+
+.type-integration {
+  background: color-mix(in srgb, var(--status-success) 12%, transparent);
+  color: var(--status-success);
+}
+
+.type-e2e {
+  background: color-mix(in srgb, var(--status-warn) 14%, transparent);
+  color: var(--status-warn);
+}
+
+/* Fallback for any other job type */
+.job-type-pill:not(.type-perf):not(.type-integration):not(.type-e2e) {
+  background: color-mix(in srgb, var(--status-unknown) 12%, transparent);
+  color: var(--status-unknown);
 }
 
 .empty-state {
-  color: rgba(0, 0, 0, 0.38);
+  color: var(--status-stopped);
   font-style: italic;
-  padding: 8px;
-}
-
-.participant-panel .mat-mdc-option {
-  background: white !important;
-}
-
-.participant-panel .mat-mdc-option:hover {
-  background: rgba(0, 0, 0, 0.04) !important;
+  padding: 12px;
+  text-align: center;
+  font-size: 0.88rem;
+  margin: 0;
 }

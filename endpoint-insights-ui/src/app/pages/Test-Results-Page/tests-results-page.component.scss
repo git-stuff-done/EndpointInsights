@@ -4,25 +4,22 @@
 }
 
 .test-results-page {
-  padding: 20px;
+  padding: 0 20px 20px;
 }
 
 .page-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 12px 0 16px;
   flex-wrap: wrap;
   gap: 12px;
 }
 
 .page-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
+  padding: 16px 0 14px;
 }
 
-/* Search */
 .search-wrapper {
   position: relative;
   display: flex;
@@ -33,16 +30,12 @@
   position: absolute;
   left: 12px;
   z-index: 1;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--status-stopped);
   pointer-events: none;
 }
 
 .search-field {
-  width: 340px;
-}
-
-::ng-deep .search-field input {
-  padding-left: 36px !important;
+  width: 300px;
 }
 
 /* Table */
@@ -54,28 +47,12 @@
 
 .results-table {
   width: 100%;
-  
-  &.mat-mdc-table {
-    display: table;
-    table-layout: auto;
-  }
-  
-  .mat-mdc-header-row {
-    display: table-row;
-  }
-  
-  .mat-mdc-row {
-    display: table-row;
-  }
-  
-  .mat-mdc-header-cell {
-    display: table-cell;
-    white-space: nowrap;
-  }
-  
-  .mat-mdc-cell {
-    display: table-cell;
-  }
+
+  &.mat-mdc-table { display: table; table-layout: auto; }
+  .mat-mdc-header-row { display: table-row; }
+  .mat-mdc-row        { display: table-row; }
+  .mat-mdc-header-cell { display: table-cell; white-space: nowrap; }
+  .mat-mdc-cell        { display: table-cell; }
 }
 
 .mat-column-runId,
@@ -83,9 +60,7 @@
   min-width: 120px;
 }
 
-.mat-column-actions {
-  width: 60px;
-}
+.mat-column-actions { width: 60px; }
 
 .mono {
   font-family: monospace;
@@ -101,6 +76,9 @@
   vertical-align: middle;
 }
 
+tr.mat-mdc-row { transition: background 0.12s ease; }
+tr.mat-mdc-row:hover td { background: var(--color-bg); }
+
 /* Status pills */
 .status-pill {
   display: inline-block;
@@ -110,12 +88,13 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  color: var(--color-white);
 }
 
-.status-pass  { background: #2e7d32; color: #fff; }
-.status-fail  { background: #c62828; color: #fff; }
-.status-warn  { background: #b26a00; color: #fff; }
-.status-unknown { background: #455a64; color: #fff; }
+.status-pass    { background: var(--status-success); }
+.status-fail    { background: var(--status-fail); }
+.status-warn    { background: var(--status-warn); }
+.status-unknown { background: var(--status-unknown); }
 
 /* Loading / error states */
 .loading-state,
@@ -124,18 +103,16 @@
   align-items: center;
   gap: 12px;
   padding: 40px 20px;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--status-stopped);
 }
 
-.error-state {
-  color: #c62828;
-}
+.error-state { color: var(--status-fail); }
 
 /* No data row */
 .no-data-row td {
   padding: 24px 16px;
   text-align: center;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--status-stopped);
 }
 
 /* Tooltip indicators */

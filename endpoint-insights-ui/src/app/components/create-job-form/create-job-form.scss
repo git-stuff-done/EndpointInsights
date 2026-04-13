@@ -3,12 +3,14 @@ form {
   flex-direction: column;
   gap: 16px;
   padding: 16px;
-  max-width: 600px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-row {
   display: flex;
   gap: 16px;
+
   mat-form-field {
     flex: 1;
   }
@@ -23,7 +25,7 @@ mat-form-field {
 }
 
 mat-error {
-  color: #f44336;
+  color: var(--color-error);
   font-size: 0.75rem;
   margin-top: 4px;
   line-height: 1.2;
@@ -42,11 +44,6 @@ mat-error {
   vertical-align: middle;
 }
 
-.dot-green  { background-color: #4caf50; }
-.dot-yellow { background-color: #ff9800; }
-.dot-red    { background-color: #f44336; }
-
-
-
-
-
+.dot-green  { background-color: var(--color-success); }
+.dot-yellow { background-color: var(--color-warning); }
+.dot-red    { background-color: var(--color-error); }

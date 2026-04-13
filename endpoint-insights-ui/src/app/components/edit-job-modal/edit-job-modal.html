@@ -1,80 +1,66 @@
-<div class="modal-header">
-    <div class="header">
-        <h2 mat-dialog-title class="truncate-id">
-            {{data.name}}: <span class="id-text">{{data.jobId}}</span>
-        </h2>
-    </div>
+<h2 mat-dialog-title class="truncate-id">
+    {{data.name}}: <span class="id-text">{{data.jobId}}</span>
+</h2>
 
-    <mat-dialog-content>
-        @if (state().inEditMode){
-            <app-job-form [job]="data" (jobSubmitted)="onUpdate($event)"></app-job-form>
-        }
-        @else {
-            <div class="form">
-                <div class="form-row">
-                    <div class="form-field">
-                        <label>Job Name</label>
-                        <p>{{ data.name }}</p>
-                    </div>
-                    <div class="form-field">
-                        <label>Job Description</label>
-                        <p>{{ data.description }}</p>
-                    </div>
+<mat-dialog-content>
+    @if (state().inEditMode){
+        <app-job-form [job]="data" (jobSubmitted)="onUpdate($event)"></app-job-form>
+    }
+    @else {
+        <div class="form">
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Job Name</label>
+                    <p>{{ data.name }}</p>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <label>Git URL</label>
-                        <p>{{ data.gitUrl }}</p>
-                    </div>
-                    <div class="form-field">
-                        <label>Job Type</label>
-                        <p>{{ data.jobType }}</p>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    @if (data.jobType === 'PERF') {
-                        <div class="form-field">
-                            <label>JMeter Test Name</label>
-                            <p>{{ data.jmeterTestName }}</p>
-                        </div>
-                    } @else {
-                        <div class="form-field">
-                            <label>Run Command</label>
-                            <p>{{ data.runCommand }}</p>
-                        </div>
-                    }
-                    <div class="form-field">
-                        <label>Compile Command</label>
-                        <p>{{ data.compileCommand }}</p>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <label>Passing Threshold</label>
-                        <p>
-                            0 - {{ data.threshold }} ms
-                        </p>
-                    </div>
+                <div class="form-field">
+                    <label>Job Description</label>
+                    <p>{{ data.description }}</p>
                 </div>
             </div>
-        }
-    </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
-        <div class="button-group">
-            <button class="create-job-modal-cancel-button" mat-raised-button (click)="onCancel()">Cancel</button>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Git URL</label>
+                    <p>{{ data.gitUrl }}</p>
+                </div>
+                <div class="form-field">
+                    <label>Job Type</label>
+                    <p>{{ data.jobType }}</p>
+                </div>
+            </div>
 
-            <button class="create-job-modal-create-button" (click)="toggleEditMode()" mat-raised-button>
-                @if (!state().inEditMode) {
-                    <span>Edit</span>
+            <div class="form-row">
+                @if (data.jobType === 'PERF') {
+                    <div class="form-field">
+                        <label>JMeter Test Name</label>
+                        <p>{{ data.jmeterTestName }}</p>
+                    </div>
+                } @else {
+                    <div class="form-field">
+                        <label>Run Command</label>
+                        <p>{{ data.runCommand }}</p>
+                    </div>
                 }
-                @else {
-                    <span>Save</span>
-                }
-            </button>
+                <div class="form-field">
+                    <label>Compile Command</label>
+                    <p>{{ data.compileCommand }}</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Passing Threshold</label>
+                    <p>0 - {{ data.threshold }} ms</p>
+                </div>
+            </div>
         </div>
-    </mat-dialog-actions>
-</div>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-raised-button class="dialog-btn-cancel" (click)="onCancel()">Cancel</button>
+    <button mat-raised-button class="dialog-btn-primary" (click)="toggleEditMode()">
+        @if (!state().inEditMode) { Edit } @else { Save }
+    </button>
+</mat-dialog-actions>

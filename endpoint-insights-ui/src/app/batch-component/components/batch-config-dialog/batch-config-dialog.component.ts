@@ -12,7 +12,7 @@ import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/c
 import {Batch} from "../../../models/batch.model";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
-import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/list";
+import {MatListOption, MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
@@ -37,7 +37,6 @@ import {User} from "../../../models/user.model";
         MatNativeDateModule,
         MatAutocompleteModule,
         MatSelectModule,
-        MatDivider,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './batch-config-dialog.component.html',
