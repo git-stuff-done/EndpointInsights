@@ -7,9 +7,8 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.repository.*;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -30,11 +29,15 @@ public class TestRunService {
 	private final TestRunRepository testRunRepository;
 	private final JobRepository jobRepository;
 	private final TestBatchRepository testBatchRepository;
+	private final PerfTestResultRepository perfTestResultRepository;
+	private final TestResultRepository testResultRepository;
 
-	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository, TestBatchRepository testBatchRepository) {
+	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository, TestBatchRepository testBatchRepository, PerfTestResultRepository perfTestResultRepository, TestResultRepository testResultRepository) {
 		this.testRunRepository = testRunRepository;
 		this.jobRepository = jobRepository;
 		this.testBatchRepository = testBatchRepository;
+		this.perfTestResultRepository = perfTestResultRepository;
+		this.testResultRepository = testResultRepository;
 	}
 
 	public TestRun createTestRun(TestRun testRun) {
@@ -115,10 +118,14 @@ public class TestRunService {
 				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
 	}
 
+	@Transactional
 	public ResponseEntity<Map<String, Object>> deleteTestRunById(UUID runId) {
 		if (!testRunRepository.existsById(runId)) {
 			throw new TestRunNotFoundException(runId.toString());
 		}
+
+		perfTestResultRepository.deleteByRunIds(List.of(runId));
+		testResultRepository.deleteByRunIds(List.of(runId));
 		testRunRepository.deleteById(runId);
 
 		return ResponseEntity.ok(Map.of("status", String.format("Test run %s deleted successfully", runId)));
@@ -190,11 +197,13 @@ public class TestRunService {
         }).collect(Collectors.toList());
     }
 
+	@Transactional
     public ResponseEntity<Map<String, Object>> deleteBefore(Instant purgeDate) {
-        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate);
+        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate).stream().map(TestRun::getRunId).toList();
 
-		testRunRepository.deleteAll(oldRuns);
-		testRunRepository.flush();
+		perfTestResultRepository.deleteByRunIds(oldRuns);
+		testResultRepository.deleteByRunIds(oldRuns);
+		testRunRepository.deleteAllByIdInBatch(oldRuns);
 
 		return ResponseEntity.ok(Map.of("deletedRuns", oldRuns.size()));
     }
