@@ -1,8 +1,9 @@
 describe('Application Smoke Tests', function() {
-    it('loads and redirects to IdP for authentication', function(browser) {
+    it('authenticates with identity provider', function(browser) {
+        const baseUrl = process.env.APP_URL || browser.launch_url || 'http://localhost:8080';
+
         browser
-            .navigateTo('http://localhost:8080')
-            .waitForElementVisible('body')
-            .assert.urlContains('auth.crowleybrynn.com')
+            .authenticateWithAuthelia(baseUrl)
+            .assert.elementPresent('[data-test-id="dashboard-title"]')
     })
 })

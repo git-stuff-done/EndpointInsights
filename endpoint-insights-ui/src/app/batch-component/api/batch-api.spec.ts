@@ -40,7 +40,6 @@ describe('BatchApi', () => {
         service = TestBed.inject(BatchApi);
     });
 
-
     it('should get all batches', () => {
         const mockResponse = new HttpResponse({ body: [mockBatch] });
         httpInterceptSpy.get.and.returnValue(of(mockResponse));
@@ -51,8 +50,6 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.get).toHaveBeenCalledWith(`${environment.apiUrl}/batches`);
     });
-
-
 
     it('should delete a batch by id', () => {
         const mockResponse = new HttpResponse({ body: mockBatch });
@@ -75,7 +72,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [], active: false }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], active: false }
         );
     });
 
