@@ -4,15 +4,16 @@
     <form [formGroup]="form" class="batch-form">
 
         <!-- Overview -->
-        <div class="form-panel">
-            <div class="panel-header">Overview</div>
-            <div class="panel-body">
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Application Name</mat-label>
-                    <input matInput placeholder="e.g. Payments Service" formControlName="batchName" />
-                </mat-form-field>
-            </div>
-        </div>
+        <section class="form-section">
+            <h3>Name</h3>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Test Batch Name</mat-label>
+                <input matInput placeholder="e.g. Payments Service" formControlName="batchName"  />
+                <mat-error>{{ getErrorMessage('batchName') }}</mat-error>
+            </mat-form-field>
+        </section>
+
+        <mat-divider></mat-divider>
 
         <!-- Schedule -->
         <div class="form-panel">
