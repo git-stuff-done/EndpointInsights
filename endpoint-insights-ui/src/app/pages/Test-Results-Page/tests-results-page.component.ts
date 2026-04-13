@@ -113,7 +113,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
         this.dataSource.filterPredicate = (row: RecentActivity, filter: string) => {
             const term = filter.trim().toLowerCase();
             return (
-                row.testName.toLowerCase().includes(term) ||
+                row.testName?.toLowerCase().includes(term) ||
                 row.batchName?.toLowerCase().includes(term) ||
                 row.runId.toLowerCase().includes(term) ||
                 row.batchId?.toLowerCase().includes(term) ||
