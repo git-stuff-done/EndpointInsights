@@ -92,6 +92,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 ) { }
 
     ngOnInit(): void {
+        this.dashboardSummaryService.loadDashboardSummary(100).subscribe({
+            next: (summary) => this.summary = summary,
+            error: (err) => console.error('Failed to load summary', err)
+        });
+
+        this.jobService.getAllJobs().subscribe({
+            next: (jobs) => this.jobs = jobs,
+            error: (err) => console.error('Failed to load jobs', err)
+        });
+
         this.testRunService.getRecentActivity(10).subscribe({
             next: (data) => {
                 this.tests = data.map(r => ({
@@ -107,24 +117,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                     status: r.status as DashboardTestActivity['status'],
                 }));
 
-            // POST the same activity data to /dashboard/summary
-        this.dashboardSummaryService.loadDashboardSummary(100).subscribe({
-            next: (summary) => this.summary = summary,
-            error: (err) => console.error('Failed to load summary', err)
-        });
+                const mostRecentRun = data[0] ?? null;
 
-        this.jobService.getAllJobs().subscribe({
-            next: (jobs) => this.jobs = jobs,
-            error: (err) => console.error('Failed to load jobs', err)
-        });
-
-                const mostRecentPassingRun = data.find(
-                  r => (r.status === 'PASS' || r.status === 'FAIL') && (r.jobId || r.batchId)
-                );
-
-                if (mostRecentPassingRun) {
-                  this.jobId = mostRecentPassingRun.jobId ?? '';
-                  this.batchId = mostRecentPassingRun.batchId ?? '';
+                if (mostRecentRun) {
+                    if (mostRecentRun.batchId) {
+                        this.batchId = mostRecentRun.batchId;
+                    } else {
+                        this.jobId = mostRecentRun.jobId ?? '';
+                    }
                 } else {
                   this.error = 'No recent passing test found.';
                 }
