@@ -46,6 +46,9 @@ spring:
 jmeter:
   home: ${JMETER_HOME}
 
+temp:
+  dir: C:\temp
+
 scheduling:
   pool-size: 10
   thread-name-prefix: TestBatchScheduler-
@@ -108,8 +111,20 @@ springdoc:
 spring:
   config:
     activate:
+      on-profile: UNIX
+
+temp:
+  dir: /tmp/endpoint-insights
+
+---
+spring:
+  config:
+    activate:
       on-profile: PROD
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
+
+temp:
+  dir: /tmp/endpoint-insights

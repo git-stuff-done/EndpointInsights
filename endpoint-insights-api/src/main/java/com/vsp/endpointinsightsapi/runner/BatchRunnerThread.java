@@ -66,10 +66,6 @@ public class BatchRunnerThread implements Runnable {
 		final Map<UUID, TestRunStatus> testRunMap = Collections.synchronizedMap(new HashMap<>());
 		final List<JobRunnerThread> jobTasks = new ArrayList<>();
 		for (final Job job : batch.getJobs()) {
-
-            // Set the job name before completed to show job name in results
-            testRun.setJobId(job.getJobId());
-            testRunRepository.save(testRun);
 			var jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
 				testRunMap.put(job.getJobId(), status.status());
 			});

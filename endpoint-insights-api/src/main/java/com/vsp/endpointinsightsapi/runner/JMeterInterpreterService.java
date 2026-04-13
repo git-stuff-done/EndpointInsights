@@ -25,18 +25,15 @@ public class JMeterInterpreterService implements TestInterpreter {
 	private final PerfTestResultRepository perfTestResultRepository;
 	private final PerfTestResultCodeRepository perfTestResultCodeRepository;
 	private final TestResultRepository testResultRepository;
-    private final JobRepository jobRepository;
-
 
     // Used for interpreting test results
 	private record SampleRecord(long elapsed, int responseCodeInt, String responseCode, long timeStamp, boolean success) {}
 
 	@Autowired
-	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository, JobRepository jobRepository) {
+	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository) {
 		this.perfTestResultRepository = perfTestResultRepository;
 		this.perfTestResultCodeRepository = perfTestResultCodeRepository;
 		this.testResultRepository = testResultRepository;
-        this.jobRepository = jobRepository;
     }
 
 	private int calculatePercentile(List<Long> sortedLatencies, double percentile) {
@@ -53,8 +50,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 	@Override
 	@Transactional
-	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
-        Job job = jobRepository.findById(testRun.getJobId()).orElse(null);
+	public TestRunResult processResults(File file, TestRun testRun, Job job) throws IOException {
         if(job == null) {
             throw new RuntimeException("Job threshold not found");
         }

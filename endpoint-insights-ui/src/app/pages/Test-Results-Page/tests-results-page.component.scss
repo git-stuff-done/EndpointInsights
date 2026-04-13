@@ -45,6 +45,10 @@
   color: var(--color-white);
 }
 
+.charts-row {
+  margin-bottom: 2rem;
+}
+
 .mat-mdc-paginator {
   margin-top: 1rem;
   display: flex;
@@ -73,6 +77,30 @@
 
 .results-table {
   width: 100%;
+
+  &.mat-mdc-table {
+    display: table;
+    table-layout: auto;
+  }
+
+  .mat-mdc-header-row {
+    display: table-row;
+  }
+
+  .mat-mdc-row {
+    display: table-row;
+  }
+
+  .mat-mdc-header-cell {
+    display: table-cell;
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+  }
+
+  .mat-mdc-cell {
+    display: table-cell;
+    padding: 0.5rem 1rem;
+  }
 }
 
 .results-table {
