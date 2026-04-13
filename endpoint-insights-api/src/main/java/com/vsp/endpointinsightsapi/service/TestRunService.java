@@ -81,8 +81,11 @@ public class TestRunService {
 	}
 
 	public TestRun getTestRunById(UUID runId) {
-		return testRunRepository.findById(runId)
+		var res = testRunRepository.findById(runId)
 				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
+		res.getResults();
+
+		return res;
 	}
 
 	@Transactional

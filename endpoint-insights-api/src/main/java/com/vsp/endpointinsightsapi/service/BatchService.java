@@ -12,7 +12,6 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
-import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
@@ -117,6 +116,10 @@ public class BatchService {
     public TestBatch createBatch(BatchRequestDTO request) {
         TestBatch batch = new TestBatch();
         batch.setBatchName(request.getBatchName());
+        batch.setCronExpression(request.getCronExpression());
+        batch.setScheduleId(request.getScheduleId());
+        batch.setStartTime(request.getStartTime());
+        batch.setActive(request.getActive());
 
         if (request.getJobs() != null && !request.getJobs().isEmpty()) {
             List<Job> jobs = jobRepository.findAllById(request.getJobs());
@@ -285,7 +288,7 @@ public class BatchService {
             batchRunPersistenceService.save(returnedBatch, run);
 
             // Notify now that batch is completed
-            notificationService.sendTestCompletionNotifications(returnedBatch.getBatchName(),run.getBatchId(), run, null);
+            notificationService.sendTestCompletionNotifications(run.getBatchId(), run.getRunId(), null);
         });
         vspTaskScheduler.execute(batchRunnerThread);
 

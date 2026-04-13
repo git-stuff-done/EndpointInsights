@@ -2,6 +2,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ViewResult} from './view-result';
 import {provideHttpClient} from "@angular/common/http";
+import {provideHttpClientTesting} from "@angular/common/http/testing";
 import {Params, provideRouter, Router} from "@angular/router";
 import {of, throwError} from "rxjs";
 import {TestRun} from "../models/test-run.model";
@@ -50,6 +51,7 @@ describe('ViewResult', () => {
       imports: [ViewResult],
       providers: [
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([])
       ]
     })
