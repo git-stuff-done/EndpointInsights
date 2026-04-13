@@ -1,10 +1,10 @@
-const APP_URL = 'http://localhost:8080';
+const APP_URL = process.env.APP_URL || 'http://localhost:8080';
 
 describe('Test Results List Page', function () {
 
   before(function (browser) {
     browser
-      .injectAuthToken()
+      .authenticateWithAuthelia(APP_URL)
       .navigateTo(`${APP_URL}/test-results`);
   });
 
@@ -26,6 +26,13 @@ describe('Test Results List Page', function () {
     page
       .waitForElementVisible('@searchWrapper')
       .assert.elementPresent('@searchInput');
+  });
+
+  it('renders the purge controls', function (browser) {
+    const page = browser.page['test-results'].list();
+    page
+      .waitForElementVisible('@purgeContainer')
+      .assert.elementPresent('@purgeDeleteButton');
   });
 
   // --- Table load ---
@@ -50,6 +57,13 @@ describe('Test Results List Page', function () {
     browser
       .waitForElementVisible('tr[mat-row]')
       .assert.elementPresent('tr[mat-row]');
+  });
+
+  it('renders the paginator below the table', function (browser) {
+    const page = browser.page['test-results'].list();
+    page
+      .waitForTable()
+      .assert.elementPresent('@paginator');
   });
 
   it('renders status pills on data rows', function (browser) {

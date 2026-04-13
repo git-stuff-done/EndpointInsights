@@ -35,7 +35,8 @@ module.exports = {
     resultContainer: { selector: '.result-container' },
     runMeta:         { selector: '.run-meta' },
     metaPills:       { selector: '.meta-pill' },
-    statusBadge:     { selector: '.status-badge' },
+    statusBadge:     { selector: '.status-badge' },  // modifier classes: status-pass, status-fail, status-warn, status-unknown
+    deleteButton:    { selector: '.delete-button button' },
     matTable:        { selector: 'mat-table' },
     headerRow:       { selector: 'mat-header-row' },
     dataRows:        { selector: 'mat-row' },

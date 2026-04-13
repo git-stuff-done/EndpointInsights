@@ -1,4 +1,4 @@
-const APP_URL = 'http://localhost:8080';
+const APP_URL = process.env.APP_URL || 'http://localhost:8080';
 
 // Tests that require real data are gated on E2E_TEST_RUN_ID.
 // When unset the suite stays green — each gated test passes with a SKIPPED notice.
@@ -7,7 +7,7 @@ const RUN_ID = process.env.E2E_TEST_RUN_ID || null;
 describe('Test Results View Page', function () {
 
   before(function (browser) {
-    browser.injectAuthToken();
+    browser.authenticateWithAuthelia(APP_URL);
     if (RUN_ID) {
       browser.navigateTo(`${APP_URL}/test-results/view?id=${RUN_ID}`);
     } else {
@@ -49,10 +49,20 @@ describe('Test Results View Page', function () {
     }
     browser.getAttribute('.status-badge', 'class', function (result) {
       const cls = result.value;
-      const valid = ['status-completed', 'status-failed', 'status-running', 'status-pending']
+      const valid = ['status-pass', 'status-fail', 'status-warn', 'status-unknown']
         .some(c => cls.includes(c));
       this.assert.ok(valid, `status badge has a recognised modifier class: ${cls}`);
     });
+  });
+
+  it('delete button is present in the run metadata section', function (browser) {
+    if (!RUN_ID) {
+      browser.assert.ok(true, 'SKIPPED: E2E_TEST_RUN_ID not set');
+      return;
+    }
+    browser
+      .waitForElementVisible('.run-meta')
+      .assert.elementPresent('.delete-button button');
   });
 
   it('renders the results mat-table with a header row', function (browser) {

@@ -59,5 +59,8 @@ module.exports = {
     runIdCell:          { selector: '.mono.truncate' },
     viewButton:         { selector: 'button[aria-label="View test result"]' },
     firstRowViewButton: { selector: 'tr[mat-row]:first-of-type button[aria-label="View test result"]' },
+    paginator:          { selector: 'mat-paginator' },
+    purgeContainer:     { selector: '.purge-container' },
+    purgeDeleteButton:  { selector: '.purge-container button[color="warn"]' },
   }
 };
