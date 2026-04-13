@@ -3,34 +3,11 @@
   padding: 8px;
 }
 
-.grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 :host, :host * {
   box-sizing: border-box;
 }
 
-.grid > * {
-  background: var(--color-white);
-  border: 1px solid var(--color-text-light);
-  padding: 12px 14px;
-  border-radius: var(--card-radius);
-  background: var(--color-white);
-  border: var(--card-border);
-  box-shadow: var(--card-shadow);
-  transition: var(--card-transition);
-
-  width: 100%;
-}
-
-/* Button Styling */
 .button-container {
-  outline-offset: -5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -59,7 +36,7 @@
   position: absolute;
   left: 12px;
   z-index: 1;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--status-stopped);
   pointer-events: none;
 }
 
@@ -67,67 +44,48 @@
   width: 300px;
 }
 
-::ng-deep .search-field input {
-  padding-left: 36px !important;
-}
-
 .elevated-btn {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-
   padding: 10px 18px;
   border: 1px solid var(--color-white);
   border-radius: 14px;
   background: var(--color-white);
-  color: #111;
-  font-weight: 700; /* Bold text */
+  color: var(--color-text);
+  font-weight: 700;
   cursor: pointer;
-
-  box-shadow: var(--shadow-sm),
-  var(--shadow-md);
+  box-shadow: var(--shadow-sm), var(--shadow-md);
 }
+.elevated-btn:hover  { transform: translateY(-2px); }
+.elevated-btn:active { transform: translateY(0); }
 
-.elevated-btn:hover {
-  transform: translateY(-2px);
-}
-
-.elevated-btn:active {
-  transform: translateY(0);
-}
-
-/* Batch List Styling */
+/* Batch List */
 .batch-list-container {
   display: grid;
   padding: 20px;
 }
 
-/* shared column recipe + a fixed actions width */
 :host {
-  --cols: 2fr 2fr 1.5fr 1fr 1fr; /* Name | Batch ID | Created By | Start Time | Last Run */
-  --actions: 44px; /* filter + row action buttons */
+  --cols: 2fr 2fr 1.5fr 1fr 1fr;
+  --actions: 44px;
   --gap: 24px;
 }
 
-/* HEADER */
 .batch-header-row {
   display: grid;
   grid-template-columns: var(--cols) var(--actions);
   column-gap: var(--gap);
   align-items: center;
   padding: 8px 14px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky; /* optional: keep visible while scrolling */
+  background: var(--color-bg);
+  border-bottom: var(--card-border);
+  position: sticky;
   top: 0;
   z-index: 2;
 }
 
-/* make the <h3> participate directly in the grid */
-.batch-headers {
-  display: contents;
-}
-
+.batch-headers { display: contents; }
 .batch-headers h3 {
   margin: 0;
   font-weight: 700;
@@ -135,10 +93,7 @@
   white-space: nowrap;
 }
 
-/* filter occupies the actions column */
-.filter-btn {
-  justify-self: end;
-}
+.filter-btn { justify-self: end; }
 
 .filter-btn[mat-icon-button],
 .filter-btn button {
@@ -150,8 +105,8 @@
   display: grid;
   place-items: center;
   line-height: 0;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+  background: var(--color-white);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-btn .mat-icon {
@@ -161,71 +116,52 @@
   line-height: 1;
 }
 
+.batch-list { display: grid; gap: 10px; }
 
-/* batch + rows */
-.batch-list {
-  display: grid;
-  gap: 10px;
-}
-
-/* ROWS — same grid as header */
 .batch-row {
   display: grid;
   grid-template-columns: var(--cols) var(--actions);
   column-gap: var(--gap);
   align-items: center;
-
-  background: #fff;
-  border: 1px solid #e9e9e9;
+  background: var(--color-white);
+  border: var(--card-border);
   border-radius: 12px;
   padding: 12px 14px;
-
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .06), 0 8px 16px rgba(0, 0, 0, .10);
+  box-shadow: var(--card-shadow);
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
-/* cells */
-.cell {
-  min-width: 0;
+.batch-row:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: #d0d5dd;
 }
 
-/* allow text truncation */
-.name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.title {
-  font-weight: 600;
-}
+.cell    { min-width: 0; }
+.name    { display: flex; align-items: center; gap: 10px; }
+.title   { font-weight: 600; }
 
 .active {
   padding: 2px 8px;
   border-radius: 999px;
   font-size: .75rem;
   text-transform: capitalize;
-  border: 1px solid #ddd;
+  border: 1px solid transparent;
 }
 
 .active.false {
-  background: #fdecea;
-  color: #b3261e;
-  border-color: #f6c7c2;
+  background: color-mix(in srgb, var(--status-fail) 10%, white);
+  color: var(--status-fail);
+  border-color: color-mix(in srgb, var(--status-fail) 30%, white);
 }
 
 .active.true {
-  background: #eef3ff;
-  color: #2a5bd7;
-  border-color: #d8e2ff;
+  background: color-mix(in srgb, var(--status-success) 10%, white);
+  color: var(--status-success);
+  border-color: color-mix(in srgb, var(--status-success) 30%, white);
 }
 
-.actions {
-  display: inline-flex;
-  gap: 4px;
-  justify-self: end;
-}
-
+.actions { display: inline-flex; gap: 4px; justify-self: end; }
 .actions button {
   width: 36px;
   height: 36px;
@@ -235,11 +171,10 @@
   display: grid;
   place-items: center;
   line-height: 0;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+  background: var(--color-white);
+  box-shadow: var(--shadow-sm);
 }
 
-/* truncate long text nicely */
 .title, .id, .created-by, .start, .lastRun {
   overflow: hidden;
   text-overflow: ellipsis;

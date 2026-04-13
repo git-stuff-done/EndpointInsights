@@ -15,6 +15,7 @@ import {BatchConfigDialogComponent} from './components/batch-config-dialog/batch
 import {BatchService} from "../services/batch.service";
 import {DeleteBatchModalComponent} from "../shared/delete-confimation-modal/delete-confirmation-component";
 import {NotificationService} from "../services/notification.service";
+import {dateTimestampProvider} from "rxjs/internal/scheduler/dateTimestampProvider";
 import {UserDisplayComponent} from "../components/user-display/user-display.component";
 import {Router} from "@angular/router";
 
@@ -88,6 +89,8 @@ export class BatchComponent implements OnInit, OnDestroy {
         this.batchService.runBatch(batch).subscribe({
             next: (data) => {
                 this.notificationService.showToast(`Run started with id: ${data.body?.runId}`, 'success');
+                batch.lastTimeRun = new Date().toISOString()
+                batch.startTime = new Date().toISOString()
             },
             error: (err) => this.notificationService.showToast(`Failed to run batch: ${err.error.details[0]}`, 'error')
         })
@@ -117,7 +120,7 @@ export class BatchComponent implements OnInit, OnDestroy {
                 batchName: '',
                 startTime: '',
                 active: false,
-                lastRunTime: '',
+                lastTimeRun: '',
  //               scheduledDays: [],
                 nextRunTime: '',
                 nextRunDate: '',

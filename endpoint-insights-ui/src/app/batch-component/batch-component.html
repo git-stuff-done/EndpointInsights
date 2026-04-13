@@ -1,6 +1,8 @@
 <main>
+    <h1 class="page-title">Batches</h1>
     <div class="button-container">
-        <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
+        <button data-test="new-batch" mat-raised-button class="elevated-btn mat-elev-2" color="basic"
+                (click)="openCreateBatchModal()">
             <span>New Batch</span>
             <mat-icon fontIcon="add"></mat-icon>
         </button>
@@ -8,11 +10,16 @@
             <div class="search-wrapper">
                 <mat-icon class="search-icon">search</mat-icon>
                 <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
-                    <input matInput [formControl]="searchControl" placeholder="Search batches...">
+                    <input
+                            matInput
+                            data-test-id="search-batches-input"
+                            [formControl]="searchControl"
+                            placeholder="Search batches..."
+                    >
                 </mat-form-field>
             </div>
             <button class="filter-btn elevated-btn" [matMenuTriggerFor]="filterMenu"
-                [matBadge]="hasActiveFilter ? '!' : ''" matBadgeSize="small" matBadgeColor="accent">
+                    [matBadge]="hasActiveFilter ? '!' : ''" matBadgeSize="small" matBadgeColor="accent">
                 <mat-icon>filter_list</mat-icon>
             </button>
             <mat-menu #filterMenu="matMenu">
@@ -31,7 +38,7 @@
             </mat-menu>
         </div>
     </div>
-    <div class="batch-list-container">
+    <div id="batches-table" class="batch-list-container">
         <div class="batch-header-row">
             <div class="batch-headers">
                 <h3>Batch Name</h3>
@@ -44,31 +51,65 @@
         <!-- List -->
         <div class="batch-list">
             @for (b of filteredBatches; track b.id) {
-                <div class="batch-row" >
+                <div class="batch-row" [attr.data-test-id]="'batch-row-' + b.batchName">
                     <div class="cell name">
-                        <span class="title">{{ b.batchName }}</span>
-                         <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>
+                        <span class="title" [attr.data-test-id]="'batch-name-' + b.batchName">{{ b.batchName }}</span>
+                         <span class="active" [class.true]="b.active === true" [class.false]="b.active !== true">{{ b.active ? 'Active' : 'Inactive' }}</span>
                     </div>
                     <div class="cell id">{{ b.id }}</div>
                     <div class="cell created-by">
                         @if (b.createdBy) {
                             <app-user-display
-                                [name]="b.createdBy.name"
-                                [subject]="b.createdBy.subject"
-                                [issuer]="b.createdBy.issuer"
+                                    [name]="b.createdBy.name"
+                                    [subject]="b.createdBy.subject"
+                                    [issuer]="b.createdBy.issuer"
                             />
                         } @else {
                             <span>-</span>
                         }
                     </div>
                     <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-                    <div class="cell lastRun">{{ b.lastRunTime ? (b.lastRunTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
+                    <div class="cell lastRun">{{ b.lastTimeRun ? (b.lastTimeRun | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
 
-                     <div class="cell actions" (click)="$event.stopPropagation()">
-                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="runBatch(b)"><mat-icon>play_arrow</mat-icon></button>
-                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onView(b)"><mat-icon>open_in_new</mat-icon></button>
-                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Edit" (click)="onConfigure(b)"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Delete" (click)="onDelete(b)"><mat-icon>delete</mat-icon></button>
+                    <div class="cell actions" (click)="$event.stopPropagation()">
+                        <button
+                                mat-icon-button
+                                [attr.data-test-id]="'run-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
+                                aria-label="Run"
+                                (click)="runBatch(b)"
+                        >
+                            <mat-icon>play_arrow</mat-icon>
+                        </button>
+                        <button
+                                mat-icon-button
+                                [attr.data-test-id]="'open-batch-results-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
+                                aria-label="Open Results"
+                                (click)="onView(b)"
+                        >
+                            <mat-icon>open_in_new</mat-icon>
+                        </button>
+                        <button
+                                mat-icon-button
+                                [attr.data-test-id]="'edit-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
+                                aria-label="Edit"
+                                (click)="onConfigure(b)"
+                        >
+                            <mat-icon>edit
+                            </mat-icon
+                            >
+                        </button>
+                        <button
+                                mat-icon-button
+                                [attr.data-test-id]="'delete-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
+                                aria-label="Delete"
+                                (click)="onDelete(b)"
+                        >
+                            <mat-icon>delete</mat-icon>
+                        </button>
                     </div>
                 </div>
             }

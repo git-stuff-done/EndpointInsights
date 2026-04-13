@@ -43,7 +43,7 @@ module.exports = {
     test_settings: {
         default: {
             disable_error_log: false,
-            launch_url: 'http://localhost:8080',
+            launch_url: process.env.APP_URL || 'http://localhost:8080',
 
             screenshots: {
                 enabled: false,
@@ -73,7 +73,9 @@ module.exports = {
                         '--allow-insecure-localhost',
                         '--headless=new',
                         '--disable-dev-shm-usage',
-                        '--disable-gpu'
+                        '--disable-gpu',
+                        '--disable-web-security',
+                        '--disable-features=IsolateOrigins,site-per-process'
                     ]
                 }
             },

@@ -116,6 +116,10 @@ public class BatchService {
     public TestBatch createBatch(BatchRequestDTO request) {
         TestBatch batch = new TestBatch();
         batch.setBatchName(request.getBatchName());
+        batch.setCronExpression(request.getCronExpression());
+        batch.setScheduleId(request.getScheduleId());
+        batch.setStartTime(request.getStartTime());
+        batch.setActive(request.getActive());
 
         if (request.getJobs() != null && !request.getJobs().isEmpty()) {
             List<Job> jobs = jobRepository.findAllById(request.getJobs());
