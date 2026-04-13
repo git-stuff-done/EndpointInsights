@@ -72,7 +72,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [], groupIds: [] }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], groupIds: [], active: false }
         );
     });
 
@@ -136,7 +136,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [], groupIds: ['group-1', 'group-2'] }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [], groupIds: ['group-1', 'group-2'], active: false }
         );
     });
 
