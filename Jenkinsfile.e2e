@@ -11,10 +11,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'endpoint-insights-e2e'
         IMAGE_TAG = "${GIT_COMMIT}"
-        TEST_IMAGE_NAME = 'endpoint-insights-e2e-tests'
         CONTAINER_NAME = "endpoint-insights-e2e-app-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
-        TEST_CONTAINER_NAME = "endpoint-insights-e2e-tests-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
-        NETWORK_NAME = "endpoint-insights-e2e-network-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
     }
 
     stages {
@@ -26,15 +23,7 @@ pipeline {
                     """
 
                     sh """
-                        docker network ls --filter "name=endpoint-insights-e2e-network-" -q | xargs -r docker network rm || true
-                    """
-
-                    sh """
                         docker images ${IMAGE_NAME} --format '{{.Tag}}' | tail -n +6 | xargs -r -I {} docker rmi ${IMAGE_NAME}:{} || true
-                    """
-
-                    sh """
-                        docker images ${TEST_IMAGE_NAME} --format '{{.Tag}}' | tail -n +6 | xargs -r -I {} docker rmi ${TEST_IMAGE_NAME}:{} || true
                     """
                 }
             }
@@ -52,19 +41,17 @@ pipeline {
                     sh """
                         docker build -f ./integration-tests/Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
-
-                    sh """
-                        docker build -f ./integration-tests/Dockerfile.tests -t ${TEST_IMAGE_NAME}:${IMAGE_TAG} .
-                    """
                 }
             }
         }
 
-        stage('Create Network') {
+        stage('Install Test Dependencies') {
             steps {
-                sh """
-                    docker network create ${NETWORK_NAME}
-                """
+                dir('integration-tests') {
+                    sh """
+                        npm ci
+                    """
+                }
             }
         }
 
@@ -74,8 +61,7 @@ pipeline {
                     sh """
                         docker run -d \
                             --name ${CONTAINER_NAME} \
-                            --network ${NETWORK_NAME} \
-                            --network-alias app \
+                            -p 8080:8080 \
                             --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
                             ${IMAGE_NAME}:${IMAGE_TAG}
                     """
@@ -104,7 +90,7 @@ pipeline {
                             if [ "\$HEALTH_STATUS" = "healthy" ]; then
                                 echo "Container is healthy!"
 
-                                if docker run --rm --network ${NETWORK_NAME} curlimages/curl:latest -f -s http://app:8080/api/health > /dev/null; then
+                                if curl -f -s http://localhost:8080/api/health > /dev/null; then
                                     echo "Health endpoint verified!"
                                     exit 0
                                 else
@@ -133,15 +119,13 @@ pipeline {
 
         stage('E2E Tests') {
             steps {
-                script {
+                dir('integration-tests') {
                     sh """
-                        docker run --rm \
-                            --name ${TEST_CONTAINER_NAME} \
-                            --network ${NETWORK_NAME} \
-                            --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
-                            -e APP_URL=http://app:8080 \
-                            -v \$(pwd)/integration-tests/tests_output:/tests/tests_output \
-                            ${TEST_IMAGE_NAME}:${IMAGE_TAG}
+                        set +e
+                        export APP_URL=http://localhost:8080
+                        npx nightwatch test --env chrome
+                        TEST_EXIT_CODE=\$?
+                        exit \$TEST_EXIT_CODE
                     """
                 }
             }
@@ -162,9 +146,7 @@ pipeline {
             sh """
                 docker stop ${CONTAINER_NAME} || true
                 docker rm ${CONTAINER_NAME} || true
-                docker network rm ${NETWORK_NAME} || true
                 docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
-                docker rmi ${TEST_IMAGE_NAME}:${IMAGE_TAG} || true
             """
         }
 

@@ -5,6 +5,9 @@
   "scripts": {
     "test:integration": "node -r dotenv/config node_modules/.bin/nightwatch"
   },
+  "config": {
+    "detect_chromedriver_version": "true"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

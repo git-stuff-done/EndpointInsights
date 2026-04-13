@@ -73,7 +73,9 @@ module.exports = {
                         '--allow-insecure-localhost',
                         '--headless=new',
                         '--disable-dev-shm-usage',
-                        '--disable-gpu'
+                        '--disable-gpu',
+                        '--disable-web-security',
+                        '--disable-features=IsolateOrigins,site-per-process'
                     ]
                 }
             },
