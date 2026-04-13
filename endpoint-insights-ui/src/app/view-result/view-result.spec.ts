@@ -2,9 +2,10 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ViewResult} from './view-result';
 import {provideHttpClient} from "@angular/common/http";
-import {Params, provideRouter} from "@angular/router";
-import {of} from "rxjs";
+import {Params, provideRouter, Router} from "@angular/router";
+import {of, throwError} from "rxjs";
 import {TestRun} from "../models/test-run.model";
+import {NotificationService} from "../services/notification.service";
 
 describe('ViewResult', () => {
   let component: ViewResult;
@@ -97,6 +98,44 @@ describe('ViewResult', () => {
     expect(getTestRunSpy).not.toHaveBeenCalled();
   });
 
+  describe('delete()', () => {
+    it('should do nothing when testRun is not set', () => {
+      const deleteRunSpy = spyOn(component['testRunService'], 'deleteRun');
+      component.testRun = undefined;
+
+      component.delete();
+
+      expect(deleteRunSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call deleteRun, navigate to test-results, and show success toast on success', async () => {
+      const router = TestBed.inject(Router);
+      const notificationService = TestBed.inject(NotificationService);
+      spyOn(component['testRunService'], 'deleteRun').and.returnValue(of({}));
+      const navigateSpy = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+      const toastSpy = spyOn(notificationService, 'showToast');
+      component.testRun = mockTestRun;
+
+      component.delete();
+
+      expect(component['testRunService'].deleteRun).toHaveBeenCalledOnceWith(mockTestRun.runId);
+      await fixture.whenStable();
+      expect(navigateSpy).toHaveBeenCalledOnceWith(['/test-results']);
+      expect(toastSpy).toHaveBeenCalledOnceWith('Test run deleted successfully', 'success');
+    });
+
+    it('should log an error when deleteRun fails', () => {
+      const error = new Error('server error');
+      spyOn(component['testRunService'], 'deleteRun').and.returnValue(throwError(() => error));
+      const consoleSpy = spyOn(console, 'error');
+      component.testRun = mockTestRun;
+
+      component.delete();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error deleting test run:', error);
+    });
+  });
+
   it('should return correct error rate class for different error rates', () => {
     // Test for low error rate (<= 0.1)
     expect(component.getErrorRateClass(0)).toBe('error-rate-low');
@@ -112,4 +151,6 @@ describe('ViewResult', () => {
     expect(component.getErrorRateClass(0.51)).toBe('error-rate-high');
     expect(component.getErrorRateClass(1)).toBe('error-rate-high');
   });
+
+
 });
