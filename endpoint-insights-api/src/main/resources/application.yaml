@@ -111,6 +111,15 @@ springdoc:
 spring:
   config:
     activate:
+      on-profile: UNIX
+
+temp:
+  dir: /tmp/endpoint-insights
+
+---
+spring:
+  config:
+    activate:
       on-profile: PROD
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
