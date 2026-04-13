@@ -1,8 +1,8 @@
 describe('Application Smoke Tests', function() {
-    it('loads and redirects to IdP for authentication', function(browser) {
+    it('authenticates with identity provider', function(browser) {
         browser
-            .navigateTo('http://localhost:8080')
-            .waitForElementVisible('body')
-            .assert.urlContains('auth.crowleybrynn.com')
+            .authenticateWithAuthelia('http://localhost:8080')
+            .assert.urlContains('localhost:4200')
+            .assert.elementPresent('#dashboard-title')
     })
 })

@@ -1,4 +1,4 @@
-<h1 class="page-title"> Endpoint Insights Dashboard</h1>
+<h1 id="dashboard-title" class="page-title"> Endpoint Insights Dashboard</h1>
 
 <main class="container-fluid py-3">
     <section class="dashboard-grid">
@@ -9,8 +9,8 @@
                 <header class="kpi-title">Active Jobs</header>
                 <div class="kpi-main">{{ activeJobsTotal }}</div>
                 <div class="kpi-sub">
-<!--                    {{ activeJobsScheduled }} scheduled,-->
-<!--                    {{ activeJobsManual }} manual-->
+                    <!--                    {{ activeJobsScheduled }} scheduled,-->
+                    <!--                    {{ activeJobsManual }} manual-->
                 </div>
             </article>
 
@@ -64,14 +64,14 @@
                 </div>
             </article>
 
-<!--            <article class="panel panel-chart">-->
-<!--                <header class="panel-header">API Trend</header>-->
-<!--                <div class="panel-body">-->
-<!--                    <div class="chart-placeholder">-->
-<!--                        API Trend Chart Placeholder-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </article>-->
+            <!--            <article class="panel panel-chart">-->
+            <!--                <header class="panel-header">API Trend</header>-->
+            <!--                <div class="panel-body">-->
+            <!--                    <div class="chart-placeholder">-->
+            <!--                        API Trend Chart Placeholder-->
+            <!--                    </div>-->
+            <!--                </div>-->
+            <!--            </article>-->
         </section>
 
         <!-- Recent Activity -->
@@ -113,7 +113,8 @@
                     </span>
                                     </td>
                                     <td>
-                                        <button mat-icon-button aria-label="View test result" title="View result" (click)="viewResult(t.id)">
+                                        <button mat-icon-button aria-label="View test result" title="View result"
+                                                (click)="viewResult(t.id)">
                                             <mat-icon>open_in_new</mat-icon>
                                         </button>
                                     </td>
