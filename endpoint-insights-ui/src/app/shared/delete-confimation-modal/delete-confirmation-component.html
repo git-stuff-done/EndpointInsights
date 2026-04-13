@@ -1,11 +1,10 @@
+<h2 mat-dialog-title>Delete Batch</h2>
 
-<div class="delete-confirm-container">
-    <h2 mat-dialog-title>Delete Batch</h2>
-    <mat-dialog-content>
-        Are you sure you want to delete batch: "{{ data.batchName }}"?
-    </mat-dialog-content>
-    <mat-dialog-actions class="delete-confirm-actions">
-        <button mat-button mat-dialog-close>Cancel</button>
-        <button mat-button class="delete-confirm-delete-button" (click)="deleteBatch()">Delete</button>
-    </mat-dialog-actions>
-</div>
+<mat-dialog-content>
+    Are you sure you want to delete batch: <strong>"{{ data.batchName }}"</strong>?
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-raised-button class="dialog-btn-cancel" mat-dialog-close>Cancel</button>
+    <button mat-raised-button class="dialog-btn-danger" (click)="deleteBatch()">Delete</button>
+</mat-dialog-actions>

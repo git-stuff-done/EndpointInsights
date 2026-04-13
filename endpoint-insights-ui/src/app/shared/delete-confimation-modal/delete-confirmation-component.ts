@@ -20,15 +20,15 @@ import {ToastService} from "../../services/toast.service";
         MatDialogTitle,
         MatButton
     ],
-    templateUrl: '/delete-confirmation-component.html',
-    styleUrl: '/delete-confirmation-component.scss'
+    templateUrl: './delete-confirmation-component.html',
+    styleUrl: './delete-confirmation-component.scss'
 })
 export class DeleteBatchModalComponent {
     private batchService = inject(BatchService);
     private toast = inject(ToastService);
     private dialogRef = inject(MatDialogRef<DeleteBatchModalComponent>);
 
-    data:Batch = inject(MAT_DIALOG_DATA);
+    data: Batch = inject(MAT_DIALOG_DATA);
 
     public constructor() {}
 
