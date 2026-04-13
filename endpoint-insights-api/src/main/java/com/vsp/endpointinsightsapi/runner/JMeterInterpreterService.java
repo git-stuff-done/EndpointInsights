@@ -54,13 +54,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 	@Override
 	@Transactional
 	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
-		// Create test result so we can get the UUID
-		TestResult testResult = new TestResult();
-		testResult.setId(UUID.randomUUID());
-		testResult.setJobType(TestType.PERF.toInteger());
-		testResult.setTestRun(testRun);
-		testResult = testResultRepository.save(testResult);
-
         Job job = jobRepository.findById(testRun.getJobId()).orElse(null);
         if(job == null) {
             throw new RuntimeException("Job threshold not found");
@@ -117,16 +110,17 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testResult, grouped, errorCodeCount, job);
+			boolean passed = createResults(testRun, grouped, errorCodeCount, job.getThreshold());
 
-			return new TestRunResult(passed, testResult.getId());
+			return new TestRunResult(passed, testRun.getRunId());
 		} catch (IOException e) {
 			throw new IOException("Failed to process JMeter results: " + e.getMessage(), e);
 		}
 	}
 
-	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Job job) {
+	private boolean createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
 		// Results will be made here
+		List<TestResult> testResults = new ArrayList<>();
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
 		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
 
@@ -157,8 +151,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 				if (r.timeStamp >= fiveMinutesAgo) volumeLast5Minutes++;
 			}
 
-            Integer threshold = job.getThreshold();
-
 			Collections.sort(latencies);
 			int p50 = !latencies.isEmpty() ? calculatePercentile(latencies, 50) : 0;
 			int p95 = !latencies.isEmpty() ? calculatePercentile(latencies, 95) : 0;
@@ -175,6 +167,14 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
 
+			// Create test result
+			TestResult testResult = new TestResult();
+			testResult.setId(UUID.randomUUID());
+			testResult.setJobType(TestType.PERF.toInteger());
+			testResult.setTestRun(testRun);
+			testResults.add(testResult);
+
+			// Create perf test result
 			PerfTestResult res = new PerfTestResult();
 			PerfTestResultId resId = new PerfTestResultId();
 			// Needs a resultId (TestResult id), for demo will generate random
@@ -217,6 +217,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 		boolean passed = perfTestResults.stream().noneMatch(r -> r.getErrorRatePercent() > 0.5);
 
+		testResultRepository.saveAll(testResults);
 		perfTestResultRepository.saveAll(perfTestResults);
 		perfTestResultCodeRepository.saveAll(perfTestResultCodes);
 

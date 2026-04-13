@@ -47,7 +47,7 @@ public class JavaMailEmailSender implements EmailSender {
     }
 
     @Override
-    public void sendTestCompletionEmail(String batchName, TestRun testRun, String recipientEmail, List<TestResult> results) throws IOException, MessagingException {
+    public void sendTestCompletionEmail(String batchName, TestRun testRun, String recipientEmail, TestResult result) throws MessagingException, IOException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -55,14 +55,12 @@ public class JavaMailEmailSender implements EmailSender {
         Map<String, String> variablesMap = new HashMap<>();
         PerfTestResult perf = new PerfTestResult();
         String reasonForFailure = TestFailureTypes.OTHER.toString();
-        for(TestResult testResult : results){
-            PerfTestResult perfTestResult = testResult.getPerfTestResult();
-            if(perfTestResult.getTestResult().getId().equals(testResult.getId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
-                perf = perfTestResult;
-                reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
-            }
-
+        PerfTestResult perfTestResult = result.getPerfTestResult();
+        if(perfTestResult.getTestResult().getId().equals(result.getId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
+            perf = perfTestResult;
+            reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
         }
+
         Optional<Job> job =  jobRepository.findById(testRun.getJobId());
         if (job.isEmpty()) {
             throw new EntityNotFoundException("Job with id " + testRun.getJobId() + " not found");

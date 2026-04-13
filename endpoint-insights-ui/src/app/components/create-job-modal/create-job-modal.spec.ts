@@ -1,4 +1,4 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {MatDialogRef} from '@angular/material/dialog';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {CreateJobModal} from './create-job-modal';
@@ -110,11 +110,14 @@ describe('CreateJobModal', () => {
             expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to create job. Please try again.');
         });
 
-        it('should close the dialog on failure', () => {
+        it('should close the dialog on failure', fakeAsync(() => {
             jobServiceSpy.createJob.and.returnValue(throwError(() => new Error('fail')));
+
             component.onSubmit({ jobType: 'E2E', name: 'Test' });
+            tick();
+
             expect(mockDialogRef.close).toHaveBeenCalledTimes(1);
-        });
+        }));
     });
 
     describe('onCancel', () => {

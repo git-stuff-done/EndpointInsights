@@ -12,14 +12,14 @@ import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/c
 import {Batch} from "../../../models/batch.model";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
-import {MatDivider, MatSelectionList} from "@angular/material/list";
+import {MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
 import {JobsApi} from "../../../jobsApi/jobsApi";
 import {TestItem} from "../../../models/test.model";
 import {User} from "../../../models/user.model";
-
+import {MatDividerModule} from '@angular/material/divider';
 
 @Component({
     selector: 'app-batch-config-dialog',
@@ -37,7 +37,7 @@ import {User} from "../../../models/user.model";
         MatNativeDateModule,
         MatAutocompleteModule,
         MatSelectModule,
-        MatDivider,
+        MatDividerModule,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './batch-config-dialog.component.html',

@@ -8,7 +8,7 @@
             <h3>Name</h3>
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Test Batch Name</mat-label>
-                <input matInput placeholder="e.g. Payments Service" formControlName="batchName"  />
+                <input matInput data-test-id="batch-name-input" placeholder="e.g. Payments Service" formControlName="batchName"  />
                 <mat-error>{{ getErrorMessage('batchName') }}</mat-error>
             </mat-form-field>
         </section>
@@ -16,116 +16,132 @@
         <mat-divider></mat-divider>
 
         <!-- Schedule -->
-        <section class="form-section">
-            <h3>Schedule</h3>
+        <div class="form-panel">
+            <div class="panel-header">Schedule</div>
+            <div class="panel-body">
+                <div class="schedule-fields">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Frequency</mat-label>
+                        <mat-select data-test-id="batch-frequency-select" [value]="scheduleFrequency()" (selectionChange)="onFrequencyChange($event.value)">
+                            <mat-option value="daily">Daily</mat-option>
+                            <mat-option value="weekly">Weekly</mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
-            <!-- Frequency picker -->
-            <mat-form-field appearance="outline">
-                <mat-label>Frequency</mat-label>
-                <mat-select [value]="scheduleFrequency()" (selectionChange)="onFrequencyChange($event.value)">
-                    <mat-option value="daily">Daily</mat-option>
-                    <mat-option value="weekly">Weekly</mat-option>
-                </mat-select>
-            </mat-form-field>
+                    @if (scheduleFrequency() === 'weekly') {
+                        <mat-form-field appearance="outline">
+                            <mat-label>Days</mat-label>
+                            <mat-select multiple data-test-id="schedule-days-select" [value]="scheduleDays()" (selectionChange)="onDaysChange($event.value)">
+                                @for (day of dayOptions; track day.value) {
+                                    <mat-option [value]="day.value">{{ day.label }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    }
 
-            <!-- Day picker (only for weekly) -->
-            @if (scheduleFrequency() === 'weekly') {
-                <mat-form-field appearance="outline">
-                    <mat-label>Days</mat-label>
-                    <mat-select multiple [value]="scheduleDays()" (selectionChange)="onDaysChange($event.value)">
-                        @for (day of dayOptions; track day.value) {
-                            <mat-option [value]="day.value">{{ day.label }}</mat-option>
-                        }
-                    </mat-select>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Time</mat-label>
+                        <input matInput type="time" data-test-id="schedule-time-picker" [value]="scheduleTime()" (change)="onTimeChange($any($event.target).value)" />
+                    </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Cron Expression</mat-label>
+                    <input matInput data-test-id="schedule-cron-exp" formControlName="cronExpression" placeholder="e.g. 0 30 14 * * MON,WED,FRI" />
                 </mat-form-field>
-            }
 
-            <!-- Time picker -->
-            <mat-form-field appearance="outline">
-                <mat-label>Time</mat-label>
-                <input matInput type="time" [value]="scheduleTime()" (change)="onTimeChange($any($event.target).value)" />
-            </mat-form-field>
-
-            <!-- Generated cron expression (editable) -->
-            <mat-form-field appearance="outline">
-                <mat-label>Cron Expression</mat-label>
-                <input matInput formControlName="cronExpression" placeholder="e.g. 0 30 14 * * MON,WED,FRI" />
-            </mat-form-field>
-
-            <div class="run-info">
-                <span>Last Run: {{ form.get('lastRunTime')?.value || 'Never' }}</span>
+                <div class="run-info">
+                    <span>Last Run: {{ form.get('lastRunTime')?.value || 'Never' }}</span>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <mat-divider></mat-divider>
+        <!-- Email Recipients -->
+        <div class="form-panel">
+            <div class="panel-header">Email Recipients</div>
+            <div class="panel-body">
+                <div class="form-row">
+                    <mat-form-field appearance="outline" class="flex-grow">
+                        <mat-label>Add Email Address</mat-label>
+                        <input matInput type="email" data-test-id="batch-email-input" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+                    </mat-form-field>
+                    <button mat-raised-button class="dialog-btn-primary" data-test-id="add-email-button" (click)="addEmail()">Add</button>
+                </div>
+                <div class="job-list">
+                    @for (email of emailList(); track email) {
+                        <div class="job-row">
+                            <div class="job-info">
+                                <mat-icon class="row-icon">email</mat-icon>
+                                <span class="job-name">{{ email }}</span>
+                            </div>
+                            <button mat-icon-button data-test-id="remove-email-button" (click)="removeEmail(email)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    } @empty {
+                        <p class="empty-state">No email recipients added</p>
+                    }
+                </div>
+            </div>
+        </div>
 
-        <section>
-            <h4>Email Recipients</h4>
-            <div class="form-row">
-                <mat-form-field appearance="outline" class="flex-grow">
-                    <mat-label>Add Email Address</mat-label>
-                    <input matInput type="email" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+        <!-- Current Jobs -->
+        <div class="form-panel">
+            <div class="panel-header">Current Jobs</div>
+            <div class="panel-body">
+                <div class="job-list">
+                    @for (test of currentBatchTests(); track test.jobId) {
+                        <div class="job-row">
+                            <div class="job-info">
+                                <span class="job-type-pill" [ngClass]="'type-' + test.jobType.toLowerCase()">{{ test.jobType }}</span>
+                                <span class="job-name">{{ test.name }}</span>
+                            </div>
+                            <button mat-icon-button data-test-id="remove-test-button" (click)="removeTest(test)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    } @empty {
+                        <p class="empty-state">No tests in batch</p>
+                    }
+                </div>
+                <button mat-button data-test-id="remove-all-tests-button" color="warn" (click)="clearAllTests()">Clear All</button>
+            </div>
+        </div>
+
+        <!-- Add Jobs -->
+        <div class="form-panel">
+            <div class="panel-header">Add Jobs</div>
+            <div class="panel-body">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput
+                           placeholder="Search jobs..."
+                           data-test-id="search-available-tests-input"
+                           [value]="searchTerm()"
+                           (input)="searchTerm.set($any($event.target).value)" />
                 </mat-form-field>
-                <button mat-raised-button (click)="addEmail()">Add</button>
+                <div class="job-list">
+                    @for (test of filteredAvailableTests(); track test.jobId) {
+                        <div class="job-row">
+                            <div class="job-info">
+                                <span class="job-type-pill" [ngClass]="'type-' + test.jobType.toLowerCase()">{{ test.jobType }}</span>
+                                <span class="job-name">{{ test.name }}</span>
+                            </div>
+                            <button mat-icon-button data-test-id="add-test-button" (click)="addTest(test)">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                    } @empty {
+                        <p class="empty-state">No jobs available to add</p>
+                    }
+                </div>
             </div>
-            <div class="job-list">
-                @for (email of emailList(); track email) {
-                    <div class="job-row">
-                        <span>{{ email }}</span>
-                        <button mat-icon-button (click)="removeEmail(email)">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </div>
-                } @empty {
-                    <p class="empty-state">No email recipients</p>
-                }
-            </div>
-        </section>
+        </div>
 
-        <mat-divider></mat-divider>
-
-        <!-- Jobs -->
-        <section class="form-section">
-            <h3>Current Jobs</h3>
-            <div class="job-list">
-                @for (test of currentBatchTests(); track test.jobId) {
-                    <div class="job-row">
-                        <span>{{ test.name }}</span>
-                        <button mat-icon-button (click)="removeTest(test)">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </div>
-                } @empty {
-                    <p class="empty-state">No tests in batch</p>
-                }
-            </div>
-            <button mat-button color="warn" (click)="clearAllTests()">Clear All</button>
-
-            <h3>Add Jobs</h3>
-            <mat-form-field appearance="outline" class="full-width">
-                <mat-icon matPrefix>search</mat-icon>
-                <input matInput
-                       placeholder="Search tests..."
-                       [value]="searchTerm()"
-                       (input)="searchTerm.set($any($event.target).value)" />
-            </mat-form-field>
-            <div class="job-list">
-                @for (test of filteredAvailableTests(); track test.jobId) {
-                    <div class="job-row">
-                        <span>{{ test.name }}</span>
-                        <button mat-icon-button (click)="addTest(test)">
-                            <mat-icon>add</mat-icon>
-                        </button>
-                    </div>
-                } @empty {
-                    <p class="empty-state">No tests available</p>
-                }
-            </div>
-        </section>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-stroked-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" (click)="save()">Save</button>
+    <button mat-raised-button class="dialog-btn-cancel" data-test-id="cancel-dialog-button" mat-dialog-close>Cancel</button>
+    <button mat-raised-button class="dialog-btn-primary" data-test-id="save-dialog-button" (click)="save()">Save</button>
 </mat-dialog-actions>

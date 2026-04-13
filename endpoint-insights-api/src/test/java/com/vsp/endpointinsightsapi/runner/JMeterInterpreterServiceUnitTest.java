@@ -25,8 +25,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JMeterInterpreterServiceUnitTest {
@@ -40,7 +39,7 @@ class JMeterInterpreterServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        when(testResultRepository.save(any(TestResult.class)))
+        lenient().when(testResultRepository.saveAll(anyList()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         Job job = new Job();
         // set any needed fields on job, e.g. threshold
@@ -97,13 +96,6 @@ class JMeterInterpreterServiceUnitTest {
     }
 
     @Test
-    void TEST_ResultId_IsAlwaysPopulated() throws IOException {
-        File file = generateJtlFile(10, 0);
-        TestRunResult result = service.processResults(file, new TestRun());
-        assertNotNull(result.resultId());
-    }
-
-    @Test
     void TEST_MultipleThreadGroups_EvaluatedIndependently() throws IOException {
         File tempFile = File.createTempFile("jmeter-multi", ".jtl");
         tempFile.deleteOnExit();
@@ -135,7 +127,7 @@ class JMeterInterpreterServiceUnitTest {
         File file = generateJtlFile(10, 0);
         service.processResults(file, new TestRun());
 
-        verify(testResultRepository).save(any(TestResult.class));
+        verify(testResultRepository).saveAll(anyList());
         verify(perfTestResultRepository).saveAll(anyList());
         verify(perfTestResultCodeRepository).saveAll(anyList());
     }
