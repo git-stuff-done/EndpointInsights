@@ -107,6 +107,20 @@
                 </mat-form-field>
                 <button mat-raised-button data-test-id="add-email-button" (click)="addEmail()">Add</button>
             </div>
+
+            <!-- Display added emails -->
+            @if (emailList().length > 0) {
+                <div class="email-list">
+                    @for (email of emailList(); track email) {
+                        <div class="job-row">
+                            <span>{{ email }}</span>
+                            <button mat-icon-button (click)="removeEmail(email)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
         </section>
 
         <!-- Current Jobs -->
