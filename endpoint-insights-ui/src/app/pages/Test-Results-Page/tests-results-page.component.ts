@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,12 +29,14 @@ import { TestRunService } from '../../services/test-run.service';
         MatButtonModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        MatPaginatorModule,
     ],
     templateUrl: './tests-results-page.component.html',
     styleUrl: './tests-results-page.component.scss',
 })
 export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
 
     dataSource = new MatTableDataSource<RecentActivity>([]);
     displayedColumns = ['batchName', 'testName', 'runId', 'dateRun', 'durationMs', 'startedBy', 'status', 'actions'];
@@ -98,6 +101,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
 
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
 
         this.dataSource.sortingDataAccessor = (item: RecentActivity, property: string) => {
             switch (property) {
