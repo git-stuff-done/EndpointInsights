@@ -6,7 +6,7 @@ import com.vsp.endpointinsightsapi.repository.TestResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
