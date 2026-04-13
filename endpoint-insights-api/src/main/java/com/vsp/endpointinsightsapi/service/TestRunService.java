@@ -7,21 +7,18 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.repository.*;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,11 +29,15 @@ public class TestRunService {
 	private final TestRunRepository testRunRepository;
 	private final JobRepository jobRepository;
 	private final TestBatchRepository testBatchRepository;
+	private final PerfTestResultRepository perfTestResultRepository;
+	private final TestResultRepository testResultRepository;
 
-	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository, TestBatchRepository testBatchRepository) {
+	public TestRunService(TestRunRepository testRunRepository, JobRepository jobRepository, TestBatchRepository testBatchRepository, PerfTestResultRepository perfTestResultRepository, TestResultRepository testResultRepository) {
 		this.testRunRepository = testRunRepository;
 		this.jobRepository = jobRepository;
 		this.testBatchRepository = testBatchRepository;
+		this.perfTestResultRepository = perfTestResultRepository;
+		this.testResultRepository = testResultRepository;
 	}
 
 	public TestRun createTestRun(TestRun testRun) {
@@ -60,40 +61,7 @@ public class TestRunService {
 		List<TestRun> runs = testRunRepository
 				.findAllByOrderByFinishedAtDesc(PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt")))
 				.getContent();
-
-		Set<UUID> jobIds = runs.stream().map(TestRun::getJobId).collect(Collectors.toSet());
-		Set<UUID> batchIds = runs.stream()
-				.map(TestRun::getBatchId)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-
-		Map<UUID, Job> jobMap = jobRepository.findAllById(jobIds).stream()
-				.collect(Collectors.toMap(Job::getJobId, j -> j));
-		Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
-				.collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
-
-		return runs.stream().map(run -> {
-			Job job = jobMap.get(run.getJobId());
-			TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
-
-			long durationMs = 0;
-			if (run.getStartedAt() != null && run.getFinishedAt() != null) {
-				durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
-			}
-
-			return RecentActivityDTO.builder()
-					.runId(run.getRunId().toString())
-					.jobId(run.getJobId() != null ? run.getJobId().toString() : null)
-                    .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
-					.testName(job != null ? job.getName() : "Unknown")
-					.group(deriveScheduleType(batch))
-					.dateRun(run.getStartedAt())
-					.durationMs(durationMs)
-					.startedBy(run.getRunBy())
-					.status(toDisplayStatus(run.getStatus()))
-					.batchName(batch != null ? batch.getBatchName() : null)
-					.build();
-		}).collect(Collectors.toList());
+		return mapToRecentActivity(runs);
 	}
 
 	private String toDisplayStatus(TestRunStatus status) {
@@ -120,76 +88,87 @@ public class TestRunService {
 		return res;
 	}
 
-	public void deleteTestRunById(UUID runId) {
+	@Transactional
+	public ResponseEntity<Map<String, Object>> deleteTestRunById(UUID runId) {
 		if (!testRunRepository.existsById(runId)) {
 			throw new TestRunNotFoundException(runId.toString());
 		}
+
+		perfTestResultRepository.deleteByRunIds(List.of(runId));
+		testResultRepository.deleteByRunIds(List.of(runId));
 		testRunRepository.deleteById(runId);
+
+		return ResponseEntity.ok(Map.of("status", String.format("Test run %s deleted successfully", runId)));
 	}
 
     // jobId takes precedence over batchId
     public List<RecentActivityDTO> getRecentActivityById(UUID jobId, UUID batchId, int limit) {
-
-        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeLimit = Math.clamp(limit, 1, 100);
+        PageRequest page = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"));
 
         List<TestRun> runs;
-
         if (jobId != null) {
-            runs = testRunRepository
-                    .findByJobIdOrderByFinishedAtDesc(
-                            jobId,
-                            PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"))
-                    )
-                    .getContent();
+            runs = testRunRepository.findByJobIdOrderByFinishedAtDesc(jobId, page).getContent();
         } else if (batchId != null) {
-            runs = testRunRepository
-                    .findByBatchIdOrderByFinishedAtDesc(
-                            batchId,
-                            PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"))
-                    )
-                    .getContent();
+            runs = testRunRepository.findByBatchIdOrderByFinishedAtDesc(batchId, page).getContent();
         } else {
             throw new IllegalArgumentException("Must provide jobId or batchId");
         }
 
+        return mapToRecentActivity(runs);
+    }
+
+    private List<RecentActivityDTO> mapToRecentActivity(List<TestRun> runs) {
+        Set<UUID> jobIds = runs.stream()
+                .map(TestRun::getJobId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Set<UUID> batchIds = runs.stream()
                 .map(TestRun::getBatchId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        Set<UUID> jobIds = runs.stream()
-                .map(TestRun::getJobId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
         Map<UUID, Job> jobMap = jobRepository.findAllById(jobIds).stream()
                 .collect(Collectors.toMap(Job::getJobId, j -> j));
-
-
-
         Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
                 .collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
 
-        return runs.stream().map(run -> {
-            Job job = run.getJobId() != null ? jobMap.get(run.getJobId()) : null;
-            TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
+        return runs.stream()
+                .map(run -> toRecentActivityDTO(run, jobMap, batchMap))
+                .collect(Collectors.toList());
+    }
 
-            long durationMs = 0;
-            if (run.getStartedAt() != null && run.getFinishedAt() != null) {
-                durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
-            }
+    private RecentActivityDTO toRecentActivityDTO(TestRun run, Map<UUID, Job> jobMap, Map<UUID, TestBatch> batchMap) {
+        Job job = run.getJobId() != null ? jobMap.get(run.getJobId()) : null;
+        TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
 
-            return RecentActivityDTO.builder()
-                    .runId(run.getRunId().toString())
-                    .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
-                    .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
-                    .testName(job != null ? job.getName() : "Unknown")
-                    .group(deriveScheduleType(batch))
-                    .dateRun(run.getStartedAt())
-                    .durationMs(durationMs)
-                    .startedBy(run.getRunBy())
-                    .status(toDisplayStatus(run.getStatus()))
-                    .build();
-        }).collect(Collectors.toList());
+        long durationMs = 0;
+        if (run.getStartedAt() != null && run.getFinishedAt() != null) {
+            durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
+        }
+
+        return RecentActivityDTO.builder()
+                .runId(run.getRunId().toString())
+                .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
+                .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
+                .testName(job != null ? job.getName() : "Unknown")
+                .group(deriveScheduleType(batch))
+                .dateRun(run.getStartedAt())
+                .durationMs(durationMs)
+                .startedBy(run.getRunBy())
+                .status(toDisplayStatus(run.getStatus()))
+                .batchName(batch != null ? batch.getBatchName() : null)
+                .build();
+    }
+
+	@Transactional
+    public ResponseEntity<Map<String, Object>> deleteBefore(Instant purgeDate) {
+        var oldRuns = testRunRepository.findByFinishedAtBefore(purgeDate).stream().map(TestRun::getRunId).toList();
+
+		perfTestResultRepository.deleteByRunIds(oldRuns);
+		testResultRepository.deleteByRunIds(oldRuns);
+		testRunRepository.deleteAllByIdInBatch(oldRuns);
+
+		return ResponseEntity.ok(Map.of("deletedRuns", oldRuns.size()));
     }
 }

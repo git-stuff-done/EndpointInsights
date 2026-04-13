@@ -5,11 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public interface TestRunRepository extends JpaRepository<TestRun, UUID> {
 	Page<TestRun> findAllByOrderByFinishedAtDesc(Pageable pageable);
+
+    List<TestRun> findByFinishedAtBefore(Instant finishedAt);
 
     Page<TestRun> findByJobIdOrderByFinishedAtDesc(UUID jobId, Pageable pageable);
 

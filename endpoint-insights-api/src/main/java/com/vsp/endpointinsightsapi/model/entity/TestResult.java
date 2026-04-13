@@ -29,7 +29,7 @@ public class TestResult {
 	@JoinColumn(name = "run_id", referencedColumnName = "run_id", nullable = false)
 	private TestRun testRun;
 
-	@OneToOne(mappedBy = "testResult")
+	@OneToOne(mappedBy = "testResult", cascade = CascadeType.REMOVE)
 	private PerfTestResult perfTestResult;
 
 }
