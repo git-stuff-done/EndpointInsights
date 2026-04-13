@@ -12,7 +12,7 @@ import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/c
 import {Batch} from "../../../models/batch.model";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatSelectModule} from "@angular/material/select";
-import {MatDivider, MatListOption, MatSelectionList} from "@angular/material/list";
+import {MatSelectionList} from "@angular/material/list";
 import {BatchService} from "../../../services/batch.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs";
 import {UserService} from "../../../services/user.service";
@@ -23,6 +23,7 @@ import {NotificationGroupService} from "../../../services/notification-group.ser
 import {NotificationGroup} from "../../../models/notification-group.model";
 import {NotificationGroupsDialogComponent} from "../notification-groups-dialog/notification-groups-dialog.component";
 
+import {MatDividerModule} from '@angular/material/divider';
 
 @Component({
     selector: 'app-batch-config-dialog',
@@ -40,7 +41,7 @@ import {NotificationGroupsDialogComponent} from "../notification-groups-dialog/n
         MatNativeDateModule,
         MatAutocompleteModule,
         MatSelectModule,
-        MatDivider,
+        MatDividerModule,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './batch-config-dialog.component.html',
@@ -61,7 +62,6 @@ export class BatchConfigDialogComponent implements OnInit {
     searchControl = new FormControl('');
 
 
-    selectedParticipant: any = null;
     searchParticipants: User[] = [];
     activeParticipants = signal<User[]>([]);
 
@@ -92,12 +92,18 @@ export class BatchConfigDialogComponent implements OnInit {
 
     form = this.fb.group({
         id: [this.data.id],
-        batchName: [this.data.batchName ?? '', [Validators.required, Validators.maxLength(120)]],
+        batchName: [this.data.batchName ?? '', [
+            Validators.required,
+            Validators.minLength(3),
+            Validators.maxLength(50),
+            Validators.pattern(/^[a-zA-Z0-9_-]+$/),
+        ]],
         startTime: [this.data.startTime ?? ''],
-        lastRunTime: [this.data.lastRunTime ?? ''],
+        lastRunTime: [this.data.lastTimeRun ?? ''],
         cronExpression: [this.data.cronExpression ?? ''],
         notificationList: [this.data.notificationList ?? []],
-        jobs: [this.data.jobs ?? []]
+        jobs: [this.data.jobs ?? []],
+        active:[this.data.active]
     });
 
     // Schedule editor state
@@ -179,7 +185,7 @@ export class BatchConfigDialogComponent implements OnInit {
             id: this.data.id,
             batchName: (this.data.batchName ?? '').trim(),
             startTime: this.data.startTime,
-            lastRunTime: this.data.lastRunTime,
+            lastRunTime: this.data.lastTimeRun,
             cronExpression: this.data.cronExpression ?? '',
             notificationList: this.data.notificationList || [],
             jobs: this.data.jobs ?? []
@@ -297,6 +303,7 @@ export class BatchConfigDialogComponent implements OnInit {
 
 
     save() {
+        this.form.markAllAsTouched();
         if (this.form.invalid) {
             return;
         }
@@ -314,10 +321,11 @@ export class BatchConfigDialogComponent implements OnInit {
                     id: response.body?.id,
                     batchName: response.body?.batchName,
                     startTime: response.body?.startTime,
-                    lastRunTime: response.body?.lastRunTime,
+                    lastRunTime: response.body?.lastTimeRun,
                     cronExpression: response.body?.cronExpression ?? '',
                     notificationList: response.body?.notificationList || [],
-                    jobs: response.body?.jobs
+                    jobs: response.body?.jobs,
+                    active: response.body?.active
                 });
                 this.dialogRef.close(response.body);
             },
@@ -325,14 +333,38 @@ export class BatchConfigDialogComponent implements OnInit {
         });
     }
 
-
-    close(): void {
-        this.dialogRef.close({
-            title: this.form.controls.batchName.value?.trim() || this.data.batchName || '',
-            //nextRunIso: this.composeIso(this.form.controls.nextRunDate.value, this.form.controls.nextRunTime.value),
-            batchTests: this.currentBatchTests(),
-        });
+    private getFieldLabel(fieldName: string): string {
+        const labels: { [key: string]: string } = {
+            'batchName': 'Batch name',
+        };
+        return labels[fieldName] || fieldName;
     }
+
+    getErrorMessage(fieldName: string): string {
+        const control = this.form.get(fieldName);
+        if (!control?.errors || !control.touched) {
+            return '';
+        }
+
+        if (control.errors['required']) {
+            return `${this.getFieldLabel(fieldName)} is required`;
+        }
+
+        if (control.errors['minlength']) {
+            return `Minimum length is ${control.errors['minlength'].requiredLength}`;
+        }
+
+        if (control.errors['maxlength']) {
+            return `Maximum length is ${control.errors['maxlength'].requiredLength} characters`;
+        }
+
+        if (control.errors['pattern']) {
+            return 'Only letters, numbers, hyphens, and underscores are allowed';
+        }
+
+        return 'Invalid input';
+    }
+
 
 
 }

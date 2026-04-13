@@ -18,10 +18,10 @@ describe('BatchApi', () => {
         batchName: 'Test Batch',
         active: false,
         startTime: '',
-        lastRunTime: '',
+        lastTimeRun: '',
         notificationList: [],
         jobs: [],
-        isNew: false
+        isNew: false,
     };
 
     beforeEach(() => {
@@ -51,6 +51,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.get).toHaveBeenCalledWith(`${environment.apiUrl}/batches`);
     });
+
 
 
     it('should delete a batch by id', () => {

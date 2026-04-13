@@ -12,6 +12,7 @@ import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
+import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.JobRepository;
@@ -304,7 +305,7 @@ public class BatchService {
             batchRunPersistenceService.save(returnedBatch, run);
 
             // Notify now that batch is completed
-            notificationService.sendTestCompletionNotifications(run.getBatchId(), run.getRunId(), null);
+            notificationService.sendTestCompletionNotifications(returnedBatch.getBatchName(),run.getBatchId(), run, null);
         });
         vspTaskScheduler.execute(batchRunnerThread);
 
