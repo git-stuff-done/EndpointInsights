@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NotificationGroupService } from './notification-group.service';
 import { HttpInterceptorService } from './http-interceptor.service';
 import { ToastService } from './toast.service';
 import { environment } from '../../environment';
 import { HttpResponse } from '@angular/common/http';
 import { NotificationGroup } from '../models/notification-group.model';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('NotificationGroupService', () => {
     let service: NotificationGroupService;
@@ -51,7 +51,7 @@ describe('NotificationGroupService', () => {
         expect(httpInterceptSpy.get).toHaveBeenCalledWith(`${environment.apiUrl}/notification-groups`);
     });
 
-    it('should create a new notification group', () => {
+    it('should create a new notification group with success toast', () => {
         const mockResponse = new HttpResponse({ body: mockGroup });
         httpInterceptSpy.post.and.returnValue(of(mockResponse));
 
@@ -59,11 +59,22 @@ describe('NotificationGroupService', () => {
             expect(response.body).toEqual(mockGroup);
         });
 
-        expect(httpInterceptSpy.post).toHaveBeenCalled();
-        expect(toastServiceSpy.onSuccess).toHaveBeenCalled();
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Notification group created successfully');
     });
 
-    it('should update an existing notification group', () => {
+    it('should handle create group error', (done) => {
+        const error = new Error('API Error');
+        httpInterceptSpy.post.and.returnValue(throwError(() => error));
+
+        service.createGroup('Test', 'Test', []).subscribe({
+            error: (err) => {
+                expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to create notification group');
+                done();
+            }
+        });
+    });
+
+    it('should update an existing notification group with success toast', () => {
         const mockResponse = new HttpResponse({ body: mockGroup });
         httpInterceptSpy.put.and.returnValue(of(mockResponse));
 
@@ -71,31 +82,65 @@ describe('NotificationGroupService', () => {
             expect(response.body).toEqual(mockGroup);
         });
 
-        expect(httpInterceptSpy.put).toHaveBeenCalled();
-        expect(toastServiceSpy.onSuccess).toHaveBeenCalled();
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Notification group updated successfully');
     });
 
-    it('should delete a notification group', () => {
+    it('should handle update group error', (done) => {
+        const error = new Error('API Error');
+        httpInterceptSpy.put.and.returnValue(throwError(() => error));
+
+        service.updateGroup('123', 'Test', 'Test').subscribe({
+            error: (err) => {
+                expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to update notification group');
+                done();
+            }
+        });
+    });
+
+    it('should delete a notification group with success toast', () => {
         const mockResponse = new HttpResponse({ body: null });
         httpInterceptSpy.delete.and.returnValue(of(mockResponse));
 
         service.deleteGroup('123-456').subscribe();
 
         expect(httpInterceptSpy.delete).toHaveBeenCalledWith(`${environment.apiUrl}/notification-groups/123-456`);
-        expect(toastServiceSpy.onSuccess).toHaveBeenCalled();
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Notification group deleted successfully');
     });
 
-    it('should add members to a notification group', () => {
+    it('should handle delete group error', (done) => {
+        const error = new Error('API Error');
+        httpInterceptSpy.delete.and.returnValue(throwError(() => error));
+
+        service.deleteGroup('123').subscribe({
+            error: (err) => {
+                expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to delete notification group');
+                done();
+            }
+        });
+    });
+
+    it('should add members to a notification group with success toast', () => {
         const mockResponse = new HttpResponse({ body: null });
         httpInterceptSpy.post.and.returnValue(of(mockResponse));
 
         service.addMembers('123-456', ['new1@example.com', 'new2@example.com']).subscribe();
 
-        expect(httpInterceptSpy.post).toHaveBeenCalled();
-        expect(toastServiceSpy.onSuccess).toHaveBeenCalled();
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Members added to group successfully');
     });
 
-    it('should remove a member from a notification group', () => {
+    it('should handle add members error', (done) => {
+        const error = new Error('API Error');
+        httpInterceptSpy.post.and.returnValue(throwError(() => error));
+
+        service.addMembers('123', ['test@example.com']).subscribe({
+            error: (err) => {
+                expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to add members to group');
+                done();
+            }
+        });
+    });
+
+    it('should remove a member from a notification group with success toast', () => {
         const mockResponse = new HttpResponse({ body: null });
         httpInterceptSpy.delete.and.returnValue(of(mockResponse));
 
@@ -104,27 +149,28 @@ describe('NotificationGroupService', () => {
         expect(httpInterceptSpy.delete).toHaveBeenCalledWith(
             `${environment.apiUrl}/notification-groups/123-456/members/test@example.com`
         );
-        expect(toastServiceSpy.onSuccess).toHaveBeenCalled();
+        expect(toastServiceSpy.onSuccess).toHaveBeenCalledWith('Member removed from group successfully');
     });
 
-    it('should handle create group error', () => {
-        httpInterceptSpy.post.and.returnValue(of(new HttpResponse({ body: null, status: 400 })));
+    it('should handle remove member error', (done) => {
+        const error = new Error('API Error');
+        httpInterceptSpy.delete.and.returnValue(throwError(() => error));
 
-        service.createGroup('Test', 'Test', []).subscribe({
-            error: () => {
-                expect(toastServiceSpy.onError).toHaveBeenCalled();
+        service.removeMember('123', 'test@example.com').subscribe({
+            error: (err) => {
+                expect(toastServiceSpy.onError).toHaveBeenCalledWith('Failed to remove member from group');
+                done();
             }
         });
     });
 
-    it('should handle update group error', () => {
-        httpInterceptSpy.put.and.returnValue(of(new HttpResponse({ body: null, status: 400 })));
+    it('should get group by id', () => {
+        httpInterceptSpy.get.and.returnValue(of(mockGroup));
 
-        service.updateGroup('123', 'Test', 'Test').subscribe({
-            error: () => {
-                expect(toastServiceSpy.onError).toHaveBeenCalled();
-            }
+        service.getGroupById('123-456').subscribe(response => {
+            expect(response).toEqual(mockGroup);
         });
     });
 });
+
 

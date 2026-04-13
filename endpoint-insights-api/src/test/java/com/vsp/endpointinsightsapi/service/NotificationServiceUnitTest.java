@@ -78,4 +78,73 @@ class NotificationServiceUnitTest {
         verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("a@test.com"));
         verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("b@test.com"));
     }
+
+    @Test
+    void sendTestCompletionNotifications_resolveGroupsToEmails() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        TestBatchEmailList groupEntry = new TestBatchEmailList(null, batchId, null, "group:" + groupId);
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(groupEntry));
+        when(notificationGroupService.getGroupMemberEmails(groupId)).thenReturn(List.of("group@test.com"));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(notificationGroupService, times(1)).getGroupMemberEmails(groupId);
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("group@test.com"));
+    }
+
+    @Test
+    void sendTestCompletionNotifications_mixedEmailsAndGroups() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        TestBatchEmailList emailEntry = new TestBatchEmailList(null, batchId, null, "direct@test.com");
+        TestBatchEmailList groupEntry = new TestBatchEmailList(null, batchId, null, "group:" + groupId);
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(emailEntry, groupEntry));
+        when(notificationGroupService.getGroupMemberEmails(groupId)).thenReturn(List.of("group@test.com"));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("direct@test.com"));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("group@test.com"));
+    }
+
+    @Test
+    void sendTestCompletionNotifications_invalidGroupIdFormat_logsWarning() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+
+        TestBatchEmailList invalidGroupEntry = new TestBatchEmailList(null, batchId, null, "group:invalid-uuid");
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(invalidGroupEntry));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(notificationGroupService, never()).getGroupMemberEmails(any());
+        verifyNoInteractions(emailSender);
+    }
+
+    @Test
+    void sendTestCompletionNotifications_deduplicatesEmails() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+
+        TestBatchEmailList a = new TestBatchEmailList(null, batchId, null, "shared@test.com");
+        TestBatchEmailList b = new TestBatchEmailList(null, batchId, null, "shared@test.com");
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("shared@test.com"));
+    }
 }

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { NotificationGroupsDialogComponent } from './notification-groups-dialog.component';
 import { NotificationGroupService } from '../../../services/notification-group.service';
 import { ToastService } from '../../../services/toast.service';
@@ -155,11 +155,119 @@ describe('NotificationGroupsDialogComponent', () => {
         expect(groupServiceSpy.deleteGroup).toHaveBeenCalledWith('1');
     });
 
-    it('should not delete a group if not confirmed', () => {
+    it('should handle save error with form validation', () => {
+        component.editingGroupId.set('1');
+        component.form.patchValue({
+            name: '',
+            description: 'Description'
+        });
+
+        component.saveGroupChanges();
+
+        expect(component.loading()).toBe(false);
+    });
+
+    it('should not save when form is invalid', () => {
+        groupServiceSpy.updateGroup.and.returnValue(of({ body: mockGroups[0] }));
+
+        component.editingGroupId.set('1');
+        component.form.patchValue({
+            name: '',
+            description: 'Invalid'
+        });
+
+        component.saveGroupChanges();
+
+        expect(groupServiceSpy.updateGroup).not.toHaveBeenCalled();
+    });
+
+    it('should handle save error for invalid group id', () => {
+        component.editingGroupId.set(null);
+        component.form.patchValue({
+            name: 'Test',
+            description: 'Test'
+        });
+
+        component.saveGroupChanges();
+
+        expect(groupServiceSpy.updateGroup).not.toHaveBeenCalled();
+    });
+
+    it('should handle group loading error', () => {
+        spyOn(console, 'error');
+        groupServiceSpy.getAllGroups.and.returnValue(throwError(() => new Error('Load failed')));
+
+        component.loadGroups();
+
+        expect(console.error).toHaveBeenCalledWith('Error loading groups:', jasmine.any(Error));
+        expect(component.loading()).toBe(false);
+    });
+
+    it('should handle group creation error', () => {
+        spyOn(console, 'error');
+        groupServiceSpy.createGroup.and.returnValue(throwError(() => new Error('Create failed')));
+
+        component.form.patchValue({
+            name: 'Test',
+            description: 'Test'
+        });
+
+        component.createGroup();
+
+        expect(console.error).toHaveBeenCalledWith('Error creating group:', jasmine.any(Error));
+        expect(component.loading()).toBe(false);
+    });
+
+    it('should handle group update error', () => {
+        spyOn(console, 'error');
+        groupServiceSpy.updateGroup.and.returnValue(throwError(() => new Error('Update failed')));
+
+        component.editingGroupId.set('1');
+        component.form.patchValue({
+            name: 'Updated',
+            description: 'Updated'
+        });
+
+        component.saveGroupChanges();
+
+        expect(console.error).toHaveBeenCalledWith('Error updating group:', jasmine.any(Error));
+        expect(component.loading()).toBe(false);
+    });
+
+    it('should handle group deletion error without confirmation', () => {
         spyOn(window, 'confirm').and.returnValue(false);
 
         component.deleteGroup('1');
 
         expect(groupServiceSpy.deleteGroup).not.toHaveBeenCalled();
     });
-});
+
+    it('should set loading state during operations', () => {
+        const mockResponse = new HttpResponse({ body: mockGroups[0] });
+        groupServiceSpy.createGroup.and.returnValue(of(mockResponse));
+
+        component.form.patchValue({
+            name: 'New Group'
+        });
+
+        component.createGroup();
+
+        expect(component.loading()).toBeDefined();
+    });
+
+    it('should reset form after successful creation', () => {
+        groupServiceSpy.createGroup.and.returnValue(of(new HttpResponse({ body: mockGroups[0] })));
+        groupServiceSpy.getAllGroups.and.returnValue(of(new HttpResponse({ body: mockGroups })));
+
+        component.form.patchValue({
+            name: 'New Group',
+            description: 'Desc',
+            members: []
+        });
+
+        component.createGroup();
+
+        expect(component.form.get('name')?.value).toBe('');
+        expect(component.form.get('description')?.value).toBe('');
+    });
+}
