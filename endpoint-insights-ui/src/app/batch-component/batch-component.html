@@ -62,7 +62,7 @@
                         }
                     </div>
                     <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-                    <div class="cell lastRun">{{ b.lastRunTime ? (b.lastRunTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
+                    <div class="cell lastRun">{{ b.lastTimeRun ? (b.lastTimeRun | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
 
                      <div class="cell actions" (click)="$event.stopPropagation()">
                          <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="runBatch(b)"><mat-icon>play_arrow</mat-icon></button>
