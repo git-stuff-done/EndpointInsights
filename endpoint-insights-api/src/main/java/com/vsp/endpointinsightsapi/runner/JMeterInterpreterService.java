@@ -193,7 +193,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 			res.setErrorRatePercent(errorRate);
             res.setLatencyThresholdResult(latencyPerformanceStatus);
             res.setLatencyThreshold(threshold);
-            res.setJobId(job.getJobId());
 			perfTestResults.add(res);
 
 			// Now, PerfTestResultCode per error code

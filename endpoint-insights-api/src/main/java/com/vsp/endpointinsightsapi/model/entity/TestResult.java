@@ -27,7 +27,7 @@ public class TestResult {
 	@JoinColumn(name = "run_id", referencedColumnName = "run_id", nullable = false)
 	private TestRun testRun;
 
-	@OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-	private List<PerfTestResult> perfTestResult;
+	@OneToOne(mappedBy = "testResult", fetch = FetchType.EAGER)
+	private PerfTestResult perfTestResult;
 
 }

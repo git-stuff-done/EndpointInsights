@@ -56,13 +56,12 @@ public class JavaMailEmailSender implements EmailSender {
         PerfTestResult perf = new PerfTestResult();
         String reasonForFailure = TestFailureTypes.OTHER.toString();
         for(TestResult testResult : results){
-            List<PerfTestResult> perfTestResults = testResult.getPerfTestResult();
-            for(PerfTestResult perfTestResult : perfTestResults){
-                if(perfTestResult.getTestResult().getId().equals(testResult.getId()) && perfTestResult.getJobId().equals(testRun.getJobId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
-                    perf = perfTestResult;
-                    reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
-                }
+            PerfTestResult perfTestResult = testResult.getPerfTestResult();
+            if(perfTestResult.getTestResult().getId().equals(testResult.getId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
+                perf = perfTestResult;
+                reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
             }
+
         }
         Optional<Job> job =  jobRepository.findById(testRun.getJobId());
         if (job.isEmpty()) {

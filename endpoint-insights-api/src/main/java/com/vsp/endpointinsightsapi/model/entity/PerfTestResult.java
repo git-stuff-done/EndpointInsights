@@ -18,7 +18,7 @@ public class PerfTestResult {
 
 	@JsonIgnore
 	@MapsId("resultId")
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "result_id", nullable = false, insertable = false, updatable = false)
 	private TestResult testResult;
 
@@ -52,6 +52,4 @@ public class PerfTestResult {
     @Column(name = "latency_threshold")
     private Integer latencyThreshold;
 
-    @Column(name = "job_id")
-    private UUID jobId;
 }
