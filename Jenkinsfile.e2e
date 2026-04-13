@@ -122,6 +122,9 @@ pipeline {
                 dir('integration-tests') {
                     sh """
                         set +e
+                        set -a
+                        source /var/lib/jenkins/endpoint-insights-e2e.env
+                        set +a
                         export APP_URL=http://localhost:8080
                         npx nightwatch test --env chrome
                         TEST_EXIT_CODE=\$?
