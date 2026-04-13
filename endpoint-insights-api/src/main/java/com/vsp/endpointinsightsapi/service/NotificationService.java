@@ -59,7 +59,7 @@ public class NotificationService {
             }
         }
 
-        LOG.info("Resolved to {} unique email recipients for run {}", allEmails.size(), testRun.getRunId());
+        LOG.info("Resolved to {} unique email recipients for run {}", allEmails.size(), runId);
 
         // Send emails to all resolved recipients
         for (String email : allEmails) {
