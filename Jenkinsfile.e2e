@@ -11,8 +11,10 @@ pipeline {
     environment {
         IMAGE_NAME = 'endpoint-insights-e2e'
         IMAGE_TAG = "${GIT_COMMIT}"
-        CONTAINER_NAME = "endpoint-insights-e2e-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
-        APP_PORT = sh(script: 'python3 -c "import socket; s=socket.socket(); s.bind((\'\', 0)); print(s.getsockname()[1]); s.close()"', returnStdout: true).trim()
+        TEST_IMAGE_NAME = 'endpoint-insights-e2e-tests'
+        CONTAINER_NAME = "endpoint-insights-e2e-app-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
+        TEST_CONTAINER_NAME = "endpoint-insights-e2e-tests-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
+        NETWORK_NAME = "endpoint-insights-e2e-network-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
     }
 
     stages {
@@ -23,10 +25,16 @@ pipeline {
                         docker ps -a --filter "name=endpoint-insights-e2e-" -q | xargs -r docker rm -f || true
                     """
 
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    sh """
+                        docker network ls --filter "name=endpoint-insights-e2e-network-" -q | xargs -r docker network rm || true
+                    """
 
                     sh """
                         docker images ${IMAGE_NAME} --format '{{.Tag}}' | tail -n +6 | xargs -r -I {} docker rmi ${IMAGE_NAME}:{} || true
+                    """
+
+                    sh """
+                        docker images ${TEST_IMAGE_NAME} --format '{{.Tag}}' | tail -n +6 | xargs -r -I {} docker rmi ${TEST_IMAGE_NAME}:{} || true
                     """
                 }
             }
@@ -44,18 +52,31 @@ pipeline {
                     sh """
                         docker build -f ./integration-tests/Dockerfile -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
+
+                    sh """
+                        docker build -f ./integration-tests/Dockerfile.tests -t ${TEST_IMAGE_NAME}:${IMAGE_TAG} .
+                    """
                 }
             }
         }
 
-        stage('Start') {
+        stage('Create Network') {
+            steps {
+                sh """
+                    docker network create ${NETWORK_NAME}
+                """
+            }
+        }
+
+        stage('Start Application') {
             steps {
                 script {
                     sh """
                         docker run -d \
                             --name ${CONTAINER_NAME} \
+                            --network ${NETWORK_NAME} \
+                            --network-alias app \
                             --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
-                            -p ${APP_PORT}:8080 \
                             ${IMAGE_NAME}:${IMAGE_TAG}
                     """
 
@@ -83,7 +104,7 @@ pipeline {
                             if [ "\$HEALTH_STATUS" = "healthy" ]; then
                                 echo "Container is healthy!"
 
-                                if curl -f -s http://localhost:${APP_PORT}/api/health > /dev/null; then
+                                if docker run --rm --network ${NETWORK_NAME} curlimages/curl:latest -f -s http://app:8080/api/health > /dev/null; then
                                     echo "Health endpoint verified!"
                                     exit 0
                                 else
@@ -106,18 +127,21 @@ pipeline {
                         docker logs --tail 100 ${CONTAINER_NAME}
                         exit 1
                     """
-
-                    env.APP_URL = "http://localhost:${APP_PORT}"
                 }
             }
         }
 
         stage('E2E Tests') {
             steps {
-                dir('integration-tests') {
-                    sh 'npm ci'
+                script {
                     sh """
-                        APP_URL=${APP_URL} npx nightwatch test --env chrome
+                        docker run --rm \
+                            --name ${TEST_CONTAINER_NAME} \
+                            --network ${NETWORK_NAME} \
+                            --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
+                            -e APP_URL=http://app:8080 \
+                            -v \$(pwd)/integration-tests/tests_output:/tests/tests_output \
+                            ${TEST_IMAGE_NAME}:${IMAGE_TAG}
                     """
                 }
             }
@@ -138,7 +162,9 @@ pipeline {
             sh """
                 docker stop ${CONTAINER_NAME} || true
                 docker rm ${CONTAINER_NAME} || true
+                docker network rm ${NETWORK_NAME} || true
                 docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
+                docker rmi ${TEST_IMAGE_NAME}:${IMAGE_TAG} || true
             """
         }
 
@@ -153,8 +179,11 @@ pipeline {
                     echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === Docker PS ===" >> integration-tests/debug.log
                     docker ps -a >> integration-tests/debug.log 2>&1 || true
                     echo "" >> integration-tests/debug.log
-                    echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === Network Info ===" >> integration-tests/debug.log
-                    netstat -tulpn | grep ${APP_PORT} >> integration-tests/debug.log 2>&1 || true
+                    echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === Docker Networks ===" >> integration-tests/debug.log
+                    docker network ls >> integration-tests/debug.log 2>&1 || true
+                    echo "" >> integration-tests/debug.log
+                    echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === App Container Logs ===" >> integration-tests/debug.log
+                    docker logs ${CONTAINER_NAME} >> integration-tests/debug.log 2>&1 || true
                 """
                 archiveArtifacts artifacts: 'integration-tests/debug.log', allowEmptyArchive: true
             }
