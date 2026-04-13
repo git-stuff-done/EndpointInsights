@@ -5,24 +5,36 @@ pipeline {
 
     options {
         disableConcurrentBuilds()
+        lock(resource: 'endpoint-insights-e2e-lock', skipIfLocked: false)
     }
 
     environment {
         IMAGE_NAME = 'endpoint-insights-e2e'
         IMAGE_TAG = "${GIT_COMMIT}"
-        CONTAINER_NAME = "endpoint-insights-e2e-${GIT_COMMIT}"
+        CONTAINER_NAME = "endpoint-insights-e2e-${BUILD_TAG.replaceAll('[^a-zA-Z0-9_.-]', '_')}"
+        APP_PORT = sh(script: 'python3 -c "import socket; s=socket.socket(); s.bind((\'\', 0)); print(s.getsockname()[1]); s.close()"', returnStdout: true).trim()
     }
-    
+
     stages {
-        stage('Checkout') {
+        stage('Cleanup') {
             steps {
-                checkout scm
+                script {
+                    sh """
+                        docker ps -a --filter "name=endpoint-insights-e2e-" -q | xargs -r docker rm -f || true
+                    """
+
+                    sh "docker rm -f ${CONTAINER_NAME} || true"
+
+                    sh """
+                        docker images ${IMAGE_NAME} --format '{{.Tag}}' | tail -n +6 | xargs -r -I {} docker rmi ${IMAGE_NAME}:{} || true
+                    """
+                }
             }
         }
 
-        stage('Cleanup') {
+        stage('Checkout') {
             steps {
-                sh "docker rm -f ${CONTAINER_NAME} || true"
+                checkout scm
             }
         }
 
@@ -38,31 +50,65 @@ pipeline {
 
         stage('Start') {
             steps {
-                sh "docker rm -f ${CONTAINER_NAME} || true"
+                script {
+                    sh """
+                        docker run -d \
+                            --name ${CONTAINER_NAME} \
+                            --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
+                            -p ${APP_PORT}:8080 \
+                            ${IMAGE_NAME}:${IMAGE_TAG}
+                    """
 
-                sh """
-                    docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        --env-file /var/lib/jenkins/endpoint-insights-e2e.env \
-                        -p 8080:8080 \
-                        ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                    sh """
+                        #!/bin/bash
+                        set -e
 
-                sh """
-                    #!/bin/bash
-                    ## Based on docker healthcheck max time + 15s
-                    TIMEOUT=70 
-                    ELAPSED=0
-                    until [ "\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME})" = "healthy" ]; do
-                        if [ \$ELAPSED -ge \$TIMEOUT ]; then
-                            echo "Container failed to become healthy within \${TIMEOUT}s"
-                            exit 1
-                        fi
-                        echo "Waiting for container to be healthy... (\${ELAPSED}s)"
-                        sleep 5
-                        ELAPSED=\$((ELAPSED + 5))
-                    done
-                """
+                        TIMEOUT=90
+                        ELAPSED=0
+                        INTERVAL=5
+
+                        echo "Waiting for container ${CONTAINER_NAME} to be healthy..."
+                        echo "Container logs will be shown if startup fails"
+
+                        while [ \$ELAPSED -lt \$TIMEOUT ]; do
+                            if ! docker ps --filter "name=${CONTAINER_NAME}" --filter "status=running" -q | grep -q .; then
+                                echo "ERROR: Container stopped running during startup!"
+                                echo "Last 50 lines of container logs:"
+                                docker logs --tail 50 ${CONTAINER_NAME}
+                                exit 1
+                            fi
+
+                            HEALTH_STATUS=\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_NAME} 2>/dev/null || echo "none")
+
+                            if [ "\$HEALTH_STATUS" = "healthy" ]; then
+                                echo "Container is healthy!"
+
+                                if curl -f -s http://localhost:${APP_PORT}/api/health > /dev/null; then
+                                    echo "Health endpoint verified!"
+                                    exit 0
+                                else
+                                    echo "WARNING: Health status shows healthy but endpoint not responding"
+                                fi
+                            elif [ "\$HEALTH_STATUS" = "unhealthy" ]; then
+                                echo "ERROR: Container health check failed!"
+                                echo "Container logs:"
+                                docker logs --tail 100 ${CONTAINER_NAME}
+                                exit 1
+                            fi
+
+                            echo "Waiting for container to be healthy... (\${ELAPSED}s) [Status: \${HEALTH_STATUS}]"
+                            sleep \$INTERVAL
+                            ELAPSED=\$((ELAPSED + INTERVAL))
+                        done
+
+                        echo "ERROR: Container failed to become healthy within \${TIMEOUT}s"
+                        echo "Final container logs:"
+                        docker logs --tail 100 ${CONTAINER_NAME}
+                        exit 1
+                    """
+
+                    env.APP_URL = "http://localhost:${APP_PORT}"
+                }
             }
         }
 
@@ -70,18 +116,48 @@ pipeline {
             steps {
                 dir('integration-tests') {
                     sh 'npm ci'
-                    sh 'npx nightwatch test --env chrome'
+                    sh """
+                        APP_URL=${APP_URL} npx nightwatch test --env chrome
+                    """
                 }
             }
         }
     }
-    
+
     post {
         always {
+            script {
+                sh """
+                    docker logs ${CONTAINER_NAME} > integration-tests/container.log 2>&1 || true
+                """
+                archiveArtifacts artifacts: 'integration-tests/container.log', allowEmptyArchive: true
+            }
+
             junit 'integration-tests/tests_output/*.xml'
-            sh "docker stop ${CONTAINER_NAME} || true"
-            sh "docker rm ${CONTAINER_NAME} || true"
-            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+
+            sh """
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+                docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
+            """
+        }
+
+        failure {
+            script {
+                sh """
+                    echo "=== Debug Log Generated: \$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ) ===" > integration-tests/debug.log
+                    echo "Jenkins Build: ${BUILD_TAG}" >> integration-tests/debug.log
+                    echo "Build Number: ${BUILD_NUMBER}" >> integration-tests/debug.log
+                    echo "Build URL: ${BUILD_URL}" >> integration-tests/debug.log
+                    echo "" >> integration-tests/debug.log
+                    echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === Docker PS ===" >> integration-tests/debug.log
+                    docker ps -a >> integration-tests/debug.log 2>&1 || true
+                    echo "" >> integration-tests/debug.log
+                    echo "[\$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)] === Network Info ===" >> integration-tests/debug.log
+                    netstat -tulpn | grep ${APP_PORT} >> integration-tests/debug.log 2>&1 || true
+                """
+                archiveArtifacts artifacts: 'integration-tests/debug.log', allowEmptyArchive: true
+            }
         }
     }
 }
