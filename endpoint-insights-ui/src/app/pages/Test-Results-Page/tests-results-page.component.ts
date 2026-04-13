@@ -18,7 +18,7 @@ import {
 } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatFormField, MatLabel, MatSuffix} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
@@ -39,6 +39,7 @@ import {NotificationService} from "../../services/notification.service";
         MatDatepicker,
         MatDatepickerToggle,
         MatDatepickerInput,
+        MatSuffix,
         PerformanceChart,
         MatPaginator,
         MatIcon,
