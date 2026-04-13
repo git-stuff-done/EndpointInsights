@@ -47,7 +47,7 @@ public class PerformanceChartService {
 
         String title = activities.isEmpty()
                 ? "API Performance"
-                : activities.get(0).getTestName() + " API Performance";
+                : (batchId != null ? activities.getFirst().getBatchName() != null ? activities.getFirst().getBatchName() : activities.getFirst().getTestName() : activities.getFirst().getTestName()) + " API Performance";
 
         return new ChartResponseDTO(
                 title,
