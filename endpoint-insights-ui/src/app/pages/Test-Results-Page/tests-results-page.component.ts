@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -45,6 +46,7 @@ import {NotificationService} from "../../services/notification.service";
 })
 export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
 
     @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -95,6 +97,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
 
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
 
         this.dataSource.sortingDataAccessor = (item: RecentActivity, property: string) => {
             switch (property) {

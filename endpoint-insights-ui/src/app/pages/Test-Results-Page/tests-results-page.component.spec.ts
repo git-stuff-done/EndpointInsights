@@ -71,6 +71,13 @@ describe('TestsResultsPageComponent', () => {
     expect(text).toContain('PASS');
   });
 
+  it('wires paginator to dataSource', () => {
+    serviceSpy.getRecentActivity.and.returnValue(of([]));
+    fixture = TestBed.createComponent(TestsResultsPageComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.dataSource.paginator).toBeTruthy();
+  });
+
   it('shows error message when service fails', () => {
     serviceSpy.getRecentActivity.and.returnValue(throwError(() => new Error('fail')));
 
