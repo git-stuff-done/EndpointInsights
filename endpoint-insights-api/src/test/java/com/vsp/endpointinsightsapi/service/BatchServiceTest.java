@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -378,5 +379,41 @@ class BatchServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("Test Batch", result.get(0).getBatchName());
+    }
+
+    @Test
+    void createBatch_setsAllFields() {
+        UUID batchId = UUID.randomUUID();
+        String cronExpression = "0 0 12 * * *";
+        Long scheduleId = 1001L;
+        LocalDateTime startTime = LocalDateTime.now();
+        Boolean active = true;
+
+        com.vsp.endpointinsightsapi.dto.BatchRequestDTO request = new com.vsp.endpointinsightsapi.dto.BatchRequestDTO();
+        request.setBatchName("New Batch");
+        request.setCronExpression(cronExpression);
+        request.setScheduleId(scheduleId);
+        request.setStartTime(startTime);
+        request.setActive(active);
+
+        TestBatch savedBatch = new TestBatch();
+        savedBatch.setBatchId(batchId);
+        savedBatch.setBatchName("New Batch");
+        savedBatch.setCronExpression(cronExpression);
+        savedBatch.setScheduleId(scheduleId);
+        savedBatch.setStartTime(startTime);
+        savedBatch.setActive(active);
+
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(savedBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(savedBatch));
+
+        TestBatch result = testBatchService.createBatch(request);
+
+        assertEquals(cronExpression, result.getCronExpression());
+        assertEquals(scheduleId, result.getScheduleId());
+        assertEquals(startTime, result.getStartTime());
+        assertEquals(active, result.getActive());
+        verify(testBatchRepository).saveAndFlush(any(TestBatch.class));
+        verify(batchSchedulerService).scheduleBatch(savedBatch);
     }
 }

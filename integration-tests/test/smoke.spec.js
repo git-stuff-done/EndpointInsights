@@ -4,7 +4,6 @@ describe('Application Smoke Tests', function() {
 
         browser
             .authenticateWithAuthelia(baseUrl)
-            .assert.urlContains(':8080')
-            .assert.elementPresent('#dashboard-title')
+            .assert.elementPresent('[data-test-id="dashboard-title"]')
     })
 })

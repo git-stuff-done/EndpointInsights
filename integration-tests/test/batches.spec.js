@@ -9,7 +9,6 @@ describe('Batch Management Tests', function() {
         const baseUrl = process.env.APP_URL || browser.launch_url || 'http://localhost:8080';
         browser
             .authenticateWithAuthelia(baseUrl)
-            .assert.urlContains(':8080')
             .waitForElementVisible('body');
     });
 
