@@ -39,38 +39,7 @@
 
         <!-- Charts Row -->
         <section class="charts-row">
-            <article class="panel panel-chart">
-                <header class="panel-header">API Performance</header>
-                <div class="panel-body">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>{{ chartResponse?.title }}</h3>
-                            <span class="chart-subtitle">Recent Passed and Failed Runs</span>
-                        </div>
-
-                        <div *ngIf="loading" class="chart-loading">
-                            Loading chart...
-                        </div>
-
-                        <div *ngIf="error" class="chart-error">
-                            {{ error }}
-                        </div>
-
-                        <div *ngIf="!loading && !error" class="chart-container">
-                            <canvas #performanceCanvas></canvas>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-<!--            <article class="panel panel-chart">-->
-<!--                <header class="panel-header">API Trend</header>-->
-<!--                <div class="panel-body">-->
-<!--                    <div class="chart-placeholder">-->
-<!--                        API Trend Chart Placeholder-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </article>-->
+            <app-performance-chart [batchId]="batchId" [jobId]="jobId"></app-performance-chart>
         </section>
 
         <!-- Recent Activity -->
@@ -123,27 +92,5 @@
                 </div>
             </article>
         </section>
-
-        <!-- Alerts -->
-        <section class="alerts-row">
-            <article class="panel panel-alerts">
-                <header class="panel-header">Alerts / Notifications</header>
-                <div class="panel-body">
-                    <ul class="alerts-list">
-                        @for (a of alerts; track a.id) {
-                            <li
-                                    class="alert-item"
-                                    [class.alert-warning]="a.severity === 'warning'"
-                                    [class.alert-error]="a.severity === 'error'"
-                            >
-                                <span class="alert-icon">⚠</span>
-                                <span class="alert-message">{{ a.message }}</span>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </article>
-        </section>
-
     </section>
 </main>

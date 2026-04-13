@@ -26,6 +26,31 @@
   align-items: center;
 }
 
+
+.action-wrapper {
+  display: flex;
+  margin-bottom: 1.5rem;
+}
+
+.purge-container {
+  margin-left: auto;
+}
+
+.purge-field {
+  padding-right: 1rem;
+}
+
+.header-row {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.mat-mdc-paginator {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
 .search-icon {
   position: absolute;
   left: 12px;
@@ -42,18 +67,18 @@
 .table-container {
   width: 100%;
   overflow-x: auto;
-  border-radius: 12px;
+  border: var(--card-border);
+  border-radius: var(--card-radius);
 }
 
 .results-table {
   width: 100%;
 
-  &.mat-mdc-table { display: table; table-layout: auto; }
-  .mat-mdc-header-row { display: table-row; }
-  .mat-mdc-row        { display: table-row; }
-  .mat-mdc-header-cell { display: table-cell; white-space: nowrap; }
-  .mat-mdc-cell        { display: table-cell; }
-}
+.results-table {
+  width: 100%;
+
+  &.mat-mdc-table {
+  
 
 .mat-column-runId,
 .mat-column-jobId {
@@ -81,7 +106,7 @@ tr.mat-mdc-row:hover td { background: var(--color-bg); }
 
 /* Status pills */
 .status-pill {
-  display: inline-block;
+  vertical-align: 0.4rem;
   padding: 0.2rem 0.65rem;
   border-radius: 999px;
   font-size: 0.75rem;
