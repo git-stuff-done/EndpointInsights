@@ -28,7 +28,8 @@ export class BatchCardComponent {
     }
 
     formattedDate(): string {
-        if (!this.batch.lastRunTime) return '—';
-        return new Date(this.batch.lastRunTime).toLocaleString();
+        console.log(this.batch.lastTimeRun)
+        if (!this.batch.lastTimeRun) return '—';
+        return new Date(this.batch.lastTimeRun).toLocaleString();
     }
 }

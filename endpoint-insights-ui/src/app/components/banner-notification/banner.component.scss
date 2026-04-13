@@ -13,10 +13,10 @@
   box-sizing: border-box;
 }
 
-.banner.info    { background: #2196f3; }
-.banner.success { background: #4caf50; }
-.banner.warning { background: #ff9800; }
-.banner.error   { background: #f44336; }
+.banner.info    { background: var(--color-accent); }
+.banner.success { background: var(--color-success); }
+.banner.warning { background: var(--color-warning); }
+.banner.error   { background: var(--color-error); }
 
 .banner span {
   flex: 1;
@@ -27,17 +27,17 @@
 }
 
 .banner button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid white;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: white;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  padding: 4px 12px;
+  padding: 4px 10px;
   flex-shrink: 0;
-  min-width: 30px;
-  border-radius: 4px;
+  min-width: auto;
+  border-radius: 6px;
 }
 
 .banner button:hover {

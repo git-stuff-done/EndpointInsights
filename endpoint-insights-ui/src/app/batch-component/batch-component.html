@@ -1,4 +1,5 @@
 <main>
+    <h1 class="page-title">Batches</h1>
     <div class="button-container">
         <button mat-raised-button class="elevated-btn mat-elev-2" color="basic" (click)="openCreateBatchModal()">
             <span>New Batch</span>
@@ -47,7 +48,7 @@
                 <div class="batch-row" >
                     <div class="cell name">
                         <span class="title">{{ b.batchName }}</span>
-                         <span class="active">{{ 'Active - ' + b.active || 'Active - Null'}}</span>
+                         <span class="active" [class.true]="b.active === true" [class.false]="b.active !== true">{{ b.active ? 'Active' : 'Inactive' }}</span>
                     </div>
                     <div class="cell id">{{ b.id }}</div>
                     <div class="cell created-by">
@@ -62,10 +63,11 @@
                         }
                     </div>
                     <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-                    <div class="cell lastRun">{{ b.lastRunTime ? (b.lastRunTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
+                    <div class="cell lastRun">{{ b.lastTimeRun ? (b.lastTimeRun | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
 
                      <div class="cell actions" (click)="$event.stopPropagation()">
                          <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="runBatch(b)"><mat-icon>play_arrow</mat-icon></button>
+                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Run" (click)="onView(b)"><mat-icon>open_in_new</mat-icon></button>
                          <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Edit" (click)="onConfigure(b)"><mat-icon>edit</mat-icon></button>
                         <button mat-icon-button class="elevated-btn mat-elev-2" aria-label="Delete" (click)="onDelete(b)"><mat-icon>delete</mat-icon></button>
                     </div>

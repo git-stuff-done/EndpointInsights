@@ -53,6 +53,16 @@ scheduling:
 batches:
   stale-batch-threshold-seconds: 60
 
+test-runs:
+  purge-frequency:
+    hours: 1
+    minutes: 0
+  max-age:
+    days: 90
+    hours: 0
+    minutes: 0
+    seconds: 0
+
 app:
   authentication:
     enabled: true
@@ -79,6 +89,20 @@ app:
       - "http://localhost:8080"
       - "http://localhost:4200"
 
+# Springdoc OpenAPI / Swagger Configuration
+springdoc:
+  api-docs:
+    path: /api/docs
+  swagger-ui:
+    enabled: true
+    path: /api
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    doc-expansion: list
+  show-actuator: false
+  use-fqn: false
+  default-flat-param-object: true
 
 ---
 spring:

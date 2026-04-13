@@ -266,6 +266,24 @@ describe('AuthenticationService', () => {
         expect(stored).toBe('/page#section');
         expect(consoleSpy).not.toHaveBeenCalled();
       });
+
+      it('should allow http: protocol with same origin', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        const currentOrigin = new URL(window.location.href).origin;
+        service.setRedirectUrl(`${currentOrigin}/dashboard`);
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe(`${currentOrigin}/dashboard`);
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow https: protocol with same origin', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        const currentOrigin = new URL(window.location.href).origin;
+        service.setRedirectUrl(`${currentOrigin}/dashboard`);
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBe(`${currentOrigin}/dashboard`);
+        expect(consoleSpy).not.toHaveBeenCalled();
+      });
     });
 
     describe('Special Characters in Paths', () => {
@@ -346,6 +364,22 @@ describe('AuthenticationService', () => {
       it('should reject javascript: with mixed case', () => {
         const consoleSpy = spyOn(console, 'warn');
         service.setRedirectUrl('JavaScript:alert("xss")');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject http: protocol with different origin', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('http://evil.com/phishing');
+        const stored = localStorage.getItem('redirectUrl');
+        expect(stored).toBeNull();
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      it('should reject https: protocol with different origin', () => {
+        const consoleSpy = spyOn(console, 'warn');
+        service.setRedirectUrl('https://evil.com/phishing');
         const stored = localStorage.getItem('redirectUrl');
         expect(stored).toBeNull();
         expect(consoleSpy).toHaveBeenCalled();

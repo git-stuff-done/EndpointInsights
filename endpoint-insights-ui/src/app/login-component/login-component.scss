@@ -1,5 +1,6 @@
 .header{
-  background: lightgray;
+  background: var(--color-primary);
+  color: var(--color-white);
   text-align: center;
   padding: 10px;
 }
@@ -19,7 +20,7 @@
 .logo{
   width: 225px;
   height: auto;
-  border: 1px solid #000000;
+  border: 1px solid var(--color-primary);
   display: block;
   padding: 20px;
   margin: 0 auto 20px;
@@ -36,11 +37,11 @@
 }
 
 .login-button{
-  background: #000000;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
+  padding: var(--btn-padding-vertical) var(--btn-padding-horizontal);
+  border-radius: var(--btn-radius);
   cursor: pointer;
-  width: 400px;
+  width: 100%;
 }

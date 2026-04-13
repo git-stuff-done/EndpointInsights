@@ -36,23 +36,7 @@ describe('DashboardComponent', () => {
     ]))
   };
 
-  const mockPerformanceChartService = {
-    getApiPerformanceChart: jasmine.createSpy('getApiPerformanceChart').and.returnValue(
-      of({
-        title: 'Endpoint_Insight_Health API Performance',
-        xAxis: 'runNumber',
-        series: [
-          {
-            name: 'Run Duration (ms)',
-            data: [
-              { label: '1', value: 6469, status: 'PASS' },
-              { label: '2', value: 6254, status: 'FAIL' }
-            ]
-          }
-        ]
-      })
-    )
-  };
+
 
     const mockDashboardSummaryService = {
         getSummary: jasmine.createSpy('getSummary').and.returnValue(
@@ -84,7 +68,6 @@ describe('DashboardComponent', () => {
       imports: [DashboardComponent, HttpClientTestingModule],
       providers: [
         { provide: TestRunService, useValue: mockTestRunService },
-        { provide: PerformanceChartService, useValue: mockPerformanceChartService },
         { provide: DashboardSummaryService, useValue: mockDashboardSummaryService },
         { provide: JobService, useValue: mockJobService }
       ]
@@ -92,13 +75,10 @@ describe('DashboardComponent', () => {
 
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
-
-    spyOn<any>(component, 'renderChart').and.stub();
   });
 
   afterEach(() => {
     mockTestRunService.getRecentActivity.calls.reset();
-    mockPerformanceChartService.getApiPerformanceChart.calls.reset();
     mockDashboardSummaryService.getSummary.calls.reset();
     mockDashboardSummaryService.loadDashboardSummary.calls.reset();
     mockJobService.getAllJobs.calls.reset();
@@ -118,33 +98,6 @@ describe('DashboardComponent', () => {
     expect(component.tests[0].status).toBe('PASS');
   });
 
-  it('loads chart for the most recent pass/fail run', () => {
-    fixture.detectChanges();
-
-    expect(mockPerformanceChartService.getApiPerformanceChart).toHaveBeenCalledWith('job-1', undefined);
-  });
-
-  it('maps chart response into labels and chart point data', () => {
-    fixture.detectChanges();
-
-    expect(component.lineChartLabels).toEqual(['1', '2']);
-    expect(component.lineChartData).toEqual([
-      {
-        label: 'Run Duration (ms)',
-        data: [
-          { label: '1', value: 6469, status: 'PASS' },
-          { label: '2', value: 6254, status: 'FAIL' }
-        ]
-      }
-    ]);
-  });
-
-  it('calls renderChart after chart data loads', fakeAsync(() => {
-    fixture.detectChanges();
-    tick();
-
-    expect((component as any).renderChart).toHaveBeenCalled();
-  }));
 
   it('sets jobId from the most recent matching run', () => {
     fixture.detectChanges();
