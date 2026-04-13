@@ -50,7 +50,7 @@ public class TestRunFactory {
 		testRun.setStatus(TestRunStatus.PENDING);
 		testRun.setBatchId(batch.getBatchId());
 		testRun.setRunBy(CurrentUser.getUsername());
-		testRun = testRunRepository.saveAndFlush(testRun);
+		testRun = testRunRepository.save(testRun);
 
 		return testRun;
 	}

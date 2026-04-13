@@ -1,15 +1,10 @@
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
-import com.vsp.endpointinsightsapi.model.entity.TestResult;
-import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
-import com.vsp.endpointinsightsapi.repository.TestResultRepository;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,12 +30,10 @@ public class NotificationService {
         this.testResultRepository = testResultRepository;
     }
 
-    @Transactional
-    public void sendTestCompletionNotifications(String batchName, UUID batchId, TestRun testRun, UUID resultId) {
+    public void sendTestCompletionNotifications(UUID batchId, UUID runId, UUID resultId) {
         List<TestBatchEmailList> recipients = emailListsRepository.findAllByBatchId(batchId);
-        List<TestResult> testResults = testResultRepository.findByRunId(testRun.getRunId()).orElse(null);
-        // use test run to get job id from perf results
-        LOG.info("Sending test completion notifications for run {} to {} recipients", testRun.getRunId(), recipients.size());
+
+        LOG.info("Sending test completion notifications for run {} to {} recipients", runId, recipients.size());
 
         // Resolve emails and groups to unique email addresses
         Set<String> allEmails = new HashSet<>();
@@ -70,10 +63,10 @@ public class NotificationService {
         // Send emails to all resolved recipients
         for (String email : allEmails) {
             try {
-                emailSender.sendTestCompletionEmail(batchName, testRun, email, testResults);
-                LOG.info("Notification sent for run {} to {}", testRun.getRunId(), email);
+                emailSender.sendTestCompletionEmail(runId, resultId, email);
+                LOG.info("Notification sent for run {} to {}", runId, email);
             } catch (Exception ex) {
-                LOG.error("Failed to send notification for run {} to {}", testRun.getRunId(), email, ex);
+                LOG.error("Failed to send notification for run {} to {}", runId, email, ex);
             }
         }
     }

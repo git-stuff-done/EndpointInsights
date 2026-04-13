@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -27,7 +26,7 @@ public class TestResult {
 	@JoinColumn(name = "run_id", referencedColumnName = "run_id", nullable = false)
 	private TestRun testRun;
 
-	@OneToMany(mappedBy = "testResult", fetch = FetchType.EAGER)
-	private List<PerfTestResult> perfTestResult;
+	@OneToOne(mappedBy = "testResult", cascade = CascadeType.REMOVE)
+	private PerfTestResult perfTestResult;
 
 }

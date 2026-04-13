@@ -17,6 +17,7 @@ import lombok.Setter;
 public class BatchRequestDTO {
     private UUID id;
     private String batchName;
+    private String cronExpression;
     private Long scheduleId;
     private LocalDateTime startTime;
     private LocalDateTime lastTimeRun;

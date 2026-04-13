@@ -34,6 +34,7 @@ export class BatchApi {
         if(batch.isNew){
             const createRequest = {
                 batchName: batch.batchName,
+                cronExpression: batch.cronExpression,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
                 emails: batch.emails ?? [],
                 groupIds: batch.groupIds ?? [],
