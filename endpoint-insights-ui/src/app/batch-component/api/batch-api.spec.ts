@@ -53,6 +53,7 @@ describe('BatchApi', () => {
     });
 
 
+
     it('should delete a batch by id', () => {
         const mockResponse = new HttpResponse({ body: mockBatch });
         httpInterceptSpy.delete.and.returnValue(of(mockResponse));
