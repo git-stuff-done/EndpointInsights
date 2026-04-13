@@ -2,9 +2,12 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
+import com.vsp.endpointinsightsapi.repository.TestResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +19,7 @@ class NotificationServiceUnitTest {
     private TestBatchEmailListsRepository emailListsRepository;
     private EmailSender emailSender;
     private NotificationGroupService notificationGroupService;
+    private TestResultRepository testResultRepository;
     private NotificationService notificationService;
 
     @BeforeEach
