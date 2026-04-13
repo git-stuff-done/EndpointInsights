@@ -21,7 +21,7 @@ describe('BatchApi', () => {
         lastRunTime: '',
         notificationList: [],
         jobs: [],
-        isNew: false
+        isNew: false,
     };
 
     beforeEach(() => {
@@ -53,6 +53,7 @@ describe('BatchApi', () => {
     });
 
 
+
     it('should delete a batch by id', () => {
         const mockResponse = new HttpResponse({ body: mockBatch });
         httpInterceptSpy.delete.and.returnValue(of(mockResponse));
@@ -74,7 +75,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.post).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches`,
-            { batchName: 'Test Batch', jobs: [], emails: [] }
+            { batchName: 'Test Batch', jobs: [], emails: [], active: false }
         );
     });
 
@@ -107,7 +108,7 @@ describe('BatchApi', () => {
 
         expect(httpInterceptSpy.put).toHaveBeenCalledWith(
             `${environment.apiUrl}/batches/123`,
-            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: [] }
+            { batchName: 'Test Batch', cronExpression: undefined, jobs: [], emails: []}
         );
     });
 
