@@ -168,7 +168,7 @@ describe('NotificationGroupsDialogComponent', () => {
     });
 
     it('should not save when form is invalid', () => {
-        groupServiceSpy.updateGroup.and.returnValue(of({ body: mockGroups[0] }));
+        groupServiceSpy.updateGroup.and.returnValue(of(new HttpResponse({ body: mockGroups[0] })));
 
         component.editingGroupId.set('1');
         component.form.patchValue({
@@ -270,4 +270,4 @@ describe('NotificationGroupsDialogComponent', () => {
         expect(component.form.get('name')?.value).toBe('');
         expect(component.form.get('description')?.value).toBe('');
     });
-}
+});

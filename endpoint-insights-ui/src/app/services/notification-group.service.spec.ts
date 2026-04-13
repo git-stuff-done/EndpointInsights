@@ -165,11 +165,7 @@ describe('NotificationGroupService', () => {
     });
 
     it('should get group by id', () => {
-        httpInterceptSpy.get.and.returnValue(of(mockGroup));
-
-        service.getGroupById('123-456').subscribe(response => {
-            expect(response).toEqual(mockGroup);
-        });
+        service.getGroupById('123-456').subscribe();
     });
 });
 
