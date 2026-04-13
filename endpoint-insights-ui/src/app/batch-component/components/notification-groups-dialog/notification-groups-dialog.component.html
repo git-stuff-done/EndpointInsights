@@ -1,0 +1,104 @@
+<h2 mat-dialog-title>Manage Notification Groups</h2>
+
+<mat-dialog-content class="modal-body">
+    <div class="groups-container">
+        <!-- Create/Edit Group Form -->
+        <section class="form-section">
+            <h3>{{ isEditing() ? 'Edit Group' : 'Create New Group' }}</h3>
+            <form [formGroup]="form" class="group-form">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Group Name</mat-label>
+                    <input matInput placeholder="e.g. Backend Team" formControlName="name" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput placeholder="Optional description" formControlName="description" rows="2"></textarea>
+                </mat-form-field>
+
+                <!-- Email input section -->
+                <div class="email-input-section">
+                    <h4>Group Members</h4>
+                    <div class="form-row">
+                        <mat-form-field appearance="outline" class="flex-grow">
+                            <mat-label>Add Email Address</mat-label>
+                            <input matInput type="email" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+                        </mat-form-field>
+                        <button mat-raised-button (click)="addEmail()">Add</button>
+                    </div>
+
+                    <!-- Members list -->
+                    <div class="members-list">
+                        @for (email of selectedGroupMembers(); track email) {
+                            <div class="member-row">
+                                <span>{{ email }}</span>
+                                <button mat-icon-button (click)="removeEmail(email)">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        } @empty {
+                            <p class="empty-state">No members in this group</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Action buttons for create/edit -->
+                <div class="form-actions">
+                    @if (isEditing()) {
+                        <button mat-button (click)="cancelEdit()">Cancel</button>
+                        <button mat-raised-button color="primary" (click)="saveGroupChanges()">Save Changes</button>
+                    } @else {
+                        <button mat-raised-button color="primary" (click)="createGroup()">Create Group</button>
+                    }
+                </div>
+            </form>
+        </section>
+
+        <mat-divider></mat-divider>
+
+        <!-- Existing Groups List -->
+        <section class="groups-list-section">
+            <h3>Existing Groups</h3>
+            @if (loading()) {
+                <p>Loading...</p>
+            } @else if (groups().length === 0) {
+                <p class="empty-state">No notification groups yet. Create one above!</p>
+            } @else {
+                <div class="groups-list">
+                    @for (group of groups(); track group.id) {
+                        <div class="group-card">
+                            <div class="group-header">
+                                <div class="group-info">
+                                    <h4>{{ group.name }}</h4>
+                                    @if (group.description) {
+                                        <p class="description">{{ group.description }}</p>
+                                    }
+                                </div>
+                                <div class="group-actions">
+                                    <button mat-icon-button (click)="startEditGroup(group)" title="Edit">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button (click)="deleteGroup(group.id)" title="Delete">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="group-members">
+                                <strong>Members ({{ group.members.length }}):</strong>
+                                <div class="members-list">
+                                    @for (email of group.members; track email) {
+                                        <span class="member-badge">{{ email }}</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

@@ -1,7 +1,7 @@
 import {Component, OnInit, inject, signal, computed, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
@@ -19,6 +19,10 @@ import {UserService} from "../../../services/user.service";
 import {JobsApi} from "../../../jobsApi/jobsApi";
 import {TestItem} from "../../../models/test.model";
 import {User} from "../../../models/user.model";
+import {NotificationGroupService} from "../../../services/notification-group.service";
+import {NotificationGroup} from "../../../models/notification-group.model";
+import {NotificationGroupsDialogComponent} from "../notification-groups-dialog/notification-groups-dialog.component";
+
 import {MatDividerModule} from '@angular/material/divider';
 
 @Component({
@@ -49,6 +53,8 @@ export class BatchConfigDialogComponent implements OnInit {
     private readonly batchService = inject(BatchService);
     private readonly userService = inject(UserService);
     private readonly jobsApi = inject(JobsApi);
+    private readonly notificationGroupService = inject(NotificationGroupService);
+    private readonly matDialog = inject(MatDialog);
     private readonly dialogRef = inject(MatDialogRef<BatchConfigDialogComponent>);
     isNew = !this.data.id;
 
@@ -61,6 +67,8 @@ export class BatchConfigDialogComponent implements OnInit {
 
     currentBatchTests = signal<TestItem[]>([]);
     emailList = signal<string[]>([]);
+    selectedGroups = signal<NotificationGroup[]>([]);
+    availableGroups = signal<NotificationGroup[]>([]);
     emailInputControl = new FormControl('');
 
 
@@ -128,7 +136,7 @@ export class BatchConfigDialogComponent implements OnInit {
         this.buildCron();
     }
 
-    /** Build a cron string from the editor state and set it on the form */
+    // Build a cron string from the editor state and set it on the form
     private buildCron(): void {
         const time = this.scheduleTime();
         const [hours, minutes] = time.split(':').map(Number);
@@ -148,8 +156,7 @@ export class BatchConfigDialogComponent implements OnInit {
         this.form.patchValue({cronExpression: cron});
     }
 
-
-    /** Parse a cron string and update the editor state to match */
+    // Parse a cron string and update the editor state to match
     private parseCronToEditor(cron: string): void {
         if (!cron) return;
 
@@ -192,6 +199,7 @@ export class BatchConfigDialogComponent implements OnInit {
             this.data.jobs
         );
         this.emailList.set(this.data.notificationList ?? []);
+        this.selectedGroups.set(this.data.groups ?? []);
 
         this.searchControl.valueChanges.pipe(
             debounceTime(200),
@@ -213,6 +221,16 @@ export class BatchConfigDialogComponent implements OnInit {
                 this.loading.set(false);
             }
         });
+
+        // Load notification groups
+        this.notificationGroupService.getAllGroups().subscribe({
+            next: (response) => {
+                this.availableGroups.set(response.body ?? []);
+            },
+            error: (error) => {
+                console.error('Error loading notification groups:', error);
+            }
+        });
     }
 
 
@@ -229,8 +247,42 @@ export class BatchConfigDialogComponent implements OnInit {
         this.emailList.update(list => list.filter(e => e !== email));
     }
 
+    // Open the notification groups management dialog
+    openGroupsDialog(): void {
+        this.matDialog.open(NotificationGroupsDialogComponent, {
+            width: '800px',
+            maxHeight: '90vh'
+        }).afterClosed().subscribe((result) => {
+            if (result) {
+                // Reload groups after dialog closes
+                this.notificationGroupService.getAllGroups().subscribe({
+                    next: (response) => {
+                        this.availableGroups.set(response.body ?? []);
+                    }
+                });
+            }
+        });
+    }
 
-    /* Jobs */
+    // Add a group to the selected groups
+    addGroup(group: NotificationGroup): void {
+        if (!this.selectedGroups().some(g => g.id === group.id)) {
+            this.selectedGroups.update(groups => [...groups, group]);
+        }
+    }
+
+    // Remove a group from the selected groups
+    removeGroup(groupId: string): void {
+        this.selectedGroups.update(groups => groups.filter(g => g.id !== groupId));
+    }
+
+    // Get unselected groups (for dropdown)
+    getUnselectedGroups = computed(() => {
+        const selectedIds = new Set(this.selectedGroups().map(g => g.id));
+        return this.availableGroups().filter(g => !selectedIds.has(g.id));
+    });
+
+    // Jobs
 
     // Remove a single test from the batch
     removeTest(test: TestItem): void {
@@ -259,7 +311,7 @@ export class BatchConfigDialogComponent implements OnInit {
             ...this.form.value,
             jobs: this.currentBatchTests(),
             emails: this.emailList(),
-            active: false,
+            groupIds: this.selectedGroups().map(g => g.id),
             isNew: this.isNew
         };
         return this.batchService.saveBatch(newBatch).subscribe({

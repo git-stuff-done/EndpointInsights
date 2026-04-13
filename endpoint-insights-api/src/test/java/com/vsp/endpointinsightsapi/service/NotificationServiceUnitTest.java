@@ -2,12 +2,14 @@ package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
+import com.vsp.endpointinsightsapi.repository.TestResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -15,13 +17,17 @@ class NotificationServiceUnitTest {
 
     private TestBatchEmailListsRepository emailListsRepository;
     private EmailSender emailSender;
+    private NotificationGroupService notificationGroupService;
+    private TestResultRepository testResultRepository;
     private NotificationService notificationService;
 
     @BeforeEach
     void setUp() {
         emailListsRepository = mock(TestBatchEmailListsRepository.class);
         emailSender = mock(EmailSender.class);
-        notificationService = new NotificationService(emailListsRepository, emailSender);
+        notificationGroupService = mock(NotificationGroupService.class);
+        testResultRepository = mock(TestResultRepository.class);
+        notificationService = new NotificationService(emailListsRepository, emailSender, notificationGroupService, testResultRepository);
     }
 
     @Test
@@ -53,27 +59,75 @@ class NotificationServiceUnitTest {
 
         notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
 
-        verify(emailListsRepository, times(1)).findAllByBatchId(eq(batchId));
         verifyNoInteractions(emailSender);
     }
 
     @Test
-    void sendTestCompletionNotifications_senderThrows_continuesSending() {
+    void sendTestCompletionNotifications_resolveGroupsToEmails() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        TestBatchEmailList groupEntry = new TestBatchEmailList(null, batchId, null, "group:" + groupId);
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(groupEntry));
+        when(notificationGroupService.getGroupMemberEmails(groupId)).thenReturn(List.of("group@test.com"));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(notificationGroupService, times(1)).getGroupMemberEmails(groupId);
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("group@test.com"));
+    }
+
+    @Test
+    void sendTestCompletionNotifications_mixedEmailsAndGroups() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        TestBatchEmailList emailEntry = new TestBatchEmailList(null, batchId, null, "direct@test.com");
+        TestBatchEmailList groupEntry = new TestBatchEmailList(null, batchId, null, "group:" + groupId);
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(emailEntry, groupEntry));
+        when(notificationGroupService.getGroupMemberEmails(groupId)).thenReturn(List.of("group@test.com"));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("direct@test.com"));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("group@test.com"));
+    }
+
+    @Test
+    void sendTestCompletionNotifications_invalidGroupIdFormat_logsWarning() {
         UUID batchId = UUID.randomUUID();
         UUID runId = UUID.randomUUID();
         UUID resultId = UUID.randomUUID();
 
-        TestBatchEmailList a = new TestBatchEmailList(null, batchId, null, "a@test.com");
-        TestBatchEmailList b = new TestBatchEmailList(null, batchId, null, "b@test.com");
+        TestBatchEmailList invalidGroupEntry = new TestBatchEmailList(null, batchId, null, "group:invalid-uuid");
 
-        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
-
-        doThrow(new RuntimeException("boom"))
-                .when(emailSender).sendTestCompletionEmail(eq(runId), eq(resultId), eq("a@test.com"));
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(invalidGroupEntry));
 
         notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
 
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("a@test.com"));
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("b@test.com"));
+        verify(notificationGroupService, never()).getGroupMemberEmails(any());
+        verifyNoInteractions(emailSender);
+    }
+
+    @Test
+    void sendTestCompletionNotifications_deduplicatesEmails() {
+        UUID batchId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
+        UUID resultId = UUID.randomUUID();
+
+        TestBatchEmailList a = new TestBatchEmailList(null, batchId, null, "shared@test.com");
+        TestBatchEmailList b = new TestBatchEmailList(null, batchId, null, "shared@test.com");
+
+        when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
+
+        notificationService.sendTestCompletionNotifications(batchId, runId, resultId);
+
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq(runId), eq(resultId), eq("shared@test.com"));
     }
 }

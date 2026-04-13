@@ -173,6 +173,52 @@
   font-size: 0.88rem;
   margin: 0;
 }
+
+.notification-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 12px;
+
+  h5 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .selected-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .group-chip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background-color: #e3f2fd;
+      color: #1565c0;
+      border-radius: 4px;
+      font-size: 14px;
+
+      .remove-btn {
+        margin-left: 8px;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+}
 mat-error {
   color: red !important;
 }
