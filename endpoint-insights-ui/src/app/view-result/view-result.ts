@@ -89,7 +89,6 @@ export class ViewResult implements OnInit, AfterViewInit {
       this.testRun = run;
       this.testResultsDataSource.data = run.results.map(result => result.perfTestResult as PerfTestResult);
       this.testResultsDataSource.paginator = this.paginator;
-      console.log(this.testResultsDataSource.data.length);
     })
   }
 
@@ -124,7 +123,10 @@ export class ViewResult implements OnInit, AfterViewInit {
               this.notificationService.showToast('Test run deleted successfully', 'success');
             });
           },
-          error: (err) => console.error('Error deleting test run:', err)
+          error: (err) => {
+            console.error('Error deleting test run:', err);
+            this.notificationService.showToast('Failed to delete test run', 'error');
+          }
         });
     }
 
