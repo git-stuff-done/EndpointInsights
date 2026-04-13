@@ -7,9 +7,7 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.exception.JobNotFoundException;
 import com.vsp.endpointinsightsapi.exception.TestRunNotFoundException;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,6 +36,12 @@ class TestRunServiceTest {
 
 	@Mock
 	private TestRunRepository testRunRepository;
+
+	@Mock
+	private PerfTestResultRepository perfTestResultRepository;
+
+	@Mock
+    TestResultRepository testResultRepository;
 
 	@Mock
 	private JobRepository jobRepository;
@@ -253,7 +257,7 @@ class TestRunServiceTest {
 	void deleteTestRunById_existingRun_deletesRun() {
 		UUID runId = UUID.randomUUID();
 		when(testRunRepository.existsById(runId)).thenReturn(true);
-
+//
 		testRunService.deleteTestRunById(runId);
 
 		verify(testRunRepository).existsById(runId);

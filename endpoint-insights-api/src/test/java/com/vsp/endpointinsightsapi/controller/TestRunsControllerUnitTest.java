@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -266,9 +268,12 @@ class TestRunsControllerUnitTest {
 	void deleteTestRun_returnsOk() throws Exception {
 		UUID runId = UUID.randomUUID();
 
+		when(testRunService.deleteTestRunById(runId))
+				.thenReturn(ResponseEntity.ok(Map.of("status", "Test run deleted successfully")));
+
 		mockMvc.perform(delete("/api/test-runs/{id}", runId))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$").value("Test run " + runId + " deleted"));
+				.andExpect(jsonPath("$.status").value("Test run deleted successfully"));
 
 		verify(testRunService).deleteTestRunById(runId);
 	}

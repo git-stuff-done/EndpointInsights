@@ -1,8 +1,10 @@
 package com.vsp.endpointinsightsapi.controller;
 
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
-import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.exception.CustomException;
+import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
+import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.service.TestRunService;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -123,10 +127,25 @@ public class TestRunsController {
 			@ApiResponse(responseCode = "404", description = "Test run not found"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
-	public ResponseEntity<String> deleteTestRun(
-			@Parameter(description = "Test run ID", required = true)
-			@PathVariable("id") UUID runId) {
-		testRunService.deleteTestRunById(runId);
-		return ResponseEntity.ok(String.format("Test run %s deleted", runId));
+	public ResponseEntity<Map<String, Object>> deleteTestRun(
+      @Parameter(description = "Test run ID", required = true)
+      @PathVariable("id") UUID runId) {
+		return testRunService.deleteTestRunById(runId);
+	}
+
+	@DeleteMapping
+  @Operation(summary = "Delete test runs before a specific date", description = "Permanently deletes all test runs that were finished before the specified purge date")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Test runs deleted successfully"),
+			@ApiResponse(responseCode = "400", description = "Invalid purge date - cannot be in the future"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized")
+	})
+	public ResponseEntity<Map<String, Object>> deleteBefore(@RequestParam("purgeDate") Instant purgeDate) {
+		if (purgeDate.isAfter(Instant.now())) {
+			throw new CustomExceptionBuilder(HttpStatus.BAD_REQUEST, "purgeDate cannot be in the future").build();
+		}
+
+//		return ResponseEntity.ok(Map.of("status", "Test runs deleted successfully"));
+		return testRunService.deleteBefore(purgeDate);
 	}
 }
