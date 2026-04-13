@@ -17,6 +17,10 @@ import { PerformanceChartService } from '../services/performance-chart.service';
 import { ChartPoint, ChartResponse } from '../models/chart.model';
 import {Router} from "@angular/router";
 import {MatIcon} from "@angular/material/icon";
+import { DashboardSummaryService } from '../services/dashboard-summary.service';
+import { DashboardSummaryResponse } from '../models/dashboard-summary.model';
+import { JobService } from '../services/job-services';
+import { Job } from '../models/job.model';
 
 Chart.register(
   LineController,
@@ -70,20 +74,29 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     lineChartLabels: string[] = [];
     lineChartData: { label: string; data: ChartPoint[] }[] = [];
 
-    // KPI metrics
-    activeJobsTotal = 12;
-    activeJobsScheduled = 9;
-    activeJobsManual = 3;
+    // Summary from backend
+    summary?: DashboardSummaryResponse;
 
-    failuresLast24h = 3;
-    failureEndpointsCount = 2;
+    // KPI getters — driven by summary
+    get totalRuns()         { return this.summary?.totalRuns ?? 0; }
+    get passingRuns()       { return this.summary?.passedRuns ?? 0; }
+    get failuresLast24h()   { return this.summary?.failedRuns ?? 0; }
+    get passingPercentage() { return this.summary ? Math.round(this.summary.passRate * 100) : 0; }
+    get averageLatencyMs()  { return this.summary ? Math.round(this.summary.avgDurationMs) : 0; }
+    get failureEndpointsCount() {
+      if (!this.summary?.recentActivity) return 0;
+      return new Set(
+        this.summary.recentActivity
+          .filter(t => t.status === 'FAIL')
+          .map(t => t.testName)
+      ).size;
+    }
+    private jobs: Job[] = [];
+    get activeJobsTotal()     { return this.jobs.length; }
 
-    passingPercentage = 92;
-    passingRuns = 230;
-    totalRuns = 250;
-
-    averageLatencyMs = 350;
-    latencyThresholdMs = 400;
+    // No backend source yet — keep static for now
+//     activeJobsScheduled = 9;
+//     activeJobsManual = 3;
 
     // Chart data placeholders
     apiPerformanceData = [];   // replace with real shape later
@@ -93,7 +106,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     constructor(private router: Router,
                 private testRunService: TestRunService,
-                private performanceChartService: PerformanceChartService
+                private performanceChartService: PerformanceChartService,
+                private dashboardSummaryService: DashboardSummaryService,
+                private jobService: JobService
                 ) { }
 
     ngOnInit(): void {
@@ -111,6 +126,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                     startedBy: r.startedBy,
                     status: r.status as DashboardTestActivity['status'],
                 }));
+
+            // POST the same activity data to /dashboard/summary
+        this.dashboardSummaryService.loadDashboardSummary(100).subscribe({
+            next: (summary) => this.summary = summary,
+            error: (err) => console.error('Failed to load summary', err)
+        });
+
+        this.jobService.getAllJobs().subscribe({
+            next: (jobs) => this.jobs = jobs,
+            error: (err) => console.error('Failed to load jobs', err)
+        });
+
                 const mostRecentPassingRun = data.find(
                   r => (r.status === 'PASS' || r.status === 'FAIL') && (r.jobId || r.batchId)
                 );
