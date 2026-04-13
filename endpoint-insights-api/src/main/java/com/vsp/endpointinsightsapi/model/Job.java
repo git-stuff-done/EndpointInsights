@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vsp.endpointinsightsapi.model.enums.GitAuthType;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
@@ -79,6 +80,7 @@ public class Job  extends AuditingEntity {
     private TestType jobType;
 
     @JsonBackReference
+    @JsonIgnore
     @ManyToMany(mappedBy = "jobs", fetch = FetchType.LAZY)
     private List<TestBatch> batches = new ArrayList<>();
 

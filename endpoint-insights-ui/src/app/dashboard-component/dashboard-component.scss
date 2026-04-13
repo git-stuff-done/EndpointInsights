@@ -1,16 +1,10 @@
 :host {
   display: block;
-}
-
-/* Page title */
-.page-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  padding: 8px;
 }
 
 /* Main container should never exceed viewport width */
-main.container-fluid {
+main {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -29,9 +23,10 @@ main.container-fluid {
 /* Shared panel/card look */
 .kpi-card,
 .panel {
-  border-radius: 6px;
-  background-color: #f5f5f5;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  border-radius: var(--card-radius);
+  background-color: var(--color-white);
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
 }
 
 /* KPI row */
@@ -48,7 +43,18 @@ main.container-fluid {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
+
+.kpi-row .kpi-card:nth-child(1) { border-top: 3px solid var(--color-accent); }
+.kpi-row .kpi-card:nth-child(2) { border-top: 3px solid var(--status-fail); }
+.kpi-row .kpi-card:nth-child(3) { border-top: 3px solid var(--status-success); }
+.kpi-row .kpi-card:nth-child(4) { border-top: 3px solid var(--status-warn); }
 
 .kpi-title {
   font-size: 0.9rem;
@@ -63,7 +69,7 @@ main.container-fluid {
 
 .kpi-sub {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--status-stopped);
   min-height: 1.2em;
 }
 
@@ -76,30 +82,30 @@ main.container-fluid {
 }
 
 .panel-header {
-  background-color: #004a6f;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-white);
   padding: 0.4rem 0.75rem;
   font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
 .panel-body {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   padding: 0.75rem;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 var(--card-radius) var(--card-radius);
 }
 
 /* Placeholder styling until real charts exist */
 .chart-placeholder {
   height: 220px;
-  border: 1px dashed #c0c4cc;
+  border: 1px dashed color-mix(in srgb, var(--color-text) 25%, transparent);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
-  color: #777;
+  color: var(--status-stopped);
 }
 
 /* Recent activity table */
@@ -130,11 +136,11 @@ main.container-fluid {
 }
 
 .activity-table thead {
-  background-color: #e1e4ea;
+  background-color: var(--color-bg);
 }
 
 .activity-table tbody tr:nth-child(even) {
-  background-color: #f7f7f7;
+  background-color: var(--color-bg);
 }
 
 /* Status pill */
@@ -147,24 +153,13 @@ main.container-fluid {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-white);
 }
 
-.status-pass {
-  background-color: #2e9d4b;
-}
-
-.status-fail {
-  background-color: #c53c3c;
-}
-
-.status-running {
-  background-color: #1976d2;
-}
-
-.status-pending {
-  background-color: #e6930a;
-}
+.status-pass    { background-color: var(--status-success); }
+.status-fail    { background-color: var(--status-fail); }
+.status-running { background-color: var(--status-running); }
+.status-pending { background-color: var(--status-pending); }
 
 /* Alerts */
 .alerts-row {
@@ -186,16 +181,16 @@ main.container-fluid {
   align-items: center;
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
-  background-color: #f2f2f2;
+  background-color: var(--color-bg);
   font-size: 0.85rem;
 }
 
 .alert-warning {
-  border-left: 4px solid #f0c14b;
+  border-left: 4px solid var(--color-warning);
 }
 
 .alert-error {
-  border-left: 4px solid #c53c3c;
+  border-left: 4px solid var(--color-error);
 }
 
 .alert-icon {
@@ -209,10 +204,10 @@ main.container-fluid {
 
 /* Charts */
 .chart-card {
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 16px;
   padding: 20px 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--card-shadow);
   margin-top: 20px;
 }
 
@@ -226,12 +221,12 @@ main.container-fluid {
     font-size: 18px;
     font-weight: 600;
     margin: 0;
-    color: #1f2937; // dark gray
+    color: var(--color-text);
   }
 
   .chart-subtitle {
     font-size: 13px;
-    color: #6b7280; // muted gray
+    color: var(--status-stopped);
   }
 }
 
@@ -244,12 +239,12 @@ main.container-fluid {
 .chart-error {
   text-align: center;
   padding: 40px;
-  color: #6b7280;
+  color: var(--status-stopped);
   font-size: 14px;
 }
 
 .chart-error {
-  color: #ef4444; // red
+  color: var(--color-error);
 }
 
 /* Responsive tweaks */
@@ -258,9 +253,6 @@ main.container-fluid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .charts-row {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 600px) {

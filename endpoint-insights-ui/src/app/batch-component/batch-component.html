@@ -1,4 +1,5 @@
 <main>
+    <h1 class="page-title">Batches</h1>
     <div class="button-container">
         <button data-test="new-batch" mat-raised-button class="elevated-btn mat-elev-2" color="basic"
                 (click)="openCreateBatchModal()">
@@ -53,7 +54,7 @@
                 <div class="batch-row" [attr.data-test-id]="'batch-row-' + b.batchName">
                     <div class="cell name">
                         <span class="title" [attr.data-test-id]="'batch-name-' + b.batchName">{{ b.batchName }}</span>
-                        <span class="active">{{ 'Active - ' + b.active || 'Active - Null' }}</span>
+                         <span class="active" [class.true]="b.active === true" [class.false]="b.active !== true">{{ b.active ? 'Active' : 'Inactive' }}</span>
                     </div>
                     <div class="cell id">{{ b.id }}</div>
                     <div class="cell created-by">
@@ -68,12 +69,13 @@
                         }
                     </div>
                     <div class="cell start">{{ b.startTime ? (b.startTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
-                    <div class="cell lastRun">{{ b.lastRunTime ? (b.lastRunTime | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
+                    <div class="cell lastRun">{{ b.lastTimeRun ? (b.lastTimeRun | date:'MMM d, y, h:mm a') : 'Empty' }}</div>
 
                     <div class="cell actions" (click)="$event.stopPropagation()">
                         <button
                                 mat-icon-button
                                 [attr.data-test-id]="'run-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
                                 aria-label="Run"
                                 (click)="runBatch(b)"
                         >
@@ -82,6 +84,16 @@
                         <button
                                 mat-icon-button
                                 [attr.data-test-id]="'edit-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
+                                aria-label="Open Results"
+                                (click)="onView(b)"
+                        >
+                            <mat-icon>open_in_new</mat-icon>
+                        </button>
+                        <button
+                                mat-icon-button
+                                [attr.data-test-id]="'edit-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
                                 aria-label="Edit"
                                 (click)="onConfigure(b)"
                         >
@@ -92,6 +104,7 @@
                         <button
                                 mat-icon-button
                                 [attr.data-test-id]="'delete-batch-button-' + b.batchName"
+                                class="elevated-btn mat-elev-2"
                                 aria-label="Delete"
                                 (click)="onDelete(b)"
                         >

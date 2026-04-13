@@ -70,3 +70,27 @@ app:
 
 server:
   port: 8080
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.springframework.security: ${LOG_LEVEL_SPRING:INFO}
+    org.springframework.boot: ${LOG_LEVEL_SPRING:INFO}
+    org.hibernate: ${LOG_LEVEL_JPA:WARN}
+    org.hibernate.SQL: ${LOG_LEVEL_SQL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_SQL:WARN}
+    org.springframework.data.jpa: ${LOG_LEVEL_JPA:WARN}
+    com.vsp.endpointinsightsapi: ${LOG_LEVEL_APP:INFO}
+    com.vsp.endpointinsightsapi.aspects.LogAspect: ${LOG_LEVEL_APP:INFO}
+    com.vsp.endpointinsightsapi.service: ${LOG_LEVEL_APP:INFO}
+    com.vsp.endpointinsightsapi.controller: ${LOG_LEVEL_APP:INFO}
+    com.vsp.endpointinsightsapi.repository: ${LOG_LEVEL_APP:INFO}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/application.log}
+    max-size: ${LOG_FILE_MAX_SIZE:10MB}
+    max-history: ${LOG_FILE_MAX_HISTORY:30}
+    total-size-cap: 1GB

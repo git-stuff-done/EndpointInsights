@@ -1,29 +1,6 @@
 /* ================================
    Variables
    ================================ */
-$banner-pass:   #d6f2d6;
-$banner-pass-b: #a8dea8;
-
-$banner-warn:   #fff1b8;
-$banner-warn-b: #ffd666;
-
-$banner-fail:   #fad2d2;
-$banner-fail-b: #f1a8a8;
-
-$banner-unknown:   #e9ecf1;
-$banner-unknown-b: #cfd6df;
-
-$neutral-bg:     #ffffff;
-$neutral-border: #e5e7eb;
-
-$panel-title-bg: var(--color-primary);
-$panel-title-fg: #ffffff;
-
-/* brand colors for chips */
-$chip-pass: #2e7d32;
-$chip-warn: #b26a00;
-$chip-fail: #c62828;
-$chip-unk:  #455a64;
 
 /* ================================
    Card shell
@@ -52,23 +29,23 @@ $chip-unk:  #455a64;
 /* ================================
    Collapsed banner
    ================================ */
-.test-results-card.pass:not(.is-expanded)    { background: #fff;         border: 2px solid #7fcf8b; }
-.test-results-card.warn:not(.is-expanded)    { background: #fff;         border: 2px solid #ffb74d; }
-.test-results-card.unknown:not(.is-expanded) { background: #fff;         border: 2px solid #9eabb4; }
-.test-results-card.fail:not(.is-expanded)    { background: $banner-fail; border: 1px solid $banner-fail-b; }
+.test-results-card.pass:not(.is-expanded)    { background: var(--color-white); border: 2px solid color-mix(in srgb, var(--status-success) 50%, white); }
+.test-results-card.warn:not(.is-expanded)    { background: var(--color-white); border: 2px solid color-mix(in srgb, var(--status-warn) 50%, white); }
+.test-results-card.unknown:not(.is-expanded) { background: var(--color-white); border: 2px solid color-mix(in srgb, var(--status-unknown) 50%, white); }
+.test-results-card.fail:not(.is-expanded)    { background: color-mix(in srgb, var(--status-fail) 8%, white); border: 1px solid color-mix(in srgb, var(--status-fail) 20%, white); }
 
 :host ::ng-deep .mat-mdc-chip.chip-pass .mdc-evolution-chip__text-label,
 :host ::ng-deep .mat-mdc-chip.chip-warn .mdc-evolution-chip__text-label,
 :host ::ng-deep .mat-mdc-chip.chip-fail .mdc-evolution-chip__text-label,
 :host ::ng-deep .mat-mdc-chip.chip-unknown .mdc-evolution-chip__text-label {
-  color: #fff !important;
+  color: var(--color-white) !important;
 }
 /* ================================
    Expanded state
    ================================ */
 .test-results-card.is-expanded {
-  background: $neutral-bg;
-  border: 1px solid $neutral-border;
+  background: var(--color-white);
+  border: var(--card-border);
 
   .mat-expansion-panel-header {
     margin: 0;
@@ -76,15 +53,15 @@ $chip-unk:  #455a64;
     padding: 8px 16px;
     min-height: 56px;
     box-shadow: none;
-    background: #fff;
+    background: var(--color-white);
     align-items: center;
     overflow: visible;
   }
 
-  &.pass    .mat-expansion-panel-header { border: 2px solid #7fcf8b; }
-  &.warn    .mat-expansion-panel-header { border: 2px solid #ffb74d; }
-  &.unknown .mat-expansion-panel-header { border: 2px solid #9eabb4; }
-  &.fail    .mat-expansion-panel-header { background: $banner-fail; border: 1px solid $banner-fail-b; }
+  &.pass    .mat-expansion-panel-header { border: 2px solid color-mix(in srgb, var(--status-success) 50%, white); }
+  &.warn    .mat-expansion-panel-header { border: 2px solid color-mix(in srgb, var(--status-warn) 50%, white); }
+  &.unknown .mat-expansion-panel-header { border: 2px solid color-mix(in srgb, var(--status-unknown) 50%, white); }
+  &.fail    .mat-expansion-panel-header { background: color-mix(in srgb, var(--status-fail) 8%, white); border: 1px solid color-mix(in srgb, var(--status-fail) 20%, white); }
 }
 
 /* ================================
@@ -122,7 +99,7 @@ $chip-unk:  #455a64;
 .summary mat-chip-set,
 .summary .kv { flex: 0 0 auto; }
 
-.summary .kv { color: rgba(0,0,0,.75); }
+.summary .kv { color: color-mix(in srgb, var(--color-text) 75%, transparent); }
 .summary .kv strong {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -140,37 +117,37 @@ $chip-unk:  #455a64;
 /* PASS */
 .mat-mdc-chip.chip-pass,
 .mat-mdc-chip.pass {
-  --mdc-chip-elevated-container-color: #2e7d32;
-  --mdc-chip-flat-container-color:     #2e7d32;
-  --mdc-chip-label-text-color:         #ffffff;
-  background-color: $chip-pass;
+  --mdc-chip-elevated-container-color: var(--status-success);
+  --mdc-chip-flat-container-color:     var(--status-success);
+  --mdc-chip-label-text-color:         var(--color-white);
+  background-color: var(--status-success);
 }
 
 /* WARN */
 .mat-mdc-chip.chip-warn,
 .mat-mdc-chip.warn {
-  --mdc-chip-elevated-container-color: #b26a00;
-  --mdc-chip-flat-container-color:     #b26a00;
-  --mdc-chip-label-text-color:         #fff8e1;
-  background-color: $chip-warn;
+  --mdc-chip-elevated-container-color: var(--status-warn);
+  --mdc-chip-flat-container-color:     var(--status-warn);
+  --mdc-chip-label-text-color:         var(--color-white);
+  background-color: var(--status-warn);
 }
 
 /* FAIL */
 .mat-mdc-chip.chip-fail,
 .mat-mdc-chip.fail {
-  --mdc-chip-elevated-container-color: #c62828;
-  --mdc-chip-flat-container-color:     #c62828;
-  --mdc-chip-label-text-color:         #fff5f5;
-  background-color: $chip-fail;
+  --mdc-chip-elevated-container-color: var(--status-fail);
+  --mdc-chip-flat-container-color:     var(--status-fail);
+  --mdc-chip-label-text-color:         var(--color-white);
+  background-color: var(--status-fail);
 }
 
 /* UNKNOWN */
 .mat-mdc-chip.chip-unknown,
 .mat-mdc-chip.unknown {
-  --mdc-chip-elevated-container-color: #455a64;
-  --mdc-chip-flat-container-color:     #455a64;
-  --mdc-chip-label-text-color:         #f0f0f0;
-  background-color: $chip-unk;
+  --mdc-chip-elevated-container-color: var(--status-unknown);
+  --mdc-chip-flat-container-color:     var(--status-unknown);
+  --mdc-chip-label-text-color:         var(--color-white);
+  background-color: var(--status-unknown);
 }
 
 /* Force readable label text regardless of theme quirks */
@@ -182,7 +159,7 @@ $chip-unk:  #455a64;
 .mat-mdc-chip.warn .mdc-evolution-chip__text-label,
 .mat-mdc-chip.fail .mdc-evolution-chip__text-label,
 .mat-mdc-chip.unknown .mdc-evolution-chip__text-label {
-  color: #fff !important;
+  color: var(--color-white) !important;
 }
 
 /* chip geometry */
@@ -218,8 +195,8 @@ $chip-unk:  #455a64;
 
 /* Subpanel title: dark when expanded */
 .test-results-card.is-expanded .panel .mat-mdc-card-title {
-  background: $panel-title-bg;
-  color: $panel-title-fg;
+  background: var(--color-primary);
+  color: var(--color-white);
   margin: 0;
   padding: 8px 16px;
   border-top-left-radius: 10px;
@@ -256,11 +233,11 @@ $chip-unk:  #455a64;
 
 .test-results-card .mat-card-content th {
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text);
 }
 
 .test-results-card .mat-card-content td {
-  color: #111827;
+  color: var(--color-text);
   vertical-align: top;
 }
 
@@ -290,14 +267,14 @@ $chip-unk:  #455a64;
   th {
     width: 55%;
     text-align: left;
-    color: #6b7280;
+    color: var(--status-stopped);
     font-weight: 600;
   }
 
   td.num {
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: #111827;
+    color: var(--color-text);
   }
 
   tr:last-child th,
@@ -344,7 +321,7 @@ Logs Table Scrollable
    Misc
    ================================ */
 .sp { margin: 8px 0; }
-.description { margin: 8px 12px 0 12px; color: rgba(0,0,0,.72); }
+.description { margin: 8px 12px 0 12px; color: color-mix(in srgb, var(--color-text) 72%, transparent); }
 
 /* Hover affordance on outlined banners */
 .test-results-card.pass:not(.is-expanded),
@@ -353,8 +330,8 @@ Logs Table Scrollable
   transition: box-shadow .15s ease, border-color .15s ease;
 }
 
-.test-results-card.pass:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(46,125,50,.12); }
-.test-results-card.warn:not(.is-expanded):hover    { box-shadow: 0 4px 14px rgba(178,106,0,.12); }
-.test-results-card.unknown:not(.is-expanded):hover { box-shadow: 0 4px 14px rgba(69,90,100,.12); }
+.test-results-card.pass:not(.is-expanded):hover    { box-shadow: 0 4px 14px color-mix(in srgb, var(--status-success) 12%, transparent); }
+.test-results-card.warn:not(.is-expanded):hover    { box-shadow: 0 4px 14px color-mix(in srgb, var(--status-warn) 12%, transparent); }
+.test-results-card.unknown:not(.is-expanded):hover { box-shadow: 0 4px 14px color-mix(in srgb, var(--status-unknown) 12%, transparent); }
 
 

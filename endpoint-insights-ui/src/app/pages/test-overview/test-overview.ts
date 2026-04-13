@@ -17,6 +17,7 @@ import { JobService } from '../../services/job-services';
 import { TestRunService } from '../../services/test-run.service';
 import { ToastService } from '../../services/toast.service';
 import { UserDisplayComponent } from '../../components/user-display/user-display.component';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-test-overview',
@@ -48,6 +49,7 @@ export class TestOverview implements OnInit, OnDestroy {
         private jobService: JobService,
         private testRunService: TestRunService,
         private toastService: ToastService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
@@ -191,5 +193,9 @@ export class TestOverview implements OnInit, OnDestroy {
                 this.loadTests();
             }
         });
+    }
+
+    protected onView(t: TestItem) {
+        this.router.navigate(['/test-results'], { queryParams: { name: t.name }, state: { displayGraph: true, jobId: t.jobId } });
     }
 }

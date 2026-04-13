@@ -30,13 +30,14 @@ export class BatchApi {
         return this.httpInterceptService.post<TestRun>(`${environment.apiUrl}/batches/${id}/run`, null);
     }
 
-    saveBatch(batch: any):Observable<HttpResponse<Batch>>{
+    saveBatch(batch: Batch):Observable<HttpResponse<Batch>>{
         if(batch.isNew){
             const createRequest = {
                 batchName: batch.batchName,
                 cronExpression: batch.cronExpression,
                 jobs: (batch.jobs ?? []).map((j: any) => j.jobId),
-                emails: batch.emails ?? []
+                emails: batch.emails ?? [],
+                active: batch.active,
             };
             return this.httpInterceptService.post<Batch>(`${environment.apiUrl}/batches`, createRequest)
                 .pipe(
