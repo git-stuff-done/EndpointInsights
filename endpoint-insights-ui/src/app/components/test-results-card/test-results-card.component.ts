@@ -27,7 +27,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatDividerModule,
     MatIconModule,
     MatTooltipModule,
-    MatIconModule,
     MatDialogModule,
   ],
   templateUrl: './test-results-card.component.html',

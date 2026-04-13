@@ -53,6 +53,16 @@ scheduling:
 batches:
   stale-batch-threshold-seconds: 60
 
+test-runs:
+  purge-frequency:
+    hours: 1
+    minutes: 0
+  max-age:
+    days: 90
+    hours: 0
+    minutes: 0
+    seconds: 0
+
 app:
   authentication:
     enabled: true

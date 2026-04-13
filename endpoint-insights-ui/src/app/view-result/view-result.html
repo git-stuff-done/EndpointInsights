@@ -7,6 +7,7 @@
                 <div class="meta-pill">Duration <span>{{ duration }}s</span></div>
                 <div class="meta-pill">By <span>{{ testRun.runBy }}</span></div>
                 <div class="status-badge" [ngClass]="'status-' + testRun.status.toLowerCase()">{{ testRun.status }}</div>
+                <div class="delete-button"><button (click)="delete()"><mat-icon>delete</mat-icon></button></div>
             </div>
         }
         <div class="result-body">

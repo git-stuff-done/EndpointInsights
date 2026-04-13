@@ -9,10 +9,12 @@ import {
   MatRow,
   MatRowDef,
   MatTable,
-  MatTableDataSource
+  MatTableDataSource,
 } from "@angular/material/table";
+import {MatIcon} from "@angular/material/icon";
 import {DatePipe, DecimalPipe, NgClass, SlicePipe} from "@angular/common";
 import {MatPaginator} from "@angular/material/paginator";
+import {NotificationService} from "../services/notification.service";
 
 @Component({
   selector: 'app-view-result',
@@ -31,7 +33,8 @@ import {MatPaginator} from "@angular/material/paginator";
     NgClass,
     DatePipe,
     SlicePipe,
-    MatPaginator
+    MatPaginator,
+    MatIcon
   ],
   templateUrl: './view-result.html',
   styleUrl: './view-result.scss',
@@ -56,7 +59,9 @@ export class ViewResult implements OnInit, AfterViewInit {
   }
 
   constructor(private testRunService: TestRunService,
-              private activatedRoute: ActivatedRoute) {
+              private activatedRoute: ActivatedRoute,
+              private router: Router,
+              private notificationService: NotificationService) {
   }
 
   ngOnInit() {
@@ -84,7 +89,6 @@ export class ViewResult implements OnInit, AfterViewInit {
       this.testRun = run;
       this.testResultsDataSource.data = run.results.map(result => result.perfTestResult as PerfTestResult);
       this.testResultsDataSource.paginator = this.paginator;
-      console.log(this.testResultsDataSource.data.length);
     })
   }
 
@@ -106,6 +110,24 @@ export class ViewResult implements OnInit, AfterViewInit {
         } else {
             return 'error-rate-low';
         }
+    }
+
+    public delete() {
+      if (!this.testRun) {
+        console.error('No test run available to delete');
+        return;
+      }
+        this.testRunService.deleteRun(this.testRun.runId).subscribe({
+          next: (res) => {
+            this.router.navigate(['/test-results']).then(() => {
+              this.notificationService.showToast('Test run deleted successfully', 'success');
+            });
+          },
+          error: (err) => {
+            console.error('Error deleting test run:', err);
+            this.notificationService.showToast('Failed to delete test run', 'error');
+          }
+        });
     }
 
 }
