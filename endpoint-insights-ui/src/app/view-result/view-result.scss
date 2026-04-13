@@ -43,21 +43,21 @@
   padding: 6px 14px;
 
   &.status-completed {
-    background: rgba(76, 175, 80, 0.1);
-    color: var(--color-success);
-    border: 1px solid rgba(76, 175, 80, 0.3);
+    background: color-mix(in srgb, var(--status-success) 10%, transparent);
+    color: var(--status-success);
+    border: 1px solid color-mix(in srgb, var(--status-success) 30%, transparent);
   }
 
   &.status-failed {
-    background: rgba(244, 67, 54, 0.1);
-    color: var(--color-error);
-    border: 1px solid rgba(244, 67, 54, 0.3);
+    background: color-mix(in srgb, var(--status-fail) 10%, transparent);
+    color: var(--status-fail);
+    border: 1px solid color-mix(in srgb, var(--status-fail) 30%, transparent);
   }
 
   &.status-running, &.status-pending {
-    background: rgba(25, 118, 210, 0.1);
-    color: var(--color-accent);
-    border: 1px solid rgba(25, 118, 210, 0.3);
+    background: color-mix(in srgb, var(--status-running) 10%, transparent);
+    color: var(--status-running);
+    border: 1px solid color-mix(in srgb, var(--status-running) 30%, transparent);
   }
 }
 

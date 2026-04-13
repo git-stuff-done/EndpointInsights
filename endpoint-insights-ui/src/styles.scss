@@ -48,6 +48,15 @@ app-root {
   --shadow-md: 0 4px 10px rgba(0,0,0,0.12);
   --shadow-lg: 0 8px 20px rgba(0,0,0,0.16);
 
+  /* Status colors — single source of truth */
+  --status-success: #2e7d32;
+  --status-fail:    #c62828;
+  --status-warn:    #b26a00;
+  --status-running: #1976d2;
+  --status-pending: #b26a00;
+  --status-stopped: #6b7280;
+  --status-unknown: #455a64;
+
   /* Existing app variables */
   --topbar-fg-dim: rgba(255,255,255,.80);
   --page-bg: #f7f9fc;
@@ -145,6 +154,16 @@ body {
 .page {
   padding: 16px;
   min-height: calc(100dvh - 56px);
+}
+
+/* ===== Consistent page title */
+.page-title {
+  margin: 0 0 16px;
+  padding: 16px 20px 14px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* ===== Subtle card helpers (optional) */
@@ -247,25 +266,31 @@ body {
 Begin Styles for Create Job Form Components
  */
 div.mat-mdc-select-panel.create-job-form-type-select-panel {
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--color-white);
+  border: var(--card-border);
   padding: 8px;
   border-radius: 4px;
 }
 
 mat-option.mat-mdc-option.create-job-form-type-select-option {
-  background-color: white;
-  border: 1px solid #ffffff;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-white);
   border-radius: 4px;
 }
 
 mat-option.mat-mdc-option.create-job-form-type-select-option:hover {
-  background-color: #ccc
+  background-color: var(--color-bg);
 }
 /**
 End Styles for Create Job Form Components
  */
 
+
+/* Rounded search fields — applied globally to any .search-field */
+.search-field .mdc-text-field--outlined { border-radius: 24px; overflow: hidden; }
+.search-field .mdc-notched-outline__leading  { border-radius: 24px 0 0 24px; min-width: 24px; }
+.search-field .mdc-notched-outline__trailing { border-radius: 0 24px 24px 0; }
+.search-field input.mat-mdc-input-element { padding-left: 36px !important; text-overflow: ellipsis; }
 
 .filter-menu-item {
   display: flex;
@@ -279,14 +304,50 @@ End Styles for Create Job Form Components
 }
 
 .filter-menu-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
+}
+
+/* ===== Dialog / Modal polish ===== */
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+/* Prevent horizontal scroll inside any dialog */
+.mat-mdc-dialog-content {
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+}
+
+/* Give outlined form-field labels/inputs a little more clearance from the left border */
+.mat-mdc-dialog-content .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix {
+  padding-inline-start: 8px;
+}
+.mat-mdc-dialog-content .mdc-text-field--outlined .mdc-floating-label {
+  padding-left: 8px;
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-title {
+  background: var(--color-primary);
+  color: var(--color-white) !important;
+  padding: 16px 24px !important;
+  margin: 0 !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+
+.mat-mdc-dialog-actions {
+  border-top: var(--card-border);
+  padding: 12px 24px !important;
+  gap: 8px;
 }
 
 .mat-datepicker-content {
-  background-color: white !important;
-  border: 1px solid #ccc;
+  background-color: var(--color-white) !important;
+  border: var(--card-border);
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .cdk-overlay-pane.mat-mdc-dialog-panel {
@@ -298,11 +359,60 @@ End Styles for Create Job Form Components
 }
 
 .mat-mdc-menu-panel {
-  background-color: white !important;
+  background-color: var(--color-white) !important;
+  border-radius: var(--card-radius) !important;
+  overflow: hidden;
 
   .mat-mdc-menu-item {
     border: none;
     box-shadow: none;
     padding: 8px 16px;
+    border-radius: 0;
   }
+}
+
+/* Round Material text-buttons (e.g. Clear All) to match app style */
+button.mat-mdc-button {
+  border-radius: var(--btn-radius) !important;
+}
+
+/* ===== Dialog action buttons — use these classes on mat-raised-button in all modals ===== */
+button.mat-mdc-raised-button.dialog-btn-primary {
+  background-color: var(--color-accent) !important;
+  color: var(--color-white) !important;
+  border-color: var(--color-accent);
+  border-radius: var(--btn-radius);
+
+  &:hover  { background-color: color-mix(in srgb, var(--color-accent) 85%, black) !important; }
+  &:active { background-color: color-mix(in srgb, var(--color-accent) 68%, black) !important; }
+  &:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  &:focus:not(:focus-visible) { outline: none; }
+}
+
+button.mat-mdc-raised-button.dialog-btn-cancel {
+  background-color: transparent !important;
+  color: var(--status-stopped) !important;
+  border: 1px solid color-mix(in srgb, var(--status-stopped) 40%, transparent) !important;
+  border-radius: var(--btn-radius);
+  box-shadow: none !important;
+
+  &:hover  {
+    background-color: var(--color-bg) !important;
+    border-color: var(--status-stopped) !important;
+  }
+  &:active { background-color: color-mix(in srgb, var(--status-stopped) 12%, transparent) !important; }
+  &:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  &:focus:not(:focus-visible) { outline: none; }
+}
+
+button.mat-mdc-raised-button.dialog-btn-danger {
+  background-color: var(--color-error) !important;
+  color: var(--color-white) !important;
+  border-color: var(--color-error);
+  border-radius: var(--btn-radius);
+
+  &:hover  { background-color: color-mix(in srgb, var(--color-error) 85%, black) !important; }
+  &:active { background-color: color-mix(in srgb, var(--color-error) 68%, black) !important; }
+  &:focus-visible { outline: 2px solid var(--color-error); outline-offset: 2px; }
+  &:focus:not(:focus-visible) { outline: none; }
 }
