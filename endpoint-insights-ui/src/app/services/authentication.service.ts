@@ -27,19 +27,24 @@ function isValidRedirectUrl(url: string): boolean {
   if (!url) {
     return false;
   }
-  //Check for dangerous protocols
-  const dangerousProtocols = [ 'javascript:', 'vbscript:', 'ftp:', 'data:', 'file:', 'tel:', 'mailto:' ];
-  const lowerUrl = url.toLowerCase();
-  for (const protocol of dangerousProtocols) {
-    if (lowerUrl.startsWith(protocol)) {
-      return false;
-    }
-  }
   //Relative URLs starting with /, ./, ../, or no protocol are safe
   if ((url.startsWith('/')) || (url.startsWith('./')) || (url.startsWith('../'))) {
     return true;
   }
-  //For absolute URLs, validate it has the same origin
+  //For absolute URLs, only http and https protocols are allowed
+  const allowedProtocols = [ 'http:', 'https:' ];
+  const lowerUrl = url.toLowerCase();
+  let hasProtocol = false;
+  for (const protocol of allowedProtocols) {
+    if (lowerUrl.startsWith(protocol)) {
+      hasProtocol = true;
+      break;
+    }
+  }
+  if (!hasProtocol) {
+    return false;
+  }
+  //Validate absolute URLs with allowed protocols have the same origin
   try {
     const urlObj = new URL(url, window.location.origin);
     const currentOrigin = new URL(window.location.href).origin;
