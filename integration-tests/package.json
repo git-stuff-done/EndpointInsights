@@ -3,14 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:integration": "node -r dotenv/config node_modules/.bin/nightwatch"
+  },
+  "config": {
+    "detect_chromedriver_version": "true"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "chromedriver": "^145.0.6",
+    "chromedriver": "^147.0.0",
     "nightwatch": "^3.15.0"
+  },
+  "overrides": {
+    "minimatch": "^9.0.5",
+    "serialize-javascript": "7.0.5",
+    "mocha": {
+      ".": "^10.7.3",
+      "serialize-javascript": "7.0.5"
+    }
   }
 }
