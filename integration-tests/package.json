@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "chromedriver": "^145.0.6",
+    "chromedriver": "^147.0.0",
     "nightwatch": "^3.15.0"
   },
   "overrides": {
