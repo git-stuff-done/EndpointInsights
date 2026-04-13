@@ -20,7 +20,7 @@ describe('DeleteBatchModalComponent', () => {
         id: '123',
         batchName: 'Test Batch',
         startTime: '',
-        lastRunTime: '',
+        lastTimeRun: '',
         cronExpression: '',
         notificationList: [],
         jobs: []
