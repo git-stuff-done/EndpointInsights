@@ -60,40 +60,7 @@ public class TestRunService {
 		List<TestRun> runs = testRunRepository
 				.findAllByOrderByFinishedAtDesc(PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt")))
 				.getContent();
-
-		Set<UUID> jobIds = runs.stream().map(TestRun::getJobId).collect(Collectors.toSet());
-		Set<UUID> batchIds = runs.stream()
-				.map(TestRun::getBatchId)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-
-		Map<UUID, Job> jobMap = jobRepository.findAllById(jobIds).stream()
-				.collect(Collectors.toMap(Job::getJobId, j -> j));
-		Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
-				.collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
-
-		return runs.stream().map(run -> {
-			Job job = jobMap.get(run.getJobId());
-			TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
-
-			long durationMs = 0;
-			if (run.getStartedAt() != null && run.getFinishedAt() != null) {
-				durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
-			}
-
-			return RecentActivityDTO.builder()
-					.runId(run.getRunId().toString())
-					.jobId(run.getJobId() != null ? run.getJobId().toString() : null)
-                    .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
-					.testName(job != null ? job.getName() : "Unknown")
-					.group(deriveScheduleType(batch))
-					.dateRun(run.getStartedAt())
-					.durationMs(durationMs)
-					.startedBy(run.getRunBy())
-					.status(toDisplayStatus(run.getStatus()))
-					.batchName(batch != null ? batch.getBatchName() : null)
-					.build();
-		}).collect(Collectors.toList());
+		return mapToRecentActivity(runs);
 	}
 
 	private String toDisplayStatus(TestRunStatus status) {
@@ -126,67 +93,61 @@ public class TestRunService {
 
     // jobId takes precedence over batchId
     public List<RecentActivityDTO> getRecentActivityById(UUID jobId, UUID batchId, int limit) {
-
-        int safeLimit = Math.max(1, Math.min(limit, 100));
+        int safeLimit = Math.clamp(limit, 1, 100);
+        PageRequest page = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"));
 
         List<TestRun> runs;
-
         if (jobId != null) {
-            runs = testRunRepository
-                    .findByJobIdOrderByFinishedAtDesc(
-                            jobId,
-                            PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"))
-                    )
-                    .getContent();
+            runs = testRunRepository.findByJobIdOrderByFinishedAtDesc(jobId, page).getContent();
         } else if (batchId != null) {
-            runs = testRunRepository
-                    .findByBatchIdOrderByFinishedAtDesc(
-                            batchId,
-                            PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "finishedAt"))
-                    )
-                    .getContent();
+            runs = testRunRepository.findByBatchIdOrderByFinishedAtDesc(batchId, page).getContent();
         } else {
             throw new IllegalArgumentException("Must provide jobId or batchId");
         }
 
+        return mapToRecentActivity(runs);
+    }
+
+    private List<RecentActivityDTO> mapToRecentActivity(List<TestRun> runs) {
+        Set<UUID> jobIds = runs.stream()
+                .map(TestRun::getJobId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Set<UUID> batchIds = runs.stream()
                 .map(TestRun::getBatchId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        Set<UUID> jobIds = runs.stream()
-                .map(TestRun::getJobId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
         Map<UUID, Job> jobMap = jobRepository.findAllById(jobIds).stream()
                 .collect(Collectors.toMap(Job::getJobId, j -> j));
-
-
-
         Map<UUID, TestBatch> batchMap = testBatchRepository.findAllById(batchIds).stream()
                 .collect(Collectors.toMap(TestBatch::getBatchId, b -> b));
 
-        return runs.stream().map(run -> {
-            Job job = run.getJobId() != null ? jobMap.get(run.getJobId()) : null;
-            TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
+        return runs.stream()
+                .map(run -> toRecentActivityDTO(run, jobMap, batchMap))
+                .collect(Collectors.toList());
+    }
 
-            long durationMs = 0;
-            if (run.getStartedAt() != null && run.getFinishedAt() != null) {
-                durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
-            }
+    private RecentActivityDTO toRecentActivityDTO(TestRun run, Map<UUID, Job> jobMap, Map<UUID, TestBatch> batchMap) {
+        Job job = run.getJobId() != null ? jobMap.get(run.getJobId()) : null;
+        TestBatch batch = run.getBatchId() != null ? batchMap.get(run.getBatchId()) : null;
 
-            return RecentActivityDTO.builder()
-                    .runId(run.getRunId().toString())
-                    .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
-                    .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
-                    .testName(job != null ? job.getName() : "Unknown")
-                    .group(deriveScheduleType(batch))
-                    .dateRun(run.getStartedAt())
-                    .durationMs(durationMs)
-                    .startedBy(run.getRunBy())
-                    .status(toDisplayStatus(run.getStatus()))
-                    .build();
-        }).collect(Collectors.toList());
+        long durationMs = 0;
+        if (run.getStartedAt() != null && run.getFinishedAt() != null) {
+            durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
+        }
+
+        return RecentActivityDTO.builder()
+                .runId(run.getRunId().toString())
+                .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
+                .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
+                .testName(job != null ? job.getName() : "Unknown")
+                .group(deriveScheduleType(batch))
+                .dateRun(run.getStartedAt())
+                .durationMs(durationMs)
+                .startedBy(run.getRunBy())
+                .status(toDisplayStatus(run.getStatus()))
+                .batchName(batch != null ? batch.getBatchName() : null)
+                .build();
     }
 }

@@ -40,6 +40,10 @@ export class PerformanceChart {
     this.loading = true;
     this.error = '';
 
+    if (!this.jobId && !this.batchId)
+      return;
+
+
     this.performanceChartService.getApiPerformanceChart(
         this.jobId || undefined,
         this.batchId || undefined
