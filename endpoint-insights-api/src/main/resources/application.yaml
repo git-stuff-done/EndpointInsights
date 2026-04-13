@@ -118,4 +118,4 @@ spring:
       ddl-auto: validate
 
 temp:
-  dir: /tmp
+  dir: /tmp/endpoint-insights
