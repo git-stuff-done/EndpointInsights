@@ -1,41 +1,71 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {DatePipe, DecimalPipe, NgClass, NgStyle} from '@angular/common';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatTableDataSource, MatTableModule} from '@angular/material/table';
-import {MatSort, MatSortModule} from '@angular/material/sort';
+import {
+    MatCell,
+    MatCellDef,
+    MatColumnDef,
+    MatHeaderCell,
+    MatHeaderCellDef,
+    MatHeaderRow,
+    MatHeaderRowDef,
+    MatNoDataRow,
+    MatRow,
+    MatRowDef,
+    MatTable,
+    MatTableDataSource
+} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatInput} from '@angular/material/input';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatTooltip} from '@angular/material/tooltip';
 import {debounceTime, Subject, takeUntil} from 'rxjs';
 import {RecentActivity} from '../../models/test-run.model';
 import {TestRunService} from '../../services/test-run.service';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
 import {provideNativeDateAdapter} from "@angular/material/core";
+import {PerformanceChart} from "../../performance-chart/performance-chart";
 import {NotificationService} from "../../services/notification.service";
 
 @Component({
     selector: 'app-tests-results-page',
     standalone: true,
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatTableModule,
-        MatSortModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatButtonModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
         MatDatepicker,
         MatDatepickerToggle,
         MatDatepickerInput,
+        PerformanceChart,
         MatPaginator,
+        MatIcon,
+        MatProgressSpinner,
+        MatTable,
+        MatTooltip,
+        MatCell,
+        MatHeaderCell,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatCellDef,
+        NgClass,
+        MatHeaderRow,
+        MatRow,
+        MatLabel,
+        MatFormField,
+        NgStyle,
+        ReactiveFormsModule,
+        MatHeaderRowDef,
+        MatRowDef,
+        MatNoDataRow,
+        MatInput,
+        MatIconButton,
+        MatSort,
+        DecimalPipe,
+        DatePipe
+
     ],
     providers: [
         provideNativeDateAdapter()
@@ -55,6 +85,10 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
     isLoading = true;
     loadError: string | null = null;
 
+    protected chartBatchId: string = '';
+    protected chartJobId: string = '';
+    protected displayChart: boolean = false;
+
     public maxDate = new Date();
 
     private destroy$ = new Subject<void>();
@@ -67,11 +101,21 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
     ) {}
 
     ngOnInit(): void {
+        const state = window.history.state;
+        if (state) {
+            this.displayChart = state.displayGraph ?? false;
+
+            this.chartBatchId = state.batchId ?? null;
+            this.chartJobId = state.jobId ?? null;
+        }
+
         this.dataSource.filterPredicate = (row: RecentActivity, filter: string) => {
             const term = filter.trim().toLowerCase();
             return (
                 row.testName.toLowerCase().includes(term) ||
+                row.batchName?.toLowerCase().includes(term) ||
                 row.runId.toLowerCase().includes(term) ||
+                row.batchId?.toLowerCase().includes(term) ||
                 (row.jobId ?? '').toLowerCase().includes(term)
             );
         };
@@ -86,6 +130,7 @@ export class TestsResultsPageComponent implements OnInit, AfterViewInit, OnDestr
         this.searchControl.valueChanges
             .pipe(debounceTime(200), takeUntil(this.destroy$))
             .subscribe(value => {
+                this.displayChart = false;
                 this.dataSource.filter = (value ?? '').trim().toLowerCase();
             });
 
