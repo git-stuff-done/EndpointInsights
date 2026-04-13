@@ -44,6 +44,7 @@ public class TestRunSchedulerService {
 
     private void runPurge() {
         Instant oldestTestRun = Instant.now()
+                .minus(testRunsConfig.getMaxAgeMonths(), ChronoUnit.MONTHS)
                 .minus(testRunsConfig.getMaxAgeDays(), ChronoUnit.DAYS)
                 .minus(testRunsConfig.getMaxAgeHours(), ChronoUnit.HOURS)
                 .minus(testRunsConfig.getMaxAgeMinutes(), ChronoUnit.MINUTES)
