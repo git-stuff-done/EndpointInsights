@@ -103,9 +103,9 @@
             <div class="form-row">
                 <mat-form-field appearance="outline" class="flex-grow">
                     <mat-label>Add Email Address</mat-label>
-                    <input matInput type="email" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+                    <input matInput type="email" data-test-id="batch-email-input" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
                 </mat-form-field>
-                <button mat-raised-button (click)="addEmail()">Add</button>
+                <button mat-raised-button data-test-id="add-email-button" (click)="addEmail()">Add</button>
             </div>
         </section>
 
