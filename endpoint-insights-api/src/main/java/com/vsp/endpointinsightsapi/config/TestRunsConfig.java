@@ -17,8 +17,6 @@ public class TestRunsConfig {
     @Value("${test-runs.purge-frequency.minutes}")
     private int purgeFrequencyMinutes;
 
-    @Value("${test-runs.max-age.months}")
-    private int maxAgeMonths;
     @Value("${test-runs.max-age.days}")
     private int maxAgeDays;
     @Value("${test-runs.max-age.hours}")

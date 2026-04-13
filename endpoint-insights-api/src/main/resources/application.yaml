@@ -58,8 +58,7 @@ test-runs:
     hours: 1
     minutes: 0
   max-age:
-    months: 3
-    days: 0
+    days: 90
     hours: 0
     minutes: 0
     seconds: 0
