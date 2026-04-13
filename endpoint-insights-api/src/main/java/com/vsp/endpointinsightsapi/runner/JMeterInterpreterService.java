@@ -117,7 +117,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testResult, grouped, errorCodeCount, job.getThreshold());
+			boolean passed = createResults(testResult, grouped, errorCodeCount, job);
 
 			return new TestRunResult(passed, testResult.getId());
 		} catch (IOException e) {
@@ -125,7 +125,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 		}
 	}
 
-	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
+	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Job job) {
 		// Results will be made here
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
 		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
@@ -156,6 +156,8 @@ public class JMeterInterpreterService implements TestInterpreter {
 				if (r.timeStamp >= oneMinuteAgo) volumeLastMinute++;
 				if (r.timeStamp >= fiveMinutesAgo) volumeLast5Minutes++;
 			}
+
+            Integer threshold = job.getThreshold();
 
 			Collections.sort(latencies);
 			int p50 = !latencies.isEmpty() ? calculatePercentile(latencies, 50) : 0;
@@ -191,6 +193,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			res.setErrorRatePercent(errorRate);
             res.setLatencyThresholdResult(latencyPerformanceStatus);
             res.setLatencyThreshold(threshold);
+            res.setJobId(job.getJobId());
 			perfTestResults.add(res);
 
 			// Now, PerfTestResultCode per error code
