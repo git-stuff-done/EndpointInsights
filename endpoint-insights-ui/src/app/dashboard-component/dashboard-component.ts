@@ -142,28 +142,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
 
 
-    // Alerts mock data
-    alerts: DashboardAlert[] = [
-        {
-            id: 'checkout-latency',
-            message:
-                'Checkout API latency spike, 600 ms average (threshold 400 ms), notified DevOps team',
-            severity: 'warning'
-        },
-        {
-            id: 'auth-error-rate',
-            message:
-                'Auth API error rate above 5 percent, job failed, email sent to API owners',
-            severity: 'error'
-        },
-        {
-            id: 'profile-missed',
-            message:
-                'Profile API scheduled run missed, retrying in 15 minutes',
-            severity: 'warning'
-        }
-    ];
-
     // keep any other existing code you already had in here
     viewResult(id: string) {
         this.router.navigate(['/test-results/view'],  { state: { runId: id } });
