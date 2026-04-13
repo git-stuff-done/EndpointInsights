@@ -7,7 +7,10 @@ describe('Batch Management Tests', function() {
 
     before(function(browser) {
         const baseUrl = process.env.APP_URL || browser.launch_url || 'http://localhost:8080';
-        browser.authenticateWithAuthelia(baseUrl);
+        browser
+            .authenticateWithAuthelia(baseUrl)
+            .assert.urlContains(':8080')
+            .waitForElementVisible('body');
     });
 
     it('navigates to batches page', function(browser) {
