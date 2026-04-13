@@ -267,7 +267,7 @@ describe('NotificationGroupsDialogComponent', () => {
 
         component.createGroup();
 
-        expect(component.form.get('name')?.value).toBe('');
-        expect(component.form.get('description')?.value).toBe('');
+        expect(component.form.get('name')?.value).toBeNull();
+        expect(component.form.get('description')?.value).toBeNull();
     });
 });
