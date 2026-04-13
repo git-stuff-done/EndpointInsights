@@ -63,7 +63,7 @@ export class CreateJobForm {
                 this.noWhitespaceValidator
             ]],
            // jmeterTestName: ["", [Validators.required, Validators.minLength(1), Validators.maxLength(64)]],
-            threshold:[""],
+            threshold:["", Validators.required],
             jmeterTestName: ["", [Validators.maxLength(64)]],
         });
 
@@ -235,7 +235,7 @@ export class CreateJobForm {
     submitForm() {
         if (this.createJobForm.valid) {
             this.jobSubmitted.emit(this.createJobForm.value);
-            
+
 
         } else {
             this.createJobForm.markAllAsTouched();
