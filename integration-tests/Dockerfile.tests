@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY integration-tests/package.json integration-tests/package-lock.json ./
 
+ENV DETECT_CHROMEDRIVER_VERSION=true
+
 RUN npm ci
 
 COPY integration-tests/ ./
