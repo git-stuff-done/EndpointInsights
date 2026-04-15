@@ -43,7 +43,7 @@ module.exports = {
     pageTitle:          { selector: 'h1.page-title' },
     searchWrapper:      { selector: '.search-wrapper' },
     searchInput:        { selector: '.search-field input' },
-    resultsTable:       { selector: 'table.results-table' },
+    resultsTable:       { selector: 'mat-table.results-table' },
     headerRow:          { selector: 'tr[mat-header-row]' },
     dataRows:           { selector: 'tr[mat-row]' },
     loadingState:       { selector: '.loading-state' },
