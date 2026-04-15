@@ -47,16 +47,16 @@ describe('Test Results List Page', function () {
 
   it('renders the expected column headers', function (browser) {
     browser
-      .waitForElementVisible('tr[mat-header-row]')
-      .assert.textContains('th[mat-header-cell]:nth-child(1)', 'Batch Name')
-      .assert.textContains('th[mat-header-cell]:nth-child(2)', 'Test Name')
-      .assert.textContains('th[mat-header-cell]:nth-child(7)', 'Status');
+      .waitForElementVisible('mat-header-row')
+      .assert.textContains('mat-header-cell:nth-child(1)', 'Batch Name')
+      .assert.textContains('mat-header-cell:nth-child(2)', 'Test Name')
+      .assert.textContains('mat-header-cell:nth-child(7)', 'Status');
   });
 
   it('renders at least one data row', function (browser) {
     browser
-      .waitForElementVisible('tr[mat-row]')
-      .assert.elementPresent('tr[mat-row]');
+      .waitForElementVisible('mat-row')
+      .assert.elementPresent('mat-row');
   });
 
   it('renders the paginator below the table', function (browser) {
@@ -113,8 +113,8 @@ describe('Test Results List Page', function () {
   it('clicking view result button navigates to /test-results/view', function (browser) {
     browser
       .navigateTo(`${APP_URL}/test-results`)
-      .waitForElementVisible('tr[mat-row]')
-      .strictClick('tr[mat-row]:first-of-type button[aria-label="View test result"]')
+      .waitForElementVisible('mat-row')
+      .strictClick('mat-row:first-of-type button[aria-label="View test result"]')
       .assert.urlContains('/test-results/view');
   });
 });
