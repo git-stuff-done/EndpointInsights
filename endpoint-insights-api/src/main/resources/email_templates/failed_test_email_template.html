@@ -151,12 +151,10 @@
                                                                 <p><span style="font-size: 18px">Endpoint Insights has detected a failure for batch {name}, on {date}.</span></p>
                                                                 <p><span style="font-size: 18px">The following details were retrieved:</span></p>
                                                                 <p><br></p>
-                                                                <p><span style="font-size: 18px; font-weight: bold">Test started at: </span></p>
-                                                                <p><span style="font-size: 18px; font-weight: bold">Test failed at:</span></p>
+                                                                <p><span style="font-size: 18px; font-weight: bold">Test started at: </span><span style="font-size: 18px">{startTime}</span></p>
+                                                                <p><span style="font-size: 18px; font-weight: bold">Test failed at: </span><span style="font-size: 18px">{endTime}</span></p>
                                                                 <p><br></p>
-                                                                <p><span style="font-size: 18px; font-weight: bold">Name of failed test:</span></p>
-                                                                <p><span style="font-size: 18px; font-weight: bold">Failed test result:</span></p>
-                                                                <p><span style="font-size: 18px; font-weight: bold">Threshold set:</span></p>
+                                                                {failureRows}
                                                             </div>
 
                                                         </td>

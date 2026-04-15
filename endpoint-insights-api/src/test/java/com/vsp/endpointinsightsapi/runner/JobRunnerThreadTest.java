@@ -2,6 +2,7 @@ package com.vsp.endpointinsightsapi.runner;
 
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
+import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
@@ -160,6 +161,7 @@ class JobRunnerThreadTest {
         job.setJobType(TestType.PERF);
         job.setGitUrl(null);
         job.setCompileCommand(null);
+        List<TestResult> results = new ArrayList<>();
 
         Assumptions.assumeTrue(
                 !System.getProperty("os.name", "").toLowerCase().contains("win"),
@@ -172,7 +174,7 @@ class JobRunnerThreadTest {
 
         UUID resultId = UUID.randomUUID();
         when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
-                .thenReturn(new TestRunResult(true, resultId));
+                .thenReturn(new TestRunResult(true, resultId, results));
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -187,6 +189,7 @@ class JobRunnerThreadTest {
         job.setJobType(TestType.PERF);
         job.setGitUrl(null);
         job.setCompileCommand(null);
+        List<TestResult> results = new ArrayList<>();
 
         Assumptions.assumeTrue(
                 !System.getProperty("os.name", "").toLowerCase().contains("win"),
@@ -198,7 +201,7 @@ class JobRunnerThreadTest {
                 .thenReturn(new String[]{"true"});
 
         when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
-                .thenReturn(new TestRunResult(false, UUID.randomUUID()));
+                .thenReturn(new TestRunResult(false, UUID.randomUUID(), results));
 
         JobRunnerThread thread = newThread();
         thread.run();
@@ -211,6 +214,7 @@ class JobRunnerThreadTest {
     void run_usesCommandEnhancer() throws IOException {
         job.setGitUrl(null);
         job.setCompileCommand(null);
+        List<TestResult> results = new ArrayList<>();
 
         Assumptions.assumeTrue(
                 !System.getProperty("os.name", "").toLowerCase().contains("win"),
@@ -221,7 +225,7 @@ class JobRunnerThreadTest {
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
         when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
-                .thenReturn(new TestRunResult(true, UUID.randomUUID()));
+                .thenReturn(new TestRunResult(true, UUID.randomUUID(), results));
 
         JobRunnerThread thread = newThread();
         thread.run();

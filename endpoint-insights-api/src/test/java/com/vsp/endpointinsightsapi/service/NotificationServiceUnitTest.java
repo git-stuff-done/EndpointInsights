@@ -4,6 +4,7 @@ import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
 import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestResultRepository;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,14 +22,12 @@ class NotificationServiceUnitTest {
     private TestBatchEmailListsRepository emailListsRepository;
     private EmailSender emailSender;
     private NotificationService notificationService;
-    private TestResultRepository testResultRepository;
 
     @BeforeEach
     void setUp() {
         emailListsRepository = mock(TestBatchEmailListsRepository.class);
         emailSender = mock(EmailSender.class);
-        testResultRepository = mock(TestResultRepository.class);
-        notificationService = new NotificationService(emailListsRepository, emailSender, testResultRepository);
+        notificationService = new NotificationService(emailListsRepository, emailSender);
 
     }
 
@@ -47,10 +46,10 @@ class NotificationServiceUnitTest {
 
         when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
 
-        notificationService.sendTestCompletionNotifications("test", batchId, testRun, resultId);
+        notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
         verify(emailListsRepository, times(1)).findAllByBatchId(eq(batchId));
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(testResult));
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("b@test.com"), eq(testResult));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(List.of(testResult)));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("b@test.com"), eq(List.of(testResult)));
         verifyNoMoreInteractions(emailSender);
     }
 
@@ -61,10 +60,11 @@ class NotificationServiceUnitTest {
         UUID resultId = UUID.randomUUID();
         TestRun testRun = new TestRun();
         testRun.setRunId(runId);
-
+        TestResult testResult = new TestResult();
+        testResult.setId(resultId);
         when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of());
 
-        notificationService.sendTestCompletionNotifications("test", batchId, testRun, resultId);
+        notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
         verify(emailListsRepository, times(1)).findAllByBatchId(eq(batchId));
         verifyNoInteractions(emailSender);
     }
@@ -85,10 +85,10 @@ class NotificationServiceUnitTest {
         when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
 
         doThrow(new RuntimeException("boom"))
-                .when(emailSender).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(testResult));
+                .when(emailSender).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), List.of(testResult));
 
-        notificationService.sendTestCompletionNotifications("test", batchId, testRun, resultId);
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(testResult));
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("b@test.com"), eq(testResult));
+        notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(List.of(testResult)));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("b@test.com"), eq(List.of(testResult)));
     }
 }

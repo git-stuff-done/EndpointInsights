@@ -110,15 +110,14 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testRun, grouped, errorCodeCount, job.getThreshold());
 
-			return new TestRunResult(passed, testRun.getRunId());
+            return createResults(testRun, grouped, errorCodeCount, job.getThreshold());
 		} catch (IOException e) {
 			throw new IOException("Failed to process JMeter results: " + e.getMessage(), e);
 		}
 	}
 
-	private boolean createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
+	private TestRunResult createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
 		// Results will be made here
 		List<TestResult> testResults = new ArrayList<>();
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
@@ -221,6 +220,6 @@ public class JMeterInterpreterService implements TestInterpreter {
 		perfTestResultRepository.saveAll(perfTestResults);
 		perfTestResultCodeRepository.saveAll(perfTestResultCodes);
 
-		return passed;
+		return new TestRunResult(passed, null, testResults);
 	}
 }

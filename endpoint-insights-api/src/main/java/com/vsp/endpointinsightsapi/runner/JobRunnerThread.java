@@ -3,9 +3,12 @@ package com.vsp.endpointinsightsapi.runner;
 import com.vsp.endpointinsightsapi.exception.JobSetupException;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.JobRunnerThreadStatus;
+import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.TestRunResult;
+import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
+import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
 import com.vsp.endpointinsightsapi.service.NotificationService;
 import org.slf4j.Logger;
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class JobRunnerThread implements Runnable {
@@ -41,17 +45,17 @@ public class JobRunnerThread implements Runnable {
 
 
 	public JobRunnerThread(Job job, TestRun testRun, TestRunRepository testRunRepository,
-						   JMeterInterpreterService jMeterInterpreterService,
-						   NotificationService notificationService,
+                           JMeterInterpreterService jMeterInterpreterService,
+                           NotificationService notificationService,
                            GitService gitService, JMeterCommandService jMeterCommandEnhancer,
-						   Consumer<JobRunnerThreadStatus> onComplete, boolean isBatchRun) {
+                           Consumer<JobRunnerThreadStatus> onComplete, boolean isBatchRun) {
 		this.job = job;
 		this.testRun = testRun;
 		this.testRunRepository = testRunRepository;
 		this.notificationService = notificationService;
         this.gitService = gitService;
         this.jMeterCommandEnhancer = jMeterCommandEnhancer;
-		this.onComplete = onComplete;
+        this.onComplete = onComplete;
 		this.isBatchRun = isBatchRun;
 
         // todo: add new interpreters as needed
@@ -81,7 +85,7 @@ public class JobRunnerThread implements Runnable {
 			try {
 				testResultFile = executeTest(workingDirectory);
 			} catch (JobSetupException e) {
-				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
+				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED, null));
 				return;
 			}
 
@@ -91,18 +95,19 @@ public class JobRunnerThread implements Runnable {
                 LOG.info("No test results file available for interpretation");
 
 
-				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
+				onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED, null));
             } else {
                 LOG.info("Test results available in: {}", testResultFile.get().getAbsolutePath());
 
                 // Pass job id to test run for threshold
             	TestRunResult pass = testInterpreter.processResults(testResultFile.get(), testRun);
 
-				onComplete.accept(new JobRunnerThreadStatus(testRun, pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED));
+				onComplete.accept(new JobRunnerThreadStatus(testRun, pass.passed() ? TestRunStatus.COMPLETED : TestRunStatus.FAILED, pass.testResults()));
             }
+
 		} catch (IOException e) {
             LOG.error("Running job failed with exception: {}", e.getMessage());
-            onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED));
+            onComplete.accept(new JobRunnerThreadStatus(testRun, TestRunStatus.FAILED, null));
         } finally {
 
             cleanupTempDir();

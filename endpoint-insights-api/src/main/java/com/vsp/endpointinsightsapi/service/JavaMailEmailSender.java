@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -40,6 +41,20 @@ public class JavaMailEmailSender implements EmailSender {
     private final ResourceLoader resourceLoader;
     private final JobRepository jobRepository;
 
+    private static final String FAILURE_ROW_TEMPLATE = """
+    <div style="border: 1px solid #ddd; border-radius: 4px; padding: 12px; margin-bottom: 12px; background-color: #fff;">
+        <p><span style="font-size: 16px; font-weight: bold; color: #cc0000;">Job: {jobName}</span></p>
+        <p><span style="font-size: 14px; font-weight: bold;">Reason: </span><span style="font-size: 14px;">{reason}</span></p>
+        <p><span style="font-size: 14px; font-weight: bold;">P50: </span><span style="font-size: 14px;">{P50}</span>
+           <span style="font-size: 14px; font-weight: bold; margin-left: 10px;">P95: </span><span style="font-size: 14px;">{P95}</span>
+           <span style="font-size: 14px; font-weight: bold; margin-left: 10px;">P99: </span><span style="font-size: 14px;">{P99}</span></p>
+        <p><span style="font-size: 14px; font-weight: bold;">Threshold: </span><span style="font-size: 14px;">{threshold}</span></p>
+    </div>
+    """;
+
+
+
+
     public JavaMailEmailSender(JavaMailSender mailSender, ResourceLoader resourceLoader, JobRepository jobRepository) {
         this.mailSender = mailSender;
         this.resourceLoader = resourceLoader;
@@ -47,37 +62,60 @@ public class JavaMailEmailSender implements EmailSender {
     }
 
     @Override
-    public void sendTestCompletionEmail(String batchName, TestRun testRun, String recipientEmail, TestResult result) throws MessagingException, IOException {
+    public void sendTestCompletionEmail(String batchName, TestRun testRun, String recipientEmail, List<TestResult> results) throws MessagingException, IOException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         Resource resource = resourceLoader.getResource("classpath:email_templates/failed_test_email_template.html");
-        Map<String, String> variablesMap = new HashMap<>();
-        PerfTestResult perf = new PerfTestResult();
-        String reasonForFailure = TestFailureTypes.OTHER.toString();
-        PerfTestResult perfTestResult = result.getPerfTestResult();
-        if(perfTestResult.getTestResult().getId().equals(result.getId()) && perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name()) ){
-            perf = perfTestResult;
-            reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
-        }
 
-        Optional<Job> job =  jobRepository.findById(testRun.getJobId());
-        if (job.isEmpty()) {
-            throw new EntityNotFoundException("Job with id " + testRun.getJobId() + " not found");
-        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy h:mm a")
                 .withZone(ZoneId.of("America/Los_Angeles"));
 
+        Map<String, String> variablesMap = new HashMap<>();
         variablesMap.put("name", batchName);
-        variablesMap.put("date", formatter.format(LocalDateTime.now()));
+        variablesMap.put("date", formatter.format(ZonedDateTime.now(ZoneId.of("America/Los_Angeles"))));
         variablesMap.put("startTime", formatter.format(testRun.getStartedAt()));
         variablesMap.put("endTime", formatter.format(testRun.getFinishedAt()));
-        variablesMap.put("reason", reasonForFailure);
-        variablesMap.put("jobName", job.get().getName());
-        variablesMap.put("P50", perf.getP50LatencyMs() + "ms");
-        variablesMap.put("P95", perf.getP95LatencyMs() + "ms");
-        variablesMap.put("P99", perf.getP99LatencyMs() + "ms");
-        variablesMap.put("threshold", job.get().getThreshold().toString() + "ms");
+
+        StringBuilder failureRows = new StringBuilder();
+        String reasonForFailure = TestFailureTypes.OTHER.toString();
+
+        if(results.isEmpty()){
+            Optional<Job> job = jobRepository.findById(testRun.getJobId());
+            String jobName = job.map(Job::getName).orElse("Unknown");
+            String row = FAILURE_ROW_TEMPLATE
+                    .replace("{jobName}", jobName)
+                    .replace("{reason}", reasonForFailure)
+                    .replace("{P50}", "-")
+                    .replace("{P95}", "-")
+                    .replace("{P99}", "-")
+                    .replace("{threshold}", "-");
+
+            failureRows.append(row);
+        }
+
+        for (TestResult result : results) {
+            PerfTestResult perfTestResult = result.getPerfTestResult();
+            if (perfTestResult == null || !perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name())) continue;
+
+            reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
+
+            Optional<Job> job = jobRepository.findById(testRun.getJobId());
+            String jobName = job.map(Job::getName).orElse("Unknown");
+            String threshold = job.map(j -> j.getThreshold().toString() + "ms").orElse("N/A");
+
+            String row = FAILURE_ROW_TEMPLATE
+                    .replace("{jobName}", jobName)
+                    .replace("{reason}", reasonForFailure)
+                    .replace("{P50}", perfTestResult.getP50LatencyMs() + "ms")
+                    .replace("{P95}", perfTestResult.getP95LatencyMs() + "ms")
+                    .replace("{P99}", perfTestResult.getP99LatencyMs() + "ms")
+                    .replace("{threshold}", threshold);
+
+            failureRows.append(row);
+        }
+
+        variablesMap.put("failureRows", failureRows.toString());
 
         String template = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 

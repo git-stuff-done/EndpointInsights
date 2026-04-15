@@ -4,10 +4,12 @@ import com.vsp.endpointinsightsapi.factory.JobRunnerThreadFactory;
 import com.vsp.endpointinsightsapi.model.BatchRunnerThreadStatus;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
+import com.vsp.endpointinsightsapi.model.entity.TestResult;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.service.NotificationService;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class BatchRunnerThread implements Runnable {
@@ -65,13 +68,18 @@ public class BatchRunnerThread implements Runnable {
 
 		final Map<UUID, TestRunStatus> testRunMap = Collections.synchronizedMap(new HashMap<>());
 		final List<JobRunnerThread> jobTasks = new ArrayList<>();
+
+        AtomicReference<List<TestResult>> resultIds = new AtomicReference<>(new ArrayList<>());    // This is being passed up call chain back to service
 		for (final Job job : batch.getJobs()) {
 
             // Set the job name before completed to show job name in results
             testRun.setJobId(job.getJobId());
             testRunRepository.save(testRun);
 			var jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
-				testRunMap.put(job.getJobId(), status.status());
+				if(status.testResults() != null && !status.testResults().isEmpty()) {
+                    resultIds.set(status.testResults());
+                }
+                testRunMap.put(job.getJobId(), status.status());
 			});
 			jobTasks.add(jobRunnerThread);
 		}
@@ -92,11 +100,11 @@ public class BatchRunnerThread implements Runnable {
 
 		if (testRunMap.values().stream().anyMatch(status -> status != TestRunStatus.COMPLETED)) {
 			LOG.error("Batch run (id={}) failed. Test run status: {}", batch.getBatchId(), testRunMap);
-			onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.FAILED));
+			onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.FAILED, resultIds.get()));
 			return;
 		}
 
 		LOG.info("Batch run (id={}) completed successfully.", batch.getBatchId());
-		onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.COMPLETED));
+		onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.COMPLETED, resultIds.get()));
 	}
 }
