@@ -85,7 +85,7 @@ class NotificationServiceUnitTest {
         when(emailListsRepository.findAllByBatchId(batchId)).thenReturn(List.of(a, b));
 
         doThrow(new RuntimeException("boom"))
-                .when(emailSender).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), List.of(testResult));
+                .when(emailSender).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(List.of(testResult)));
 
         notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
         verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("a@test.com"), eq(List.of(testResult)));
