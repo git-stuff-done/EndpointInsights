@@ -29,6 +29,7 @@ const commands = {
   clearSearch() {
     return this
       .clearValue('@searchInput')
+      .setValue('@searchInput', ' ')
       .pause(300);
   }
 };
