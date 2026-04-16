@@ -11,21 +11,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class NotificationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(NotificationService.class);
+    private static final String GROUP_IDENTIFIER_PREFIX = "group:";
 
     private final TestBatchEmailListsRepository emailListsRepository;
     private final EmailSender emailSender;
+    private final NotificationGroupService notificationGroupService;
+    private final TestResultRepository testResultRepository;
 
-    public NotificationService(TestBatchEmailListsRepository emailListsRepository, EmailSender emailSender) {
+    public NotificationService(TestBatchEmailListsRepository emailListsRepository,
+                              EmailSender emailSender,
+                              NotificationGroupService notificationGroupService,
+                              TestResultRepository testResultRepository) {
         this.emailListsRepository = emailListsRepository;
         this.emailSender = emailSender;
+        this.notificationGroupService = notificationGroupService;
+        this.testResultRepository = testResultRepository;
     }
 
     public void sendTestCompletionNotifications(String batchName, UUID batchId, TestRun testRun, List<TestResult> testResults) {
@@ -33,8 +39,33 @@ public class NotificationService {
 
         LOG.info("Sending test completion notifications for run {} to {} recipients", testRun.getRunId(), recipients.size());
 
+        // Resolve emails and groups to unique email addresses
+        Set<String> allEmails = new HashSet<>();
+
         for (TestBatchEmailList entry : recipients) {
-            String email = entry.getEmail();
+            String emailOrGroup = entry.getEmail();
+
+            // Check if this is a group identifier
+            if (emailOrGroup.startsWith(GROUP_IDENTIFIER_PREFIX)) {
+                String groupIdStr = emailOrGroup.substring(GROUP_IDENTIFIER_PREFIX.length());
+                try {
+                    UUID groupId = UUID.fromString(groupIdStr);
+                    List<String> groupEmails = notificationGroupService.getGroupMemberEmails(groupId);
+                    allEmails.addAll(groupEmails);
+                    LOG.debug("Resolved group {} to {} members", groupId, groupEmails.size());
+                } catch (IllegalArgumentException ex) {
+                    LOG.warn("Invalid group identifier format: {}", emailOrGroup, ex);
+                }
+            } else {
+                // Regular email address
+                allEmails.add(emailOrGroup);
+            }
+        }
+
+        LOG.info("Resolved to {} unique email recipients for run {}", allEmails.size(), testRun.getRunId());
+
+        // Send emails to all resolved recipients
+        for (String email : allEmails) {
             try {
                 emailSender.sendTestCompletionEmail(batchName, testRun, email, testResults);
                 LOG.info("Notification sent for run {} to {}", testRun.getRunId(), email);

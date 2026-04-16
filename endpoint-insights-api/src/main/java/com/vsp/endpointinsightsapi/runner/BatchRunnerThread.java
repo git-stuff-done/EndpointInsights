@@ -71,10 +71,6 @@ public class BatchRunnerThread implements Runnable {
 
         AtomicReference<List<TestResult>> resultIds = new AtomicReference<>(new ArrayList<>());    // This is being passed up call chain back to service
 		for (final Job job : batch.getJobs()) {
-
-            // Set the job name before completed to show job name in results
-            testRun.setJobId(job.getJobId());
-            testRunRepository.save(testRun);
 			var jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
 				if(status.testResults() != null && !status.testResults().isEmpty()) {
                     resultIds.set(status.testResults());

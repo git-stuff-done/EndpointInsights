@@ -123,8 +123,9 @@ public class BatchService {
 
         TestBatch saved = testBatchRepository.saveAndFlush(batch);
 
-        if (request.getEmails() != null && !request.getEmails().isEmpty()) {
-            updateEmailsForBatch(saved.getBatchId(), request.getEmails());
+        if ((request.getEmails() != null && !request.getEmails().isEmpty()) ||
+            (request.getGroupIds() != null && !request.getGroupIds().isEmpty())) {
+            updateEmailsForBatch(saved.getBatchId(), request.getEmails(), request.getGroupIds());
         }
 
         batchSchedulerService.scheduleBatch(saved);
@@ -163,8 +164,8 @@ public class BatchService {
 
         testBatchRepository.saveAndFlush(batch);
 
-        if (request.getEmails() != null) {
-            updateEmailsForBatch(id, request.getEmails());
+        if (request.getEmails() != null || (request.getGroupIds() != null && !request.getGroupIds().isEmpty())) {
+            updateEmailsForBatch(id, request.getEmails(), request.getGroupIds());
         }
 
         batchSchedulerService.scheduleBatch(batch);
@@ -181,11 +182,25 @@ public class BatchService {
     }
 
     @Transactional
-    public void updateEmailsForBatch(UUID batchId, List<String> emails) {
+    public void updateEmailsForBatch(UUID batchId, List<String> emails, List<UUID> groupIds) {
         testBatchEmailListsRepository.deleteAllByBatchId(batchId);
-        List<TestBatchEmailList> existingEmails = testBatchEmailListsRepository.findAllByBatchId(batchId);
-        System.out.println(existingEmails);
-        List<TestBatchEmailList> entities = emails.stream()
+
+        List<String> allEmails = new ArrayList<>();
+
+        // Add individual emails
+        if (emails != null && !emails.isEmpty()) {
+            allEmails.addAll(emails);
+        }
+
+        // Add group identifiers (stored as "group:{UUID}" in email field)
+        if (groupIds != null && !groupIds.isEmpty()) {
+            allEmails.addAll(groupIds.stream()
+                    .map(id -> "group:" + id.toString())
+                    .toList());
+        }
+
+        // Deduplicate emails (case-insensitive)
+        List<TestBatchEmailList> entities = allEmails.stream()
                 .collect(Collectors.toMap(
                         String::toLowerCase,
                         email -> email,
@@ -202,6 +217,11 @@ public class BatchService {
                 .toList();
 
         testBatchEmailListsRepository.saveAll(entities);
+    }
+
+    // Backward compatibility overload for updateEmailsForBatch
+    public void updateEmailsForBatch(UUID batchId, List<String> emails) {
+        updateEmailsForBatch(batchId, emails, null);
     }
 
 

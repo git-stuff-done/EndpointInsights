@@ -14,5 +14,6 @@ public class BatchUpdateRequest {
 	public String batchName;
 	public List<UUID> jobs;
 	public List<String> emails;
+	public List<UUID> groupIds;
 
 }

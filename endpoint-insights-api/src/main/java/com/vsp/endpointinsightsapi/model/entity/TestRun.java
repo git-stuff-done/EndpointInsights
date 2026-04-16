@@ -25,7 +25,7 @@ public class TestRun {
 	@Column(name = "run_id")
 	private UUID runId;
 
-	@Column(name = "job_id", nullable = false)
+	@Column(name = "job_id")
 	private UUID jobId;
 
 	@Column(name = "run_by", nullable = false)

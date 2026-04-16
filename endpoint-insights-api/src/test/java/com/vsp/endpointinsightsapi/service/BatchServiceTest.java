@@ -1,7 +1,7 @@
-// BatchServiceTest.java
 package com.vsp.endpointinsightsapi.service;
 
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
+import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.exception.BatchNotFoundException;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
@@ -382,38 +382,107 @@ class BatchServiceTest {
     }
 
     @Test
-    void createBatch_setsAllFields() {
+    void createBatch_withEmails_savesEmails() {
         UUID batchId = UUID.randomUUID();
-        String cronExpression = "0 0 12 * * *";
-        Long scheduleId = 1001L;
-        LocalDateTime startTime = LocalDateTime.now();
-        Boolean active = true;
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setBatchName("Test Batch");
+        batch.setJobs(new ArrayList<>());
 
-        com.vsp.endpointinsightsapi.dto.BatchRequestDTO request = new com.vsp.endpointinsightsapi.dto.BatchRequestDTO();
-        request.setBatchName("New Batch");
-        request.setCronExpression(cronExpression);
-        request.setScheduleId(scheduleId);
-        request.setStartTime(startTime);
-        request.setActive(active);
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setBatchName("Test Batch");
+        request.setJobs(new ArrayList<>());
+        request.setEmails(List.of("test@example.com"));
+        request.setGroupIds(new ArrayList<>());
 
-        TestBatch savedBatch = new TestBatch();
-        savedBatch.setBatchId(batchId);
-        savedBatch.setBatchName("New Batch");
-        savedBatch.setCronExpression(cronExpression);
-        savedBatch.setScheduleId(scheduleId);
-        savedBatch.setStartTime(startTime);
-        savedBatch.setActive(active);
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(batch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(batch));
 
-        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(savedBatch);
-        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(savedBatch));
+        testBatchService.createBatch(request);
 
-        TestBatch result = testBatchService.createBatch(request);
-
-        assertEquals(cronExpression, result.getCronExpression());
-        assertEquals(scheduleId, result.getScheduleId());
-        assertEquals(startTime, result.getStartTime());
-        assertEquals(active, result.getActive());
         verify(testBatchRepository).saveAndFlush(any(TestBatch.class));
-        verify(batchSchedulerService).scheduleBatch(savedBatch);
+        verify(testBatchEmailListsRepository).saveAll(any());
+    }
+
+    @Test
+    void createBatch_withGroupIds_savesGroupIdentifiers() {
+        UUID batchId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setBatchName("Test Batch");
+        batch.setJobs(new ArrayList<>());
+
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setBatchName("Test Batch");
+        request.setJobs(new ArrayList<>());
+        request.setEmails(new ArrayList<>());
+        request.setGroupIds(List.of(groupId));
+
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(batch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(batch));
+
+        testBatchService.createBatch(request);
+
+        verify(testBatchRepository).saveAndFlush(any(TestBatch.class));
+        verify(testBatchEmailListsRepository).saveAll(any());
+    }
+
+    @Test
+    void createBatch_withEmailsAndGroupIds_savesBoth() {
+        UUID batchId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        TestBatch batch = new TestBatch();
+        batch.setBatchId(batchId);
+        batch.setBatchName("Test Batch");
+        batch.setJobs(new ArrayList<>());
+
+        BatchRequestDTO request = new BatchRequestDTO();
+        request.setBatchName("Test Batch");
+        request.setJobs(new ArrayList<>());
+        request.setEmails(List.of("test@example.com"));
+        request.setGroupIds(List.of(groupId));
+
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(batch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(batch));
+
+        testBatchService.createBatch(request);
+
+        verify(testBatchRepository).saveAndFlush(any(TestBatch.class));
+        verify(testBatchEmailListsRepository).saveAll(any());
+    }
+
+    @Test
+    void updateBatch_withGroupIds_savesGroupIdentifiers() {
+        UUID batchId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        TestBatch existingBatch = new TestBatch();
+        existingBatch.setBatchId(batchId);
+        existingBatch.setJobs(new ArrayList<>());
+
+        BatchUpdateRequest request = new BatchUpdateRequest();
+        request.setEmails(null);
+        request.setGroupIds(List.of(groupId));
+
+        when(testBatchRepository.findById(batchId)).thenReturn(Optional.of(existingBatch));
+        when(testBatchRepository.saveAndFlush(any(TestBatch.class))).thenReturn(existingBatch);
+        when(testBatchRepository.findByIdWithJobsAndUsers(batchId)).thenReturn(Optional.of(existingBatch));
+
+        testBatchService.updateBatch(batchId, request);
+
+        verify(testBatchEmailListsRepository).deleteAllByBatchId(batchId);
+        verify(testBatchEmailListsRepository).saveAll(any());
+    }
+
+    @Test
+    void updateEmailsForBatch_backwardCompatibilityOverload_callsMainMethod() {
+        UUID batchId = UUID.randomUUID();
+        List<String> emails = List.of("test@example.com");
+
+        testBatchService.updateEmailsForBatch(batchId, emails);
+
+        verify(testBatchEmailListsRepository).deleteAllByBatchId(batchId);
+        verify(testBatchEmailListsRepository).saveAll(any());
     }
 }

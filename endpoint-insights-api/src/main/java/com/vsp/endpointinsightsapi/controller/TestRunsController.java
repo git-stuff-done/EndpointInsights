@@ -92,34 +92,6 @@ public class TestRunsController {
 		return ResponseEntity.ok(testRunService.getTestRunById(runId));
 	}
 
-	@PostMapping
-	@Operation(summary = "Create test run", description = "Creates a new test run with the specified configuration")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "Test run created successfully"),
-			@ApiResponse(responseCode = "400", description = "Invalid input"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "500", description = "Internal server error")
-	})
-	public ResponseEntity<TestRun> createTestRun(@RequestBody @Valid TestRunCreateRequest request) {
-		try {
-			TestRun testRun = new TestRun();
-			testRun.setJobId(request.getJobId());
-            testRun.setBatchId(request.getBatchId());
-			testRun.setRunBy(request.getRunBy());
-			testRun.setStatus(request.getStatus());
-			testRun.setStartedAt(request.getStartedAt());
-			testRun.setFinishedAt(request.getFinishedAt());
-
-			TestRun saved = testRunService.createTestRun(testRun);
-			return new ResponseEntity<>(saved, HttpStatus.CREATED);
-		} catch (CustomException e) {
-			throw e;
-		} catch (RuntimeException e) {
-			LOG.error("Error creating test run: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
-	}
-
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete test run", description = "Permanently deletes a test run by its ID")
 	@ApiResponses(value = {
@@ -127,6 +99,7 @@ public class TestRunsController {
 			@ApiResponse(responseCode = "404", description = "Test run not found"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
 	})
+
 	public ResponseEntity<Map<String, Object>> deleteTestRun(
       @Parameter(description = "Test run ID", required = true)
       @PathVariable("id") UUID runId) {
