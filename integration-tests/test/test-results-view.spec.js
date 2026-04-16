@@ -82,10 +82,10 @@ describe('Test Results View Page', function () {
     }
     browser
       .waitForElementVisible('mat-header-row')
-      .assert.textContains('mat-header-cell.cdk-column-threadGroup',       'Thread Group')
-      .assert.textContains('mat-header-cell.cdk-column-samplerName',       'Sampler')
-      .assert.textContains('mat-header-cell.cdk-column-latencyThreshold',  'Latency Threshold')
-      .assert.textContains('mat-header-cell.cdk-column-errorRatePercent',  'Error Rate');
+      .assert.textContains('mat-header-row', 'Thread Group')
+      .assert.textContains('mat-header-row', 'Sampler')
+      .assert.textContains('mat-header-row', 'Latency Threshold')
+      .assert.textContains('mat-header-row', 'Error Rate');
   });
 
   it('renders at least one data row in the results table', function (browser) {
