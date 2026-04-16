@@ -96,8 +96,8 @@ describe('Batch Management Tests', function() {
             .click('xpath', '//mat-option[contains(., "Daily")]')
             .pause(10)
 
-            .clearValue('[data-test-id="schedule-time-picker"]')
-            .setValue('[data-test-id="schedule-time-picker"]', '09:00')
+            .click('[data-test-id="schedule-time-picker"]')
+            .setValue('[data-test-id="schedule-time-picker"]', [browser.Keys.CONTROL + 'a', '09:00'])
 
             .setValue('[data-test-id="batch-email-input"]', 'another@example.com')
             .click('[data-test-id="add-email-button"]')
@@ -146,8 +146,8 @@ describe('Batch Management Tests', function() {
     it('verifies batch is no longer in the list', function(browser) {
         browser
             .pause(10)
-            .clearValue('[data-test-id="search-batches-input"]')
-            .setValue('[data-test-id="search-batches-input"]', testData.batchName)
+            .click('[data-test-id="search-batches-input"]')
+            .setValue('[data-test-id="search-batches-input"]', [browser.Keys.CONTROL + 'a', testData.batchName])
             .pause(10)
 
             .elements('css selector', `[data-test-id="batch-row-${testData.batchName}"]`, function(result) {

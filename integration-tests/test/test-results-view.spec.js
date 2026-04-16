@@ -81,11 +81,11 @@ describe('Test Results View Page', function () {
       return;
     }
     browser
-      .waitForElementVisible('mat-header-cell')
-      .assert.textContains('mat-header-cell:nth-child(1)', 'Thread Group')
-      .assert.textContains('mat-header-cell:nth-child(2)', 'Sampler')
-      .assert.textContains('mat-header-cell:nth-child(6)', 'Latency Threshold')
-      .assert.textContains('mat-header-cell:nth-child(7)', 'Error Rate');
+      .waitForElementVisible('mat-header-row')
+      .assert.textContains('mat-header-cell.cdk-column-threadGroup',       'Thread Group')
+      .assert.textContains('mat-header-cell.cdk-column-samplerName',       'Sampler')
+      .assert.textContains('mat-header-cell.cdk-column-latencyThreshold',  'Latency Threshold')
+      .assert.textContains('mat-header-cell.cdk-column-errorRatePercent',  'Error Rate');
   });
 
   it('renders at least one data row in the results table', function (browser) {

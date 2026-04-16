@@ -48,9 +48,9 @@ describe('Test Results List Page', function () {
   it('renders the expected column headers', function (browser) {
     browser
       .waitForElementVisible('mat-header-row')
-      .assert.textContains('mat-header-cell:nth-child(1)', 'Batch Name')
-      .assert.textContains('mat-header-cell:nth-child(2)', 'Test Name')
-      .assert.textContains('mat-header-cell:nth-child(7)', 'Status');
+      .assert.textContains('mat-header-cell.cdk-column-batchName', 'Batch Name')
+      .assert.textContains('mat-header-cell.cdk-column-testName', 'Test Name')
+      .assert.textContains('mat-header-cell.cdk-column-status', 'Status');
   });
 
   it('renders at least one data row', function (browser) {
