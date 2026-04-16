@@ -107,13 +107,13 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 			// Create results
 
-            return createResults(testRun, grouped, errorCodeCount, job.getThreshold());
+            return createResults(testRun, grouped, errorCodeCount, job);
 		} catch (IOException e) {
 			throw new IOException("Failed to process JMeter results: " + e.getMessage(), e);
 		}
 	}
 
-	private TestRunResult createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
+	private TestRunResult createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Job job) throws IOException {
 		// Results will be made here
 		List<TestResult> testResults = new ArrayList<>();
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
@@ -152,6 +152,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			int p99 = !latencies.isEmpty() ? calculatePercentile(latencies, 99) : 0;
 
             String latencyPerformanceStatus = JobStatus.PASS.name();
+            Integer threshold = job.getThreshold();
             int warning = (int) (threshold * 0.5) + threshold;
             if(p50 > threshold ||  p95 > threshold || p99 > threshold) {
                 latencyPerformanceStatus = JobStatus.WARN.name();
@@ -166,6 +167,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 			TestResult testResult = new TestResult();
 			testResult.setId(UUID.randomUUID());
 			testResult.setJobType(TestType.PERF.toInteger());
+            testRun.setJobId(job.getJobId());
 			testResult.setTestRun(testRun);
 			testResults.add(testResult);
 

@@ -44,15 +44,17 @@ public class JavaMailEmailSender implements EmailSender {
     private final JobRepository jobRepository;
 
     private static final String FAILURE_ROW_TEMPLATE = """
-    <div style="border: 1px solid #ddd; border-radius: 4px; padding: 12px; margin-bottom: 12px; background-color: #fff;">
-        <p><span style="font-size: 16px; font-weight: bold; color: #cc0000;">Job: {jobName}</span></p>
-        <p><span style="font-size: 14px; font-weight: bold;">Reason: </span><span style="font-size: 14px;">{reason}</span></p>
-        <p><span style="font-size: 14px; font-weight: bold;">P50: </span><span style="font-size: 14px;">{P50}</span>
-           <span style="font-size: 14px; font-weight: bold; margin-left: 10px;">P95: </span><span style="font-size: 14px;">{P95}</span>
-           <span style="font-size: 14px; font-weight: bold; margin-left: 10px;">P99: </span><span style="font-size: 14px;">{P99}</span></p>
-        <p><span style="font-size: 14px; font-weight: bold;">Threshold: </span><span style="font-size: 14px;">{threshold}</span></p>
-    </div>
-    """;
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin-bottom: 12px; background-color: #ffffff; border: 1px solid #dddddd;">
+            <tr>
+                <td style="padding: 12px; font-family: arial, helvetica, sans-serif;">
+                    <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">Job: {jobName}</p>
+                    <p style="margin: 0 0 8px 0; font-size: 14px;"><b>Reason:</b> {reason}</p>
+                    <p style="margin: 0 0 8px 0; font-size: 14px;"><b>P50:</b> {P50} &nbsp; <b>P95:</b> {P95} &nbsp; <b>P99:</b> {P99}</p>
+                    <p style="margin: 0; font-size: 14px;"><b>Threshold:</b> {threshold}</p>
+                </td>
+            </tr>
+        </table>
+""";
 
 
 
@@ -134,11 +136,4 @@ public class JavaMailEmailSender implements EmailSender {
         mailSender.send(message);
     }
 
-    private String buildEmailBody(UUID runId, UUID resultId) {
-        String status = resultId != null ? "COMPLETED" : "FAILED";
-        String resultLine = resultId != null
-                ? "Result ID: " + resultId
-                : "No result data available (test may have failed to execute).";
-        return "Your test run has " + status + ".\n\nRun ID: " + runId + "\n" + resultLine;
-    }
 }

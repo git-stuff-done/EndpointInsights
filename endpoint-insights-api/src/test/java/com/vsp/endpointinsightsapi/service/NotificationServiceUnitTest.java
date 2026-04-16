@@ -138,7 +138,7 @@ class NotificationServiceUnitTest {
 
         notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
         verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("direct@test.com"), eq(List.of(testResult)));
-        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("bgroup@test.com"), eq(List.of(testResult)));
+        verify(emailSender, times(1)).sendTestCompletionEmail(eq("test"), eq(testRun), eq("group@test.com"), eq(List.of(testResult)));
 
     }
 
@@ -179,7 +179,7 @@ class NotificationServiceUnitTest {
 
         notificationService.sendTestCompletionNotifications("test", batchId, testRun, List.of(testResult));
 
-        verify(emailSender, times(1)).sendTestCompletionEmail("test", eq(testRun), eq("shared@test.com"), eq(List.of(testResult)));
+        verify(emailSender, times(1)).sendTestCompletionEmail(any(), eq(testRun), eq("shared@test.com"), eq(List.of(testResult)));
     }
 
 
