@@ -11,6 +11,7 @@ import com.vsp.endpointinsightsapi.repository.PerfTestResultRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
@@ -31,6 +32,7 @@ import java.util.*;
 
 @Service
 @Profile("!EMAIL-NOOP")
+@Slf4j
 public class JavaMailEmailSender implements EmailSender {
 
     private final JavaMailSender mailSender;
@@ -80,7 +82,7 @@ public class JavaMailEmailSender implements EmailSender {
         StringBuilder failureRows = new StringBuilder();
         String reasonForFailure = TestFailureTypes.OTHER.toString();
 
-        if(results.isEmpty()){
+        if(results == null || results.isEmpty()){
             Optional<Job> job = jobRepository.findById(testRun.getJobId());
             String jobName = job.map(Job::getName).orElse("Unknown");
             String row = FAILURE_ROW_TEMPLATE
@@ -93,27 +95,29 @@ public class JavaMailEmailSender implements EmailSender {
 
             failureRows.append(row);
         }
+        else{
+            for (TestResult result : results) {
+                PerfTestResult perfTestResult = result.getPerfTestResult();
+                if (perfTestResult == null || !perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name())) continue;
 
-        for (TestResult result : results) {
-            PerfTestResult perfTestResult = result.getPerfTestResult();
-            if (perfTestResult == null || !perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name())) continue;
+                reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
 
-            reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
+                Optional<Job> job = jobRepository.findById(testRun.getJobId());
+                String jobName = job.map(Job::getName).orElse("Unknown");
+                String threshold = job.map(j -> j.getThreshold().toString() + "ms").orElse("N/A");
 
-            Optional<Job> job = jobRepository.findById(testRun.getJobId());
-            String jobName = job.map(Job::getName).orElse("Unknown");
-            String threshold = job.map(j -> j.getThreshold().toString() + "ms").orElse("N/A");
+                String row = FAILURE_ROW_TEMPLATE
+                        .replace("{jobName}", jobName)
+                        .replace("{reason}", reasonForFailure)
+                        .replace("{P50}", perfTestResult.getP50LatencyMs() + "ms")
+                        .replace("{P95}", perfTestResult.getP95LatencyMs() + "ms")
+                        .replace("{P99}", perfTestResult.getP99LatencyMs() + "ms")
+                        .replace("{threshold}", threshold);
 
-            String row = FAILURE_ROW_TEMPLATE
-                    .replace("{jobName}", jobName)
-                    .replace("{reason}", reasonForFailure)
-                    .replace("{P50}", perfTestResult.getP50LatencyMs() + "ms")
-                    .replace("{P95}", perfTestResult.getP95LatencyMs() + "ms")
-                    .replace("{P99}", perfTestResult.getP99LatencyMs() + "ms")
-                    .replace("{threshold}", threshold);
-
-            failureRows.append(row);
+                failureRows.append(row);
+            }
         }
+
 
         variablesMap.put("failureRows", failureRows.toString());
 

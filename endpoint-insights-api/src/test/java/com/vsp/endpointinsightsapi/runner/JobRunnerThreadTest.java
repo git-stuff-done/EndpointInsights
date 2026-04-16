@@ -176,6 +176,7 @@ class JobRunnerThreadTest {
         when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
                 .thenReturn(new TestRunResult(true, resultId, results));
 
+
         JobRunnerThread thread = newThread();
         thread.run();
 
@@ -224,8 +225,10 @@ class JobRunnerThreadTest {
         job.setJmeterTestName("test.jmx");
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
+
         when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
                 .thenReturn(new TestRunResult(true, UUID.randomUUID(), results));
+
 
         JobRunnerThread thread = newThread();
         thread.run();
