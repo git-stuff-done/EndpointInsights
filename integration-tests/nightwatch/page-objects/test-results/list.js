@@ -18,8 +18,8 @@ const commands = {
   search(term) {
     return this
       .waitForElementVisible('@searchInput')
-      .click('@searchInput')
-      .setValue('@searchInput', [this.api.Keys.CONTROL + 'a', term])
+      .clearValue('@searchInput')
+      .setValue('@searchInput', term)
       .pause(300);
   },
 
@@ -28,8 +28,7 @@ const commands = {
    */
   clearSearch() {
     return this
-      .click('@searchInput')
-      .setValue('@searchInput', [this.api.Keys.CONTROL + 'a', this.api.Keys.DELETE])
+      .clearValue('@searchInput')
       .pause(300);
   }
 };
