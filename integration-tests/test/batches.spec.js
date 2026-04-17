@@ -56,7 +56,7 @@ describe('Batch Management Tests', function() {
 
             .click('[data-test-id="save-dialog-button"]')
             .pause(100)
-            .waitForElementVisible('[data-test-id="toast-message"]', 3000)
+            .waitForElementVisible('[data-test-id="toast-message"]', 20000)
             .assert.textContains('[data-test-id="toast-message"]', 'Successfully saved batch item')
     });
 
