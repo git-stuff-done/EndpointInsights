@@ -14,6 +14,7 @@ describe('Batch Management Tests', function() {
 
     it('navigates to batches page', function(browser) {
         browser
+            .waitForElementVisible('a[href*="batches"]', 10000)
             .click('a[href*="batches"]')
             .assert.urlContains('/batches')
             .assert.elementPresent('#batches-table');
