@@ -57,8 +57,6 @@ public class JavaMailEmailSender implements EmailSender {
 """;
 
 
-
-
     public JavaMailEmailSender(JavaMailSender mailSender, ResourceLoader resourceLoader, JobRepository jobRepository) {
         this.mailSender = mailSender;
         this.resourceLoader = resourceLoader;
@@ -83,43 +81,46 @@ public class JavaMailEmailSender implements EmailSender {
 
         StringBuilder failureRows = new StringBuilder();
         String reasonForFailure = TestFailureTypes.OTHER.toString();
-
-        if(results == null || results.isEmpty()){
-            Optional<Job> job = jobRepository.findById(testRun.getJobId());
-            String jobName = job.map(Job::getName).orElse("Unknown");
-            String row = FAILURE_ROW_TEMPLATE
-                    .replace("{jobName}", jobName)
-                    .replace("{reason}", reasonForFailure)
-                    .replace("{P50}", "-")
-                    .replace("{P95}", "-")
-                    .replace("{P99}", "-")
-                    .replace("{threshold}", "-");
-
-            failureRows.append(row);
-        }
-        else{
             for (TestResult result : results) {
                 PerfTestResult perfTestResult = result.getPerfTestResult();
-                if (perfTestResult == null || !perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name())) continue;
 
-                reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
+                if(perfTestResult == null){
+                    Optional<Job> job = jobRepository.findById(result.getTestRun().getJobId());
+                    String jobName = job.map(Job::getName).orElse("Unknown");
+                    String row = FAILURE_ROW_TEMPLATE
+                            .replace("{jobName}", jobName)
+                            .replace("{reason}", reasonForFailure)
+                            .replace("{P50}", "-")
+                            .replace("{P95}", "-")
+                            .replace("{P99}", "-")
+                            .replace("{threshold}", "-");
 
-                Optional<Job> job = jobRepository.findById(testRun.getJobId());
-                String jobName = job.map(Job::getName).orElse("Unknown");
-                String threshold = job.map(j -> j.getThreshold().toString() + "ms").orElse("N/A");
+                    failureRows.append(row);
 
-                String row = FAILURE_ROW_TEMPLATE
-                        .replace("{jobName}", jobName)
-                        .replace("{reason}", reasonForFailure)
-                        .replace("{P50}", perfTestResult.getP50LatencyMs() + "ms")
-                        .replace("{P95}", perfTestResult.getP95LatencyMs() + "ms")
-                        .replace("{P99}", perfTestResult.getP99LatencyMs() + "ms")
-                        .replace("{threshold}", threshold);
+                }
+                else {
 
-                failureRows.append(row);
+                    if(!perfTestResult.getLatencyThresholdResult().equals(JobStatus.FAIL.name())){
+                        continue;
+                    }
+                    reasonForFailure = TestFailureTypes.LATENCY_THRESHOLD_EXCEEDED.toString();
+
+                    Optional<Job> job = jobRepository.findById(testRun.getJobId());
+                    String jobName = job.map(Job::getName).orElse("Unknown");
+                    String threshold = job.map(j -> j.getThreshold().toString() + "ms").orElse("N/A");
+
+                    String row = FAILURE_ROW_TEMPLATE
+                            .replace("{jobName}", jobName)
+                            .replace("{reason}", reasonForFailure)
+                            .replace("{P50}", perfTestResult.getP50LatencyMs() + "ms")
+                            .replace("{P95}", perfTestResult.getP95LatencyMs() + "ms")
+                            .replace("{P99}", perfTestResult.getP99LatencyMs() + "ms")
+                            .replace("{threshold}", threshold);
+
+                    failureRows.append(row);
+                }
+
             }
-        }
-
 
         variablesMap.put("failureRows", failureRows.toString());
 
@@ -133,6 +134,7 @@ public class JavaMailEmailSender implements EmailSender {
         helper.setTo(recipientEmail);
         helper.setSubject("Test Run Completed - " + testRun.getRunId());
         helper.setText(template, true);
+
         mailSender.send(message);
     }
 

@@ -299,7 +299,10 @@ public class BatchService {
             // Spring's @Transactional only applies when method invocation occurs from outside the declaring class.
             batchRunPersistenceService.save(returnedBatch, run);
 
-            List<TestResult> loaded = batchRunPersistenceService.loadResultsWithPerf(status.testRuns());
+            List<TestResult> loaded = List.of();
+            if(status.testRuns() != null){
+                loaded = batchRunPersistenceService.loadResultsWithPerf(status.testRuns());
+            }
 
             // Notify now that batch is completed
             notificationService.sendTestCompletionNotifications(returnedBatch.getBatchName(), run.getBatchId(), run, loaded);

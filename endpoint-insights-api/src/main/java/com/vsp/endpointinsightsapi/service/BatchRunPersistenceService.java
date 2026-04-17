@@ -35,8 +35,10 @@ public class BatchRunPersistenceService {
     @Transactional
     public List<TestResult> loadResultsWithPerf(List<TestResult> testResults) {
         return testResults.stream()
-                .map(r -> testResultRepository.findById(r.getId()).orElse(null))
-                .filter(Objects::nonNull)
+                .map(r -> {
+                    if (r.getId() == null) return r;
+                    return testResultRepository.findById(r.getId()).orElse(r);
+                })
                 .toList();
     }
 

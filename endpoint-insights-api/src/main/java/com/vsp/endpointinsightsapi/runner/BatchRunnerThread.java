@@ -9,7 +9,6 @@ import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 import com.vsp.endpointinsightsapi.repository.TestRunRepository;
-import com.vsp.endpointinsightsapi.service.NotificationService;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,11 +68,20 @@ public class BatchRunnerThread implements Runnable {
 		final Map<UUID, TestRunStatus> testRunMap = Collections.synchronizedMap(new HashMap<>());
 		final List<JobRunnerThread> jobTasks = new ArrayList<>();
 
-        AtomicReference<List<TestResult>> resultIds = new AtomicReference<>(new ArrayList<>());    // This is being passed up call chain back to service
+        List<TestResult> resultIds = Collections.synchronizedList(new ArrayList<>());
 		for (final Job job : batch.getJobs()) {
 			var jobRunnerThread = jobRunnerThreadFactory.create(job, testRun, true, (status) -> {
 				if(status.testResults() != null && !status.testResults().isEmpty()) {
-                    resultIds.set(status.testResults());
+                    resultIds.addAll(status.testResults());
+                }
+
+                // If no test results other failure has occurred, make result and set job id to pass back
+                else{
+                    TestResult r =  new TestResult();
+                    TestRun failedRun = new TestRun();
+                    failedRun.setJobId(job.getJobId());
+                    r.setTestRun(failedRun);
+                    resultIds.add(r);
                 }
                 testRunMap.put(job.getJobId(), status.status());
 			});
@@ -96,11 +104,11 @@ public class BatchRunnerThread implements Runnable {
 
 		if (testRunMap.values().stream().anyMatch(status -> status != TestRunStatus.COMPLETED)) {
 			LOG.error("Batch run (id={}) failed. Test run status: {}", batch.getBatchId(), testRunMap);
-			onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.FAILED, resultIds.get()));
+			onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.FAILED, resultIds));
 			return;
 		}
 
 		LOG.info("Batch run (id={}) completed successfully.", batch.getBatchId());
-		onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.COMPLETED, resultIds.get()));
+		onComplete.accept(new BatchRunnerThreadStatus(batch, testRun, TestRunStatus.COMPLETED, resultIds));
 	}
 }
