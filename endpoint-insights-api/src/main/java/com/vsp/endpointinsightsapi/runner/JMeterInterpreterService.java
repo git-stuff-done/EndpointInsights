@@ -25,18 +25,15 @@ public class JMeterInterpreterService implements TestInterpreter {
 	private final PerfTestResultRepository perfTestResultRepository;
 	private final PerfTestResultCodeRepository perfTestResultCodeRepository;
 	private final TestResultRepository testResultRepository;
-    private final JobRepository jobRepository;
-
 
     // Used for interpreting test results
 	private record SampleRecord(long elapsed, int responseCodeInt, String responseCode, long timeStamp, boolean success) {}
 
 	@Autowired
-	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository, JobRepository jobRepository) {
+	public JMeterInterpreterService(PerfTestResultRepository perfTestResultRepository, PerfTestResultCodeRepository perfTestResultCodeRepository, TestResultRepository testResultRepository) {
 		this.perfTestResultRepository = perfTestResultRepository;
 		this.perfTestResultCodeRepository = perfTestResultCodeRepository;
 		this.testResultRepository = testResultRepository;
-        this.jobRepository = jobRepository;
     }
 
 	private int calculatePercentile(List<Long> sortedLatencies, double percentile) {
@@ -53,15 +50,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 	@Override
 	@Transactional
-	public TestRunResult processResults(File file, TestRun testRun) throws IOException {
-		// Create test result so we can get the UUID
-		TestResult testResult = new TestResult();
-		testResult.setId(UUID.randomUUID());
-		testResult.setJobType(TestType.PERF.toInteger());
-		testResult.setTestRun(testRun);
-		testResult = testResultRepository.save(testResult);
-
-        Job job = jobRepository.findById(testRun.getJobId()).orElse(null);
+	public TestRunResult processResults(File file, TestRun testRun, Job job) throws IOException {
         if(job == null) {
             throw new RuntimeException("Job threshold not found");
         }
@@ -117,16 +106,17 @@ public class JMeterInterpreterService implements TestInterpreter {
 			}
 
 			// Create results
-			boolean passed = createResults(testResult, grouped, errorCodeCount, job.getThreshold());
+			boolean passed = createResults(testRun, grouped, errorCodeCount, job.getThreshold());
 
-			return new TestRunResult(passed, testResult.getId());
+			return new TestRunResult(passed, testRun.getRunId());
 		} catch (IOException e) {
 			throw new IOException("Failed to process JMeter results: " + e.getMessage(), e);
 		}
 	}
 
-	private boolean createResults(TestResult testResult, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
+	private boolean createResults(TestRun testRun, Map<String, List<SampleRecord>> grouped, Map<String, Integer> errorCodeCount, Integer threshold) {
 		// Results will be made here
+		List<TestResult> testResults = new ArrayList<>();
 		List<PerfTestResult> perfTestResults = new ArrayList<>();
 		List<PerfTestResultCode> perfTestResultCodes = new ArrayList<>();
 
@@ -173,6 +163,14 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 			double errorRate = total > 0 ? (double)errorCount * 100.0 / total : 0.0;
 
+			// Create test result
+			TestResult testResult = new TestResult();
+			testResult.setId(UUID.randomUUID());
+			testResult.setJobType(TestType.PERF.toInteger());
+			testResult.setTestRun(testRun);
+			testResults.add(testResult);
+
+			// Create perf test result
 			PerfTestResult res = new PerfTestResult();
 			PerfTestResultId resId = new PerfTestResultId();
 			// Needs a resultId (TestResult id), for demo will generate random
@@ -215,6 +213,7 @@ public class JMeterInterpreterService implements TestInterpreter {
 
 		boolean passed = perfTestResults.stream().noneMatch(r -> r.getErrorRatePercent() > 0.5);
 
+		testResultRepository.saveAll(testResults);
 		perfTestResultRepository.saveAll(perfTestResults);
 		perfTestResultCodeRepository.saveAll(perfTestResultCodes);
 

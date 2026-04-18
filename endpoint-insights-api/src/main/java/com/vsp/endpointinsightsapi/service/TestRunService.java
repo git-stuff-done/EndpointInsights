@@ -81,8 +81,11 @@ public class TestRunService {
 	}
 
 	public TestRun getTestRunById(UUID runId) {
-		return testRunRepository.findById(runId)
+		var res = testRunRepository.findById(runId)
 				.orElseThrow(() -> new TestRunNotFoundException(runId.toString()));
+		res.getResults();
+
+		return res;
 	}
 
 	@Transactional
@@ -144,11 +147,18 @@ public class TestRunService {
             durationMs = Duration.between(run.getStartedAt(), run.getFinishedAt()).toMillis();
         }
 
+		String testName = null;
+		if (job != null) {
+			testName = job.getName();
+		} else if (batch != null) {
+			testName = batch.getJobs().stream().map(Job::getName).collect(Collectors.joining(", "));
+		}
+
         return RecentActivityDTO.builder()
                 .runId(run.getRunId().toString())
                 .jobId(run.getJobId() != null ? run.getJobId().toString() : null)
                 .batchId(run.getBatchId() != null ? run.getBatchId().toString() : null)
-                .testName(job != null ? job.getName() : "Unknown")
+                .testName(testName)
                 .group(deriveScheduleType(batch))
                 .dateRun(run.getStartedAt())
                 .durationMs(durationMs)

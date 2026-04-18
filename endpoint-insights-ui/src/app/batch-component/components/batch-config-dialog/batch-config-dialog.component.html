@@ -56,34 +56,72 @@
             </div>
         </div>
 
-        <!-- Email Recipients -->
-        <div class="form-panel">
-            <div class="panel-header">Email Recipients</div>
-            <div class="panel-body">
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="flex-grow">
-                        <mat-label>Add Email Address</mat-label>
-                        <input matInput type="email" data-test-id="batch-email-input" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+        <mat-divider></mat-divider>
+
+        <section>
+            <h4>Notification Groups & Recipients</h4>
+            <div class="notification-settings">
+                <!-- Manage Groups Button -->
+                <button mat-stroked-button (click)="openGroupsDialog()" class="full-width">
+                    <mat-icon>settings</mat-icon>
+                    Manage Notification Groups
+                </button>
+
+                <!-- Selected Groups -->
+                @if (selectedGroups().length > 0) {
+                    <div class="selected-groups">
+                        <h5>Selected Groups</h5>
+                        @for (group of selectedGroups(); track group.id) {
+                            <div class="group-chip">
+                                <span>{{ group.name }} ({{ group.members.length }} members)</span>
+                                <button mat-icon-button (click)="removeGroup(group.id)" class="remove-btn">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Add Group Dropdown -->
+                @if (getUnselectedGroups().length > 0) {
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Add Group</mat-label>
+                        <mat-select>
+                            @for (group of getUnselectedGroups(); track group.id) {
+                                <mat-option (click)="addGroup(group)">
+                                    {{ group.name }} ({{ group.members.length }} members)
+                                </mat-option>
+                            }
+                        </mat-select>
                     </mat-form-field>
-                    <button mat-raised-button class="dialog-btn-primary" data-test-id="add-email-button" (click)="addEmail()">Add</button>
-                </div>
-                <div class="job-list">
+                }
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h4>Individual Email Recipients</h4>
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="flex-grow">
+                    <mat-label>Add Email Address</mat-label>
+                    <input matInput type="email" data-test-id="batch-email-input" [formControl]="emailInputControl" (keyup.enter)="addEmail()" />
+                </mat-form-field>
+                <button mat-raised-button data-test-id="add-email-button" (click)="addEmail()">Add</button>
+            </div>
+
+            <!-- Display added emails -->
+            @if (emailList().length > 0) {
+                <div class="email-list">
                     @for (email of emailList(); track email) {
                         <div class="job-row">
-                            <div class="job-info">
-                                <mat-icon class="row-icon">email</mat-icon>
-                                <span class="job-name">{{ email }}</span>
-                            </div>
-                            <button mat-icon-button data-test-id="remove-email-button" (click)="removeEmail(email)">
+                            <span>{{ email }}</span>
+                            <button mat-icon-button (click)="removeEmail(email)">
                                 <mat-icon>close</mat-icon>
                             </button>
                         </div>
-                    } @empty {
-                        <p class="empty-state">No email recipients added</p>
                     }
                 </div>
-            </div>
-        </div>
+            }
+        </section>
 
         <!-- Current Jobs -->
         <div class="form-panel">

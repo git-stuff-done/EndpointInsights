@@ -171,7 +171,7 @@ class JobRunnerThreadTest {
                 .thenReturn(new String[]{"true"});
 
         UUID resultId = UUID.randomUUID();
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class), any(Job.class)))
                 .thenReturn(new TestRunResult(true, resultId));
 
         JobRunnerThread thread = newThread();
@@ -179,7 +179,7 @@ class JobRunnerThreadTest {
 
         assertEquals(TestRunStatus.COMPLETED, testRun.getStatus());
         assertNotNull(testRun.getFinishedAt());
-        verify(jMeterInterpreterService).processResults(nullable(File.class), any(TestRun.class));
+        verify(jMeterInterpreterService).processResults(nullable(File.class), any(TestRun.class), any(Job.class));
     }
 
     @Test
@@ -197,7 +197,7 @@ class JobRunnerThreadTest {
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
 
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class), any(Job.class)))
                 .thenReturn(new TestRunResult(false, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
@@ -220,7 +220,7 @@ class JobRunnerThreadTest {
         job.setJmeterTestName("test.jmx");
         when(jMeterCommandEnhancer.getRunCommand(nullable(File.class), eq("test.jmx"), anyString()))
                 .thenReturn(new String[]{"true"});
-        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class)))
+        when(jMeterInterpreterService.processResults(nullable(File.class), any(TestRun.class), any(Job.class)))
                 .thenReturn(new TestRunResult(true, UUID.randomUUID()));
 
         JobRunnerThread thread = newThread();
