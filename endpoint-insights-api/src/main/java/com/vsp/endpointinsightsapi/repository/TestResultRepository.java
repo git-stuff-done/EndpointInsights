@@ -20,6 +20,7 @@ public interface TestResultRepository extends JpaRepository<TestResult, UUID> {
 	* */
 	List<TestResult> getAllByJobType(Integer jobType);
 
+
 	@Modifying
 	@Query("DELETE FROM TestResult tr WHERE tr.testRun.runId IN :runIds")
 	void deleteByRunIds(@Param("runIds") List<UUID> runIds);

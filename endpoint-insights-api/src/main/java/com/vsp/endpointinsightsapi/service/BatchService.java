@@ -10,14 +10,9 @@ import com.vsp.endpointinsightsapi.factory.TestRunFactory;
 import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.Job;
 import com.vsp.endpointinsightsapi.model.TestBatch;
-import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
-import com.vsp.endpointinsightsapi.model.entity.TestBatchEmailList;
-import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.entity.*;
 import com.vsp.endpointinsightsapi.model.enums.TestRunStatus;
-import com.vsp.endpointinsightsapi.repository.JobRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchEmailListsRepository;
-import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
-import com.vsp.endpointinsightsapi.repository.TestRunRepository;
+import com.vsp.endpointinsightsapi.repository.*;
 import com.vsp.endpointinsightsapi.runner.BatchRunnerThread;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
@@ -33,10 +28,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,7 +74,7 @@ public class BatchService {
 		this.notificationService = notificationService;
 		this.vspTaskScheduler = vspTaskScheduler;
 		this.batchSchedulerService = batchSchedulerService;
-	}
+    }
 
 
 	//TODO fill with search criteria when filter implemented, change parameters as well
@@ -307,8 +299,13 @@ public class BatchService {
             // Spring's @Transactional only applies when method invocation occurs from outside the declaring class.
             batchRunPersistenceService.save(returnedBatch, run);
 
+            List<TestResult> loaded = List.of();
+            if(status.testRuns() != null){
+                loaded = batchRunPersistenceService.loadResultsWithPerf(status.testRuns());
+            }
+
             // Notify now that batch is completed
-            notificationService.sendTestCompletionNotifications(run.getBatchId(), run.getRunId(), null);
+            notificationService.sendTestCompletionNotifications(returnedBatch.getBatchName(), run.getBatchId(), run, loaded);
         });
         vspTaskScheduler.execute(batchRunnerThread);
 
