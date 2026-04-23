@@ -212,8 +212,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 				LOG.debug("JWT validated for user: {}", userContext.getLogIdentifier());
 			}
 
-            if (!isValidRole(roles, handler)) {
-                return false;
+            if (!isValidRole(roles, handler, request)) {
+                throw new CustomExceptionBuilder()
+                        .withStatus(HttpStatus.FORBIDDEN) // 403 instead of 401 since they're authenticated but not authorized
+                        .build();
             }
 
 			CurrentUser.setUserContext(userContext);
@@ -382,7 +384,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 	 * @param roles the user roles extracted from the jwt
 	 * @param handler the request handler object (most likely the method)
 	 * */
-	private boolean isValidRole(List<UserRole> roles, Object handler) {
+	private boolean isValidRole(List<UserRole> roles, Object handler, HttpServletRequest request) {
 		if (!(handler instanceof HandlerMethod))
 			return true;
 
@@ -393,9 +395,13 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 		var annotationOptional = Arrays.stream(method.getAnnotations()).filter(a -> a instanceof RequiredRoles).findFirst();
 
-		// If no required role annotation is present, simply being authorized will provide access
-		if (annotationOptional.isEmpty())
-			return true;
+        if (annotationOptional.isEmpty()) {
+            String httpMethod = request.getMethod().toUpperCase();
+            if (httpMethod.equals("GET")) {
+                return roles.contains(UserRole.READ) || roles.contains(UserRole.WRITE);
+            }
+            return roles.contains(UserRole.WRITE);
+        }
 
 		RequiredRoles requiredRolesAnnotation = (RequiredRoles) annotationOptional.get();
 		UserRole[] requiredRoles = requiredRolesAnnotation.roles();

@@ -1,8 +1,10 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.RequiredRoles;
 import com.vsp.endpointinsightsapi.dto.DashboardSummaryResponseDTO;
 import com.vsp.endpointinsightsapi.dto.DashboardTestActivityDTO;
 import com.vsp.endpointinsightsapi.dto.charts.ChartResponseDTO;
+import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import com.vsp.endpointinsightsapi.service.DashboardService;
 import com.vsp.endpointinsightsapi.service.PerformanceChartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +32,7 @@ public class DashboardController {
     }
 
     @PostMapping("/summary")
+    @RequiredRoles(roles = {UserRole.WRITE})
     @Operation(summary = "Calculate dashboard summary", description = "Calculates aggregated summary statistics for test activities")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Summary calculated successfully"),
@@ -43,6 +46,7 @@ public class DashboardController {
 
     @GetMapping("/charts/performance")
     @Operation(summary = "Get API performance chart data", description = "Retrieves performance metrics and chart data for APIs, optionally filtered by job or batch")
+    @RequiredRoles(roles = {UserRole.READ})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Chart data retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters - cannot provide both jobId and batchId"),

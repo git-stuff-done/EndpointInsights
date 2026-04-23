@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.RequiredRoles;
 import com.vsp.endpointinsightsapi.dto.BatchRequestDTO;
 import com.vsp.endpointinsightsapi.dto.BatchResponseDTO;
 
@@ -8,6 +9,7 @@ import com.vsp.endpointinsightsapi.mapper.BatchMapper;
 import com.vsp.endpointinsightsapi.model.TestBatch;
 import com.vsp.endpointinsightsapi.model.entity.BatchUpdateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import com.vsp.endpointinsightsapi.repository.TestBatchRepository;
 
 import com.vsp.endpointinsightsapi.service.BatchService;
@@ -46,6 +48,7 @@ public class BatchesController {
 
     // GET /api/batches
 	@GetMapping
+    @RequiredRoles(roles = {UserRole.READ})
 	@Operation(summary = "List all test batches", description = "Retrieves a list of all test batches with optional filtering")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Batches retrieved successfully"),
@@ -62,6 +65,7 @@ public class BatchesController {
 
 	// GET /api/batches/{id}
 	@GetMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.READ})
 	@Operation(summary = "Get batch by ID", description = "Retrieves a specific test batch by its unique identifier")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Batch found"),
@@ -77,6 +81,7 @@ public class BatchesController {
 
 	// POST /api/batches
 	@PostMapping
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Create new test batch", description = "Creates a new test batch with the provided configuration")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Batch created successfully"),
@@ -90,6 +95,7 @@ public class BatchesController {
 	}
 
 	@PostMapping("/{batchId}/run")
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Run test batch", description = "Executes a test batch and creates a new test run")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Batch execution started"),
@@ -112,6 +118,7 @@ public class BatchesController {
 
 	// PUT /api/batches/{id}
     @PutMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.WRITE})
     @Operation(summary = "Update test batch", description = "Updates an existing test batch with new information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Batch updated successfully"),
@@ -130,7 +137,8 @@ public class BatchesController {
 
 	// DELETE /api/batches/{id}
 	@DeleteMapping("/{id}")
-	@Operation(summary = "Delete test batch", description = "Permanently deletes a test batch by its ID")
+    @RequiredRoles(roles = {UserRole.WRITE})
+    @Operation(summary = "Delete test batch", description = "Permanently deletes a test batch by its ID")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "Batch deleted successfully"),
 			@ApiResponse(responseCode = "404", description = "Batch not found"),
