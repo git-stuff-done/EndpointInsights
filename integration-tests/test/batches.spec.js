@@ -51,7 +51,7 @@ describe('Batch Management Tests', function() {
             .assert.textContains('.job-row', testData.email)
 
             .setValue('[data-test-id="search-available-tests-input"]', 'test')
-            .pause(10)
+            .waitForElementVisible('[data-test-id="add-test-button"]', 10000)
             .click('[data-test-id="add-test-button"]')
             .pause(10)
 

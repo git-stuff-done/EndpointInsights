@@ -1,10 +1,12 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.RequiredRoles;
 import com.vsp.endpointinsightsapi.dto.RecentActivityDTO;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
 import com.vsp.endpointinsightsapi.model.TestRunCreateRequest;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
+import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import com.vsp.endpointinsightsapi.service.TestRunService;
 import com.vsp.endpointinsightsapi.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +40,7 @@ public class TestRunsController {
 	}
 
 	@GetMapping("/recent")
+    @RequiredRoles(roles = {UserRole.READ})
 	@Operation(summary = "Get recent test runs", description = "Retrieves the most recent test run executions")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Recent test runs retrieved"),
@@ -50,6 +53,7 @@ public class TestRunsController {
 	}
 
 	@GetMapping("/recent-activity")
+    @RequiredRoles(roles = {UserRole.READ})
 	@Operation(summary = "Get recent activity", description = "Retrieves recent test activity, optionally filtered by job or batch ID")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Recent activity retrieved"),
@@ -80,6 +84,7 @@ public class TestRunsController {
 	}
 
 	@GetMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.READ})
 	@Operation(summary = "Get test run by ID", description = "Retrieves a specific test run by its unique identifier")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Test run found"),
@@ -93,6 +98,7 @@ public class TestRunsController {
 	}
 
 	@DeleteMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Delete test run", description = "Permanently deletes a test run by its ID")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Test run deleted successfully"),
@@ -107,7 +113,8 @@ public class TestRunsController {
 	}
 
 	@DeleteMapping
-  @Operation(summary = "Delete test runs before a specific date", description = "Permanently deletes all test runs that were finished before the specified purge date")
+    @RequiredRoles(roles = {UserRole.WRITE})
+    @Operation(summary = "Delete test runs before a specific date", description = "Permanently deletes all test runs that were finished before the specified purge date")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Test runs deleted successfully"),
 			@ApiResponse(responseCode = "400", description = "Invalid purge date - cannot be in the future"),

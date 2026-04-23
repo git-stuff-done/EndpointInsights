@@ -1,5 +1,6 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.RequiredRoles;
 import com.vsp.endpointinsightsapi.dto.GitCheckoutResponse;
 import com.vsp.endpointinsightsapi.dto.JobDTO;
 import com.vsp.endpointinsightsapi.exception.CustomExceptionBuilder;
@@ -7,6 +8,7 @@ import com.vsp.endpointinsightsapi.mapper.JobMapper;
 import com.vsp.endpointinsightsapi.model.*;
 import com.vsp.endpointinsightsapi.model.entity.TestRun;
 import com.vsp.endpointinsightsapi.model.enums.TestType;
+import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import com.vsp.endpointinsightsapi.service.JobService;
 import com.vsp.endpointinsightsapi.validation.ErrorMessages;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +50,8 @@ public class JobsController {
 	 * */
 	@PostMapping
 	@Operation(summary = "Create new job", description = "Creates a new performance test job with the specified configuration")
-	@ApiResponses(value = {
+    @RequiredRoles(roles = {UserRole.WRITE})
+    @ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Job created successfully"),
 			@ApiResponse(responseCode = "400", description = "Invalid input - validation failed"),
 			@ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -67,7 +70,8 @@ public class JobsController {
 
 
 	 @PostMapping("/{id}/run")
-	 @Operation(summary = "Run job", description = "Executes a performance test job and creates a new test run")
+     @RequiredRoles(roles = {UserRole.WRITE})
+     @Operation(summary = "Run job", description = "Executes a performance test job and creates a new test run")
 	 @ApiResponses(value = {
 	 		 @ApiResponse(responseCode = "200", description = "Job execution started"),
 	 		 @ApiResponse(responseCode = "404", description = "Job not found"),
@@ -98,7 +102,8 @@ public class JobsController {
 	 * @return the updated Job
 	 * */
 	@PutMapping("/{id}")
-	@Operation(summary = "Update job", description = "Updates an existing job configuration")
+    @RequiredRoles(roles = {UserRole.WRITE})
+    @Operation(summary = "Update job", description = "Updates an existing job configuration")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Job updated successfully"),
 			@ApiResponse(responseCode = "400", description = "Invalid input"),
@@ -126,6 +131,7 @@ public class JobsController {
 	 * @return all job ids as a List of Strings
 	 * */
     @GetMapping
+    @RequiredRoles(roles = {UserRole.READ})
   	@Operation(summary = "List all jobs", description = "Retrieves a list of all performance test jobs")
 	  @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Jobs retrieved successfully"),
@@ -147,6 +153,7 @@ public class JobsController {
 	 * @return the Job with the given jobId
 	 * */
     @GetMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.READ})
     @Operation(summary = "Get job by ID", description = "Retrieves a specific job by its unique identifier")
 	  @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Job found"),
@@ -178,6 +185,7 @@ public class JobsController {
 	 * @return A status message indicating the job was deleted
 	 * */
 	@DeleteMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Delete job", description = "Permanently deletes a job by its ID")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "Job deleted successfully"),
@@ -198,6 +206,7 @@ public class JobsController {
 	 * @return A JobRunHistory object for the requested job
 	 * */
 	@GetMapping("/{id}/history")
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Get job run history", description = "Retrieves the run history of a specific job")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Job history retrieved"),
@@ -220,6 +229,7 @@ public class JobsController {
 	 * @return checkout information
 	 * */
 	@PostMapping("/{id}/checkout")
+    @RequiredRoles(roles = {UserRole.WRITE})
 	@Operation(summary = "Checkout job repository", description = "Checks out the Git repository associated with a job")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Repository checked out successfully"),
