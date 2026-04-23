@@ -9,6 +9,8 @@ module.exports = class AuthenticateWithAuthelia {
 
         this.api
             .navigateTo(startUrl)
+            .waitForElementVisible('[data-test-id="sso-login-button"]')
+            .click('[data-test-id="sso-login-button"]')
             .waitForElementVisible('body')
             .assert.urlContains('auth.crowleybrynn.com')
             
@@ -23,9 +25,8 @@ module.exports = class AuthenticateWithAuthelia {
             
             .waitForElementVisible('#openid-consent-accept')
             .click('#openid-consent-accept')
- 
-            .waitForElementVisible('body')
-            .pause(1000);
+
+            .waitForElementVisible('[data-test-id="dashboard-title"]', 10000);
 
         return this;
     }

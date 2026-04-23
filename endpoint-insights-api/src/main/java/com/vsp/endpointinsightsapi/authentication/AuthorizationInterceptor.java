@@ -353,7 +353,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
 		if (groups.contains(authProperties.getGroups().getWrite()))
 			roles.add(UserRole.WRITE);
-		if (groups.contains(authProperties.getGroups().getRead()))
+		if (groups.contains(authProperties.getGroups().getRead()) || roles.contains(UserRole.WRITE))
 			roles.add(UserRole.READ);
 
 		return roles;

@@ -145,7 +145,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disabled: API uses stateless JWT Bearer tokens in Authorization header
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/**", "/login/**", "/oauth2/**", "/auth/**").permitAll()  // API authorization handled by AuthorizationInterceptor
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oauth2JsonSuccessHandler)
