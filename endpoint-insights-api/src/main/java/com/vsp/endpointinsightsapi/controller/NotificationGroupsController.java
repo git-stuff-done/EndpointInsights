@@ -1,6 +1,8 @@
 package com.vsp.endpointinsightsapi.controller;
 
+import com.vsp.endpointinsightsapi.authentication.RequiredRoles;
 import com.vsp.endpointinsightsapi.model.NotificationGroup;
+import com.vsp.endpointinsightsapi.model.enums.UserRole;
 import com.vsp.endpointinsightsapi.service.NotificationGroupService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -26,6 +28,7 @@ public class NotificationGroupsController {
 
     // GET /api/notification-groups - List all groups
     @GetMapping
+    @RequiredRoles(roles = {UserRole.READ})
     public ResponseEntity<List<NotificationGroup>> getAllGroups() {
         List<NotificationGroup> groups = notificationGroupService.getAllGroups();
         return ResponseEntity.ok(groups);
@@ -33,6 +36,7 @@ public class NotificationGroupsController {
 
     // GET /api/notification-groups/{id} - Get specific group with members
     @GetMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.READ})
     public ResponseEntity<NotificationGroup> getGroup(@PathVariable UUID id) {
         return notificationGroupService.getGroupById(id)
                 .map(ResponseEntity::ok)
@@ -41,6 +45,7 @@ public class NotificationGroupsController {
 
     // POST /api/notification-groups - Create new group
     @PostMapping
+    @RequiredRoles(roles = {UserRole.WRITE})
     public ResponseEntity<NotificationGroup> createGroup(@RequestBody CreateGroupRequest request) {
         LOG.info("Creating new notification group: {}", request.getName());
         NotificationGroup group = notificationGroupService.createGroup(
@@ -53,6 +58,7 @@ public class NotificationGroupsController {
 
     // PUT /api/notification-groups/{id} - Update existing group
     @PutMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.WRITE})
     public ResponseEntity<NotificationGroup> updateGroup(
             @PathVariable @NotNull UUID id,
             @RequestBody UpdateGroupRequest request) {
@@ -67,6 +73,7 @@ public class NotificationGroupsController {
 
     // DELETE /api/notification-groups/{id} - Delete group
     @DeleteMapping("/{id}")
+    @RequiredRoles(roles = {UserRole.WRITE})
     public ResponseEntity<Void> deleteGroup(@PathVariable UUID id) {
         LOG.info("Deleting notification group: {}", id);
         notificationGroupService.deleteGroup(id);
@@ -75,6 +82,7 @@ public class NotificationGroupsController {
 
     // POST /api/notification-groups/{id}/members - Add members to group
     @PostMapping("/{id}/members")
+    @RequiredRoles(roles = {UserRole.WRITE})
     public ResponseEntity<Void> addMembers(
             @PathVariable @NotNull UUID id,
             @RequestBody AddMembersRequest request) {
@@ -85,6 +93,7 @@ public class NotificationGroupsController {
 
     // DELETE /api/notification-groups/{id}/members/{email} - Remove member from group
     @DeleteMapping("/{id}/members/{email}")
+    @RequiredRoles(roles = {UserRole.WRITE})
     public ResponseEntity<Void> removeMember(
             @PathVariable @NotNull UUID id,
             @PathVariable String email) {
