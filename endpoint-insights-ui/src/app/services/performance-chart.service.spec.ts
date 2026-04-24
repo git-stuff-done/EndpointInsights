@@ -40,7 +40,7 @@ describe('PerformanceChartService', () => {
     service.getApiPerformanceChart(jobId, undefined, limit).subscribe();
 
     const req = httpMock.expectOne(
-      `http://localhost:8080/api/dashboard/charts/performance?limit=5&jobId=123`
+      `https://d2wravsw1nwfu2.cloudfront.net/api/dashboard/charts/performance?limit=5&jobId=123`
     );
 
     expect(req.request.method).toBe('GET');
@@ -61,7 +61,7 @@ describe('PerformanceChartService', () => {
     service.getApiPerformanceChart(undefined, batchId, limit).subscribe();
 
     const req = httpMock.expectOne(
-      `http://localhost:8080/api/dashboard/charts/performance?limit=7&batchId=batch-456`
+      `https://d2wravsw1nwfu2.cloudfront.net/api/dashboard/charts/performance?limit=7&batchId=batch-456`
     );
 
     expect(req.request.method).toBe('GET');
@@ -99,7 +99,7 @@ describe('PerformanceChartService', () => {
     });
 
     const req = httpMock.expectOne(
-      `http://localhost:8080/api/dashboard/charts/performance?limit=5&jobId=123`
+      `https://d2wravsw1nwfu2.cloudfront.net/api/dashboard/charts/performance?limit=5&jobId=123`
     );
 
     req.flush(mockResponse);
@@ -118,7 +118,7 @@ describe('PerformanceChartService', () => {
     });
 
     const req = httpMock.expectOne(
-      `http://localhost:8080/api/dashboard/charts/performance?limit=10&jobId=123`
+      `https://d2wravsw1nwfu2.cloudfront.net/api/dashboard/charts/performance?limit=10&jobId=123`
     );
 
     req.flush(null);

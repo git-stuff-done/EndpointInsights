@@ -38,7 +38,7 @@ spring.security.oauth2.client:
   registration.oidc:
     client-id: endpoint-insights
     client-secret: your-secret-here
-    redirect-uri:  http://localhost:8080/login/oauth2/code/oidc
+    redirect-uri:  https://d2wravsw1nwfu2.cloudfront.net/login/oauth2/code/oidc
     authorization-grant-type: authorization_code
     scope: openid,profile,email,groups
     client-name: OIDC

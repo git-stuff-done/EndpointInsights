@@ -43,7 +43,7 @@ module.exports = {
     test_settings: {
         default: {
             disable_error_log: false,
-            launch_url: process.env.APP_URL || 'http://localhost:8080',
+            launch_url: process.env.APP_URL || 'https://d2wravsw1nwfu2.cloudfront.net',
 
             screenshots: {
                 enabled: false,

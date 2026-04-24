@@ -1,6 +1,6 @@
 describe('Application Smoke Tests', function() {
     it('authenticates with identity provider', function(browser) {
-        const baseUrl = process.env.APP_URL || browser.launch_url || 'http://localhost:8080';
+        const baseUrl = process.env.APP_URL || browser.launch_url || 'https://d2wravsw1nwfu2.cloudfront.net';
 
         browser
             .authenticateWithAuthelia(baseUrl)

@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class CorsConfig implements WebMvcConfigurer {
 
-    private List<String> allowedOrigins = List.of("http://localhost:8080", "http://localhost:4200");
+    private List<String> allowedOrigins = List.of("https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc", "https://d2wravsw1nwfu2.cloudfront.net");
     private List<String> allowedMethods = List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
     private boolean allowCredentials = true;
 

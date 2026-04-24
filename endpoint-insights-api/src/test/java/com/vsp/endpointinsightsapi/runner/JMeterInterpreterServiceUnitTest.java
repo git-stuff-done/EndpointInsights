@@ -149,7 +149,7 @@ class JMeterInterpreterServiceUnitTest {
                 String successStr = success ? "true" : "false";
                 int threadNum = (i % 100) + 1;
 
-                writer.write(String.format("%d,%d,GET /api/health,%s,%s,100 User Load 1-%d,text,%s,,422,122,1,1,http://localhost:8080/api/health,4,0,1",
+                writer.write(String.format("%d,%d,GET /api/health,%s,%s,100 User Load 1-%d,text,%s,,422,122,1,1,https://d2wravsw1nwfu2.cloudfront.net/api/health,4,0,1",
                         baseTimestamp + (i * 100L),
                         10 + (i % 50),
                         responseCode,

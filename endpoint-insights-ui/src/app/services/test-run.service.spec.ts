@@ -22,7 +22,7 @@ describe('TestRunService', () => {
   it('requests recent runs with limit param', () => {
     service.getRecentTestRuns(5).subscribe();
 
-    const req = httpMock.expectOne('http://localhost:8080/api/test-runs/recent?limit=5');
+    const req = httpMock.expectOne('https://d2wravsw1nwfu2.cloudfront.net/api/test-runs/recent?limit=5');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
@@ -32,7 +32,7 @@ describe('TestRunService', () => {
       const runId = 'eda90106-635f-44c0-acff-b45618a91433';
       service.deleteRun(runId).subscribe();
 
-      const req = httpMock.expectOne(`http://localhost:8080/api/test-runs/${runId}`);
+      const req = httpMock.expectOne(`https://d2wravsw1nwfu2.cloudfront.net/api/test-runs/${runId}`);
       expect(req.request.method).toBe('DELETE');
       req.flush(null);
     });
@@ -42,7 +42,7 @@ describe('TestRunService', () => {
       let result: any;
       service.deleteRun(runId).subscribe(res => result = res);
 
-      const req = httpMock.expectOne(`http://localhost:8080/api/test-runs/${runId}`);
+      const req = httpMock.expectOne(`https://d2wravsw1nwfu2.cloudfront.net/api/test-runs/${runId}`);
       req.flush({ deleted: true });
 
       expect(result.body).toEqual({ deleted: true });
@@ -55,7 +55,7 @@ describe('TestRunService', () => {
       service.deleteBefore(date).subscribe();
 
       const req = httpMock.expectOne(
-        `http://localhost:8080/api/test-runs?purgeDate=${date.toISOString()}`
+        `https://d2wravsw1nwfu2.cloudfront.net/api/test-runs?purgeDate=${date.toISOString()}`
       );
       expect(req.request.method).toBe('DELETE');
       req.flush(null);
@@ -67,7 +67,7 @@ describe('TestRunService', () => {
       service.deleteBefore(date).subscribe(res => result = res);
 
       const req = httpMock.expectOne(
-        `http://localhost:8080/api/test-runs?purgeDate=${date.toISOString()}`
+        `https://d2wravsw1nwfu2.cloudfront.net/api/test-runs?purgeDate=${date.toISOString()}`
       );
       req.flush({ purged: 42 });
 

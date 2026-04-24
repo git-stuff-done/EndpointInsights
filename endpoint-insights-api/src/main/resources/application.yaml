@@ -30,7 +30,7 @@ spring:
           oidc:
             client-id: ${OIDC_CLIENT_ID:endpoint-insights}
             client-secret: ${OIDC_CLIENT_SECRET:your-secret-here}
-            redirect-uri:  ${OIDC_CLIENT_REDIRECT_URI:http://localhost:8080/login/oauth2/code/oidc}
+            redirect-uri:  ${OIDC_CLIENT_REDIRECT_URI:https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc}
             authorization-grant-type: authorization_code
             scope: openid,profile,email,groups
             client-name: OIDC
@@ -69,7 +69,7 @@ test-runs:
 app:
   authentication:
     enabled: true
-    callback-uri: ${OID_CLIENT_CALLBACK_URI:http://localhost:4200/auth/callback}
+    callback-uri: ${OID_CLIENT_CALLBACK_URI:https://d2wravsw1nwfu2.cloudfront.net/auth/callback}
     allowed-audiences: ${OIDC_ALLOWED_AUDIENCES:}
     groups:
       write: "ei:write"
@@ -89,8 +89,7 @@ app:
       - "DELETE"
       - "OPTIONS"
     allowed-origins:
-      - "http://localhost:8080"
-      - "http://localhost:4200"
+      - "https://d2wravsw1nwfu2.cloudfront.net"
 
 # Springdoc OpenAPI / Swagger Configuration
 springdoc:
