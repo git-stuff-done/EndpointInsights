@@ -6,14 +6,16 @@ const RUN_ID = process.env.E2E_TEST_RUN_ID || null;
 
 describe('Test Results View Page', function () {
 
-  before(function (browser) {
-    browser.authenticateWithAuthelia(APP_URL);
-    if (RUN_ID) {
-      browser.navigateTo(`${APP_URL}/test-results/view?id=${RUN_ID}`);
-    } else {
-      browser.navigateTo(`${APP_URL}/test-results/view`);
-    }
-  });
+    before(function (browser) {
+        browser.authenticateWithAuthelia(APP_URL);
+        browser.saveScreenshot('after-auth.png');
+        if (RUN_ID) {
+            browser.navigateTo(`${APP_URL}/test-results/view?id=${RUN_ID}`);
+        } else {
+            browser.navigateTo(`${APP_URL}/test-results/view`);
+        }
+        browser.saveScreenshot('after-navigate.png');
+    });
 
   after(function (browser) {
     browser.end();
