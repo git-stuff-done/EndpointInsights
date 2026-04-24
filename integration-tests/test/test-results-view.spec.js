@@ -1,4 +1,4 @@
-const APP_URL = process.env.APP_URL || 'https://d2wravsw1nwfu2.cloudfront.net/';
+const APP_URL = process.env.APP_URL || 'http://localhost:8080';
 
 // Tests that require real data are gated on E2E_TEST_RUN_ID.
 // When unset the suite stays green — each gated test passes with a SKIPPED notice.
