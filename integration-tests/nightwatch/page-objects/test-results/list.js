@@ -35,7 +35,7 @@ const commands = {
 };
 
 module.exports = {
-  url: 'http://localhost:8080/test-results',
+  url: 'https://d2wravsw1nwfu2.cloudfront.net/test-results',
 
   commands: [commands],
 

@@ -107,7 +107,7 @@ These endpoints bypass authentication:
 #### 1. Initiate Login
 ```bash
 # This will redirect to the identity provider
-curl -v http://localhost:8080/oauth2/authorization/oidc
+curl -v https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc
 ```
 
 The response will be a 302 redirect to your OIDC provider's authorization endpoint with query parameters:
@@ -119,7 +119,7 @@ The response will be a 302 redirect to your OIDC provider's authorization endpoi
 
 #### 2. Complete Authentication in Browser
 Since the OIDC flow requires browser interaction:
-1. Open browser to `http://localhost:8080/oauth2/authorization/oidc`
+1. Open browser to `https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc`
 2. Authenticate with identity provider
 3. Grant consent if prompted
 4. You will be redirected back to the application

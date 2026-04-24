@@ -32,7 +32,7 @@ Enhanced `HealthController.java` with:
 
 ### 1. Interactive Swagger UI
 ```
-http://localhost:8080/swagger-ui.html
+https://d2wravsw1nwfu2.cloudfront.net/swagger-ui.html
 ```
 Features:
 - Browse all endpoints organized by tags
@@ -42,8 +42,8 @@ Features:
 
 ### 2. Machine-Readable OpenAPI Specs
 ```
-JSON: http://localhost:8080/api/docs
-YAML: http://localhost:8080/api/docs.yaml
+JSON: https://d2wravsw1nwfu2.cloudfront.net/api/docs
+YAML: https://d2wravsw1nwfu2.cloudfront.net/api/docs.yaml
 ```
 Use these to import into API tools like Postman or Insomnia.
 
@@ -158,7 +158,7 @@ public class YourResourceController {
 
 The simplest way to test the API is to use the **Swagger UI directly**:
 
-1. Navigate to `http://localhost:8080/api`
+1. Navigate to `https://d2wravsw1nwfu2.cloudfront.net/api`
 2. Find the endpoint you want to test
 3. Click **"Try it out"**
 4. Fill in any parameters
@@ -173,13 +173,13 @@ If you prefer to work in Postman or Insomnia:
 1. Open Postman
 2. Click File → Import
 3. Select "Link" tab
-4. Enter: `http://localhost:8080/api/docs`
+4. Enter: `https://d2wravsw1nwfu2.cloudfront.net/api/docs`
 5. Click Import
 
 **Insomnia:**
 1. Open Insomnia
 2. Click Create → Import → From URL
-3. Enter: `http://localhost:8080/api/docs`
+3. Enter: `https://d2wravsw1nwfu2.cloudfront.net/api/docs`
 4. Click Import
 
 ## Production Configuration

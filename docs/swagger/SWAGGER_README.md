@@ -4,7 +4,7 @@
 
 Once your Spring Boot application is running, open your browser and go to:
 ```
-http://localhost:8080/swagger-ui.html
+https://d2wravsw1nwfu2.cloudfront.net/swagger-ui.html
 ```
 
 You should see an interactive API documentation interface with all your endpoints.
@@ -13,12 +13,12 @@ You should see an interactive API documentation interface with all your endpoint
 
 ### JSON Format
 ```
-http://localhost:8080/api/docs
+https://d2wravsw1nwfu2.cloudfront.net/api/docs
 ```
 
 ### YAML Format
 ```
-http://localhost:8080/api/docs.yaml
+https://d2wravsw1nwfu2.cloudfront.net/api/docs.yaml
 ```
 
 ## What's Available

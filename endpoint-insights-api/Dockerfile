@@ -42,6 +42,6 @@ USER endpointinsights
 EXPOSE 8080
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=5 \
-  CMD curl -f http://localhost:8080/api/health || exit 1
+  CMD curl -f https://d2wravsw1nwfu2.cloudfront.net/api/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

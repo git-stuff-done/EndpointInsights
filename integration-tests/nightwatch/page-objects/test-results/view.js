@@ -13,7 +13,7 @@ const commands = {
    * window.history.state is not preserved across fresh navigations.
    */
   navigateToRun(runId) {
-    return this.navigateTo(`http://localhost:8080/test-results/view?id=${runId}`);
+    return this.navigateTo(`https://d2wravsw1nwfu2.cloudfront.net/test-results/view?id=${runId}`);
   },
 
   waitForMetadata() {
@@ -26,7 +26,7 @@ const commands = {
 };
 
 module.exports = {
-  url: 'http://localhost:8080/test-results/view',
+  url: 'https://d2wravsw1nwfu2.cloudfront.net/test-results/view',
 
   commands: [commands],
 

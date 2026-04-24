@@ -125,7 +125,7 @@ pipeline {
                         set -a
                         . /var/lib/jenkins/endpoint-insights-e2e.env >/dev/null 2>&1
                         set +a
-                        export APP_URL=http://localhost:8080
+                        export APP_URL=https://d2wravsw1nwfu2.cloudfront.net/
                         npx nightwatch test --env chrome
                         TEST_EXIT_CODE=\$?
                         exit \$TEST_EXIT_CODE

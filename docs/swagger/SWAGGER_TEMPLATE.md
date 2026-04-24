@@ -302,11 +302,11 @@ public class BatchesController {
 - [ ] Add `@Schema` to DTO classes
 - [ ] Include examples in schemas
 - [ ] Specify constraints (minLength, maxLength, etc.)
-- [ ] Test in Swagger UI: `http://localhost:8080/api`
+- [ ] Test in Swagger UI: `https://d2wravsw1nwfu2.cloudfront.net/`
 
 ## Example Flow
 
-1. **Open Swagger UI**: http://localhost:8080/api
+1. **Open Swagger UI**: https://d2wravsw1nwfu2.cloudfront.net/api
 2. **Find your endpoint** under the tag you created
 3. **Click "Try it out"** button
 4. **Fill in parameters** with sample data

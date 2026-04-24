@@ -149,7 +149,7 @@ public class SomeController {
 First, authenticate via the OIDC flow to obtain a JWT token:
 ```bash
 # Start the authentication flow (will redirect to identity provider)
-curl -v http://localhost:8080/oauth2/authorization/oidc
+curl -v https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc
 ```
 
 After completing the OIDC flow in a browser, the success handler returns a JSON response:
@@ -168,33 +168,33 @@ After completing the OIDC flow in a browser, the success handler returns a JSON 
 export TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Test authorized request (should return 200)
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/batches
+curl -H "Authorization: Bearer $TOKEN" https://d2wravsw1nwfu2.cloudfront.net/api/batches
 
 # Test with write access (if user has ei:write group)
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "test"}' \
-  http://localhost:8080/api/batches
+  https://d2wravsw1nwfu2.cloudfront.net/api/batches
 ```
 
 #### 3. Test Authorization Failures
 ```bash
 # Test without token (should return 401)
-curl -v http://localhost:8080/api/batches
+curl -v https://d2wravsw1nwfu2.cloudfront.net/api/batches
 
 # Test with invalid token (should return 401)
 curl -H "Authorization: Bearer invalid.token.here" \
-  http://localhost:8080/api/batches
+  https://d2wravsw1nwfu2.cloudfront.net/api/batches
 
 # Test with expired token (should return 401)
 curl -H "Authorization: Bearer $EXPIRED_TOKEN" \
-  http://localhost:8080/api/batches
+  https://d2wravsw1nwfu2.cloudfront.net/api/batches
 ```
 
 #### 4. Test Public Endpoints
 ```bash
 # Health endpoint should work without authentication
-curl http://localhost:8080/api/health
+curl https://d2wravsw1nwfu2.cloudfront.net/api/health
 ```
 
 #### 5. Test Role-Based Access
@@ -204,7 +204,7 @@ curl http://localhost:8080/api/health
 curl -X POST -H "Authorization: Bearer $READ_ONLY_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "test"}' \
-  http://localhost:8080/api/batches
+  https://d2wravsw1nwfu2.cloudfront.net/api/batches
 ```
 
 ### Expected Responses

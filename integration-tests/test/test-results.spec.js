@@ -1,4 +1,4 @@
-const APP_URL = process.env.APP_URL || 'http://localhost:8080';
+const APP_URL = process.env.APP_URL || 'https://d2wravsw1nwfu2.cloudfront.net/';
 
 describe('Test Results List Page', function () {
 
