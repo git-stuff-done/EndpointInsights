@@ -77,7 +77,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oauth2AuthenticationToken.getPrincipal()).thenReturn(oidcUser);
         when(oidcUser.getName()).thenReturn(userName);
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
-        when(authProperties.getCallbackUri()).thenReturn("https://d2wravsw1nwfu2.cloudfront.net/auth/callback");
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(authProperties.getClaims()).thenReturn(claimsConfig);
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
@@ -267,7 +267,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         );
 
         when(authProperties.getClaims()).thenReturn(claimsConfig);
-        when(authProperties.getCallbackUri()).thenReturn("https://d2wravsw1nwfu2.cloudfront.net/auth/callback");
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
 
@@ -287,7 +287,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oidcUser.getName()).thenReturn("JSON User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
         when(authProperties.getClaims()).thenReturn(claimsConfig);
-        when(authProperties.getCallbackUri()).thenReturn("https://d2wravsw1nwfu2.cloudfront.net/auth/callback");
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);
@@ -311,7 +311,7 @@ public class OAuth2JsonSuccessHandlerUnitTest {
         when(oidcUser.getName()).thenReturn("Special Char User");
         when(oidcUser.getIdToken()).thenReturn(oidcIdToken);
         when(authProperties.getClaims()).thenReturn(claimsConfig);
-        when(authProperties.getCallbackUri()).thenReturn("https://d2wravsw1nwfu2.cloudfront.net/auth/callback");
+        when(authProperties.getCallbackUri()).thenReturn("http://localhost:4200/auth/callback");
         when(claimsConfig.getUsername()).thenReturn("preferred_username");
         when(claimsConfig.getEmail()).thenReturn("email");
         when(oidcUser.getAttribute("preferred_username")).thenReturn(username);

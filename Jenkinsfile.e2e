@@ -90,7 +90,7 @@ pipeline {
                             if [ "\$HEALTH_STATUS" = "healthy" ]; then
                                 echo "Container is healthy!"
 
-                                if curl -f -s https://d2wravsw1nwfu2.cloudfront.net/api/health > /dev/null; then
+                                if curl -f -s http://localhost:8080/api/health > /dev/null; then
                                     echo "Health endpoint verified!"
                                     exit 0
                                 else
@@ -125,7 +125,7 @@ pipeline {
                         set -a
                         . /var/lib/jenkins/endpoint-insights-e2e.env >/dev/null 2>&1
                         set +a
-                        export APP_URL=https://d2wravsw1nwfu2.cloudfront.net/
+                        export APP_URL=http://localhost:8080
                         npx nightwatch test --env chrome
                         TEST_EXIT_CODE=\$?
                         exit \$TEST_EXIT_CODE

@@ -1,5 +1,5 @@
 module.exports = class AuthenticateWithAuthelia {
-    async command(startUrl = 'https://d2wravsw1nwfu2.cloudfront.net/') {
+    async command(startUrl = 'http://localhost:8080') {
         const username = process.env.TEST_USER_USERNAME;
         const password = process.env.TEST_USER_PASSWORD;
 
