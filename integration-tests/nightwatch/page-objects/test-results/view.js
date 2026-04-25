@@ -1,3 +1,6 @@
+const APP_URL = process.env.APP_URL || "http://localhost:4200";
+
+
 /**
  * Page object for the Test Results view page (/test-results/view).
  *
@@ -13,7 +16,7 @@ const commands = {
    * window.history.state is not preserved across fresh navigations.
    */
   navigateToRun(runId) {
-    return this.navigateTo(`https://d2wravsw1nwfu2.cloudfront.net/test-results/view?id=${runId}`);
+    return this.navigateTo(`${APP_URL}/test-results/view?id=${runId}`);
   },
 
   waitForMetadata() {
@@ -25,8 +28,10 @@ const commands = {
   }
 };
 
+
+
 module.exports = {
-  url: 'https://d2wravsw1nwfu2.cloudfront.net/test-results/view',
+  url: `${APP_URL}/test-results/view`,
 
   commands: [commands],
 

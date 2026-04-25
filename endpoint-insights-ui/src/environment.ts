@@ -1,5 +1,5 @@
 export const environment = {
-    apiUrl: 'https://d2wravsw1nwfu2.cloudfront.net/api',
-    authUrl: 'https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc',
+    apiUrl: 'http://localhost:8080/api',
+    authUrl: 'http://localhost:8080/oauth2/authorization/oidc',
     tokenStorageKey: 'auth-token-storage-ei-endpoints'
 };

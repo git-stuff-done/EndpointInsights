@@ -34,8 +34,10 @@ const commands = {
   }
 };
 
+const APP_URL = process.env.APP_URL || "http://localhost:4200";
+
 module.exports = {
-  url: 'https://d2wravsw1nwfu2.cloudfront.net/test-results',
+  url: `${APP_URL}/test-results`,
 
   commands: [commands],
 

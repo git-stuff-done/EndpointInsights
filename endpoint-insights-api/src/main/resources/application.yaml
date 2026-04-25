@@ -71,7 +71,7 @@ test-runs:
 app:
   authentication:
     enabled: true
-    callback-uri: ${OID_CLIENT_CALLBACK_URI:https://d2wravsw1nwfu2.cloudfront.net/auth/callback}
+    callback-uri: ${OID_CLIENT_CALLBACK_URI:http://localhost:4200/auth/callback}
     allowed-audiences: ${OIDC_ALLOWED_AUDIENCES:}
     groups:
       write: "ei:write"
@@ -91,7 +91,8 @@ app:
       - "DELETE"
       - "OPTIONS"
     allowed-origins:
-      - "https://d2wravsw1nwfu2.cloudfront.net"
+      - "http://localhost:4200"
+      - "http://localhost:8080"
 
 # Springdoc OpenAPI / Swagger Configuration
 springdoc:
