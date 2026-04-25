@@ -8,11 +8,10 @@ describe('Test Results View Page', function () {
 
   before(function (browser) {
     browser.authenticateWithAuthelia(APP_URL);
-    if (RUN_ID) {
-      browser.navigateTo(`${APP_URL}/test-results/view?id=${RUN_ID}`);
-    } else {
+
+
       browser.navigateTo(`${APP_URL}/test-results/view`);
-    }
+
   });
 
   after(function (browser) {
