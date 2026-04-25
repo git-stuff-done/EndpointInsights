@@ -1,5 +1,5 @@
 
-debe('Batch Management Tests', function() {
+describe('Batch Management Tests', function() {
     const testData = {
         batchId: null,
         batchName: `test_batch_${Date.now()}`,
