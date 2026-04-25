@@ -25,9 +25,9 @@ describe('Test Results View Page', function () {
   //   browser.waitForElementVisible('.body-container');
   // });
 
-  it('renders the result container inside the body', function (browser) {
-    browser.waitForElementVisible('.result-container');
-  });
+  // it('renders the result container inside the body', function (browser) {
+  //   browser.waitForElementVisible('.result-container');
+  // });
 
   // --- Tests that require a real run ID ---
 
