@@ -24,7 +24,7 @@ LABEL org.opencontainers.image.description="EndpointInsights"
 
 RUN groupadd -r endpointinsights && useradd -r -g endpointinsights endpointinsights
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl git && rm -rf /var/lib/apt/lists/*
 
 RUN curl -L https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz \
     | tar -xz -C /opt && \
