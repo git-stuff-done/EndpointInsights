@@ -30,7 +30,7 @@ spring:
           oidc:
             client-id: ${OIDC_CLIENT_ID:endpoint-insights}
             client-secret: ${OIDC_CLIENT_SECRET:your-secret-here}
-            redirect-uri:  ${OIDC_CLIENT_REDIRECT_URI:https://d2wravsw1nwfu2.cloudfront.net/oauth2/authorization/oidc}
+            redirect-uri:  ${OIDC_CLIENT_REDIRECT_URI:https://localhost:8080/oauth2/authorization/oidc}
             authorization-grant-type: authorization_code
             scope: openid,profile,email,groups
             client-name: OIDC
