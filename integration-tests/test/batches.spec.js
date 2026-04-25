@@ -1,6 +1,5 @@
-import {environment} from "../../endpoint-insights-ui/src/environment"
 
-describe('Batch Management Tests', function() {
+debe('Batch Management Tests', function() {
     const testData = {
         batchId: null,
         batchName: `test_batch_${Date.now()}`,
@@ -8,7 +7,7 @@ describe('Batch Management Tests', function() {
     };
 
     before(function(browser) {
-        const baseUrl = process.env.APP_URL || browser.launch_url || environment.apiUrl;
+        const baseUrl = process.env.APP_URL || browser.launch_url || 'http://localhost:8080';
         browser
             .authenticateWithAuthelia(baseUrl)
             .waitForElementVisible('body');
