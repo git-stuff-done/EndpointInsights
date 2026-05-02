@@ -115,7 +115,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                     durationMs: r.durationMs,
                     startedBy: r.startedBy,
                     status: r.status as DashboardTestActivity['status'],
-                }));
+                })).reverse();
+
 
                 const mostRecentRun = data[0] ?? null;
 
