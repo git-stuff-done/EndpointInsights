@@ -5,7 +5,12 @@
 
   [![Build Status](https://jenkins.crowleybrynn.com/buildStatus/icon?job=EndpointInsights-UnitTesting%2Fdevelop&subject=Develop%20Branch%20Tests)](https://jenkins.crowleybrynn.com/job/EndpointInsights-UnitTesting/job/develop/) [![codecov](https://codecov.io/gh/git-stuff-done/EndpointInsights/graph/badge.svg?token=4FFNP3JSPE)](https://codecov.io/gh/git-stuff-done/EndpointInsights)
 </div>
-  
+
+
+<div>
+    <img src="endpoint-insights-ui/public/logo.png" alt="Endpoint Insights Logo" width="200"/>
+</div>
+
 ## Overview
 
 Endpoint Insights is a performance and integration testing dashboard that we are building for our senior project.
@@ -95,14 +100,15 @@ The system consists of:
 
 ## Application UI Visual
 
-The dashboard page provides an overview of active jobs, fail rate, charts for performance, recent activity, and alerts.
-![Image](./docs/assets/dashboard-page.jpg)
+The dashboard page provides an overview of active jobs, fail rate, charts for performance, recent activity, and alerts. <br>
+User can also easily access recently run test results under recent activity section.
+![Image](./docs/assets/dashboard.png)
 
 The login page allows users to log in with the configured single-sign on provider.
 ![Image](./docs/assets/login-page.jpg)
 
-The batches page shows test batches and allows users to modify run configurations.
-![Image](./docs/assets/configure-batches-page.jpg)
+The batches page shows test batches and allows users to modify run configurations and schedules.
+![Image](./docs/assets/Batches.png)
 
 The tests page allows users to create and modify individual test runs.
 ![Image](./docs/assets/tests-page.jpg)
