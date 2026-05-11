@@ -110,11 +110,17 @@ The login page allows users to log in with the configured single-sign on provide
 The batches page shows test batches and allows users to modify run configurations and schedules.
 ![Image](./docs/assets/Batches.png)
 
+The configure batches page allows users to configure and manage test batch settings.
+![Image](./docs/assets/configure-batches.jpg)
+
 The tests page allows users to create and modify individual test runs.
 ![Image](./docs/assets/tests-page.jpg)
 
 The test results page shows the latest tests and statistics for previous test runs.
 ![Image](./docs/assets/test-results-page.jpg)
+
+The test results metrics page shows detailed performance metrics for previous test runs.
+![Image](./docs/assets/test-results-page-metrics.jpg)
 
 ## Getting Started
 
